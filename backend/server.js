@@ -13,6 +13,7 @@ const noticeRoutes = require('./routes/noticeRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const examRoutes = require('./routes/examRoutes');
 const parentRoutes = require('./routes/parentRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 dotenv.config();
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/api/notices', noticeRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/parents', parentRoutes);
+app.use('/api/analytics', analyticsRoutes);
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected..."))
