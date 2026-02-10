@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Institute = require('../models/Institute');
+// We import the logic from the controller we created in Step 1
+const { registerInstitute } = require('../controllers/instituteController');
 
-router.post('/create', async (req, res) => {
-    try {
-        const newInst = new Institute(req.body);
-        const savedInst = await newInst.save();
-        res.json(savedInst);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-});
+/**
+ * @route   POST /api/institutes/register
+ * @desc    Register a new Institute and create its first Admin
+ * @access  Public (In a real SaaS, this might be restricted to Super Admin later)
+ */
+router.post('/register', registerInstitute);
 
 module.exports = router;

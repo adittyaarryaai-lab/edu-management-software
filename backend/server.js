@@ -3,12 +3,14 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose'); // Add this
 const authRoutes = require('./routes/authRoutes');
+const instituteRoutes = require('./routes/instituteRoutes');
 dotenv.config();
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/institutes', instituteRoutes);
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected..."))
@@ -23,4 +25,4 @@ app.listen(PORT, () => {
     console.log(`Server is sprinting on port ${PORT}`);
 });
 
-app.use('/api/institute', require('./routes/instituteRoutes'));
+// app.use('/api/institute', require('./routes/instituteRoutes'));
