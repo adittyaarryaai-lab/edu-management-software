@@ -9,6 +9,7 @@ const staffRoutes = require('./routes/staffRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const financeRoutes = require('./routes/financeRoutes');
+const noticeRoutes = require('./routes/noticeRoutes');
 dotenv.config();
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/staff', staffRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/finance', financeRoutes);
+app.use('/api/notices', noticeRoutes);
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("MongoDB Connected..."))
