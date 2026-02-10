@@ -1,20 +1,25 @@
 const mongoose = require('mongoose');
 
 const StudentProfileSchema = new mongoose.Schema({
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    instituteId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Institute', 
-        required: true 
+    // Add this field to your existing StudentProfileSchema
+    parentUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
-    classId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Class', 
-        required: true 
+    instituteId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Institute',
+        required: true
+    },
+    classId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Class',
+        required: true
     },
     rollNumber: { type: String, required: true },
     parentName: { type: String, required: true },
