@@ -5,7 +5,7 @@ import Sidebar from './components/Sidebar';
 import AdminDashboard from './pages/AdminDashboard';
 import StudentList from './pages/StudentList';
 import Attendance from './pages/Attendance'; // NEW: Imported from Day 26
-
+import Finance from './pages/Finance';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ function App() {
       <Sidebar user={user} handleLogout={handleLogout} />
 
       <main className="flex-1 ml-64 p-8">
-        
+
         {/* GLOBAL HEADER */}
         <header className="flex justify-between items-center mb-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <div>
@@ -57,19 +57,18 @@ function App() {
           {/* Main Dashboard */}
           <Route path="/" element={<AdminDashboard />} />
           <Route path="/dashboard" element={<AdminDashboard />} />
-          
+
           {/* Student Management */}
           <Route path="/students" element={<StudentList />} />
 
           {/* Attendance Management (Day 26) */}
           <Route path="/attendance" element={<Attendance />} />
-
+          <Route path="/finance" element={<Finance />} />
           {/* Finance & Fees (Day 27 Placeholder) */}
-          <Route path="/finance" element={<div className="p-10 bg-white rounded-xl shadow-sm">Finance Module & PDF Receipts Coming in Day 27...</div>} />
+          <Route path="/finance" element={<Finance />} />
 
           {/* Academic Placeholder */}
           <Route path="/academic" element={<div className="p-10 bg-white rounded-xl shadow-sm">Academic Assignments Module Coming Soon...</div>} />
-
           {/* Fallback Redirect */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

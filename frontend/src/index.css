@@ -8,3 +8,19 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
+@media print {
+  /* Hide everything except the invoice area */
+  .no-print, nav, aside, button, header {
+    display: none !important;
+  }
+  
+  .print-area {
+    display: block !important;
+    width: 100%;
+    padding: 20px;
+  }
+
+  body {
+    background-color: white !important;
+  }
+}
