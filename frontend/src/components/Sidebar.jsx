@@ -1,12 +1,21 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, BookOpen, CreditCard, Bell, LogOut } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  BookOpen, 
+  CreditCard, 
+  Bell, 
+  LogOut, 
+  CheckSquare // New icon for Attendance
+} from 'lucide-react';
 
 const Sidebar = ({ user, handleLogout }) => {
-  // We added 'path' to each menu item to match our Routes in App.jsx
+  // Updated menuItems to include Attendance
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20}/>, roles: ['admin', 'teacher', 'student'] },
     { name: 'Students', path: '/students', icon: <Users size={20}/>, roles: ['admin', 'teacher'] },
+    { name: 'Attendance', path: '/attendance', icon: <CheckSquare size={20}/>, roles: ['admin', 'teacher'] },
     { name: 'Academic', path: '/academic', icon: <BookOpen size={20}/>, roles: ['admin', 'teacher'] },
     { name: 'Finance', path: '/finance', icon: <CreditCard size={20}/>, roles: ['admin', 'accountant'] },
     { name: 'Notices', path: '/notices', icon: <Bell size={20}/>, roles: ['admin', 'teacher', 'student', 'parent'] },
@@ -26,7 +35,6 @@ const Sidebar = ({ user, handleLogout }) => {
 
       <nav className="flex-1 space-y-1">
         {filteredMenu.map((item) => (
-          /* We replaced <button> with <NavLink> */
           <NavLink
             key={item.name}
             to={item.path}
@@ -47,7 +55,7 @@ const Sidebar = ({ user, handleLogout }) => {
       <div className="mt-auto pt-6 border-t border-slate-800">
         <div className="flex items-center gap-3 px-3 mb-6">
           <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
-            {user.name.charAt(0)}
+            {user.name ? user.name.charAt(0) : 'U'}
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-semibold truncate">{user.name}</p>
