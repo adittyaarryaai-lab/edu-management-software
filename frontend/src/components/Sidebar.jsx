@@ -1,18 +1,20 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Users, BookOpen, CreditCard, Bell, LogOut } from 'lucide-react';
 
-const Sidebar = ({ user, handleLogout, activeTab, setActiveTab }) => {
+const Sidebar = ({ user, handleLogout }) => {
+  // We added 'path' to each menu item to match our Routes in App.jsx
   const menuItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20}/>, roles: ['admin', 'teacher', 'student'] },
-    { name: 'Students', icon: <Users size={20}/>, roles: ['admin', 'teacher'] },
-    { name: 'Academic', icon: <BookOpen size={20}/>, roles: ['admin', 'teacher'] },
-    { name: 'Finance', icon: <CreditCard size={20}/>, roles: ['admin', 'accountant'] },
-    { name: 'Notices', icon: <Bell size={20}/>, roles: ['admin', 'teacher', 'student', 'parent'] },
+    { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20}/>, roles: ['admin', 'teacher', 'student'] },
+    { name: 'Students', path: '/students', icon: <Users size={20}/>, roles: ['admin', 'teacher'] },
+    { name: 'Academic', path: '/academic', icon: <BookOpen size={20}/>, roles: ['admin', 'teacher'] },
+    { name: 'Finance', path: '/finance', icon: <CreditCard size={20}/>, roles: ['admin', 'accountant'] },
+    { name: 'Notices', path: '/notices', icon: <Bell size={20}/>, roles: ['admin', 'teacher', 'student', 'parent'] },
   ];
 
   // Filter menu items based on the logged-in user's role
   const filteredMenu = menuItems.filter(item => 
-    item.roles.includes('all') || item.roles.includes(user.role)
+    item.roles.includes(user.role)
   );
 
   return (
@@ -24,18 +26,21 @@ const Sidebar = ({ user, handleLogout, activeTab, setActiveTab }) => {
 
       <nav className="flex-1 space-y-1">
         {filteredMenu.map((item) => (
-          <button
+          /* We replaced <button> with <NavLink> */
+          <NavLink
             key={item.name}
-            onClick={() => setActiveTab(item.name)}
-            className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all duration-200 ${
-              activeTab === item.name 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+            to={item.path}
+            className={({ isActive }) => 
+              `flex items-center gap-3 w-full p-3 rounded-xl transition-all duration-200 ${
+                isActive 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`
+            }
           >
             {item.icon}
             <span className="font-medium">{item.name}</span>
-          </button>
+          </NavLink>
         ))}
       </nav>
 
