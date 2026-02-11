@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
+import AdminDashboard from './pages/AdminDashboard'; // Import the dynamic component
 
 function App() {
   const [user, setUser] = useState(null);
@@ -52,36 +53,22 @@ function App() {
           </div>
         </header>
 
-        {/* Dashboard Statistics Cards (Placeholders for now) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer">
-            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Students</h3>
-            <p className="text-3xl font-extrabold text-slate-900">1,240</p>
-            <span className="text-green-500 text-xs font-medium">↑ 12% from last month</span>
-          </div>
+        {/* DYNAMIC DASHBOARD SECTION 
+            We replaced the manual 4 cards with this single component 
+            that calls our /admin-stats API.
+        */}
+        <AdminDashboard />
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer">
-            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Daily Attendance</h3>
-            <p className="text-3xl font-extrabold text-slate-900">94.2%</p>
-            <span className="text-slate-400 text-xs">Standard average</span>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer">
-            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Fees Collected</h3>
-            <p className="text-3xl font-extrabold text-blue-600">₹4.2L</p>
-            <span className="text-red-400 text-xs">8 invoices pending</span>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition cursor-pointer">
-            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Active Notices</h3>
-            <p className="text-3xl font-extrabold text-slate-900">5</p>
-            <span className="text-blue-400 text-xs font-medium underline">View All</span>
-          </div>
-        </div>
-
-        {/* Recent Activity Section (Empty for now) */}
-        <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border border-slate-200 h-64 flex flex-col items-center justify-center border-dashed border-2">
-            <p className="text-slate-400 font-medium">Coming Soon: Recent Activity Feed & Analytics</p>
+        {/* Recent Activity Section */}
+        <div className="mt-8 bg-white p-8 rounded-xl shadow-sm border border-slate-200 min-h-[300px]">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Recent Activity</h3>
+            <div className="flex flex-col items-center justify-center border-dashed border-2 border-slate-200 rounded-lg py-12">
+                <p className="text-slate-400 font-medium text-center">
+                    Feed is currently quiet. <br /> 
+                    Once you start admitting students and marking attendance, <br /> 
+                    activities will appear here.
+                </p>
+            </div>
         </div>
 
       </main>
