@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import StudentList from './pages/StudentList';
 import Attendance from './pages/Attendance'; // NEW: Imported from Day 26
 import Finance from './pages/Finance';
+import Notices from './pages/Notices';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,7 +66,8 @@ function App() {
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/finance" element={<Finance />} />
           {/* Finance & Fees (Day 27 Placeholder) */}
-          <Route path="/finance" element={<Finance />} />
+          {/* <Route path="/finance" element={<Finance />} /> */}
+          <Route path="/notices" element={<Notices user={user} />} />
 
           {/* Academic Placeholder */}
           <Route path="/academic" element={<div className="p-10 bg-white rounded-xl shadow-sm">Academic Assignments Module Coming Soon...</div>} />
