@@ -1,11 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { register, login } = require('../controllers/authController');
+const { register, login, getMe } = require('../controllers/authController');
+const { protect } = require('../middleware/authMiddleware');
 
-// Route: POST /api/auth/register
+// @route   POST /api/auth/register
+// @desc    Register a new user
+// @access  Public
 router.post('/register', register);
 
-// Route: POST /api/auth/login
+// @route   POST /api/auth/login
+// @desc    Authenticate user & get token
+// @access  Public
 router.post('/login', login);
+
+// @route   GET /api/auth/me
+// @desc    Get current logged in user profile
+// @access  Private (Requires Token)
+router.get('/me', protect, getMe);
 
 module.exports = router;

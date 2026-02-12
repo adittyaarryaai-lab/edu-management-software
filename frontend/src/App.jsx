@@ -7,6 +7,7 @@ import StudentList from './pages/StudentList';
 import Attendance from './pages/Attendance'; // NEW: Imported from Day 26
 import Finance from './pages/Finance';
 import Notices from './pages/Notices';
+import Profile from './pages/Profile';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +66,7 @@ function App() {
           {/* Attendance Management (Day 26) */}
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/finance" element={<Finance />} />
+          <Route path="/profile" element={<Profile user={user} />} />
           {/* Finance & Fees (Day 27 Placeholder) */}
           {/* <Route path="/finance" element={<Finance />} /> */}
           <Route path="/notices" element={<Notices user={user} />} />
