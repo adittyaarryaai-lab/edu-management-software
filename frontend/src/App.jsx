@@ -6,6 +6,7 @@ import StudentHome from './pages/StudentHome';
 import AttendanceDetails from './pages/AttendanceDetails';
 import Timetable from './pages/Timetable';
 import Fees from './pages/Fees';
+import Notifications from './pages/Notifications';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -48,6 +49,7 @@ function App() {
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/notices" element={<Notifications />} />
         </Routes>
       </main>
 
