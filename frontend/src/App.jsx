@@ -5,6 +5,7 @@ import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
 import AttendanceDetails from './pages/AttendanceDetails';
 import Timetable from './pages/Timetable';
+import Fees from './pages/Fees';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -14,7 +15,6 @@ function App() {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // Mock Login UI (Jab tak real login page nahi banta)
   if (!user) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
@@ -35,22 +35,22 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-32">
-      {/* 1. Blue Gradient Header */}
+    <div className="min-h-screen bg-[#f8fafc] relative">
+      {/* Navbar ko top par fix rakha hai */}
       <Navbar user={user} />
       
-      {/* 2. Main Icon Grid (Day 2 Work) */}
-      <main>
+      {/* Main content ko padding di hai taaki navbar ke niche se shuru ho */}
+      <main className="relative z-0 pb-32">
         <Routes>
           <Route path="/" element={<StudentHome />} />
           <Route path="/dashboard" element={<StudentHome />} />
-          <Route path="*" element={<Navigate to="/" />} />
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/timetable" element={<Timetable />} />
+          <Route path="/fees" element={<Fees user={user} />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
 
-      {/* 3. Mobile Bottom Menu */}
       <BottomNav />
     </div>
   );
