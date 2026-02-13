@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
+import AttendanceDetails from './pages/AttendanceDetails';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -43,6 +44,7 @@ function App() {
           <Route path="/" element={<StudentHome />} />
           <Route path="/dashboard" element={<StudentHome />} />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/attendance" element={<AttendanceDetails />} />
         </Routes>
       </main>
 
