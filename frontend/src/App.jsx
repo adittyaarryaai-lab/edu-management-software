@@ -11,6 +11,8 @@ import TeacherHome from './pages/TeacherHome';
 import TeacherAttendance from './pages/TeacherAttendance';
 import TeacherStudentList from './pages/TeacherStudentList';
 import TeacherAssignments from './pages/TeacherAssignments';
+import Performance from './pages/Performance';
+import TeacherSchedule from './pages/TeacherSchedule';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -20,7 +22,6 @@ function App() {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // Mock Login UI - Updated for Day 7 Testing
   if (!user) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
@@ -28,7 +29,6 @@ function App() {
         <p className="text-slate-500 mb-8 font-medium">Select a role to test the Premium UI</p>
         
         <div className="flex flex-col gap-4 w-full max-w-xs">
-          {/* Test Student Portal */}
           <button 
             onClick={() => {
               const mock = { name: "Vipin Tanwar", role: "student" };
@@ -40,7 +40,6 @@ function App() {
             LOGIN AS STUDENT
           </button>
 
-          {/* Test Teacher Portal */}
           <button 
             onClick={() => {
               const mock = { name: "Math Teacher Anita", role: "teacher" };
@@ -62,7 +61,7 @@ function App() {
       
       <main className="relative z-0 pb-32">
         <Routes>
-          {/* Conditional Home Route - Switches based on User Role */}
+          {/* Conditional Home Route */}
           <Route 
             path="/" 
             element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
@@ -72,16 +71,21 @@ function App() {
             element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
           />
 
+          {/* Role-Based Timetable Routing */}
+          <Route 
+            path="/timetable" 
+            element={user.role === 'teacher' ? <TeacherSchedule /> : <Timetable />} 
+          />
+
           {/* Common & Specific Routes */}
           <Route path="/attendance" element={<AttendanceDetails />} />
-          <Route path="/timetable" element={<Timetable />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
+          <Route path="/analytics" element={<Performance />} />
           
-          {/* Redirect any unknown routes to home */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
