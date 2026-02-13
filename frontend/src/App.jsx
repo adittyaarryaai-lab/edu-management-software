@@ -13,6 +13,7 @@ import TeacherStudentList from './pages/TeacherStudentList';
 import TeacherAssignments from './pages/TeacherAssignments';
 import Performance from './pages/Performance';
 import TeacherSchedule from './pages/TeacherSchedule';
+import Holidays from './pages/Holidays';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -85,6 +86,7 @@ function App() {
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
           <Route path="/analytics" element={<Performance />} />
+          <Route path="/holidays" element={<Holidays />} />
           
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
