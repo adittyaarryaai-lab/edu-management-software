@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Save, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Toast from '../components/Toast'; // Step 14 Import
 
 const TeacherAttendance = () => {
   const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState('Grade 10-B');
+  const [showToast, setShowToast] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Mock Student List
   const [students, setStudents] = useState([
@@ -20,12 +23,31 @@ const TeacherAttendance = () => {
     ));
   };
 
+  // Step 14: Submit logic with Feedback
+  const handleSubmit = () => {
+    setIsSaving(true);
+    // Fake loading for 1.5 seconds to simulate API call
+    setTimeout(() => {
+        setIsSaving(false);
+        setShowToast(true);
+    }, 1500);
+  };
+
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-24">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
+      {/* Step 14: Show Toast when triggered */}
+      {showToast && (
+        <Toast 
+            message="Attendance Saved Successfully!" 
+            type="success" 
+            onClose={() => setShowToast(false)} 
+        />
+      )}
+
       {/* Header */}
       <div className="nav-gradient text-white px-6 pt-12 pb-24 rounded-b-[3rem] shadow-lg relative z-10">
         <div className="flex justify-between items-center mb-6">
-          <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl">
+          <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl active:scale-90 transition-all">
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-xl font-bold uppercase tracking-tight">Mark Attendance</h1>
@@ -57,7 +79,6 @@ const TeacherAttendance = () => {
                 </div>
             </div>
 
-            {/* Attendance Toggle */}
             <button 
                 onClick={() => toggleStatus(student.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-[10px] uppercase transition-all shadow-sm ${
@@ -72,11 +93,26 @@ const TeacherAttendance = () => {
           </div>
         ))}
 
-        {/* Floating Action Button for Saving */}
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full px-10">
-            <button className="w-full bg-blue-500 text-white py-4 rounded-3xl font-bold shadow-2xl shadow-blue-300 flex items-center justify-center gap-2 active:scale-95 transition-all">
-                <Save size={20} />
-                <span>Submit Attendance</span>
+        {/* Floating Action Button - Updated with Loading State */}
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full px-10 z-30">
+            <button 
+                onClick={handleSubmit}
+                disabled={isSaving}
+                className={`w-full py-4 rounded-3xl font-bold shadow-2xl flex items-center justify-center gap-2 active:scale-95 transition-all ${
+                    isSaving ? 'bg-slate-300 text-white' : 'bg-blue-500 text-white shadow-blue-300'
+                }`}
+            >
+                {isSaving ? (
+                    <span className="animate-pulse flex items-center gap-2 text-sm">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Submitting...
+                    </span>
+                ) : (
+                    <>
+                        <Save size={20} />
+                        <span>Submit Attendance</span>
+                    </>
+                )}
             </button>
         </div>
       </div>
