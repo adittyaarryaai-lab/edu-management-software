@@ -9,6 +9,7 @@ import Fees from './pages/Fees';
 import Notifications from './pages/Notifications';
 import TeacherHome from './pages/TeacherHome';
 import TeacherAttendance from './pages/TeacherAttendance';
+import TeacherStudentList from './pages/TeacherStudentList';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -76,6 +77,7 @@ function App() {
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
+          <Route path="/teacher/students" element={<TeacherStudentList />} />
           
           {/* Redirect any unknown routes to home */}
           <Route path="*" element={<Navigate to="/" />} />
