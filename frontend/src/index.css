@@ -1,26 +1,36 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom Reset to ensure the dashboard takes full height */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-ems-blue: #3b82f6;
+  --color-ems-bg: #f8fafc;
 }
-@media print {
-  /* Hide everything except the invoice area */
-  .no-print, nav, aside, button, header {
-    display: none !important;
-  }
-  
-  .print-area {
-    display: block !important;
-    width: 100%;
-    padding: 20px;
-  }
 
-  body {
-    background-color: white !important;
-  }
+/* Base styles without using @apply on body to avoid PostCSS errors */
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a; /* Slate-900 equivalent */
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Component Classes using standard CSS for stability */
+.nav-gradient {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.glass-card {
+  background-color: white;
+  border-radius: 2rem;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 15px -3px rgba(186, 230, 253, 0.5);
+  transition: all 0.2s;
+}
+
+.glass-card:active {
+  transform: scale(0.95);
 }
