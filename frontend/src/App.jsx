@@ -24,6 +24,7 @@ import Transport from './pages/Transport';
 import IDCard from './pages/IDCard';
 import Library from './pages/Library';
 import LiveClass from './pages/LiveClass';
+import Feedback from './pages/Feedback';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -102,6 +103,7 @@ function App() {
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
           <Route path="/live-class" element={<LiveClass />} />
+          <Route path="/feedback" element={<Feedback />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
