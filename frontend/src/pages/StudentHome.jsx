@@ -16,6 +16,7 @@ const StudentHome = () => {
     { title: 'Fees', icon: <CreditCard size={32} />, path: '/fees', color: 'bg-teal-50 text-teal-400' },
     { title: 'Notice Board', icon: <Megaphone size={32} />, path: '/notice-feed', color: 'bg-indigo-50 text-indigo-400' }, // Day 17 Link
     { title: 'Exam Center', icon: <GraduationCap size={20} />, path: '/exams' },
+    { title: 'ID Card', icon: <UserPlus size={20} />, path: '/id-card' },
 
   ];
 

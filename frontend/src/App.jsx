@@ -21,6 +21,7 @@ import Settings from './pages/Settings';
 import MyAccount from './pages/MyAccount';
 import Exams from './pages/Exams';
 import Transport from './pages/Transport';
+import IDCard from './pages/IDCard';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -96,6 +97,7 @@ function App() {
           <Route path="/notice-feed" element={<NoticeFeed />} />
           <Route path="/exams" element={<Exams />} />
           <Route path="/transport" element={<Transport />} />
+          <Route path="/id-card" element={<IDCard user={user} />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
