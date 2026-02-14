@@ -2,13 +2,17 @@ import axios from 'axios';
 
 const API = axios.create({ baseURL: 'http://localhost:5000/api' });
 
-// Ye middleware har request ke saath token bhejega (Aage kaam aayega)
 API.interceptors.request.use((req) => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.token) {
-        req.headers.Authorization = `Bearer ${user.token}`;
+    const userData = localStorage.getItem('user');
+    if (userData) {
+        const user = JSON.parse(userData);
+        if (user && user.token) {
+            req.headers.Authorization = `Bearer ${user.token}`;
+        }
     }
     return req;
+}, (error) => {
+    return Promise.reject(error);
 });
 
 export default API;
