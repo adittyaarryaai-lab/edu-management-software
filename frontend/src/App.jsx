@@ -19,6 +19,7 @@ import Support from './pages/Support';
 import NoticeFeed from './pages/NoticeFeed';
 import Settings from './pages/Settings';
 import MyAccount from './pages/MyAccount';
+import Exams from './pages/Exams';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -92,6 +93,7 @@ function App() {
           <Route path="/academic" element={<Academic />} />
           <Route path="/support" element={<Support />} />
           <Route path="/notice-feed" element={<NoticeFeed />} />
+          <Route path="/exams" element={<Exams />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />

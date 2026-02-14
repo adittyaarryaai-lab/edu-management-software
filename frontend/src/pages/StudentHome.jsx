@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Calendar, Clock, CreditCard, 
-  Bell, Sun, FileText, 
-  ClipboardList, UserPlus, MessageSquare, 
+import {
+  Calendar, Clock, CreditCard,
+  Bell, Sun, FileText,
+  ClipboardList, UserPlus, MessageSquare,
   Megaphone, Users, GraduationCap,
   TrendingUp, FileSearch, ClipboardCheck
 } from 'lucide-react';
@@ -14,6 +14,8 @@ const StudentHome = () => {
     { title: 'TimeTable', icon: <Clock size={32} />, path: '/timetable', color: 'bg-blue-50 text-blue-400' },
     { title: 'Fees', icon: <CreditCard size={32} />, path: '/fees', color: 'bg-teal-50 text-teal-400' },
     { title: 'Notice Board', icon: <Megaphone size={32} />, path: '/notice-feed', color: 'bg-indigo-50 text-indigo-400' }, // Day 17 Link
+    { title: 'Exam Center', icon: <GraduationCap size={20} />, path: '/exams' },
+
   ];
 
   const subModules = [
