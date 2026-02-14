@@ -6,7 +6,8 @@ const connectDB = require('./config/db.js');
 // Routes Import
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const attendanceRoutes = require('./routes/attendanceRoutes'); // <-- Step 2: Import Attendance Route
+const attendanceRoutes = require('./routes/attendanceRoutes'); 
+const timetableRoutes = require('./routes/timetableRoutes');
 
 dotenv.config();
 
@@ -25,7 +26,8 @@ app.use(express.json());
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/attendance', attendanceRoutes); // <-- Step 2: Route Middleware add kiya
+app.use('/api/attendance', attendanceRoutes); 
+app.use('/api/timetable', timetableRoutes);
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');

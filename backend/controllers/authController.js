@@ -4,14 +4,23 @@ const generateToken = require('../utils/generateToken');
 // @desc    Register a new user
 // @route   POST /api/auth/register
 const registerUser = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, grade, enrollmentNo, employeeId, subjects } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ 
+        name, 
+        email, 
+        password, 
+        role,
+        grade,
+        enrollmentNo,
+        employeeId,
+        subjects 
+    });
 
     if (user) {
         res.status(201).json({
@@ -19,6 +28,7 @@ const registerUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            grade: user.grade,
             token: generateToken(user._id),
         });
     } else {
@@ -27,18 +37,17 @@ const registerUser = async (req, res) => {
 };
 
 // @desc    Auth user & get token
-// @route   POST /api/auth/login
 const authUser = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    // bcrypt compare logic Model mein bhi daal sakte hain, ya yahan
     if (user && (await require('bcryptjs').compare(password, user.password))) {
         res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
+            grade: user.grade, // LOGIN PAR BHI GRADE BHEJNA JARURI HAI
             token: generateToken(user._id),
         });
     } else {

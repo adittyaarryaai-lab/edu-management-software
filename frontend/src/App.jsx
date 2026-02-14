@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import API from './api'; // Day 31: Real API Helper
+import API from './api'; 
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
@@ -42,7 +42,6 @@ function App() {
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // Day 31: Real Login Function
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -135,9 +134,10 @@ function App() {
             } 
           />
 
+          {/* FIX: Pass user prop to Timetable */}
           <Route 
             path="/timetable" 
-            element={user.role === 'teacher' ? <TeacherSchedule /> : <Timetable />} 
+            element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} 
           />
 
           <Route path="/attendance" element={<AttendanceDetails />} />
@@ -158,7 +158,7 @@ function App() {
           <Route path="/mentors" element={<Mentorship />} />
           <Route path="/syllabus" element={<Syllabus />} />
           
-          <Route path="/teacher/attendance" element={<TeacherAttendance />} />
+          <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
 
