@@ -20,6 +20,7 @@ import NoticeFeed from './pages/NoticeFeed';
 import Settings from './pages/Settings';
 import MyAccount from './pages/MyAccount';
 import Exams from './pages/Exams';
+import Transport from './pages/Transport';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -94,6 +95,7 @@ function App() {
           <Route path="/support" element={<Support />} />
           <Route path="/notice-feed" element={<NoticeFeed />} />
           <Route path="/exams" element={<Exams />} />
+          <Route path="/transport" element={<Transport />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />

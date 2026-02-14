@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Calendar, Clock, CreditCard,
-  Bell, Sun, FileText,
-  ClipboardList, UserPlus, MessageSquare,
+import { 
+  Calendar, Clock, CreditCard, 
+  Bell, Sun, FileText, 
+  ClipboardList, UserPlus, MessageSquare, 
   Megaphone, Users, GraduationCap,
-  TrendingUp, FileSearch, ClipboardCheck
+  TrendingUp, FileSearch, ClipboardCheck,
+  Bus // <--- Ye missing tha, ise add kar diya
 } from 'lucide-react';
 
 const StudentHome = () => {
@@ -27,6 +28,7 @@ const StudentHome = () => {
     { title: 'Feedback', icon: <MessageSquare size={20} />, path: '/feedback' },
     { title: 'Mentorship', icon: <Users size={20} />, path: '/mentors' },
     { title: 'Request Center', icon: <ClipboardCheck size={20} />, path: '/requests' },
+    { title: 'Transport', icon: <Bus size={20} />, path: '/transport' },
   ];
 
   return (

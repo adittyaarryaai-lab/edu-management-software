@@ -1,12 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Menu, Search, Headphones, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SidebarDrawer from './SidebarDrawer';
 
 const Navbar = ({ user }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [greeting, setGreeting] = useState({ text: 'Good Morning', emoji: '☀️' });
   const navigate = useNavigate();
   
+  // Dynamic Greeting Logic
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour < 12) {
+        setGreeting({ text: 'Good Morning', emoji: '☀️' });
+      } else if (hour < 17) {
+        setGreeting({ text: 'Good Afternoon', emoji: '🌤️' });
+      } else if (hour < 21) {
+        setGreeting({ text: 'Good Evening', emoji: '👋' });
+      } else {
+        setGreeting({ text: 'Good Night', emoji: '🌙' });
+      }
+    };
+
+    updateGreeting();
+    // Har 15 minute mein check karega taaki time change hote hi greeting badal jaye
+    const interval = setInterval(updateGreeting, 900000); 
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     window.location.reload();
@@ -31,6 +53,7 @@ const Navbar = ({ user }) => {
           <div className="flex items-center gap-3">
             <button 
               onClick={handleLogout}
+              title="Logout"
               className="bg-red-500/20 p-2 rounded-xl backdrop-blur-md active:scale-90 transition-all border border-white/10"
             >
               <LogOut size={18} />
@@ -46,7 +69,7 @@ const Navbar = ({ user }) => {
         
         <div className="mt-2 text-left">
           <h2 className="text-2xl font-bold tracking-tight">
-            Good Evening 👋 <span className="text-white/90">{user?.name?.split(' ')[0]}</span>
+            {greeting.text} {greeting.emoji} <span className="text-white/90">{user?.name?.split(' ')[0]}</span>
           </h2>
           <span className="inline-block mt-1 px-3 py-0.5 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest">
               {user?.role} Portal
