@@ -16,6 +16,7 @@ import TeacherSchedule from './pages/TeacherSchedule';
 import Holidays from './pages/Holidays';
 import Academic from './pages/Academic';
 import Support from './pages/Support';
+import NoticeFeed from './pages/NoticeFeed';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -91,6 +92,7 @@ function App() {
           <Route path="/holidays" element={<Holidays />} />
           <Route path="/academic" element={<Academic />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/notice-feed" element={<NoticeFeed />} />
           
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

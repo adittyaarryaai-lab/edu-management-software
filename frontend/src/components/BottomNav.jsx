@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, QrCode, Bell } from 'lucide-react';
+import { Home, QrCode, Megaphone } from 'lucide-react'; // Bell ki jagah Megaphone
 import { NavLink } from 'react-router-dom';
 
 const BottomNav = () => {
@@ -17,9 +17,9 @@ const BottomNav = () => {
         </div>
       </div>
 
-      <NavLink to="/notices" className={({isActive}) => `flex flex-col items-center gap-1 ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
-        <Bell size={24} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Notification</span>
+      <NavLink to="/notice-feed" className={({isActive}) => `flex flex-col items-center gap-1 ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+        <Megaphone size={24} />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Feed</span>
       </NavLink>
     </div>
   );
