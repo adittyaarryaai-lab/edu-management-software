@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MoreVertical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api'; // API import kiya
+import Loader from '../components/Loader';
 
 const AttendanceDetails = () => {
   const navigate = useNavigate();
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [overall, setOverall] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data as per your screenshots
-  const attendanceData = [
-    { subject: "Engineering Physics", delivered: 6, attended: 6, percentage: 100, color: "bg-blue-500" },
-    { subject: "Maker Lab", delivered: 12, attended: 9, percentage: 75, color: "bg-orange-500" },
-    { subject: "Calculus", delivered: 10, attended: 8, percentage: 80, color: "bg-green-500" },
-    { subject: "Professional Comm.", delivered: 8, attended: 7, percentage: 87.5, color: "bg-purple-500" }
-  ];
+  useEffect(() => {
+    const fetchDetailedAttendance = async () => {
+      try {
+        // Hum backend se student ki puri attendance history mangayenge
+        const { data } = await API.get('/attendance/student-stats'); 
+        
+        // Note: Filhaal hum wahi logic use kar rahe hain, 
+        // aage ja kar hum subject-wise filter backend se hi layenge.
+        // Ye niche wala format database structure ke hisab se update hoga.
+        
+        setOverall(data.percentage);
+        
+        // Mocking structure for now based on your UI, 
+        // real integration mein ye backend array se map hoga
+        const mockSubjectData = [
+          { subject: "Engineering Physics", delivered: data.totalDays, attended: data.presentDays, percentage: data.percentage, color: "bg-blue-500" },
+        ];
+        
+        setAttendanceData(mockSubjectData);
+      } catch (err) {
+        console.error("Error fetching details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetailedAttendance();
+  }, []);
+
+  if (loading) return <Loader />;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
@@ -27,7 +54,7 @@ const AttendanceDetails = () => {
 
         <div className="mt-4 text-center">
           <p className="text-sm opacity-80 font-medium">Overall Attendance Percentage</p>
-          <h2 className="text-5xl font-extrabold mt-1">94.64%</h2>
+          <h2 className="text-5xl font-extrabold mt-1">{overall}%</h2>
           <div className="flex justify-center gap-6 mt-4 text-[10px] font-bold uppercase tracking-widest opacity-70">
             <span className="flex items-center gap-1">D: Delivered</span>
             <span className="flex items-center gap-1">A: Attended</span>

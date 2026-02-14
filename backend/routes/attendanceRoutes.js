@@ -28,5 +28,35 @@ router.post('/save', protect, async (req, res) => {
         res.status(500).json({ message: 'Server Error saving attendance' });
     }
 });
+// @desc    Get student attendance percentage
+// @route   GET /api/attendance/student-stats
+router.get('/student-stats', protect, async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        // Saari attendance records dhoondo jahan is student ka data ho
+        const allRecords = await Attendance.find({ 'records.student': studentId });
+
+        let totalDays = allRecords.length;
+        let presentDays = 0;
+
+        allRecords.forEach(record => {
+            const studentEntry = record.records.find(r => r.student.toString() === studentId.toString());
+            if (studentEntry && studentEntry.status === 'Present') {
+                presentDays++;
+            }
+        });
+
+        const percentage = totalDays === 0 ? 0 : Math.round((presentDays / totalDays) * 100);
+        
+        res.json({
+            totalDays,
+            presentDays,
+            absentDays: totalDays - presentDays,
+            percentage
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error fetching stats' });
+    }
+});
 
 module.exports = router;
