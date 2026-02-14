@@ -26,6 +26,7 @@ import Library from './pages/Library';
 import LiveClass from './pages/LiveClass';
 import Feedback from './pages/Feedback';
 import Requests from './pages/Requests';
+import Mentorship from './pages/Mentorship';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -106,6 +107,7 @@ function App() {
           <Route path="/live-class" element={<LiveClass />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
+          <Route path="/mentors" element={<Mentorship />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
