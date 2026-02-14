@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import API from './api'; 
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -30,16 +30,27 @@ import Requests from './pages/Requests';
 import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
+import AdminTimetable from './pages/AdminTimetable';
 
 function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const navigate = useNavigate(); // Navigation handle karne ke liye
+  const location = useLocation(); // Current URL track karne ke liye
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    } else {
+      // Agar user nahi hai aur URL "/" nahi hai, toh use "/" par bhejo
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+    }
   }, []);
 
   const handleLogin = async (e) => {
@@ -50,6 +61,7 @@ function App() {
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
       setLoading(false);
+      navigate("/"); // Login ke baad home par redirect
     } catch (error) {
       setLoading(false);
       alert(error.response?.data?.message || "Login Failed! Check your credentials.");
@@ -134,11 +146,12 @@ function App() {
             } 
           />
 
-          {/* FIX: Pass user prop to Timetable */}
           <Route 
             path="/timetable" 
             element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} 
           />
+
+          <Route path="/admin/timetable" element={<AdminTimetable />} />
 
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
