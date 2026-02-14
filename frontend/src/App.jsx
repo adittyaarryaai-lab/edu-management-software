@@ -22,6 +22,7 @@ import MyAccount from './pages/MyAccount';
 import Exams from './pages/Exams';
 import Transport from './pages/Transport';
 import IDCard from './pages/IDCard';
+import Library from './pages/Library';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -98,6 +99,7 @@ function App() {
           <Route path="/exams" element={<Exams />} />
           <Route path="/transport" element={<Transport />} />
           <Route path="/id-card" element={<IDCard user={user} />} />
+          <Route path="/library" element={<Library />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
