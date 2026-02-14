@@ -5,7 +5,8 @@ const connectDB = require('./config/db.js');
 
 // Routes Import
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes'); // <-- Ye missing tha
+const userRoutes = require('./routes/userRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes'); // <-- Step 2: Import Attendance Route
 
 dotenv.config();
 
@@ -23,7 +24,8 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes); // <-- Ye line add karni thi
+app.use('/api/users', userRoutes);
+app.use('/api/attendance', attendanceRoutes); // <-- Step 2: Route Middleware add kiya
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');

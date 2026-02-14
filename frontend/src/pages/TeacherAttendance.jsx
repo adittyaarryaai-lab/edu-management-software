@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Save, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import API from '../api'; // API Helper import kiya
+import API from '../api'; 
 import Toast from '../components/Toast';
-import Loader from '../components/Loader'; // Day 14 wala Loader
+import Loader from '../components/Loader';
 
 const TeacherAttendance = () => {
   const navigate = useNavigate();
-  const [selectedClass, setSelectedClass] = useState('10-A'); // Backend mein humne 10-A ke students dale hain
+  const [selectedClass, setSelectedClass] = useState('10-A'); 
   const [showToast, setShowToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Ab students state empty array se shuru hogi
   const [students, setStudents] = useState([]);
 
-  // Step 34: API se bacho ko fetch karne ka logic
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        // Backend API ko call kar rahe hain: /api/users/students/10-A
         const { data } = await API.get(`/users/students/${selectedClass}`);
         
-        // Data format set kar rahe hain jo hamare UI ko chahiye
         const formattedData = data.map(s => ({
           id: s._id,
           name: s.name,
           roll: s.enrollmentNo,
-          status: 'Present' // By default sabko Present rakha hai
+          status: 'Present' 
         }));
         
         setStudents(formattedData);
@@ -39,7 +34,6 @@ const TeacherAttendance = () => {
         setLoading(false);
       }
     };
-
     fetchStudents();
   }, [selectedClass]);
 
@@ -49,29 +43,52 @@ const TeacherAttendance = () => {
     ));
   };
 
+  // ================= DAY 35 UPDATE: REAL SUBMISSION START =================
   const handleSubmit = async () => {
+    if (students.length === 0) return;
+    
     setIsSaving(true);
     try {
-        // Filhaal hum feedback dikha rahe hain
-        // Day 35 mein hum yahan API call karke attendance save karenge
+        // 1. Backend ke schema ke hisaab se records taiyar kar rahe hain
+        const records = students.map(s => ({
+            student: s.id,
+            status: s.status
+        }));
+
+        // 2. Payload structure as per Attendance Model
+        const payload = {
+            grade: selectedClass,
+            date: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+            records: records
+        };
+
+        // 3. Real API Call to Backend
+        await API.post('/attendance/save', payload);
+        
+        // 4. Success UI Feedback
+        setShowToast(true);
+        
+        // 5. Thoda wait karke wapas dashboard par bhej denge
         setTimeout(() => {
             setIsSaving(false);
-            setShowToast(true);
-        }, 1500);
+            navigate('/dashboard');
+        }, 2000);
+
     } catch (err) {
-        alert("Submission failed!");
+        console.error("Submit Error:", err);
+        alert(err.response?.data?.message || "Attendance submission failed!");
         setIsSaving(false);
     }
   };
+  // ================= DAY 35 UPDATE: END =================
 
-  // Agar data load ho raha ho
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><Loader /></div>;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
       {showToast && (
         <Toast 
-            message="Attendance Saved Successfully!" 
+            message="Attendance Saved to Cloud!" 
             type="success" 
             onClose={() => setShowToast(false)} 
         />
@@ -151,7 +168,7 @@ const TeacherAttendance = () => {
                 {isSaving ? (
                     <span className="animate-pulse flex items-center gap-2 text-sm">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Syncing...
+                        Saving...
                     </span>
                 ) : (
                     <>

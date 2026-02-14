@@ -73,7 +73,7 @@ function App() {
               <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Email Address</label>
               <input 
                 type="email" 
-                placeholder="admin@test.com" 
+                placeholder="Enter your email Id....." 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-100 py-4 px-6 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-sm"
@@ -85,7 +85,7 @@ function App() {
               <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Password</label>
               <input 
                 type="password" 
-                placeholder="••••••••" 
+                placeholder="Enter your password...." 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-100 py-4 px-6 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-sm"
