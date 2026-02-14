@@ -27,6 +27,7 @@ import LiveClass from './pages/LiveClass';
 import Feedback from './pages/Feedback';
 import Requests from './pages/Requests';
 import Mentorship from './pages/Mentorship';
+import Syllabus from './pages/Syllabus';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -108,6 +109,7 @@ function App() {
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
           <Route path="/mentors" element={<Mentorship />} />
+          <Route path="/syllabus" element={<Syllabus />} />
           
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />

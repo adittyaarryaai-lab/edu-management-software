@@ -6,7 +6,7 @@ import {
   ClipboardList, UserPlus, MessageSquare, 
   Megaphone, Users, GraduationCap,
   TrendingUp, FileSearch, ClipboardCheck,
-  Bus,Book,Video // <--- Ye missing tha, ise add kar diya
+  Bus,Book,Video,BookOpen// <--- Ye missing tha, ise add kar diya
 } from 'lucide-react';
 
 const StudentHome = () => {
@@ -32,6 +32,7 @@ const StudentHome = () => {
     { title: 'Transport', icon: <Bus size={20} />, path: '/transport' },
     { title: 'Library', icon: <Book size={20} />, path: '/library' },
     { title: 'Live Class', icon: <Video size={20} />, path: '/live-class' },
+    { title: 'Syllabus', icon: <BookOpen size={20} />, path: '/syllabus' },
   ];
 
   return (
