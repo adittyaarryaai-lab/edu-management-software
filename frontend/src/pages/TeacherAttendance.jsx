@@ -1,21 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Save, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Toast from '../components/Toast'; // Step 14 Import
+import API from '../api'; // API Helper import kiya
+import Toast from '../components/Toast';
+import Loader from '../components/Loader'; // Day 14 wala Loader
 
 const TeacherAttendance = () => {
   const navigate = useNavigate();
-  const [selectedClass, setSelectedClass] = useState('Grade 10-B');
+  const [selectedClass, setSelectedClass] = useState('10-A'); // Backend mein humne 10-A ke students dale hain
   const [showToast, setShowToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // Mock Student List
-  const [students, setStudents] = useState([
-    { id: 1, name: 'Rahul Kumar', roll: '101', status: 'Present' },
-    { id: 2, name: 'New Test Student', roll: '105', status: 'Present' },
-    { id: 3, name: 'Ravi Sharma', roll: '110', status: 'Absent' },
-    { id: 4, name: 'Anjali Singh', roll: '112', status: 'Present' },
-  ]);
+  // Ab students state empty array se shuru hogi
+  const [students, setStudents] = useState([]);
+
+  // Step 34: API se bacho ko fetch karne ka logic
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        // Backend API ko call kar rahe hain: /api/users/students/10-A
+        const { data } = await API.get(`/users/students/${selectedClass}`);
+        
+        // Data format set kar rahe hain jo hamare UI ko chahiye
+        const formattedData = data.map(s => ({
+          id: s._id,
+          name: s.name,
+          roll: s.enrollmentNo,
+          status: 'Present' // By default sabko Present rakha hai
+        }));
+        
+        setStudents(formattedData);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        alert("Failed to fetch student list from Database");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, [selectedClass]);
 
   const toggleStatus = (id) => {
     setStudents(students.map(s => 
@@ -23,19 +49,26 @@ const TeacherAttendance = () => {
     ));
   };
 
-  // Step 14: Submit logic with Feedback
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSaving(true);
-    // Fake loading for 1.5 seconds to simulate API call
-    setTimeout(() => {
+    try {
+        // Filhaal hum feedback dikha rahe hain
+        // Day 35 mein hum yahan API call karke attendance save karenge
+        setTimeout(() => {
+            setIsSaving(false);
+            setShowToast(true);
+        }, 1500);
+    } catch (err) {
+        alert("Submission failed!");
         setIsSaving(false);
-        setShowToast(true);
-    }, 1500);
+    }
   };
+
+  // Agar data load ho raha ho
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><Loader /></div>;
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
-      {/* Step 14: Show Toast when triggered */}
       {showToast && (
         <Toast 
             message="Attendance Saved Successfully!" 
@@ -54,63 +87,76 @@ const TeacherAttendance = () => {
           <div className="bg-white/20 p-2 rounded-xl"><Users size={20}/></div>
         </div>
 
-        <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10">
-            <p className="text-[10px] font-bold uppercase opacity-70 mb-1">Active Class</p>
-            <h2 className="text-lg font-bold">{selectedClass}</h2>
+        <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/10 flex justify-between items-center">
+            <div>
+                <p className="text-[10px] font-bold uppercase opacity-70 mb-1">Active Class</p>
+                <h2 className="text-lg font-bold">Grade {selectedClass}</h2>
+            </div>
+            <div className="text-right">
+                <p className="text-[10px] font-bold uppercase opacity-70 mb-1">Date</p>
+                <h2 className="text-sm font-bold uppercase">{new Date().toLocaleDateString('en-GB')}</h2>
+            </div>
         </div>
       </div>
 
       {/* Student List Grid */}
       <div className="px-5 -mt-12 space-y-4 relative z-20">
         <div className="flex justify-between items-center px-2 mb-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Students: {students.length}</span>
-            <span className="text-xs font-bold text-green-500 uppercase">Present: {students.filter(s => s.status === 'Present').length}</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Database: {students.length} Students</span>
+            <span className="text-xs font-bold text-green-500 uppercase font-black">Present: {students.filter(s => s.status === 'Present').length}</span>
         </div>
 
-        {students.map((student) => (
-          <div key={student.id} className="glass-card p-5 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center font-bold text-xs shadow-inner">
-                    {student.roll}
-                </div>
-                <div>
-                    <h3 className="font-bold text-slate-800 text-sm leading-none">{student.name}</h3>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Roll No: {student.roll}</p>
-                </div>
+        {students.length === 0 ? (
+            <div className="bg-white p-10 rounded-[2.5rem] text-center border-2 border-dashed border-slate-100">
+                <p className="text-slate-400 font-bold text-sm">No students found in {selectedClass}</p>
+                <p className="text-[10px] text-slate-300 uppercase mt-2">Check Admin Enrollment</p>
             </div>
+        ) : (
+            students.map((student) => (
+                <div key={student.id} className="glass-card p-5 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center font-bold text-xs shadow-inner">
+                          {student.name.charAt(0)}
+                      </div>
+                      <div>
+                          <h3 className="font-bold text-slate-800 text-sm leading-none">{student.name}</h3>
+                          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Roll: {student.roll}</p>
+                      </div>
+                  </div>
+      
+                  <button 
+                      onClick={() => toggleStatus(student.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-[10px] uppercase transition-all shadow-sm ${
+                          student.status === 'Present' 
+                          ? 'bg-green-50 text-green-600 border border-green-100' 
+                          : 'bg-red-50 text-red-500 border border-red-100'
+                      }`}
+                  >
+                      {student.status === 'Present' ? <CheckCircle2 size={14}/> : <XCircle size={14}/>}
+                      {student.status}
+                  </button>
+                </div>
+              ))
+        )}
 
-            <button 
-                onClick={() => toggleStatus(student.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-[10px] uppercase transition-all shadow-sm ${
-                    student.status === 'Present' 
-                    ? 'bg-green-50 text-green-600 border border-green-100' 
-                    : 'bg-red-50 text-red-500 border border-red-100'
-                }`}
-            >
-                {student.status === 'Present' ? <CheckCircle2 size={14}/> : <XCircle size={14}/>}
-                {student.status}
-            </button>
-          </div>
-        ))}
-
-        {/* Floating Action Button - Updated with Loading State */}
+        {/* Action Button */}
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-full px-10 z-30">
             <button 
                 onClick={handleSubmit}
-                disabled={isSaving}
+                disabled={isSaving || students.length === 0}
                 className={`w-full py-4 rounded-3xl font-bold shadow-2xl flex items-center justify-center gap-2 active:scale-95 transition-all ${
-                    isSaving ? 'bg-slate-300 text-white' : 'bg-blue-500 text-white shadow-blue-300'
+                    isSaving || students.length === 0 ? 'bg-slate-300 text-white' : 'bg-blue-500 text-white shadow-blue-300'
                 }`}
             >
                 {isSaving ? (
                     <span className="animate-pulse flex items-center gap-2 text-sm">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Submitting...
+                        Syncing...
                     </span>
                 ) : (
                     <>
                         <Save size={20} />
-                        <span>Submit Attendance</span>
+                        <span>Submit {selectedClass} Attendance</span>
                     </>
                 )}
             </button>

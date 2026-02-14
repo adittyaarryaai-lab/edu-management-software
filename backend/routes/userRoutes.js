@@ -33,5 +33,18 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
+// Teacher fetches students of their specific grade
+router.get('/students/:grade', protect, async (req, res) => {
+    try {
+        const students = await User.find({
+            role: 'student',
+            grade: req.params.grade
+        }).select('name enrollmentNo grade');
+
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 
 module.exports = router;
