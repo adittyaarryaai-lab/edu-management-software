@@ -17,6 +17,8 @@ import Holidays from './pages/Holidays';
 import Academic from './pages/Academic';
 import Support from './pages/Support';
 import NoticeFeed from './pages/NoticeFeed';
+import Settings from './pages/Settings';
+import MyAccount from './pages/MyAccount';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -29,7 +31,7 @@ function App() {
   if (!user) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-2">EduFlowAI Reborn</h1>
+        <h1 className="text-3xl font-bold text-blue-600 mb-2 font-sans">EduFlowAI Reborn</h1>
         <p className="text-slate-500 mb-8 font-medium">Select a role to test the Premium UI</p>
         
         <div className="flex flex-col gap-4 w-full max-w-xs">
@@ -65,7 +67,7 @@ function App() {
       
       <main className="relative z-0 pb-32">
         <Routes>
-          {/* Conditional Home Route */}
+          {/* Dashboard Routes */}
           <Route 
             path="/" 
             element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
@@ -75,25 +77,32 @@ function App() {
             element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
           />
 
-          {/* Role-Based Timetable Routing */}
+          {/* Timetable Switching */}
           <Route 
             path="/timetable" 
             element={user.role === 'teacher' ? <TeacherSchedule /> : <Timetable />} 
           />
 
-          {/* Common & Specific Routes */}
+          {/* Student Specific Routes */}
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
-          <Route path="/teacher/attendance" element={<TeacherAttendance />} />
-          <Route path="/teacher/students" element={<TeacherStudentList />} />
-          <Route path="/teacher/assignments" element={<TeacherAssignments />} />
           <Route path="/analytics" element={<Performance />} />
           <Route path="/holidays" element={<Holidays />} />
           <Route path="/academic" element={<Academic />} />
           <Route path="/support" element={<Support />} />
           <Route path="/notice-feed" element={<NoticeFeed />} />
           
+          {/* Teacher Specific Routes */}
+          <Route path="/teacher/attendance" element={<TeacherAttendance />} />
+          <Route path="/teacher/students" element={<TeacherStudentList />} />
+          <Route path="/teacher/assignments" element={<TeacherAssignments />} />
+
+          {/* Identity & Settings (Day 18 Split) */}
+          <Route path="/my-account" element={<MyAccount user={user} />} />
+          <Route path="/settings" element={<Settings user={user} />} />
+          
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
