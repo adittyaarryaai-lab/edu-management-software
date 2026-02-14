@@ -28,6 +28,7 @@ import Feedback from './pages/Feedback';
 import Requests from './pages/Requests';
 import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
+import AdminHome from './pages/AdminHome'; // Day 28: Import Admin Page
 
 function App() {
   const [user, setUser] = useState(null);
@@ -40,8 +41,10 @@ function App() {
   if (!user) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
-        <h1 className="text-3xl font-bold text-blue-600 mb-2 font-sans">EduFlowAI Reborn</h1>
-        <p className="text-slate-500 mb-8 font-medium">Select a role to test the Premium UI</p>
+        <div className="bg-blue-600/10 p-4 rounded-3xl mb-4">
+           <h1 className="text-3xl font-black text-blue-600 font-sans tracking-tighter uppercase">EduFlowAI</h1>
+        </div>
+        <p className="text-slate-500 mb-8 font-bold uppercase text-[10px] tracking-[0.2em]">Select Portal Access</p>
         
         <div className="flex flex-col gap-4 w-full max-w-xs">
           <button 
@@ -50,9 +53,9 @@ function App() {
               setUser(mock);
               localStorage.setItem('user', JSON.stringify(mock));
             }}
-            className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-blue-100 active:scale-95 transition-all"
+            className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase text-xs tracking-widest"
           >
-            LOGIN AS STUDENT
+            STUDENT PORTAL
           </button>
 
           <button 
@@ -61,9 +64,21 @@ function App() {
               setUser(mock);
               localStorage.setItem('user', JSON.stringify(mock));
             }}
-            className="bg-slate-800 text-white px-10 py-4 rounded-2xl font-bold shadow-xl shadow-slate-200 active:scale-95 transition-all"
+            className="bg-slate-800 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-slate-200 active:scale-95 transition-all uppercase text-xs tracking-widest"
           >
-            LOGIN AS TEACHER
+            TEACHER PORTAL
+          </button>
+
+          {/* Day 28: Admin Access Button */}
+          <button 
+            onClick={() => {
+              const mock = { name: "System Admin", role: "admin" };
+              setUser(mock);
+              localStorage.setItem('user', JSON.stringify(mock));
+            }}
+            className="bg-purple-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-purple-100 active:scale-95 transition-all uppercase text-xs tracking-widest"
+          >
+            ADMIN PORTAL
           </button>
         </div>
       </div>
@@ -76,14 +91,22 @@ function App() {
       
       <main className="relative z-0 pb-32">
         <Routes>
-          {/* Dashboard Routes */}
+          {/* Day 28: Dynamic Dashboard Redirect based on Role */}
           <Route 
             path="/" 
-            element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
+            element={
+              user.role === 'admin' ? <AdminHome /> : 
+              user.role === 'teacher' ? <TeacherHome user={user} /> : 
+              <StudentHome user={user} />
+            } 
           />
           <Route 
             path="/dashboard" 
-            element={user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} 
+            element={
+              user.role === 'admin' ? <AdminHome /> : 
+              user.role === 'teacher' ? <TeacherHome user={user} /> : 
+              <StudentHome user={user} />
+            } 
           />
 
           {/* Timetable Switching */}
@@ -116,7 +139,7 @@ function App() {
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
 
-          {/* Identity & Settings (Day 18 Split) */}
+          {/* Identity & Settings */}
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
           
@@ -125,7 +148,8 @@ function App() {
         </Routes>
       </main>
 
-      <BottomNav />
+      {/* Hide BottomNav for Admin if needed, or keep it for easy switching */}
+      {user.role !== 'admin' && <BottomNav />}
     </div>
   );
 }
