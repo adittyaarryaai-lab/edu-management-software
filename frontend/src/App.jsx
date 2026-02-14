@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import API from './api'; // Day 31: Real API Helper
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
@@ -28,58 +29,84 @@ import Feedback from './pages/Feedback';
 import Requests from './pages/Requests';
 import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
-import AdminHome from './pages/AdminHome'; // Day 28: Import Admin Page
+import AdminHome from './pages/AdminHome';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
+  // Day 31: Real Login Function
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await API.post('/auth/login', { email, password });
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      alert(error.response?.data?.message || "Login Failed! Check your credentials.");
+    }
+  };
+
   if (!user) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center">
-        <div className="bg-blue-600/10 p-4 rounded-3xl mb-4">
-           <h1 className="text-3xl font-black text-blue-600 font-sans tracking-tighter uppercase">EduFlowAI</h1>
-        </div>
-        <p className="text-slate-500 mb-8 font-bold uppercase text-[10px] tracking-[0.2em]">Select Portal Access</p>
-        
-        <div className="flex flex-col gap-4 w-full max-w-xs">
-          <button 
-            onClick={() => {
-              const mock = { name: "Vipin Tanwar", role: "student" };
-              setUser(mock);
-              localStorage.setItem('user', JSON.stringify(mock));
-            }}
-            className="bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase text-xs tracking-widest"
-          >
-            STUDENT PORTAL
-          </button>
+      <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
+        <div className="w-full max-w-md bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+          <div className="bg-blue-600/10 w-fit px-6 py-2 rounded-2xl mb-6 mx-auto">
+            <h1 className="text-2xl font-black text-blue-600 tracking-tighter uppercase">EduFlowAI</h1>
+          </div>
+          
+          <h2 className="text-xl font-bold text-slate-800 mb-2 text-center">Welcome Back</h2>
+          <p className="text-slate-400 mb-8 font-bold uppercase text-[9px] tracking-[0.2em] text-center">Login to your specialized portal</p>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Email Address</label>
+              <input 
+                type="email" 
+                placeholder="admin@test.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-100 py-4 px-6 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-sm"
+                required
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Password</label>
+              <input 
+                type="password" 
+                placeholder="••••••••" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-100 py-4 px-6 rounded-2xl outline-none focus:border-blue-500 transition-all font-medium text-sm"
+                required
+              />
+            </div>
 
-          <button 
-            onClick={() => {
-              const mock = { name: "Math Teacher Anita", role: "teacher" };
-              setUser(mock);
-              localStorage.setItem('user', JSON.stringify(mock));
-            }}
-            className="bg-slate-800 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-slate-200 active:scale-95 transition-all uppercase text-xs tracking-widest"
-          >
-            TEACHER PORTAL
-          </button>
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase text-xs tracking-widest mt-4 disabled:bg-slate-300"
+            >
+              {loading ? "Verifying..." : "ACCESS PORTAL"}
+            </button>
+          </form>
 
-          {/* Day 28: Admin Access Button */}
-          <button 
-            onClick={() => {
-              const mock = { name: "System Admin", role: "admin" };
-              setUser(mock);
-              localStorage.setItem('user', JSON.stringify(mock));
-            }}
-            className="bg-purple-600 text-white px-10 py-5 rounded-[2rem] font-black shadow-xl shadow-purple-100 active:scale-95 transition-all uppercase text-xs tracking-widest"
-          >
-            ADMIN PORTAL
-          </button>
+          <div className="mt-8 pt-6 border-t border-slate-50 text-center">
+            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+              Secured by JWT • EduFlowAI Enterprise
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -91,7 +118,6 @@ function App() {
       
       <main className="relative z-0 pb-32">
         <Routes>
-          {/* Day 28: Dynamic Dashboard Redirect based on Role */}
           <Route 
             path="/" 
             element={
@@ -109,13 +135,11 @@ function App() {
             } 
           />
 
-          {/* Timetable Switching */}
           <Route 
             path="/timetable" 
             element={user.role === 'teacher' ? <TeacherSchedule /> : <Timetable />} 
           />
 
-          {/* Student Specific Routes */}
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
@@ -134,21 +158,17 @@ function App() {
           <Route path="/mentors" element={<Mentorship />} />
           <Route path="/syllabus" element={<Syllabus />} />
           
-          {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
 
-          {/* Identity & Settings */}
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
           
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
 
-      {/* Hide BottomNav for Admin if needed, or keep it for easy switching */}
       {user.role !== 'admin' && <BottomNav />}
     </div>
   );
