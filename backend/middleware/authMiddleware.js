@@ -9,7 +9,6 @@ const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             
-            // User ko database se dhoondo
             req.user = await User.findById(decoded.id).select('-password');
             
             if (!req.user) {
@@ -34,4 +33,13 @@ const adminOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, adminOnly };
+// FIX: Teacher only middleware added here
+const teacherOnly = (req, res, next) => {
+    if (req.user && req.user.role === 'teacher') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Access denied. Teachers only.' });
+    }
+};
+
+module.exports = { protect, adminOnly, teacherOnly };

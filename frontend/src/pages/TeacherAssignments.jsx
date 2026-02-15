@@ -1,16 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, FileText, Calendar, Clock, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api'; // Backend connection ke liye
+import Loader from '../components/Loader';
 
-const TeacherAssignments = () => {
+const TeacherAssignments = ({ user }) => {
     const navigate = useNavigate();
     const [showForm, setShowForm] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [assignments, setAssignments] = useState([]);
+    const [fetching, setFetching] = useState(true);
 
-    // Mock Assignments List
-    const assignments = [
-        { title: "Calculus Problem Set 1", class: "Grade 10-B", deadline: "15 Feb 2026", status: "Active" },
-        { title: "Physics Lab Report", class: "Grade 10-A", deadline: "18 Feb 2026", status: "Pending" },
-    ];
+    // Form states for real data
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        grade: '',
+        subject: '',
+        dueDate: ''
+    });
+
+    // 1. Fetch Assignments from Backend
+    useEffect(() => {
+        const fetchAssignments = async () => {
+            try {
+                // Hamne backend mein /api/assignments/:grade route banaya hai
+                // Yahan teacher jis grade ko handle karta hai, uska data aayega
+                const { data } = await API.get(`/assignments/${user?.grade || '10-A'}`);
+                setAssignments(data);
+            } catch (err) {
+                console.error("Error fetching assignments");
+            } finally {
+                setFetching(false);
+            }
+        };
+        fetchAssignments();
+    }, [user]);
+
+    // 2. Handle Post Assignment logic
+    const handlePost = async (e) => {
+        e.preventDefault();
+        if(!formData.title || !formData.grade || !formData.dueDate) return alert("Please fill mandatory fields!");
+        
+        setLoading(true);
+        try {
+            await API.post('/assignments/create', formData);
+            alert("Assignment Posted Successfully!");
+            setShowForm(false);
+            // Refresh list
+            window.location.reload();
+        } catch (err) {
+            alert("Error posting assignment");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (fetching) return <Loader />;
 
     return (
         <div className="min-h-screen bg-[#f8fafc] pb-24">
@@ -23,60 +69,98 @@ const TeacherAssignments = () => {
                     <h1 className="text-xl font-bold uppercase tracking-tight">Assignments</h1>
                     <button 
                         onClick={() => setShowForm(!showForm)}
-                        className="bg-white text-blue-600 p-2 rounded-xl shadow-lg active:scale-90 transition-all"
+                        className={`p-2 rounded-xl shadow-lg active:scale-90 transition-all ${showForm ? 'bg-red-500 text-white' : 'bg-white text-blue-600'}`}
                     >
-                        <Plus size={20} />
+                        {showForm ? <Plus size={20} className="rotate-45" /> : <Plus size={20} />}
                     </button>
                 </div>
-                <p className="text-[11px] opacity-90 font-medium ml-2">Manage and post class assignments.</p>
+                <p className="text-[11px] opacity-90 font-medium ml-2 uppercase tracking-widest">Portal: {user?.name}</p>
             </div>
 
             <div className="px-5 -mt-10 relative z-20 space-y-6">
-                {/* Post New Assignment Form (Toggle) */}
+                {/* Post New Assignment Form (Now Connected to Backend) */}
                 {showForm && (
                     <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <FileText size={18} className="text-blue-500" /> Create Assignment
+                        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-tighter">
+                            <FileText size={18} className="text-blue-500" /> New Task
                         </h3>
-                        <div className="space-y-4">
-                            <input type="text" placeholder="Assignment Title" className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300" />
-                            <textarea placeholder="Description..." rows="3" className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300"></textarea>
+                        <form onSubmit={handlePost} className="space-y-4">
+                            <input 
+                                type="text" 
+                                placeholder="Assignment Title" 
+                                className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300 font-bold"
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                required
+                            />
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="relative">
-                                    <Calendar className="absolute left-3 top-3 text-slate-400" size={16} />
-                                    <input type="text" placeholder="DD/MM/YYYY" className="w-full bg-slate-50 border border-slate-100 py-3 pl-10 pr-4 rounded-2xl text-[10px] outline-none" />
-                                </div>
-                                <div className="relative">
-                                    <Clock className="absolute left-3 top-3 text-slate-400" size={16} />
-                                    <input type="text" placeholder="Time" className="w-full bg-slate-50 border border-slate-100 py-3 pl-10 pr-4 rounded-2xl text-[10px] outline-none" />
-                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Grade (e.g. 10-A)" 
+                                    className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-[10px] outline-none font-bold"
+                                    onChange={(e) => setFormData({...formData, grade: e.target.value})}
+                                    required
+                                />
+                                <input 
+                                    type="text" 
+                                    placeholder="Subject" 
+                                    className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-[10px] outline-none font-bold"
+                                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                                    required
+                                />
                             </div>
-                            <button className="w-full bg-blue-500 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-blue-200 flex items-center justify-center gap-2 active:scale-95 transition-all">
-                                <Send size={18} /> Post to Class
+                            <textarea 
+                                placeholder="Instructions for students..." 
+                                rows="3" 
+                                className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300 font-medium"
+                                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            ></textarea>
+                            <div className="relative">
+                                <Calendar className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                                <input 
+                                    type="date" 
+                                    className="w-full bg-slate-50 border border-slate-100 py-3.5 pl-12 pr-4 rounded-2xl text-[10px] outline-none font-black"
+                                    onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <button 
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all uppercase text-[10px] tracking-[0.2em] disabled:bg-slate-300"
+                            >
+                                {loading ? "Broadcasting..." : <><Send size={16} /> Deploy Assignment</>}
                             </button>
-                        </div>
+                        </form>
                     </div>
                 )}
 
-                {/* Assignments List */}
+                {/* Assignments List (Dynamic Data) */}
                 <div className="space-y-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Recent Assignments</p>
-                    {assignments.map((asgn, i) => (
-                        <div key={i} className="glass-card p-5 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-orange-50 text-orange-500 p-3 rounded-2xl">
-                                    <FileText size={24} />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Class Feed</p>
+                    {assignments.length > 0 ? (
+                        assignments.map((asgn, i) => (
+                            <div key={i} className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl">
+                                        <FileText size={24} />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-extrabold text-slate-800 text-sm leading-tight">{asgn.title}</h4>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
+                                            {asgn.grade} • Due: {new Date(asgn.dueDate).toLocaleDateString()}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-extrabold text-slate-800 text-sm leading-tight">{asgn.title}</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{asgn.class} • Deadline: {asgn.deadline}</p>
+                                <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Active</span>
                                 </div>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${asgn.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-400'}`}>
-                                {asgn.status}
-                            </span>
+                        ))
+                    ) : (
+                        <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                            <p className="text-slate-300 font-bold text-[10px] uppercase tracking-[0.2em]">No Active Assignments</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>
