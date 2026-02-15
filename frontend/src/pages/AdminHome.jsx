@@ -1,40 +1,32 @@
 import React, { useState } from 'react';
-import { Users, CreditCard, Megaphone, Settings, PlusCircle, LayoutDashboard, Database, X } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom'; 
 import API from '../api';
 import Toast from '../components/Toast';
+import { motion } from 'framer-motion';
 
 const AdminHome = () => {
     const navigate = useNavigate(); 
-    
-    // Modal States
     const [showTeacherForm, setShowTeacherForm] = useState(false);
     const [showStudentForm, setShowStudentForm] = useState(false);
-    
-    // Loading & Feedback States
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
 
-    // Form States
-    const [teacherData, setTeacherData] = useState({
-        name: '', email: '', password: '', employeeId: '', subjects: ''
-    });
-    const [studentData, setStudentData] = useState({
-        name: '', email: '', password: '', enrollmentNo: '', grade: ''
-    });
+    const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', employeeId: '', subjects: '' });
+    const [studentData, setStudentData] = useState({ name: '', email: '', password: '', enrollmentNo: '', grade: '' });
 
     const adminStats = [
-        { label: 'Total Students', value: '1,240', color: 'text-blue-600' },
-        { label: 'Total Teachers', value: '85', color: 'text-purple-600' },
-        { label: 'Fees Collected', value: '₹12.5L', color: 'text-green-600' },
+        { label: 'Total Students', value: '1,240', icon: <Users size={14}/> },
+        { label: 'Total Teachers', value: '85', icon: <Bot size={14}/> },
+        { label: 'Fees Collected', value: '₹12.5L', icon: <Activity size={14}/> },
     ];
 
     const managementModules = [
-        { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24}/>, desc: 'Enroll new students', color: 'bg-blue-50 text-blue-500' },
-        { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24}/>, desc: 'Assign roles & classes', color: 'bg-purple-50 text-purple-500' },
-        { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24}/>, desc: 'Track pending payments', color: 'bg-green-50 text-green-500' },
-        { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24}/>, desc: 'Send alerts to all', color: 'bg-orange-50 text-orange-500' },
-        { id: 'timetable', title: 'Timetable Master', icon: <Database size={24}/>, desc: 'Schedule all classes', color: 'bg-indigo-50 text-indigo-500' },
+        { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24}/>, desc: 'Enroll new students', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+        { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24}/>, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+        { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24}/>, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+        { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24}/>, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+        { id: 'timetable', title: 'Timetable Master', icon: <Database size={24}/>, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     ];
 
     const handleAddTeacher = async (e) => {
@@ -42,19 +34,12 @@ const AdminHome = () => {
         if(!teacherData.email || !teacherData.password) return alert("Please fill mandatory fields");
         setLoading(true);
         try {
-            const processedData = {
-                ...teacherData,
-                subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : []
-            };
+            const processedData = { ...teacherData, subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [] };
             await API.post('/users/add-teacher', processedData);
             setMsg("Teacher Registered Successfully!");
             setShowTeacherForm(false);
             setTeacherData({ name: '', email: '', password: '', employeeId: '', subjects: '' });
-        } catch (err) {
-            alert(err.response?.data?.message || "Error adding teacher");
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { alert(err.response?.data?.message || "Error adding teacher"); } finally { setLoading(false); }
     };
 
     const handleAddStudent = async (e) => {
@@ -66,99 +51,97 @@ const AdminHome = () => {
             setMsg("Student Enrolled Successfully!");
             setShowStudentForm(false);
             setStudentData({ name: '', email: '', password: '', enrollmentNo: '', grade: '' });
-        } catch (err) {
-            alert(err.response?.data?.message || "Error adding student");
-        } finally {
-            setLoading(false);
-        }
+        } catch (err) { alert(err.response?.data?.message || "Error adding student"); } finally { setLoading(false); }
     };
 
     return (
-        <div className="px-5 -mt-10 space-y-6 pb-24">
-            <div className="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 grid grid-cols-3 gap-2">
+        <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10">
+            {/* Stats Banner - AI Look */}
+            <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
-                    <div key={i} className="text-center border-r last:border-0 border-slate-100 px-1">
-                        <p className="text-[18px] font-black text-slate-800 leading-none">{stat.value}</p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">{stat.label}</p>
+                    <div key={i} className="text-center border-r last:border-0 border-white/5 px-1">
+                        <div className="flex justify-center text-blue-400 mb-1">{stat.icon}</div>
+                        <p className="text-[18px] font-black text-white leading-none">{stat.value}</p>
+                        <p className="text-[7px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{stat.label}</p>
                     </div>
                 ))}
             </div>
 
+            {/* Modules Grid */}
             <div className="grid grid-cols-1 gap-4">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">Administrative Controls</h3>
+                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Administrative Core</h3>
                 {managementModules.map((m, i) => (
-                    <div 
-                        key={i} 
+                    <div key={i} 
                         onClick={() => {
                             if (m.id === 'add-staff') setShowTeacherForm(true);
                             if (m.id === 'add-student') setShowStudentForm(true);
                             if (m.id === 'timetable') navigate('/admin/timetable');
-                            // FIXED: Added navigation for Fees module
                             if (m.id === 'fees') navigate('/admin/fees');
                         }}
-                        className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-50 flex items-center justify-between active:scale-95 transition-all cursor-pointer"
+                        className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/10 flex items-center justify-between active:scale-95 transition-all cursor-pointer group"
                     >
                         <div className="flex items-center gap-4">
-                            <div className={`${m.color} p-3 rounded-2xl`}>{m.icon}</div>
+                            <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
                             <div>
-                                <h4 className="font-bold text-slate-800 text-sm leading-none">{m.title}</h4>
-                                <p className="text-[10px] text-slate-400 mt-1 font-medium">{m.desc}</p>
+                                <h4 className="font-bold text-gray-500 text-sm leading-none">{m.title}</h4>
+                                <p className="text-[10px] text-slate-500 mt-1 font-medium italic">{m.desc}</p>
                             </div>
                         </div>
-                        <PlusCircle size={16} className="text-slate-300" />
+                        <div className="bg-white/5 p-2 rounded-full"><PlusCircle size={14} className="text-slate-500 group-hover:text-blue-400" /></div>
                     </div>
                 ))}
             </div>
 
-            {showTeacherForm && (
-                <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-                    <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
-                        <button onClick={() => setShowTeacherForm(false)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full text-slate-400"><X size={20} /></button>
-                        <h3 className="font-black text-2xl text-slate-800 mb-2">Add Staff</h3>
+            {/* MODALS RE-STYLED FOR AI THEME */}
+            {/* [Form logic kept as is] */}
+            {(showTeacherForm || showStudentForm) && (
+                <div className="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
+                    <div className="bg-slate-900 border border-white/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
+                        <button onClick={() => {setShowTeacherForm(false); setShowStudentForm(false)}} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-white/50"><X size={20} /></button>
+                        <h3 className="font-black text-2xl text-white mb-2">{showTeacherForm ? 'Add Staff' : 'Enroll Student'}</h3>
                         <div className="space-y-4 mt-6">
-                            <input type="text" placeholder="Full Name" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={teacherData.name} onChange={(e) => setTeacherData({...teacherData, name: e.target.value})} />
-                            <input type="email" placeholder="Email" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={teacherData.email} onChange={(e) => setTeacherData({...teacherData, email: e.target.value})} />
-                            <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={teacherData.password} onChange={(e) => setTeacherData({...teacherData, password: e.target.value})} />
-                            <input type="text" placeholder="Employee ID" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={teacherData.employeeId} onChange={(e) => setTeacherData({...teacherData, employeeId: e.target.value})} />
-                            <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={teacherData.subjects} onChange={(e) => setTeacherData({...teacherData, subjects: e.target.value})} />
-                            <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-purple-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-300">
-                                {loading ? "Registering..." : "Register Teacher"}
-                            </button>
+                            {showTeacherForm ? (
+                                <>
+                                    <input type="text" placeholder="Full Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.name} onChange={(e) => setTeacherData({...teacherData, name: e.target.value})} />
+                                    <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.email} onChange={(e) => setTeacherData({...teacherData, email: e.target.value})} />
+                                    <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.password} onChange={(e) => setTeacherData({...teacherData, password: e.target.value})} />
+                                    <input type="text" placeholder="Employee ID" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.employeeId} onChange={(e) => setTeacherData({...teacherData, employeeId: e.target.value})} />
+                                    <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.subjects} onChange={(e) => setTeacherData({...teacherData, subjects: e.target.value})} />
+                                    <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-purple-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
+                                        {loading ? "Initializing..." : "Register System User"}
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <input type="text" placeholder="Student Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.name} onChange={(e) => setStudentData({...studentData, name: e.target.value})} />
+                                    <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.email} onChange={(e) => setStudentData({...studentData, email: e.target.value})} />
+                                    <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.password} onChange={(e) => setStudentData({...studentData, password: e.target.value})} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input type="text" placeholder="Enrollment No" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.enrollmentNo} onChange={(e) => setStudentData({...studentData, enrollmentNo: e.target.value})} />
+                                        <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.grade} onChange={(e) => setStudentData({...studentData, grade: e.target.value})} />
+                                    </div>
+                                    <button onClick={handleAddStudent} disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
+                                        {loading ? "Processing..." : "Enroll To Network"}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
 
-            {showStudentForm && (
-                <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-                    <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
-                        <button onClick={() => setShowStudentForm(false)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full text-slate-400"><X size={20} /></button>
-                        <h3 className="font-black text-2xl text-slate-800 mb-2">Enroll Student</h3>
-                        <div className="space-y-4 mt-6">
-                            <input type="text" placeholder="Student Name" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={studentData.name} onChange={(e) => setStudentData({...studentData, name: e.target.value})} />
-                            <input type="email" placeholder="Email" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={studentData.email} onChange={(e) => setStudentData({...studentData, email: e.target.value})} />
-                            <input type="password" placeholder="Password" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={studentData.password} onChange={(e) => setStudentData({...studentData, password: e.target.value})} />
-                            <div className="grid grid-cols-2 gap-4">
-                                <input type="text" placeholder="Enrollment No" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={studentData.enrollmentNo} onChange={(e) => setStudentData({...studentData, enrollmentNo: e.target.value})} />
-                                <input type="text" placeholder="Grade (e.g. 10-A)" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 outline-none text-sm" value={studentData.grade} onChange={(e) => setStudentData({...studentData, grade: e.target.value})} />
-                            </div>
-                            <button onClick={handleAddStudent} disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-300">
-                                {loading ? "Enrolling..." : "Register Student"}
-                            </button>
+            {/* System Status - Robot Look */}
+            <div className="bg-slate-900 border border-blue-500/20 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
+                <div className="relative z-10 flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Bot size={18} className="text-blue-400" />
+                            <h3 className="font-bold text-sm">System: Operational</h3>
                         </div>
+                        <p className="text-[10px] opacity-60 font-medium tracking-widest">ENCRYPTED ADMIN SESSION ACTIVE</p>
                     </div>
+                    <Activity className="text-blue-500/50 animate-pulse" size={40} />
                 </div>
-            )}
-
-            <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
-                <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-2">
-                        <LayoutDashboard size={18} className="text-green-400" />
-                        <h3 className="font-bold text-sm">Server Status: Online</h3>
-                    </div>
-                    <p className="text-[10px] opacity-60 font-medium">Cloud sync active. All administrative modules operational.</p>
-                </div>
-                <div className="absolute -right-10 -bottom-10 bg-white/5 w-32 h-32 rounded-full"></div>
             </div>
 
             {msg && <Toast message={msg} onClose={() => setMsg('')} />}
