@@ -18,15 +18,12 @@ const TeacherHome = ({ user }) => {
 
   return (
     <div className="min-h-screen">
-      <div className="nav-gradient text-white px-6 pt-4 pb-20 rounded-b-[3.5rem] shadow-lg mb-0 relative">
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-50 mb-1">Teacher Node Active</p>
-        <h2 className="text-2xl font-black italic">DASHBOARD</h2>
-        <Bot className="absolute right-10 bottom-6 opacity-20" size={60} />
-      </div>
 
-      <div className="px-5 -mt-12 space-y-6 relative z-10 pb-24">
+      {/* ❌ BLUE HEADER REMOVED */}
+
+      <div className="px-5 mt-0 space-y-6 relative z-10 pb-24">
         
-        {/* Quick Stats Card - Holographic Look */}
+        {/* Quick Stats Card - Shifted Up */}
         <div className="bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl border border-white/10 flex justify-between items-center">
           {quickStats.map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-1 flex-1 border-r last:border-0 border-white/5">

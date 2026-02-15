@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, ShieldCheck, LogOut, HelpCircle, Settings, ChevronRight } from 'lucide-react';
+import { X, User, ShieldCheck, LogOut, HelpCircle, Settings, ChevronRight, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SidebarDrawer = ({ isOpen, onClose, user }) => {
@@ -7,74 +7,104 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
 
     if (!isOpen) return null;
 
-    // Logout Function
+    // Logout Function (UNCHANGED)
     const handleLogout = () => {
         localStorage.removeItem('user');
         window.location.reload();
     };
 
-    // Navigation Helper
+    // Navigation Helper (UNCHANGED)
     const handleNavigation = (path) => {
         navigate(path);
         onClose(); 
     };
 
-    // UPDATED: Path ko alag-alag assign kiya hai
     const menuItems = [
-        { icon: <User size={20}/>, label: 'My Account', color: 'text-blue-500', path: '/my-account' },
-        { icon: <ShieldCheck size={20}/>, label: 'Security', color: 'text-green-500', path: '/settings' },
-        { icon: <HelpCircle size={20}/>, label: 'Support & Help', color: 'text-orange-500', path: '/support' },
-        { icon: <Settings size={20}/>, label: 'Settings', color: 'text-slate-500', path: '/settings' },
+        { icon: <User size={20}/>, label: 'My Account', color: 'text-cyan-400', path: '/my-account' },
+        { icon: <ShieldCheck size={20}/>, label: 'Security', color: 'text-green-400', path: '/settings' },
+        { icon: <HelpCircle size={20}/>, label: 'Support & Help', color: 'text-orange-400', path: '/support' },
+        { icon: <Settings size={20}/>, label: 'Settings', color: 'text-slate-400', path: '/settings' },
     ];
 
     return (
         <div className="fixed inset-0 z-[100] flex">
+            
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose}></div>
+            <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={onClose}
+            ></div>
             
             {/* Drawer Content */}
-            <div className="relative w-80 bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
-                
+            <div className="relative w-80 bg-gradient-to-br from-slate-800 via-slate-900 to-black h-full shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col animate-in slide-in-from-left duration-300 border-r border-cyan-500/20">
+
+                {/* Animated Top Scan Line */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"></div>
+
                 {/* Profile Header Section */}
-                <div className="nav-gradient p-8 pb-12 rounded-br-[3rem] text-white">
-                    <div className="flex justify-between items-start mb-6">
-                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border-2 border-white/40">
-                            <User size={32} />
+                <div className="p-8 pb-12 rounded-br-[3rem] text-white relative overflow-hidden border-b border-cyan-500/10">
+
+                    <div className="flex justify-between items-start mb-6 relative z-10">
+                        <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/40 backdrop-blur-md shadow-inner">
+                            <User size={32} className="text-cyan-300" />
                         </div>
-                        <button onClick={onClose} className="bg-white/10 p-2 rounded-xl active:scale-90 transition-all">
+
+                        <button 
+                            onClick={onClose} 
+                            className="bg-white/10 p-2 rounded-xl border border-white/10 hover:bg-cyan-500/20 transition-all active:scale-90"
+                        >
                             <X size={20} />
                         </button>
                     </div>
-                    <h2 className="text-xl font-black truncate">{user?.name}</h2>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">
+
+                    <h2 className="text-xl font-black truncate text-cyan-200 tracking-wide">
+                        {user?.name}
+                    </h2>
+
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-60 mt-2 text-cyan-400">
                         {user?.role === 'student' ? 'Roll No: 2501350071' : 'Employee ID: 9310'}
                     </p>
+
+                    <div className="mt-4 flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] text-cyan-300 opacity-70">
+                        <Cpu size={12} className="animate-pulse" />
+                        AI ENABLED
+                    </div>
                 </div>
 
                 {/* Menu Options */}
                 <div className="flex-1 p-6 space-y-2 overflow-y-auto">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-2">Main Menu</p>
+                    <p className="text-[10px] font-black text-cyan-500/60 uppercase tracking-[0.4em] mb-4 ml-2">
+                        Main Menu
+                    </p>
                     
                     {menuItems.map((item, i) => (
                         <button 
                             key={i} 
                             onClick={() => handleNavigation(item.path)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-all group active:scale-95"
+                            className="w-full flex items-center justify-between p-4 bg-slate-900/60 hover:bg-cyan-500/10 border border-transparent hover:border-cyan-400/30 rounded-2xl transition-all group active:scale-95 backdrop-blur-md"
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`${item.color}`}>{item.icon}</div>
-                                <span className="font-bold text-slate-700 text-sm">{item.label}</span>
+                                <div className={`${item.color}`}>
+                                    {item.icon}
+                                </div>
+                                <span className="font-bold text-slate-200 text-sm tracking-wide">
+                                    {item.label}
+                                </span>
                             </div>
-                            <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-500 transition-colors" />
+
+                            <ChevronRight 
+                                size={16} 
+                                className="text-slate-500 group-hover:text-cyan-400 transition-colors"
+                            />
                         </button>
                     ))}
                 </div>
 
                 {/* Footer Sign Out */}
-                <div className="p-6 border-t border-slate-50">
+                <div className="p-6 border-t border-cyan-500/10">
                     <button 
                         onClick={handleLogout}
-                        className="w-full bg-red-50 text-red-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        className="w-full bg-red-500/10 text-red-400 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 border border-red-400/20 hover:bg-red-500/20 transition-all active:scale-95 backdrop-blur-md"
                     >
                         <LogOut size={20} />
                         <span>Sign Out</span>

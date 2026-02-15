@@ -43,5 +43,37 @@ router.get('/my-fees', protect, async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
+// @desc    Record a payment (Admin Only)
+// @route   POST /api/fees/pay
+router.post('/pay', protect, adminOnly, async (req, res) => {
+    const { feeId, amount, method } = req.body;
+
+    try {
+        const fee = await Fee.findById(feeId);
+        if (!fee) return res.status(404).json({ message: 'Fee record not found' });
+
+        // Update Paid Amount
+        fee.paidAmount += Number(amount);
+        
+        // Update Status Logic
+        if (fee.paidAmount >= fee.totalAmount) {
+            fee.status = 'Paid';
+        } else if (fee.paidAmount > 0) {
+            fee.status = 'Partially Paid';
+        }
+
+        // Add to Payment History
+        fee.paymentHistory.push({
+            amount: Number(amount),
+            method: method || 'Cash',
+            date: Date.now()
+        });
+
+        await fee.save();
+        res.json({ message: 'Payment recorded successfully', fee });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error recording payment' });
+    }
+});
 
 module.exports = router;
