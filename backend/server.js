@@ -1,7 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path'); // File path handle karne ke liye
 const connectDB = require('./config/db.js');
+const upload = require('./middleware/uploadMiddleware'); // Step 2 wala middleware
 
 // Routes Import
 const authRoutes = require('./routes/authRoutes');
@@ -24,6 +26,20 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+
+// --- DAY 44: STATIC FOLDER & UPLOAD API ---
+// Isse browser hamare uploads folder ki files dekh payega
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+
+// File Upload Route
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+    // File ka path frontend ko wapas bhej rahe hain
+    res.send(`/${req.file.path.replace(/\\/g, "/")}`); 
+});
+// ------------------------------------------
 
 // API Routes
 app.use('/api/auth', authRoutes);
