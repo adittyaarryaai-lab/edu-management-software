@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes'); 
 const timetableRoutes = require('./routes/timetableRoutes');
+const feeRoutes = require('./routes/feeRoutes');
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/attendance', attendanceRoutes); 
 app.use('/api/timetable', timetableRoutes);
+app.use('/api/fees', feeRoutes);
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');

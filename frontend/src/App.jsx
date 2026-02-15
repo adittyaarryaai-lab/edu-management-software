@@ -31,6 +31,7 @@ import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
+import AdminFees from './pages/AdminFees'; // Day 39: New Import
 
 function App() {
   const [user, setUser] = useState(null);
@@ -153,6 +154,9 @@ function App() {
 
           <Route path="/admin/timetable" element={<AdminTimetable />} />
 
+          {/* Day 39: Admin Fees Route */}
+          <Route path="/admin/fees" element={<AdminFees />} />
+
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
@@ -168,6 +172,7 @@ function App() {
           <Route path="/live-class" element={<LiveClass />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
+          <Route path="/notices" element={<Notifications />} />
           <Route path="/mentors" element={<Mentorship />} />
           <Route path="/syllabus" element={<Syllabus />} />
           

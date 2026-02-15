@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Users, CreditCard, Megaphone, Settings, PlusCircle, LayoutDashboard, Database, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import API from '../api';
 import Toast from '../components/Toast';
 
 const AdminHome = () => {
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate(); 
     
     // Modal States
     const [showTeacherForm, setShowTeacherForm] = useState(false);
@@ -34,11 +34,9 @@ const AdminHome = () => {
         { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24}/>, desc: 'Assign roles & classes', color: 'bg-purple-50 text-purple-500' },
         { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24}/>, desc: 'Track pending payments', color: 'bg-green-50 text-green-500' },
         { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24}/>, desc: 'Send alerts to all', color: 'bg-orange-50 text-orange-500' },
-        // Day 38: Timetable Module
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24}/>, desc: 'Schedule all classes', color: 'bg-indigo-50 text-indigo-500' },
     ];
 
-    // Handle Add Teacher
     const handleAddTeacher = async (e) => {
         e.preventDefault();
         if(!teacherData.email || !teacherData.password) return alert("Please fill mandatory fields");
@@ -59,7 +57,6 @@ const AdminHome = () => {
         }
     };
 
-    // Handle Add Student
     const handleAddStudent = async (e) => {
         e.preventDefault();
         if(!studentData.email || !studentData.grade) return alert("Please fill mandatory fields");
@@ -78,7 +75,6 @@ const AdminHome = () => {
 
     return (
         <div className="px-5 -mt-10 space-y-6 pb-24">
-            {/* Stats Banner */}
             <div className="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
                     <div key={i} className="text-center border-r last:border-0 border-slate-100 px-1">
@@ -88,7 +84,6 @@ const AdminHome = () => {
                 ))}
             </div>
 
-            {/* Modules Grid */}
             <div className="grid grid-cols-1 gap-4">
                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest ml-2">Administrative Controls</h3>
                 {managementModules.map((m, i) => (
@@ -97,8 +92,9 @@ const AdminHome = () => {
                         onClick={() => {
                             if (m.id === 'add-staff') setShowTeacherForm(true);
                             if (m.id === 'add-student') setShowStudentForm(true);
-                            // Day 38: Navigation to Timetable Editor
                             if (m.id === 'timetable') navigate('/admin/timetable');
+                            // FIXED: Added navigation for Fees module
+                            if (m.id === 'fees') navigate('/admin/fees');
                         }}
                         className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-50 flex items-center justify-between active:scale-95 transition-all cursor-pointer"
                     >
@@ -114,7 +110,6 @@ const AdminHome = () => {
                 ))}
             </div>
 
-            {/* TEACHER MODAL */}
             {showTeacherForm && (
                 <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
                     <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
@@ -134,7 +129,6 @@ const AdminHome = () => {
                 </div>
             )}
 
-            {/* STUDENT MODAL */}
             {showStudentForm && (
                 <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
                     <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
@@ -156,7 +150,6 @@ const AdminHome = () => {
                 </div>
             )}
 
-            {/* System Status */}
             <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2">
