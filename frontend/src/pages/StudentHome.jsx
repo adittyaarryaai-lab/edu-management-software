@@ -16,7 +16,8 @@ const StudentHome = () => {
 
   const subModules = [
     { title: 'ERP Notices', icon: <Bell size={20} />, path: '/notices' },
-    { title: 'Assignment', icon: <FileText size={20} />, path: '/academic' },
+    // FIXED: Path changed from '/academic' to '/assignments'
+    { title: 'Assignment', icon: <FileText size={20} />, path: '/assignments' },
     { title: 'Performance', icon: <TrendingUp size={20} />, path: '/performance' },
     { title: 'Mentorship', icon: <Users size={20} />, path: '/mentors' },
     { title: 'Library', icon: <Book size={20} />, path: '/library' },

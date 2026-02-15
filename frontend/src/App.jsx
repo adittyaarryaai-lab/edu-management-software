@@ -34,6 +34,7 @@ import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
 import AdminFees from './pages/AdminFees'; 
+import StudentAssignments from './pages/StudentAssignments';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -202,6 +203,7 @@ function App() {
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/fees" element={<AdminFees />} />
+          <Route path="/assignments" element={<StudentAssignments user={user} />} />
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />

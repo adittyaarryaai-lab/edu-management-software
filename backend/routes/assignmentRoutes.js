@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Assignment = require('../models/Assignment');
+const Submission = require('../models/Submission');
 const { protect, teacherOnly } = require('../middleware/authMiddleware');
 
 // @desc    Create new assignment
@@ -33,6 +34,20 @@ router.get('/:grade', protect, async (req, res) => {
         res.json(assignments);
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching assignments' });
+    }
+});
+router.post('/submit', protect, async (req, res) => {
+    const { assignmentId, content, fileUrl } = req.body;
+    try {
+        const submission = await Submission.create({
+            assignment: assignmentId,
+            student: req.user._id,
+            content,
+            fileUrl
+        });
+        res.status(201).json({ message: 'Assignment submitted!', submission });
+    } catch (error) {
+        res.status(500).json({ message: 'Error submitting assignment' });
     }
 });
 
