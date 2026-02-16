@@ -208,7 +208,7 @@ function App() {
           <Route path="/attendance" element={<AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
-          <Route path="/analytics" element={<Performance />} />
+          <Route path="/performance" element={<Performance />} />
           <Route path="/holidays" element={<Holidays />} />
           <Route path="/academic" element={<Academic />} />
           <Route path="/support" element={<Support />} />
