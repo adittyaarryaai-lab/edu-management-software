@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, FileText, Calendar, Clock, Send } from 'lucide-react';
+import { ArrowLeft, Plus, FileText, Calendar, Clock, Send, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import API from '../api'; // Backend connection ke liye
+import API from '../api'; 
 import Loader from '../components/Loader';
 
 const TeacherAssignments = ({ user }) => {
@@ -11,7 +11,6 @@ const TeacherAssignments = ({ user }) => {
     const [assignments, setAssignments] = useState([]);
     const [fetching, setFetching] = useState(true);
 
-    // Form states for real data
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -20,12 +19,9 @@ const TeacherAssignments = ({ user }) => {
         dueDate: ''
     });
 
-    // 1. Fetch Assignments from Backend
     useEffect(() => {
         const fetchAssignments = async () => {
             try {
-                // Hamne backend mein /api/assignments/:grade route banaya hai
-                // Yahan teacher jis grade ko handle karta hai, uska data aayega
                 const { data } = await API.get(`/assignments/${user?.grade || '10-A'}`);
                 setAssignments(data);
             } catch (err) {
@@ -37,7 +33,6 @@ const TeacherAssignments = ({ user }) => {
         fetchAssignments();
     }, [user]);
 
-    // 2. Handle Post Assignment logic
     const handlePost = async (e) => {
         e.preventDefault();
         if(!formData.title || !formData.grade || !formData.dueDate) return alert("Please fill mandatory fields!");
@@ -47,7 +42,6 @@ const TeacherAssignments = ({ user }) => {
             await API.post('/assignments/create', formData);
             alert("Assignment Posted Successfully!");
             setShowForm(false);
-            // Refresh list
             window.location.reload();
         } catch (err) {
             alert("Error posting assignment");
@@ -60,7 +54,6 @@ const TeacherAssignments = ({ user }) => {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] pb-24">
-            {/* Header */}
             <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg relative z-10">
                 <div className="flex justify-between items-center mb-6">
                     <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl">
@@ -78,7 +71,6 @@ const TeacherAssignments = ({ user }) => {
             </div>
 
             <div className="px-5 -mt-10 relative z-20 space-y-6">
-                {/* Post New Assignment Form (Now Connected to Backend) */}
                 {showForm && (
                     <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
                         <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-tighter">
@@ -134,7 +126,6 @@ const TeacherAssignments = ({ user }) => {
                     </div>
                 )}
 
-                {/* Assignments List (Dynamic Data) */}
                 <div className="space-y-4">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Class Feed</p>
                     {assignments.length > 0 ? (
@@ -151,9 +142,14 @@ const TeacherAssignments = ({ user }) => {
                                         </p>
                                     </div>
                                 </div>
-                                <div className="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
-                                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Active</span>
-                                </div>
+                                {/* FIXED: Added 'View Submissions' button here */}
+                                <button 
+                                    onClick={() => navigate(`/teacher/grade/${asgn._id}`)}
+                                    className="bg-blue-600 text-white p-2.5 rounded-xl shadow-md active:scale-90 transition-all flex items-center gap-2"
+                                >
+                                    <Users size={14} />
+                                    <span className="text-[9px] font-black uppercase tracking-widest">Submissions</span>
+                                </button>
                             </div>
                         ))
                     ) : (

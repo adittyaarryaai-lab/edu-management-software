@@ -18,12 +18,7 @@ const TeacherHome = ({ user }) => {
 
   return (
     <div className="min-h-screen">
-
-      {/* ❌ BLUE HEADER REMOVED */}
-
       <div className="px-5 mt-0 space-y-6 relative z-10 pb-24">
-        
-        {/* Quick Stats Card - Shifted Up */}
         <div className="bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl border border-white/10 flex justify-between items-center">
           {quickStats.map((stat, i) => (
             <div key={i} className="flex flex-col items-center gap-1 flex-1 border-r last:border-0 border-white/5">
@@ -34,7 +29,6 @@ const TeacherHome = ({ user }) => {
           ))}
         </div>
 
-        {/* Main Icon Grid */}
         <div className="grid grid-cols-2 gap-4">
           {teacherModules.map((m, i) => (
             <Link to={m.path} key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-3 shadow-xl border border-white/10 active:scale-95 transition-all">
@@ -46,7 +40,6 @@ const TeacherHome = ({ user }) => {
           ))}
         </div>
 
-        {/* Meeting Card - Dark Mode Gradient */}
         <div className="bg-gradient-to-br from-indigo-950 to-slate-900 border border-white/10 rounded-[3rem] p-7 text-white shadow-2xl relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-1">
