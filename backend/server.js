@@ -12,6 +12,7 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const timetableRoutes = require('./routes/timetableRoutes');
 const feeRoutes = require('./routes/feeRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
+const noticeRoutes = require('./routes/noticeRoutes');
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/assignments', assignmentRoutes);
+app.use('/api/notices', noticeRoutes);
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
