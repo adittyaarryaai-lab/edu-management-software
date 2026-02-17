@@ -13,7 +13,8 @@ const timetableRoutes = require('./routes/timetableRoutes');
 const feeRoutes = require('./routes/feeRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const noticeRoutes = require('./routes/noticeRoutes');
-const supportRoutes = require('./routes/supportRoutes'); // DAY 50: New Import
+const supportRoutes = require('./routes/supportRoutes'); 
+const syllabusRoutes = require('./routes/syllabusRoutes'); 
 
 dotenv.config();
 
@@ -51,7 +52,8 @@ app.use('/api/timetable', timetableRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/notices', noticeRoutes);
-app.use('/api/support', supportRoutes); // DAY 50: Route Registered ✅
+app.use('/api/support', supportRoutes); 
+app.use('/api/syllabus', syllabusRoutes); 
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');

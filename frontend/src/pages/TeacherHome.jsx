@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckSquare, BookOpen, Users, FilePlus, CalendarDays, ClipboardList, Bot, Activity, Megaphone, MessageCircle } from 'lucide-react';
+// FIXED: Added Layers to the import list below
+import { CheckSquare, BookOpen, Users, FilePlus, CalendarDays, ClipboardList, Bot, Activity, Megaphone, MessageCircle, Layers } from 'lucide-react';
 import API from '../api'; // Backend connection ke liye
 
 const TeacherHome = ({ user }) => {
@@ -31,6 +32,7 @@ const TeacherHome = ({ user }) => {
     { title: 'Notice Feed', icon: <Megaphone size={32} />, path: '/notice-feed', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     // Day 51 Step 3: Support module for Teachers to reply to queries
     { title: 'Support', icon: <MessageCircle size={32} />, path: '/teacher/support', color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+    { title: 'Syllabus', icon: <Layers size={32} />, path: '/teacher/upload-syllabus', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
   ];
 
   const quickStats = [
