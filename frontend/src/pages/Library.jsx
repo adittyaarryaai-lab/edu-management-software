@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Book, Clock, AlertCircle, Bookmark, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api'; // Day 56: Connectivity added
+import Loader from '../components/Loader'; // Day 56: Loader added
 
 const Library = () => {
     const navigate = useNavigate();
+    const [books, setBooks] = useState([]); // Day 56: Data from backend
+    const [search, setSearch] = useState(''); // Day 56: Search state
+    const [loading, setLoading] = useState(true);
 
-    const issuedBooks = [
-        { title: "Introduction to Algorithms", author: "Cormen", dueDate: "20 Feb 2026", status: "Due Soon", color: "text-orange-500" },
-        { title: "React Design Patterns", author: "Addy Osmani", dueDate: "05 Mar 2026", status: "Issued", color: "text-green-500" },
-    ];
+    // Day 56: Fetch books from backend with debounced search
+    useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const { data } = await API.get(`/library?search=${search}`);
+                setBooks(data);
+            } catch (err) {
+                console.error("Library fetch error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const delayDebounceFn = setTimeout(() => {
+            fetchBooks();
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [search]);
+
+    if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24">
+        <div className="min-h-screen bg-[#f8fafc] pb-24 font-sans italic">
             {/* Header */}
             <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg relative z-10">
                 <div className="flex justify-between items-center mb-6">
@@ -28,6 +50,7 @@ const Library = () => {
                         type="text" 
                         placeholder="Search books in catalog..." 
                         className="w-full bg-white/20 text-white placeholder:text-blue-100 py-3.5 pl-12 pr-4 rounded-2xl border border-white/10 outline-none backdrop-blur-md"
+                        onChange={(e) => setSearch(e.target.value)} // Day 56: Search handler
                     />
                 </div>
             </div>
@@ -42,33 +65,38 @@ const Library = () => {
                     </div>
                 </div>
 
-                {/* Issued Books */}
+                {/* Issued & Catalog Books */}
                 <div className="space-y-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Currently Issued</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Book Catalog</p>
                     
-                    {issuedBooks.map((book, i) => (
-                        <div key={i} className="glass-card p-5 border-l-4 border-l-blue-500">
+                    {books.length > 0 ? books.map((book, i) => (
+                        <div key={i} className="bg-white rounded-[2.5rem] p-5 shadow-xl border border-white border-l-4 border-l-blue-500 transition-all active:scale-95">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-4">
                                     <div className="bg-blue-50 text-blue-500 p-3 rounded-xl">
                                         <Bookmark size={20} />
                                     </div>
                                     <div>
-                                        <h4 className="font-extrabold text-slate-800 text-sm leading-tight">{book.title}</h4>
-                                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Author: {book.author}</p>
+                                        <h4 className="font-extrabold text-slate-800 text-sm leading-tight uppercase tracking-tighter">{book.title}</h4>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Author: {book.author}</p>
                                     </div>
                                 </div>
                             </div>
                             
                             <div className="flex justify-between items-center border-t border-slate-50 pt-4 mt-2">
                                 <div className="flex items-center gap-2">
-                                    <Clock size={14} className="text-slate-400" />
-                                    <span className="text-[11px] font-bold text-slate-600">Due: {book.dueDate}</span>
+                                    <span className="text-[11px] font-bold text-slate-500 uppercase">Loc: {book.shelfLocation || 'Section A'}</span>
                                 </div>
-                                <span className={`text-[9px] font-black uppercase ${book.color}`}>{book.status}</span>
+                                <span className={`text-[9px] font-black uppercase ${book.status === 'Available' ? 'text-green-500' : 'text-orange-500'}`}>
+                                    {book.status}
+                                </span>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
+                             <p className="text-slate-300 font-black text-[10px] uppercase tracking-[0.2em]">No Books Found In Neural Database</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
