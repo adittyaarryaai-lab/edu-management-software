@@ -40,6 +40,7 @@ import TeacherNotices from './pages/TeacherNotices';
 import TeacherSupport from './pages/TeacherSupport'; 
 import ChangePassword from './pages/ChangePassword'; 
 import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus'; 
+import DigitalMaterial from './pages/DigitalMaterial';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -224,11 +225,12 @@ function App() {
           <Route path="/transport" element={<Transport />} />
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/library/digital" element={<DigitalMaterial />} /> 
           <Route path="/live-class" element={<LiveClass />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
           <Route path="/mentors" element={<Mentorship />} />
-          <Route path="/syllabus" element={<Syllabus user={user} />} /> {/* FIX: Prop pass ho raha hai */}
+          <Route path="/syllabus" element={<Syllabus user={user} />} /> 
           <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
@@ -238,7 +240,7 @@ function App() {
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
-          <Route path="/change-password" element={<ChangePassword />} /> {/* Day 54: Route Added */}
+          <Route path="/change-password" element={<ChangePassword />} /> 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>

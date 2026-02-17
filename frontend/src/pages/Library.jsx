@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Book, Clock, AlertCircle, Bookmark, Search } from 'lucide-react';
+import { ArrowLeft, Book, Clock, AlertCircle, Bookmark, Search, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api'; // Day 56: Connectivity added
 import Loader from '../components/Loader'; // Day 56: Loader added
@@ -36,13 +36,22 @@ const Library = () => {
         <div className="min-h-screen bg-[#f8fafc] pb-24 font-sans italic">
             {/* Header */}
             <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg relative z-10">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-4">
                     <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl active:scale-90 transition-all">
                         <ArrowLeft size={20} />
                     </button>
                     <h1 className="text-xl font-bold uppercase tracking-tight">E-Library</h1>
                     <div className="bg-white/20 p-2 rounded-xl"><Book size={20}/></div>
                 </div>
+
+                {/* Day 57: Digital Vault Switcher Added */}
+                <button 
+                    onClick={() => navigate('/library/digital')}
+                    className="flex items-center gap-2 bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl mb-6 active:scale-95 transition-all group"
+                >
+                    <Zap size={14} className="text-yellow-400 group-hover:animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Switch to Digital Vault</span>
+                </button>
                 
                 <div className="relative mt-4">
                     <Search className="absolute left-4 top-3.5 text-blue-300" size={18} />

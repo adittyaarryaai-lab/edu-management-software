@@ -33,5 +33,14 @@ router.post('/add', protect, async (req, res) => {
         res.status(500).json({ message: 'Error adding book' });
     }
 });
+// @desc    Get all digital books (E-Books)
+router.get('/ebooks', protect, async (req, res) => {
+    try {
+        const ebooks = await Book.find({ isDigital: true }).sort({ createdAt: -1 });
+        res.json(ebooks);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching digital material' });
+    }
+});
 
 module.exports = router;
