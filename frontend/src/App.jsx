@@ -226,7 +226,8 @@ function App() {
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
           <Route path="/library/digital" element={<DigitalMaterial />} /> 
-          <Route path="/live-class" element={<LiveClass />} />
+          {/* <Route path="/live-class" element={<LiveClass />} /> */}
+          <Route path="/live-class" element={<LiveClass user={user} />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
           <Route path="/mentors" element={<Mentorship />} />

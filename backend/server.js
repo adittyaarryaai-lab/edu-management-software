@@ -8,14 +8,15 @@ const upload = require('./middleware/uploadMiddleware'); // Step 2 wala middlewa
 // Routes Import
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
-const attendanceRoutes = require('./routes/attendanceRoutes'); 
+const attendanceRoutes = require('./routes/attendanceRoutes');
 const timetableRoutes = require('./routes/timetableRoutes');
 const feeRoutes = require('./routes/feeRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const noticeRoutes = require('./routes/noticeRoutes');
-const supportRoutes = require('./routes/supportRoutes'); 
+const supportRoutes = require('./routes/supportRoutes');
 const syllabusRoutes = require('./routes/syllabusRoutes')
-const libraryRoutes = require('./routes/libraryRoutes'); 
+const libraryRoutes = require('./routes/libraryRoutes');
+const liveClassRoutes = require('./routes/liveClassRoutes');
 
 dotenv.config();
 
@@ -41,21 +42,22 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         return res.status(400).json({ message: "No file uploaded" });
     }
     // File ka path frontend ko wapas bhej rahe hain
-    res.send(`/${req.file.path.replace(/\\/g, "/")}`); 
+    res.send(`/${req.file.path.replace(/\\/g, "/")}`);
 });
 // ------------------------------------------
 
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/attendance', attendanceRoutes); 
+app.use('/api/attendance', attendanceRoutes);
 app.use('/api/timetable', timetableRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/notices', noticeRoutes);
-app.use('/api/support', supportRoutes); 
+app.use('/api/support', supportRoutes);
 app.use('/api/syllabus', syllabusRoutes);
-app.use('/api/library', libraryRoutes); 
+app.use('/api/library', libraryRoutes);
+app.use('/api/live-classes', liveClassRoutes);
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
