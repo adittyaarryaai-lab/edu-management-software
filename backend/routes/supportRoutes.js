@@ -28,5 +28,35 @@ router.get('/my-queries', protect, async (req, res) => {
         res.status(500).json({ message: 'Error fetching queries' });
     }
 });
+// @desc    Get all queries for teachers (Teacher Only)
+router.get('/all-queries', protect, teacherOnly, async (req, res) => {
+    try {
+        const queries = await Support.find()
+            .populate('student', 'name grade')
+            .sort({ isUrgent: -1, createdAt: -1 });
+        res.json(queries);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching queries' });
+    }
+});
+
+// @desc    Resolve/Answer a query (Teacher Only)
+router.put('/resolve/:id', protect, teacherOnly, async (req, res) => {
+    try {
+        const { answer } = req.body;
+        const query = await Support.findByIdAndUpdate(
+            req.params.id,
+            { 
+                answer, 
+                status: 'Resolved',
+                teacher: req.user._id 
+            },
+            { new: true }
+        );
+        res.json(query);
+    } catch (error) {
+        res.status(500).json({ message: 'Error resolving query' });
+    }
+});
 
 module.exports = router;
