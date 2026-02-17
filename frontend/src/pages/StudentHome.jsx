@@ -5,6 +5,8 @@ import {
   TrendingUp, FileSearch, ClipboardCheck,
   Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus, Bot
 } from 'lucide-react';
+// Step 1 ka component import kiya
+// import NoticeBoard from '../components/NoticeBoard'; 
 
 const StudentHome = () => {
   const mainModules = [
@@ -17,7 +19,7 @@ const StudentHome = () => {
   const subModules = [
     { title: 'ERP Notices', icon: <Bell size={20} />, path: '/notices' },
     { title: 'Assignment', icon: <FileText size={20} />, path: '/assignments' },
-    { title: 'Performance', icon: <TrendingUp size={20} />, path: '/performance' }, // Path match with App.jsx
+    { title: 'Performance', icon: <TrendingUp size={20} />, path: '/performance' }, 
     { title: 'Mentorship', icon: <Users size={20} />, path: '/mentors' },
     { title: 'Library', icon: <Book size={20} />, path: '/library' },
     { title: 'Live Class', icon: <Video size={20} />, path: '/live-class' },
@@ -27,6 +29,7 @@ const StudentHome = () => {
 
   return (
     <div className="px-5 -mt-10 space-y-8 relative z-10 pb-24">
+      {/* 1. Main Grid */}
       <div className="grid grid-cols-2 gap-4">
         {mainModules.map((m, i) => (
           <Link to={m.path} key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-3 shadow-xl active:scale-95 transition-all">
@@ -38,6 +41,10 @@ const StudentHome = () => {
         ))}
       </div>
 
+      {/* 2. Notice Board (Day 48 - New Addition) */}
+      {/* <NoticeBoard /> */}
+
+      {/* 3. Sub-Modules Section */}
       <div className="bg-slate-900/50 backdrop-blur-2xl rounded-[3rem] p-8 border border-white/10 shadow-2xl">
         <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
             <Bot size={16} className="text-blue-400" />
