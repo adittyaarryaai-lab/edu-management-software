@@ -64,8 +64,12 @@ function App() {
     setLoading(true);
     try {
       const { data } = await API.post('/auth/login', { email, password });
+      
+      // FIX: Yahan 'data' mein backend se avatar ka path aana chahiye
+      // Hum direct database se aaya hua data save kar rahe hain
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
+      
       setLoading(false);
       navigate("/"); 
     } catch (error) {
@@ -198,7 +202,6 @@ function App() {
   return (
     <div className="min-h-screen bg-[#f8fafc] relative">
       <Navbar user={user} />
-      {/* FIX: pt-32 add kiya taaki content blue header ke piche na chhup jaye */}
       <main className="relative z-0 pb-32 pt-28"> 
         <Routes>
           <Route path="/" element={user.role === 'admin' ? <AdminHome /> : user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} />
@@ -228,7 +231,7 @@ function App() {
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
           <Route path="/teacher/grade/:assignmentId" element={<TeacherGrading />} />
-          <Route path="/teacher/notices" element={<TeacherNotices />} /> {/* Day 49: Route Added */}
+          <Route path="/teacher/notices" element={<TeacherNotices />} /> 
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />

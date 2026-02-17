@@ -29,6 +29,7 @@ const registerUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
+            avatar: user.avatar, // FIXED: Register par bhi avatar bhejna hai
             token: generateToken(user._id),
         });
     } else {
@@ -48,6 +49,7 @@ const authUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade, // LOGIN PAR BHI GRADE BHEJNA JARURI HAI
+            avatar: user.avatar, // FIXED: Login par avatar field add kar di hai
             token: generateToken(user._id),
         });
     } else {

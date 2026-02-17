@@ -45,8 +45,18 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                 <div className="p-8 pb-12 rounded-br-[3rem] text-white relative overflow-hidden border-b border-cyan-500/10">
 
                     <div className="flex justify-between items-start mb-6 relative z-10">
-                        <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/40 backdrop-blur-md shadow-inner">
-                            <User size={32} className="text-cyan-300" />
+                        {/* FIXED: User Icon replaced with Real Avatar Image */}
+                        <div className="w-16 h-16 bg-cyan-500/20 rounded-full overflow-hidden flex items-center justify-center border border-cyan-400/40 backdrop-blur-md shadow-inner">
+                            {user?.avatar ? (
+                                <img 
+                                    src={`http://localhost:5000${user.avatar}`} 
+                                    alt="profile" 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
+                                />
+                            ) : (
+                                <User size={32} className="text-cyan-300" />
+                            )}
                         </div>
 
                         <button 

@@ -13,6 +13,12 @@ const userSchema = new mongoose.Schema({
     // Common fields
     phone: String,
     address: String,
+
+    // Day 52: Avatar field added for Profile Pictures
+    avatar: { 
+        type: String, 
+        default: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' 
+    },
     
     // Student specific
     enrollmentNo: String,
