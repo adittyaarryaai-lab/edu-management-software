@@ -36,8 +36,9 @@ import AdminTimetable from './pages/AdminTimetable';
 import AdminFees from './pages/AdminFees'; 
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
-import TeacherNotices from './pages/TeacherNotices'; // Day 49: Import New Page
-import TeacherSupport from './pages/TeacherSupport'; // Day 51: Support Page for Teacher
+import TeacherNotices from './pages/TeacherNotices'; 
+import TeacherSupport from './pages/TeacherSupport'; 
+import ChangePassword from './pages/ChangePassword'; // Day 54: Import New Page
 
 function App() {
   const [user, setUser] = useState(null);
@@ -235,6 +236,7 @@ function App() {
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
+          <Route path="/change-password" element={<ChangePassword />} /> {/* Day 54: Route Added */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>

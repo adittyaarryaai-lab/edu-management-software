@@ -56,5 +56,23 @@ const authUser = async (req, res) => {
         res.status(401).json({ message: 'Invalid email or password' });
     }
 };
+// @desc    Update User Password
+// @route   PUT /api/auth/change-password
+const changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
 
-module.exports = { registerUser, authUser };
+    if (user && (await require('bcryptjs').compare(oldPassword, user.password))) {
+        // Naya password set karo (Bcrypt automatically model level pe hash karega)
+        user.password = newPassword;
+        await user.save();
+        res.json({ message: 'Password Encryption Updated! 🔐' });
+    } else {
+        res.status(401).json({ message: 'Current password match nahi ho raha!' });
+    }
+};
+
+// Isko exports mein add karna mat bhulna:
+module.exports = { registerUser, authUser, changePassword };
+
+// module.exports = { registerUser, authUser };

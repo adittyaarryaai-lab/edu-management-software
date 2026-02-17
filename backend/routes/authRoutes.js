@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, authUser } = require('../controllers/authController');
+const { registerUser, authUser, changePassword } = require('../controllers/authController');
 const router = express.Router();
 const User = require('../models/User'); // User model import karna zaroori hai stats ke liye
 const { protect } = require('../middleware/authMiddleware'); // Protect middleware for security
@@ -34,6 +34,7 @@ const upload = multer({
 
 router.post('/register', registerUser);
 router.post('/login', authUser);
+router.put('/change-password', protect, changePassword);
 
 // @desc    Update User Profile (Avatar & Phone)
 // @route   PUT /api/auth/update-profile
