@@ -66,27 +66,35 @@ router.get('/student-stats', protect, async (req, res) => {
 
         let totalDays = allRecords.length;
         let presentDays = 0;
+        let absentHistory = []; // DAY 61 UPDATE: Absent dates track karne ke liye
 
         allRecords.forEach(record => {
             const studentEntry = record.records.find(r => r.studentId.toString() === studentId.toString());
-            if (studentEntry && studentEntry.status === 'Present') {
-                presentDays++;
+            if (studentEntry) {
+                if (studentEntry.status === 'Present') {
+                    presentDays++;
+                } else {
+                    // Agar absent hai toh date history mein daal do
+                    absentHistory.push({ date: record.date, status: studentEntry.status });
+                }
             }
         });
 
-        const percentage = totalDays === 0 ? 0 : ((presentDays / totalDays) * 100).toFixed(2);
+        const percentage = totalDays === 0 ? 0 : ((presentDays / totalDays) * 100).toFixed(1);
 
         res.json({
             totalDays,
             presentDays,
             absentDays: totalDays - presentDays,
-            percentage
+            percentage,
+            absentHistory // Naya data jo frontend use karega
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching stats' });
     }
 });
-// Student checking their own attendance percentage
+
+// Student checking their own attendance percentage (Legacy support)
 router.get('/my-stats', protect, async (req, res) => {
     try {
         const attendance = await Attendance.find({ "records.studentId": req.user._id });

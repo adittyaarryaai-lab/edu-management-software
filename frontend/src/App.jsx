@@ -42,6 +42,7 @@ import ChangePassword from './pages/ChangePassword';
 import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus'; 
 import DigitalMaterial from './pages/DigitalMaterial';
 import TeacherLiveClass from './pages/TeacherLiveClass'; 
+import StudentAttendance from './pages/StudentAttendance';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -214,7 +215,8 @@ function App() {
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
-          <Route path="/attendance" element={<AttendanceDetails />} />
+          {/* <Route path="/attendance" element={<AttendanceDetails />} /> */}
+          <Route path="/attendance" element={user.role === 'student' ? <StudentAttendance /> : <AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
           <Route path="/notices" element={<Notifications />} />
           <Route path="/performance" element={<Performance />} />
