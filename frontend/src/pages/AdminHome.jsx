@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3 } from 'lucide-react'; // BarChart3 add kiya
 import { useNavigate } from 'react-router-dom'; 
 import API from '../api';
 import Toast from '../components/Toast';
@@ -24,6 +24,8 @@ const AdminHome = () => {
     const managementModules = [
         { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24}/>, desc: 'Enroll new students', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
         { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24}/>, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+        // DAY 62 UPDATE: Attendance Analytics Module Added
+        { id: 'attendance-report', title: 'Attendance Insights', icon: <BarChart3 size={24}/>, desc: 'Class-wise tracking', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
         { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24}/>, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
         { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24}/>, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24}/>, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
@@ -77,6 +79,7 @@ const AdminHome = () => {
                             if (m.id === 'add-student') setShowStudentForm(true);
                             if (m.id === 'timetable') navigate('/admin/timetable');
                             if (m.id === 'fees') navigate('/admin/fees');
+                            if (m.id === 'attendance-report') navigate('/admin/attendance-report'); // Navigation Added
                         }}
                         className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/10 flex items-center justify-between active:scale-95 transition-all cursor-pointer group"
                     >
@@ -93,7 +96,6 @@ const AdminHome = () => {
             </div>
 
             {/* MODALS RE-STYLED FOR AI THEME */}
-            {/* [Form logic kept as is] */}
             {(showTeacherForm || showStudentForm) && (
                 <div className="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
                     <div className="bg-slate-900 border border-white/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">

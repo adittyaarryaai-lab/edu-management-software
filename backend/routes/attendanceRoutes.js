@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Attendance = require('../models/Attendance');
 const User = require('../models/User'); // Zaroori hai students fetch karne ke liye
-const { protect, teacherOnly } = require('../middleware/authMiddleware');
+const { protect, teacherOnly, adminOnly } = require('../middleware/authMiddleware');
 
 // @desc    1. Get Students for Attendance (Teacher selects Grade)
 // @route   GET /api/attendance/students/:grade
@@ -107,5 +107,51 @@ router.get('/my-stats', protect, async (req, res) => {
         res.json({ total: attendance.length, present, percentage: percentage.toFixed(2) });
     } catch (error) { res.status(500).json({ message: 'Error' }); }
 });
+
+// ================= DAY 62 UPDATE: ADMIN MASTER VIEW START =================
+// @desc    Admin Master View: Get Class-wise Performance
+// @route   GET /api/attendance/admin-report/:grade
+router.get('/admin-report/:grade', protect, adminOnly, async (req, res) => {
+    try {
+        const { grade } = req.params;
+        // 1. Pehle us grade ke saare students uthao
+        const students = await User.find({ role: 'student', grade }).select('name enrollmentNo');
+        
+        // 2. Us grade ki poori attendance history uthao
+        const attendanceData = await Attendance.find({ grade });
+
+        // 3. Har student ke liye calculation karo
+        const report = students.map(student => {
+            let present = 0;
+            let total = 0;
+
+            attendanceData.forEach(day => {
+                const record = day.records.find(r => 
+                    (r.studentId && r.studentId.toString() === student._id.toString()) || 
+                    (r.student && r.student.toString() === student._id.toString())
+                );
+                
+                if (record) {
+                    total++;
+                    if (record.status === 'Present') present++;
+                }
+            });
+
+            const percentage = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+
+            return {
+                name: student.name,
+                roll: student.enrollmentNo,
+                percentage: percentage,
+                status: (percentage < 75 && total > 0) ? 'Low' : 'Good'
+            };
+        });
+
+        res.json(report);
+    } catch (error) {
+        res.status(500).json({ message: 'Admin report fetch failed' });
+    }
+});
+// ================= DAY 62 UPDATE: END =================
 
 module.exports = router;
