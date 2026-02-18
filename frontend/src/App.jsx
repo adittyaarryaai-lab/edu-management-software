@@ -44,6 +44,7 @@ import DigitalMaterial from './pages/DigitalMaterial';
 import TeacherLiveClass from './pages/TeacherLiveClass'; 
 import StudentAttendance from './pages/StudentAttendance';
 import AdminAttendance from './pages/AdminAttendance'; 
+import AdminGlobalNotice from './pages/AdminGlobalNotice';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -216,6 +217,7 @@ function App() {
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} /> 
+          <Route path="/admin/global-notice" element={<AdminGlobalNotice />} /> 
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
           <Route path="/attendance" element={user.role === 'student' ? <StudentAttendance /> : <AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />

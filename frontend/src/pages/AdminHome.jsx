@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3 } from 'lucide-react'; // BarChart3 add kiya
+import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3, Bell, ClipboardList } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom'; 
 import API from '../api';
 import Toast from '../components/Toast';
@@ -24,10 +24,10 @@ const AdminHome = () => {
     const managementModules = [
         { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24}/>, desc: 'Enroll new students', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
         { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24}/>, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-        // DAY 62 UPDATE: Attendance Analytics Module Added
         { id: 'attendance-report', title: 'Attendance Insights', icon: <BarChart3 size={24}/>, desc: 'Class-wise tracking', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
         { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24}/>, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
         { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24}/>, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+        { id: 'notice-feed', title: 'Notice Archive', icon: <ClipboardList size={24}/>, desc: 'Manage & Delete Notices', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24}/>, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     ];
 
@@ -58,7 +58,8 @@ const AdminHome = () => {
 
     return (
         <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10">
-            {/* Stats Banner - AI Look */}
+            {/* FIXED: Extra Bell Icon removed from here as Navbar already has one */}
+
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
                     <div key={i} className="text-center border-r last:border-0 border-white/5 px-1">
@@ -69,7 +70,6 @@ const AdminHome = () => {
                 ))}
             </div>
 
-            {/* Modules Grid */}
             <div className="grid grid-cols-1 gap-4">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Administrative Core</h3>
                 {managementModules.map((m, i) => (
@@ -79,7 +79,9 @@ const AdminHome = () => {
                             if (m.id === 'add-student') setShowStudentForm(true);
                             if (m.id === 'timetable') navigate('/admin/timetable');
                             if (m.id === 'fees') navigate('/admin/fees');
-                            if (m.id === 'attendance-report') navigate('/admin/attendance-report'); // Navigation Added
+                            if (m.id === 'attendance-report') navigate('/admin/attendance-report');
+                            if (m.id === 'notice') navigate('/admin/global-notice');
+                            if (m.id === 'notice-feed') navigate('/notice-feed');
                         }}
                         className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/10 flex items-center justify-between active:scale-95 transition-all cursor-pointer group"
                     >
@@ -95,7 +97,6 @@ const AdminHome = () => {
                 ))}
             </div>
 
-            {/* MODALS RE-STYLED FOR AI THEME */}
             {(showTeacherForm || showStudentForm) && (
                 <div className="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
                     <div className="bg-slate-900 border border-white/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
@@ -132,7 +133,6 @@ const AdminHome = () => {
                 </div>
             )}
 
-            {/* System Status - Robot Look */}
             <div className="bg-slate-900 border border-blue-500/20 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
                 <div className="relative z-10 flex items-center justify-between">
                     <div>

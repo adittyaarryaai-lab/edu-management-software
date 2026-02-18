@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-// FIXED: Added Video icon for Live Class
-import { CheckSquare, BookOpen, Users, FilePlus, CalendarDays, ClipboardList, Bot, Activity, Megaphone, MessageCircle, Layers, Video } from 'lucide-react';
-import API from '../api'; // Backend connection ke liye
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  CheckSquare, BookOpen, Users, FilePlus, CalendarDays, 
+  ClipboardList, Bot, Activity, Megaphone, MessageCircle, 
+  Layers, Video
+} from 'lucide-react';
+import API from '../api'; 
 
 const TeacherHome = ({ user }) => {
+  const navigate = useNavigate();
   const [studentCount, setStudentCount] = useState(0);
 
-  // Day 49: Fetching real-time student statistics
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Fetch Student Stats
         const { data } = await API.get('/auth/student-stats');
         setStudentCount(data.totalStudents);
       } catch (err) {
@@ -26,13 +30,9 @@ const TeacherHome = ({ user }) => {
     { title: 'My Schedule', icon: <CalendarDays size={32} />, path: '/timetable', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
     { title: 'Assignments', icon: <FilePlus size={32} />, path: '/teacher/assignments', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
     { title: 'Class List', icon: <Users size={32} />, path: '/teacher/students', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-    // Day 59: Naya Live Class module for Teachers
     { title: 'Live Class', icon: <Video size={32} />, path: '/teacher/live-class', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
-    // Day 49: Naya Broadcast Module (For posting)
     { title: 'Broadcast', icon: <Bot size={32} />, path: '/teacher/notices', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
-    // FIXED: Notice Feed module added for manual access
     { title: 'Notice Feed', icon: <Megaphone size={32} />, path: '/notice-feed', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-    // Day 51 Step 3: Support module for Teachers to reply to queries
     { title: 'Support', icon: <MessageCircle size={32} />, path: '/teacher/support', color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
     { title: 'Syllabus', icon: <Layers size={32} />, path: '/teacher/upload-syllabus', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
   ];
@@ -46,6 +46,7 @@ const TeacherHome = ({ user }) => {
   return (
     <div className="min-h-screen font-sans italic">
       <div className="px-5 mt-0 space-y-6 relative z-10 pb-24">
+        
         {/* Quick Stats Card */}
         <div className="bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl border border-white/10 flex justify-between items-center">
           {quickStats.map((stat, i) => (
@@ -64,12 +65,12 @@ const TeacherHome = ({ user }) => {
               <div className={`p-4 rounded-[2rem] border ${m.color}`}>
                 {m.icon}
               </div>
-              <span className="font-black text-gray-800 text-sm tracking-tight">{m.title}</span>
+              <span className="font-black text-gray-800 text-sm tracking-tight uppercase tracking-tighter">{m.title}</span>
             </Link>
           ))}
         </div>
 
-        {/* Meeting Card */}
+        {/* Staff Briefing Card */}
         <div className="bg-gradient-to-br from-indigo-950 to-slate-900 border border-white/10 rounded-[3rem] p-7 text-white shadow-2xl relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-1">
