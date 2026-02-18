@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// FIXED: Added Layers to the import list below
-import { CheckSquare, BookOpen, Users, FilePlus, CalendarDays, ClipboardList, Bot, Activity, Megaphone, MessageCircle, Layers } from 'lucide-react';
+// FIXED: Added Video icon for Live Class
+import { CheckSquare, BookOpen, Users, FilePlus, CalendarDays, ClipboardList, Bot, Activity, Megaphone, MessageCircle, Layers, Video } from 'lucide-react';
 import API from '../api'; // Backend connection ke liye
 
 const TeacherHome = ({ user }) => {
@@ -26,6 +26,8 @@ const TeacherHome = ({ user }) => {
     { title: 'My Schedule', icon: <CalendarDays size={32} />, path: '/timetable', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
     { title: 'Assignments', icon: <FilePlus size={32} />, path: '/teacher/assignments', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
     { title: 'Class List', icon: <Users size={32} />, path: '/teacher/students', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+    // Day 59: Naya Live Class module for Teachers
+    { title: 'Live Class', icon: <Video size={32} />, path: '/teacher/live-class', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
     // Day 49: Naya Broadcast Module (For posting)
     { title: 'Broadcast', icon: <Bot size={32} />, path: '/teacher/notices', color: 'bg-red-500/10 text-red-400 border-red-500/20' },
     // FIXED: Notice Feed module added for manual access
@@ -42,7 +44,7 @@ const TeacherHome = ({ user }) => {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen font-sans italic">
       <div className="px-5 mt-0 space-y-6 relative z-10 pb-24">
         {/* Quick Stats Card */}
         <div className="bg-slate-900 rounded-[2.5rem] p-6 shadow-2xl border border-white/10 flex justify-between items-center">

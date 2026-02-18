@@ -41,6 +41,7 @@ import TeacherSupport from './pages/TeacherSupport';
 import ChangePassword from './pages/ChangePassword'; 
 import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus'; 
 import DigitalMaterial from './pages/DigitalMaterial';
+import TeacherLiveClass from './pages/TeacherLiveClass'; 
 
 function App() {
   const [user, setUser] = useState(null);
@@ -226,7 +227,6 @@ function App() {
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
           <Route path="/library/digital" element={<DigitalMaterial />} /> 
-          {/* <Route path="/live-class" element={<LiveClass />} /> */}
           <Route path="/live-class" element={<LiveClass user={user} />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/requests" element={<Requests />} />
@@ -239,6 +239,7 @@ function App() {
           <Route path="/teacher/notices" element={<TeacherNotices />} /> 
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
+          <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
           <Route path="/my-account" element={<MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
           <Route path="/change-password" element={<ChangePassword />} /> 
