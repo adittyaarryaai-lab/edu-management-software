@@ -2,7 +2,6 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Register a new user
-// @route   POST /api/auth/register
 const registerUser = async (req, res) => {
     const { name, email, password, role, grade, enrollmentNo, employeeId, subjects } = req.body;
 
@@ -29,7 +28,7 @@ const registerUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
-            avatar: user.avatar, // FIXED: Register par bhi avatar bhejna hai
+            avatar: user.avatar,
             token: generateToken(user._id),
         });
     } else {
@@ -48,22 +47,21 @@ const authUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            grade: user.grade, // LOGIN PAR BHI GRADE BHEJNA JARURI HAI
-            avatar: user.avatar, // FIXED: Login par avatar field add kar di hai
+            grade: user.grade,
+            avatar: user.avatar,
             token: generateToken(user._id),
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });
     }
 };
+
 // @desc    Update User Password
-// @route   PUT /api/auth/change-password
 const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     const user = await User.findById(req.user._id);
 
     if (user && (await require('bcryptjs').compare(oldPassword, user.password))) {
-        // Naya password set karo (Bcrypt automatically model level pe hash karega)
         user.password = newPassword;
         await user.save();
         res.json({ message: 'Password Encryption Updated! 🔐' });
@@ -72,7 +70,4 @@ const changePassword = async (req, res) => {
     }
 };
 
-// Isko exports mein add karna mat bhulna:
 module.exports = { registerUser, authUser, changePassword };
-
-// module.exports = { registerUser, authUser };

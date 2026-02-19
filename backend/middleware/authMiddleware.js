@@ -49,4 +49,5 @@ const teacherOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, adminOnly, teacherOnly };
+// FIXED: Added superAdminOnly to the exports
+module.exports = { protect, superAdminOnly, adminOnly, teacherOnly };

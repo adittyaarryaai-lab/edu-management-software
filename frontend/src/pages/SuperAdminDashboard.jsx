@@ -20,7 +20,14 @@ const SuperAdminDashboard = () => {
             setLoading(true);
             const { data } = await API.get('/superadmin/stats');
             setStats(data);
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error(err);
+            if (err.response?.status === 401) {
+                // Agar unauthorized hai toh login par bhej do
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            }
+        }
         finally { setLoading(false); }
     };
 

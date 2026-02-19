@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const School = require('../models/School');
 const User = require('../models/User');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, superAdminOnly } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 // 1. Add New School & Create its Admin
-router.post('/onboard-school', protect, upload.single('logo'), async (req, res) => {
+router.post('/onboard-school', protect, superAdminOnly, upload.single('logo'), async (req, res) => {
     try {
         const schoolInfo = JSON.parse(req.body.schoolInfo);
         const adminInfo = JSON.parse(req.body.adminInfo);
@@ -38,8 +38,42 @@ router.post('/onboard-school', protect, upload.single('logo'), async (req, res) 
     }
 });
 
-// FIXED: Update School Route added for Edit functionality
-router.put('/update-school/:id', protect, async (req, res) => {
+// DAY 66: Update SuperAdmin Profile Logic (FIXED)
+router.put('/update-profile', protect, superAdminOnly, upload.single('avatar'), async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'Master Root not found' });
+
+        // Updating fields explicitly
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+        user.mobile = req.body.mobile || user.mobile;
+        user.address = req.body.address || user.address;
+
+        if (req.file) {
+            user.avatar = `/${req.file.path.replace(/\\/g, "/")}`;
+        }
+
+        const updatedUser = await user.save();
+        
+        // Pura object with token return kar rahe hain taaki frontend crash na ho
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            mobile: updatedUser.mobile,
+            address: updatedUser.address,
+            avatar: updatedUser.avatar,
+            token: req.headers.authorization.split(' ')[1] // Token preservation
+        });
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({ message: 'Master Sync Failed' });
+    }
+});
+
+router.put('/update-school/:id', protect, superAdminOnly, async (req, res) => {
     try {
         const updatedSchool = await School.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(updatedSchool);
@@ -48,8 +82,7 @@ router.put('/update-school/:id', protect, async (req, res) => {
     }
 });
 
-// 2. Dashboard Stats
-router.get('/stats', protect, async (req, res) => {
+router.get('/stats', protect, superAdminOnly, async (req, res) => {
     try {
         const schools = await School.find();
         const totalRevenue = schools.reduce((acc, curr) => acc + curr.subscription.totalPaid, 0);
