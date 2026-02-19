@@ -46,6 +46,11 @@ import StudentAttendance from './pages/StudentAttendance';
 import AdminAttendance from './pages/AdminAttendance'; 
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
 
+// Day 64: SuperAdmin Module Imports
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import SuperAdminOnboard from './pages/SuperAdminOnboard';
+import SuperAdminAccount from './pages/SuperAdminAccount';
+
 function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -66,19 +71,22 @@ function App() {
     }
   }, []);
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const { data } = await API.post('/auth/login', { email, password });
       
-      // FIX: Yahan 'data' mein backend se avatar ka path aana chahiye
-      // Hum direct database se aaya hua data save kar rahe hain
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
       
       setLoading(false);
-      navigate("/"); 
+      // Redirect logic for SuperAdmin
+      if (data.role === 'superadmin') {
+          navigate("/superadmin/dashboard");
+      } else {
+          navigate("/"); 
+      }
     } catch (error) {
       setLoading(false);
       alert(error.response?.data?.message || "Login Failed! Check your credentials.");
@@ -211,13 +219,33 @@ function App() {
       <Navbar user={user} />
       <main className="relative z-0 pb-32 pt-28"> 
         <Routes>
-          <Route path="/" element={user.role === 'admin' ? <AdminHome /> : user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} />
-          <Route path="/dashboard" element={user.role === 'admin' ? <AdminHome /> : user.role === 'teacher' ? <TeacherHome user={user} /> : <StudentHome user={user} />} />
+          {/* Main Dashboard Logic based on Role */}
+          <Route path="/" element={
+            user.role === 'superadmin' ? <SuperAdminDashboard /> : 
+            user.role === 'admin' ? <AdminHome /> : 
+            user.role === 'teacher' ? <TeacherHome user={user} /> : 
+            <StudentHome user={user} />
+          } />
+          <Route path="/dashboard" element={
+            user.role === 'superadmin' ? <SuperAdminDashboard /> : 
+            user.role === 'admin' ? <AdminHome /> : 
+            user.role === 'teacher' ? <TeacherHome user={user} /> : 
+            <StudentHome user={user} />
+          } />
+
+          {/* SuperAdmin Specific Routes - Day 64 */}
+          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/superadmin/onboard" element={<SuperAdminOnboard />} />
+          <Route path="/superadmin/account" element={<SuperAdminAccount user={user} />} />
+
+          {/* Timetable & Admin Management */}
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} /> 
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} /> 
+
+          {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
           <Route path="/attendance" element={user.role === 'student' ? <StudentAttendance /> : <AttendanceDetails />} />
           <Route path="/fees" element={<Fees user={user} />} />
@@ -233,10 +261,15 @@ function App() {
           <Route path="/library" element={<Library />} />
           <Route path="/library/digital" element={<DigitalMaterial />} /> 
           <Route path="/live-class" element={<LiveClass user={user} />} />
+          
+          {/* FIXED: Removed <div> wrapper to resolve Uncaught Error */}
           <Route path="/feedback" element={<Feedback />} />
+          
           <Route path="/requests" element={<Requests />} />
           <Route path="/mentors" element={<Mentorship />} />
           <Route path="/syllabus" element={<Syllabus user={user} />} /> 
+
+          {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
@@ -245,13 +278,17 @@ function App() {
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
-          <Route path="/my-account" element={<MyAccount user={user} />} />
+
+          {/* User Profile & Security */}
+          <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
           <Route path="/change-password" element={<ChangePassword />} /> 
+
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
-      {user.role !== 'admin' && <BottomNav />}
+      {/* SuperAdmin aur Admin ke liye BottomNav aksar nahi hota, logic check */}
+      {(user.role !== 'admin' && user.role !== 'superadmin') && <BottomNav />}
     </div>
   );
 }

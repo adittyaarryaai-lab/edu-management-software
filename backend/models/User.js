@@ -7,9 +7,13 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { 
         type: String, 
-        enum: ['student', 'teacher', 'admin'], 
+        // FIXED: Added 'superadmin' to the role list
+        enum: ['student', 'teacher', 'admin', 'superadmin'], 
         default: 'student' 
     },
+    // Day 64: School identification for Multi-tenant SaaS
+    schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School' },
+
     // Common fields
     phone: String,
     address: String,
