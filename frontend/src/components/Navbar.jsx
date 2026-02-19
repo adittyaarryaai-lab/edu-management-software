@@ -12,7 +12,10 @@ const Navbar = ({ user }) => {
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
-      // FIXED: SuperAdmin aur Admin ke liye count hamesha 0 rahega aur API hit nahi hogi
+      // FIXED: SuperAdmin backup check handle
+      const backup = localStorage.getItem('superadmin_backup');
+      if(user?.role === 'admin' && backup) return; // Ghost session mein notices block
+
       if(user?.role === 'admin' || user?.role === 'superadmin') return;
 
       try {
@@ -28,12 +31,9 @@ const Navbar = ({ user }) => {
     return () => clearInterval(interval);
   }, [user]);
 
-  // FIXED: Bell click handler
   const handleBellClick = async () => {
       try {
-          // SuperAdmin ke liye bell function disabled
           if (user?.role === 'superadmin') return;
-
           if (user?.role !== 'admin' && unreadCount > 0) {
               await API.put('/notices/mark-all-read'); 
               setUnreadCount(0);
@@ -60,9 +60,18 @@ const Navbar = ({ user }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    window.location.reload();
+    // FIXED: Agar ghost login session mein hain, toh backup restore karo logout ki jagah
+    const backup = localStorage.getItem('superadmin_backup');
+    if (backup) {
+        localStorage.setItem('user', backup);
+        localStorage.removeItem('superadmin_backup');
+        window.location.href = '/superadmin/dashboard';
+    } else {
+        localStorage.removeItem('user');
+        window.location.reload();
+    }
   };
+  
 
   return (
     <>
@@ -89,12 +98,12 @@ const Navbar = ({ user }) => {
           <div className="flex items-center gap-3">
             <button
               onClick={handleLogout}
-              className="bg-red-500/20 p-2 rounded-xl border border-red-400/30 hover:bg-red-500/30 transition-all active:scale-90"
+              className={`${localStorage.getItem('superadmin_backup') ? 'bg-orange-500/20 border-orange-400/30' : 'bg-red-500/20 border-red-400/30'} p-2 rounded-xl border transition-all active:scale-90`}
+              title={localStorage.getItem('superadmin_backup') ? 'Return to SuperAdmin' : 'Logout'}
             >
-              <LogOut size={18} />
+              <LogOut size={18} className={localStorage.getItem('superadmin_backup') ? 'text-orange-400' : 'text-red-400'} />
             </button>
 
-            {/* FIXED: SuperAdmin ke liye bell gayab, Admin ke liye counting gayab par icon rahega */}
             {user?.role !== 'superadmin' && (
               <div
                 onClick={handleBellClick}

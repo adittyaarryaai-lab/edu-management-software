@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, IndianRupee, ShieldAlert, TrendingUp, Briefcase, Trash2, Edit3, X, Save } from 'lucide-react';
+import { Globe, Plus, IndianRupee, ShieldAlert, TrendingUp, Briefcase, Trash2, Edit3, X, Save, RotateCcw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
 
 const SuperAdminDashboard = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     
-    // FIXED: Added state for Editing Modal
     const [editingSchool, setEditingSchool] = useState(null);
     const [editData, setEditData] = useState({});
 
     useEffect(() => {
-        fetchStats();
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        const backupUser = JSON.parse(localStorage.getItem('superadmin_backup'));
+
+        if (currentUser?.role !== 'superadmin' && backupUser) {
+            localStorage.setItem('user', JSON.stringify(backupUser));
+            window.location.reload(); 
+        } else {
+            fetchStats();
+        }
     }, []);
 
     const fetchStats = async () => {
@@ -22,8 +31,7 @@ const SuperAdminDashboard = () => {
             setStats(data);
         } catch (err) { 
             console.error(err);
-            if (err.response?.status === 401) {
-                // Agar unauthorized hai toh login par bhej do
+            if (err.response?.status === 403 || err.response?.status === 401) {
                 localStorage.removeItem('user');
                 window.location.href = '/';
             }
@@ -31,20 +39,49 @@ const SuperAdminDashboard = () => {
         finally { setLoading(false); }
     };
 
-    // FIXED: Handle Edit Logic
     const handleUpdate = async () => {
         try {
             await API.put(`/superadmin/update-school/${editingSchool._id}`, editData);
             setEditingSchool(null);
-            fetchStats(); // Data refresh
+            fetchStats();
         } catch (err) { alert("Update Failed"); }
+    };
+
+    const handleGhostLogin = async (schoolId) => {
+        try {
+            if (!schoolId) return alert("Invalid School Reference");
+
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            // FIXED: Saving current session explicitly
+            localStorage.setItem('superadmin_backup', JSON.stringify(currentUser));
+            
+            const { data } = await API.get(`/superadmin/login-as-school/${schoolId}`);
+            
+            // FIXED: Ensuring token is present before redirect
+            if(data.token) {
+                localStorage.setItem('user', JSON.stringify(data));
+                window.location.href = '/dashboard';
+            }
+        } catch (err) {
+            alert(err.response?.data?.message || "Ghost Login Protocol Failed!");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("CAUTION: This will deactivate the school. Revenue will be preserved in records. Proceed?")) {
+            try {
+                await API.delete(`/superadmin/delete-school/${id}`);
+                fetchStats();
+            } catch (err) {
+                alert("Deletion Failed");
+            }
+        }
     };
 
     if (loading) return <Loader />;
 
     return (
         <div className="min-h-screen bg-[#f1f5f9] p-6 font-sans italic">
-            {/* Header Section */}
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Executive Hub</h1>
@@ -55,7 +92,6 @@ const SuperAdminDashboard = () => {
                 </button>
             </div>
 
-            {/* Financial Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 {[
                     { label: 'Active Institutions', value: stats?.activeSchools, icon: <Globe />, color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -72,7 +108,6 @@ const SuperAdminDashboard = () => {
                 ))}
             </div>
 
-            {/* School List */}
             <div className="bg-white rounded-[3.5rem] p-10 shadow-2xl border border-white">
                 <h2 className="text-xl font-black text-slate-800 mb-8 uppercase tracking-tighter">Institution Inventory</h2>
                 <div className="overflow-x-auto">
@@ -88,8 +123,8 @@ const SuperAdminDashboard = () => {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {stats?.schools.map((school, i) => (
-                                <tr key={i} className="group hover:bg-slate-50/50 transition-all">
-                                    <td className="py-6">
+                                <tr key={i} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <div className="flex items-center gap-4">
                                             <img 
                                                 src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} 
@@ -97,12 +132,12 @@ const SuperAdminDashboard = () => {
                                                 alt="logo"
                                             />
                                             <div>
-                                                <p className="font-black text-slate-800 text-sm uppercase italic">{school.schoolName}</p>
+                                                <p className="font-black text-slate-800 text-sm uppercase italic group-hover:text-blue-600 transition-colors">{school.schoolName}</p>
                                                 <p className="text-[10px] text-slate-400 font-bold">{school.affiliationNo}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-6">
+                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <p className="text-xs font-black text-slate-700">{school.adminDetails.fullName}</p>
                                         <p className="text-[10px] text-slate-400 font-bold">{school.adminDetails.email}</p>
                                     </td>
@@ -114,14 +149,16 @@ const SuperAdminDashboard = () => {
                                     </td>
                                     <td className="py-6">
                                         <div className="flex gap-2">
-                                            {/* FIXED: Edit Button added */}
                                             <button 
-                                                onClick={() => {setEditingSchool(school); setEditData(school)}}
-                                                className="p-3 bg-blue-50 text-blue-400 rounded-xl hover:bg-blue-500 hover:text-white transition-all"
+                                                onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }}
+                                                className="p-3 bg-blue-50 text-blue-400 rounded-xl hover:bg-blue-500 hover:text-white transition-all shadow-sm"
                                             >
                                                 <Edit3 size={16}/>
                                             </button>
-                                            <button className="p-3 bg-slate-100 text-slate-400 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }}
+                                                className="p-3 bg-slate-100 text-slate-400 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                            >
                                                 <Trash2 size={16}/>
                                             </button>
                                         </div>
@@ -133,7 +170,6 @@ const SuperAdminDashboard = () => {
                 </div>
             </div>
 
-            {/* FIXED: Edit Modal Overlay */}
             {editingSchool && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
                     <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
