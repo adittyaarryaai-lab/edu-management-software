@@ -94,7 +94,7 @@ const Navbar = ({ user }) => {
               <LogOut size={18} />
             </button>
 
-            {/* FIXED: Admin aur SuperAdmin ke liye bell icon hide kar sakte ho ya non-clickable */}
+            {/* FIXED: SuperAdmin ke liye bell gayab, Admin ke liye counting gayab par icon rahega */}
             {user?.role !== 'superadmin' && (
               <div
                 onClick={handleBellClick}

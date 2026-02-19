@@ -58,7 +58,7 @@ const AdminHome = () => {
 
     return (
         <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10">
-            {/* FIXED: Extra Bell Icon removed from here as Navbar already has one */}
+            {/* FIXED: Extra floating bell removed to keep dashboard clean as Navbar handles it */}
 
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
