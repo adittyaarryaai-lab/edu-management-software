@@ -12,8 +12,9 @@ const AdminHome = () => {
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
 
-    const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', employeeId: '', subjects: '' });
-    const [studentData, setStudentData] = useState({ name: '', email: '', password: '', enrollmentNo: '', grade: '' });
+    // Day 71: employeeId aur enrollmentNo state se hta diye (Auto-generated)
+    const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', subjects: '' });
+    const [studentData, setStudentData] = useState({ name: '', email: '', password: '', grade: '' });
 
     const adminStats = [
         { label: 'Total Students', value: '1,240', icon: <Users size={14}/> },
@@ -37,10 +38,10 @@ const AdminHome = () => {
         setLoading(true);
         try {
             const processedData = { ...teacherData, subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [] };
-            await API.post('/users/add-teacher', processedData);
-            setMsg("Teacher Registered Successfully!");
+            const { data } = await API.post('/users/add-teacher', processedData);
+            setMsg(data.message || "Teacher Registered Successfully!");
             setShowTeacherForm(false);
-            setTeacherData({ name: '', email: '', password: '', employeeId: '', subjects: '' });
+            setTeacherData({ name: '', email: '', password: '', subjects: '' });
         } catch (err) { alert(err.response?.data?.message || "Error adding teacher"); } finally { setLoading(false); }
     };
 
@@ -49,17 +50,15 @@ const AdminHome = () => {
         if(!studentData.email || !studentData.grade) return alert("Please fill mandatory fields");
         setLoading(true);
         try {
-            await API.post('/users/add-student', studentData);
-            setMsg("Student Enrolled Successfully!");
+            const { data } = await API.post('/users/add-student', studentData);
+            setMsg(data.message || "Student Enrolled Successfully!");
             setShowStudentForm(false);
-            setStudentData({ name: '', email: '', password: '', enrollmentNo: '', grade: '' });
+            setStudentData({ name: '', email: '', password: '', grade: '' });
         } catch (err) { alert(err.response?.data?.message || "Error adding student"); } finally { setLoading(false); }
     };
 
     return (
         <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10">
-            {/* FIXED: Extra floating bell removed to keep dashboard clean as Navbar handles it */}
-
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
                     <div key={i} className="text-center border-r last:border-0 border-white/5 px-1">
@@ -108,7 +107,7 @@ const AdminHome = () => {
                                     <input type="text" placeholder="Full Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.name} onChange={(e) => setTeacherData({...teacherData, name: e.target.value})} />
                                     <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.email} onChange={(e) => setTeacherData({...teacherData, email: e.target.value})} />
                                     <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.password} onChange={(e) => setTeacherData({...teacherData, password: e.target.value})} />
-                                    <input type="text" placeholder="Employee ID" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.employeeId} onChange={(e) => setTeacherData({...teacherData, employeeId: e.target.value})} />
+                                    {/* employeeId input removed - Backend will auto-generate */}
                                     <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.subjects} onChange={(e) => setTeacherData({...teacherData, subjects: e.target.value})} />
                                     <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-purple-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
                                         {loading ? "Initializing..." : "Register System User"}
@@ -119,10 +118,8 @@ const AdminHome = () => {
                                     <input type="text" placeholder="Student Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.name} onChange={(e) => setStudentData({...studentData, name: e.target.value})} />
                                     <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.email} onChange={(e) => setStudentData({...studentData, email: e.target.value})} />
                                     <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.password} onChange={(e) => setStudentData({...studentData, password: e.target.value})} />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input type="text" placeholder="Enrollment No" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.enrollmentNo} onChange={(e) => setStudentData({...studentData, enrollmentNo: e.target.value})} />
-                                        <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.grade} onChange={(e) => setStudentData({...studentData, grade: e.target.value})} />
-                                    </div>
+                                    {/* enrollmentNo input removed - Backend will auto-generate */}
+                                    <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.grade} onChange={(e) => setStudentData({...studentData, grade: e.target.value})} />
                                     <button onClick={handleAddStudent} disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
                                         {loading ? "Processing..." : "Enroll To Network"}
                                     </button>

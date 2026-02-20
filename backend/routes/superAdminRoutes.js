@@ -138,12 +138,24 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
         
         const visibleSchools = allSchools.filter(s => !s.isDeleted);
         const activeSchools = visibleSchools.filter(s => s.subscription.status === 'Active').length;
+
+        // Step 1: Aggregating analytics for each school
+        const schoolsWithStats = await Promise.all(visibleSchools.map(async (school) => {
+            const studentCount = await User.countDocuments({ schoolId: school._id, role: 'student' });
+            const teacherCount = await User.countDocuments({ schoolId: school._id, role: 'teacher' });
+            
+            return {
+                ...school._doc,
+                studentCount,
+                teacherCount
+            };
+        }));
         
         res.json({
             totalSchools: visibleSchools.length,
             activeSchools,
             totalRevenue,
-            schools: visibleSchools 
+            schools: schoolsWithStats // Sending enriched data
         });
     } catch (error) {
         res.status(500).json({ message: 'Stats fetch failed' });

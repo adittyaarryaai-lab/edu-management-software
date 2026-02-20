@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, IndianRupee, ShieldAlert, TrendingUp, Briefcase, Trash2, Edit3, X, Save, RotateCcw } from 'lucide-react';
+import { Globe, Plus, IndianRupee, ShieldAlert, TrendingUp, Briefcase, Trash2, Edit3, X, Save, RotateCcw, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -52,12 +52,10 @@ const SuperAdminDashboard = () => {
             if (!schoolId) return alert("Invalid School Reference");
 
             const currentUser = JSON.parse(localStorage.getItem('user'));
-            // FIXED: Saving current session explicitly
             localStorage.setItem('superadmin_backup', JSON.stringify(currentUser));
             
             const { data } = await API.get(`/superadmin/login-as-school/${schoolId}`);
             
-            // FIXED: Ensuring token is present before redirect
             if(data.token) {
                 localStorage.setItem('user', JSON.stringify(data));
                 window.location.href = '/dashboard';
@@ -116,6 +114,7 @@ const SuperAdminDashboard = () => {
                             <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
                                 <th className="pb-4">School Details</th>
                                 <th className="pb-4">Admin Contact</th>
+                                <th className="pb-4">Strength (S/T)</th> {/* DAY 72: Added Strength Header */}
                                 <th className="pb-4">Revenue (Paid)</th>
                                 <th className="pb-4">Status</th>
                                 <th className="pb-4">Actions</th>
@@ -140,6 +139,17 @@ const SuperAdminDashboard = () => {
                                     <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <p className="text-xs font-black text-slate-700">{school.adminDetails.fullName}</p>
                                         <p className="text-[10px] text-slate-400 font-bold">{school.adminDetails.email}</p>
+                                    </td>
+                                    {/* DAY 72: Added School strength metrics cell */}
+                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
+                                        <div className="flex flex-col gap-0.5">
+                                            <span className="text-[11px] font-black text-blue-600 uppercase tracking-tighter italic">
+                                                {school.studentCount || 0} Students
+                                            </span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase">
+                                                {school.teacherCount || 0} Faculty
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="py-6 font-black text-sm text-green-600 italic">₹{school.subscription.totalPaid}</td>
                                     <td className="py-6">
