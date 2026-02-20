@@ -1,21 +1,16 @@
 const mongoose = require('mongoose');
 
 const bookSchema = new mongoose.Schema({
+    schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true }, // Added schoolId
     title: { type: String, required: true },
     author: { type: String, required: true },
-    isbn: { type: String, unique: true },
+    isbn: { type: String }, // Removed global unique: true for multi-tenant
     category: { type: String, required: true },
     status: { type: String, enum: ['Available', 'Issued', 'Reserved'], default: 'Available' },
-    shelfLocation: { type: String }, // e.g., Rack 4-B
+    shelfLocation: { type: String }, 
     description: { type: String },
-    isDigital: {
-        type: Boolean,
-        default: false
-    },
-    fileUrl: {
-        type: String
-    } // PDF, E-pub ya Cloud storage ka link yahan save hoga
+    isDigital: { type: Boolean, default: false },
+    fileUrl: { type: String } 
 }, { timestamps: true });
-// }, { timestamps: true });
 
 module.exports = mongoose.model('Book', bookSchema);

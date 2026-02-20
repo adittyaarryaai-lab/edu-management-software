@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const feeSchema = new mongoose.Schema({
+    schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true }, // Added schoolId
     student: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     totalAmount: { type: Number, required: true },
     paidAmount: { type: Number, default: 0 },
-    dueDate: { type: String, required: true }, // Format: YYYY-MM-DD
+    dueDate: { type: String, required: true }, 
     status: { 
         type: String, 
         enum: ['Paid', 'Pending', 'Partially Paid'], 
@@ -14,7 +15,7 @@ const feeSchema = new mongoose.Schema({
         {
             amount: Number,
             date: { type: Date, default: Date.now },
-            method: String // e.g., 'UPI', 'Cash', 'Card'
+            method: String 
         }
     ]
 }, { timestamps: true });

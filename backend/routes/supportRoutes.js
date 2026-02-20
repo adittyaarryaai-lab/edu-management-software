@@ -3,11 +3,11 @@ const router = express.Router();
 const Support = require('../models/Support');
 const { protect, teacherOnly } = require('../middleware/authMiddleware');
 
-// @desc    Post a new query (Student Only)
 router.post('/ask', protect, async (req, res) => {
     try {
         const { subject, query, isUrgent } = req.body;
         const newQuery = await Support.create({
+            schoolId: req.user.schoolId, // FIXED
             student: req.user._id,
             subject,
             query,
@@ -19,19 +19,21 @@ router.post('/ask', protect, async (req, res) => {
     }
 });
 
-// @desc    Get all queries for a student
 router.get('/my-queries', protect, async (req, res) => {
     try {
-        const queries = await Support.find({ student: req.user._id }).sort({ createdAt: -1 });
+        const queries = await Support.find({ 
+            student: req.user._id,
+            schoolId: req.user.schoolId // FIXED
+        }).sort({ createdAt: -1 });
         res.json(queries);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching queries' });
     }
 });
-// @desc    Get all queries for teachers (Teacher Only)
+
 router.get('/all-queries', protect, teacherOnly, async (req, res) => {
     try {
-        const queries = await Support.find()
+        const queries = await Support.find({ schoolId: req.user.schoolId }) // FIXED
             .populate('student', 'name grade')
             .sort({ isUrgent: -1, createdAt: -1 });
         res.json(queries);
@@ -40,12 +42,11 @@ router.get('/all-queries', protect, teacherOnly, async (req, res) => {
     }
 });
 
-// @desc    Resolve/Answer a query (Teacher Only)
 router.put('/resolve/:id', protect, teacherOnly, async (req, res) => {
     try {
         const { answer } = req.body;
-        const query = await Support.findByIdAndUpdate(
-            req.params.id,
+        const query = await Support.findOneAndUpdate(
+            { _id: req.params.id, schoolId: req.user.schoolId }, // FIXED Security
             { 
                 answer, 
                 status: 'Resolved',

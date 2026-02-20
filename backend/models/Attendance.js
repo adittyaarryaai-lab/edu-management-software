@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
+    schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true }, // Added schoolId
     teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     grade: { type: String, required: true },
-    date: { type: String, required: true }, // Format: YYYY-MM-DD
+    date: { type: String, required: true }, 
     records: [{
         studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: { type: String },

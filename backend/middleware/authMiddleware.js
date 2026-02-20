@@ -15,6 +15,11 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'User not found' });
             }
 
+            // FIXED (Problem 7): Ensure schoolId exists for non-superadmins
+            if (req.user.role !== 'superadmin' && !req.user.schoolId) {
+                return res.status(401).json({ message: 'Isolation Error: No School Identity Found' });
+            }
+
             next();
         } catch (error) {
             console.error("Token Error:", error);
@@ -49,5 +54,4 @@ const teacherOnly = (req, res, next) => {
     }
 };
 
-// FIXED: Added superAdminOnly to the exports
 module.exports = { protect, superAdminOnly, adminOnly, teacherOnly };

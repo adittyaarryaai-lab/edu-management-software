@@ -17,7 +17,8 @@ const schoolSchema = new mongoose.Schema({
         status: { type: String, enum: ['Active', 'Terminated'], default: 'Active' },
         onboardingDate: { type: Date, default: Date.now }
     },
-    sessionYear: { type: String, default: '2026-27' }
+    sessionYear: { type: String, default: '2026-27' },
+    isDeleted: { type: Boolean, default: false } // Day 68 fix for revenue preservation
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);

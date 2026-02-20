@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Attendance = require('../models/Attendance');
-const User = require('../models/User'); // Zaroori hai students fetch karne ke liye
+const User = require('../models/User'); 
 const { protect, teacherOnly, adminOnly } = require('../middleware/authMiddleware');
 
-// @desc    1. Get Students for Attendance (Teacher selects Grade)
-// @route   GET /api/attendance/students/:grade
 router.get('/students/:grade', protect, teacherOnly, async (req, res) => {
     try {
-        // Sirf wahi bache uthayega jo us specific grade mein hain
-        const students = await User.find({ role: 'student', grade: req.params.grade })
+        const students = await User.find({ 
+            role: 'student', 
+            grade: req.params.grade,
+            schoolId: req.user.schoolId // FIXED: Only my school students
+        })
             .select('name email enrollmentNo grade');
         res.json(students);
     } catch (error) {
@@ -17,21 +18,18 @@ router.get('/students/:grade', protect, teacherOnly, async (req, res) => {
     }
 });
 
-// @desc    2. Mark or Update daily attendance (Upsert Logic)
-// @route   POST /api/attendance/mark
 router.post('/mark', protect, teacherOnly, async (req, res) => {
     const { grade, date, records } = req.body;
-
     try {
-        // Check if attendance already exists for this date and grade
-        let attendance = await Attendance.findOne({ grade, date });
+        let attendance = await Attendance.findOne({ grade, date, schoolId: req.user.schoolId });
 
         if (attendance) {
-            attendance.records = records; // Update if exists (Galti sudharne ke liye)
-            attendance.teacher = req.user._id; // Kisne update kiya wo record rahega
+            attendance.records = records; 
+            attendance.teacher = req.user._id; 
             await attendance.save();
         } else {
             attendance = await Attendance.create({
+                schoolId: req.user.schoolId, // FIXED: School ID link
                 teacher: req.user._id,
                 grade,
                 date,
@@ -44,29 +42,27 @@ router.post('/mark', protect, teacherOnly, async (req, res) => {
     }
 });
 
-// @desc    3. Get specific day attendance (To view or edit)
-// @route   GET /api/attendance/view
 router.get('/view', protect, async (req, res) => {
     const { grade, date } = req.query;
     try {
-        const data = await Attendance.findOne({ grade, date });
+        const data = await Attendance.findOne({ grade, date, schoolId: req.user.schoolId });
         res.json(data);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching attendance data' });
     }
 });
 
-// @desc    4. Get student attendance stats (Dashboard Visualization)
-// @route   GET /api/attendance/student-stats
 router.get('/student-stats', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
-        // Saari records dhoondo jahan ye student entry ho
-        const allRecords = await Attendance.find({ 'records.studentId': studentId });
+        const allRecords = await Attendance.find({ 
+            'records.studentId': studentId,
+            schoolId: req.user.schoolId // FIXED
+        });
 
         let totalDays = allRecords.length;
         let presentDays = 0;
-        let absentHistory = []; // DAY 61 UPDATE: Absent dates track karne ke liye
+        let absentHistory = []; 
 
         allRecords.forEach(record => {
             const studentEntry = record.records.find(r => r.studentId.toString() === studentId.toString());
@@ -74,7 +70,6 @@ router.get('/student-stats', protect, async (req, res) => {
                 if (studentEntry.status === 'Present') {
                     presentDays++;
                 } else {
-                    // Agar absent hai toh date history mein daal do
                     absentHistory.push({ date: record.date, status: studentEntry.status });
                 }
             }
@@ -87,40 +82,27 @@ router.get('/student-stats', protect, async (req, res) => {
             presentDays,
             absentDays: totalDays - presentDays,
             percentage,
-            absentHistory // Naya data jo frontend use karega
+            absentHistory 
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching stats' });
     }
 });
 
-// Student checking their own attendance percentage (Legacy support)
-router.get('/my-stats', protect, async (req, res) => {
-    try {
-        const attendance = await Attendance.find({ "records.studentId": req.user._id });
-        let present = 0;
-        attendance.forEach(day => {
-            const record = day.records.find(r => r.studentId.toString() === req.user._id.toString());
-            if (record.status === 'Present') present++;
-        });
-        const percentage = attendance.length > 0 ? (present / attendance.length) * 100 : 0;
-        res.json({ total: attendance.length, present, percentage: percentage.toFixed(2) });
-    } catch (error) { res.status(500).json({ message: 'Error' }); }
-});
-
-// ================= DAY 62 UPDATE: ADMIN MASTER VIEW START =================
-// @desc    Admin Master View: Get Class-wise Performance
-// @route   GET /api/attendance/admin-report/:grade
 router.get('/admin-report/:grade', protect, adminOnly, async (req, res) => {
     try {
         const { grade } = req.params;
-        // 1. Pehle us grade ke saare students uthao
-        const students = await User.find({ role: 'student', grade }).select('name enrollmentNo');
+        const students = await User.find({ 
+            role: 'student', 
+            grade,
+            schoolId: req.user.schoolId // FIXED
+        }).select('name enrollmentNo');
         
-        // 2. Us grade ki poori attendance history uthao
-        const attendanceData = await Attendance.find({ grade });
+        const attendanceData = await Attendance.find({ 
+            grade,
+            schoolId: req.user.schoolId // FIXED
+        });
 
-        // 3. Har student ke liye calculation karo
         const report = students.map(student => {
             let present = 0;
             let total = 0;
@@ -152,6 +134,5 @@ router.get('/admin-report/:grade', protect, adminOnly, async (req, res) => {
         res.status(500).json({ message: 'Admin report fetch failed' });
     }
 });
-// ================= DAY 62 UPDATE: END =================
 
 module.exports = router;

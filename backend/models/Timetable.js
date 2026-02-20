@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 
 const timetableSchema = new mongoose.Schema({
-    grade: { 
-        type: String, 
-        required: true,
-        unique: true 
-    },
+    schoolId: { type: mongoose.Schema.Types.ObjectId, ref: 'School', required: true }, // Added schoolId
+    grade: { type: String, required: true }, // Removed global unique: true
     schedule: [
         {
             day: { 
@@ -18,7 +15,6 @@ const timetableSchema = new mongoose.Schema({
                     startTime: { type: String, required: true },
                     endTime: { type: String, required: true },
                     subject: { type: String, required: true },
-                    // FIX: Isko optional rehne do
                     teacher: { 
                         type: mongoose.Schema.Types.ObjectId, 
                         ref: 'User',

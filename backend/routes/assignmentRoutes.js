@@ -9,6 +9,7 @@ router.post('/create', protect, teacherOnly, async (req, res) => {
     const { grade, subject, title, description, dueDate, fileUrl } = req.body;
     try {
         const assignment = await Assignment.create({
+            schoolId: req.user.schoolId, // FIXED: School ID link
             teacher: req.user._id,
             grade,
             subject,
@@ -26,7 +27,10 @@ router.post('/create', protect, teacherOnly, async (req, res) => {
 // @desc    Get assignments for a grade
 router.get('/:grade', protect, async (req, res) => {
     try {
-        const assignments = await Assignment.find({ grade: req.params.grade })
+        const assignments = await Assignment.find({ 
+            grade: req.params.grade,
+            schoolId: req.user.schoolId // FIXED: Isolated query
+        })
             .populate('teacher', 'name')
             .sort({ createdAt: -1 });
         res.json(assignments);
@@ -40,6 +44,7 @@ router.post('/submit', protect, async (req, res) => {
     const { assignmentId, content, fileUrl } = req.body;
     try {
         const submission = await Submission.create({
+            schoolId: req.user.schoolId, // FIXED: School ID link
             assignment: assignmentId,
             student: req.user._id,
             content,
@@ -55,7 +60,10 @@ router.post('/submit', protect, async (req, res) => {
 // @desc    Get all submissions for an assignment
 router.get('/submissions/:assignmentId', protect, teacherOnly, async (req, res) => {
     try {
-        const submissions = await Submission.find({ assignment: req.params.assignmentId })
+        const submissions = await Submission.find({ 
+            assignment: req.params.assignmentId,
+            schoolId: req.user.schoolId // FIXED: Isolated query
+        })
             .populate('student', 'name email grade')
             .sort({ createdAt: -1 });
         res.json(submissions);
@@ -68,8 +76,8 @@ router.get('/submissions/:assignmentId', protect, teacherOnly, async (req, res) 
 router.put('/grade/:submissionId', protect, teacherOnly, async (req, res) => {
     const { grade, feedback } = req.body;
     try {
-        const submission = await Submission.findByIdAndUpdate(
-            req.params.submissionId,
+        const submission = await Submission.findOneAndUpdate(
+            { _id: req.params.submissionId, schoolId: req.user.schoolId }, // Security Check
             { grade, feedback, status: 'Graded' },
             { new: true }
         );
@@ -79,19 +87,18 @@ router.put('/grade/:submissionId', protect, teacherOnly, async (req, res) => {
         res.status(500).json({ message: 'Server Error grading assignment' });
     }
 });
+
 // @desc    Get student's graded performance
-// @route   GET /api/assignments/my-results
 router.get('/my-results', protect, async (req, res) => {
     try {
-        // Aapke database mein "Graded" hai, isliye hum direct wahi dhoondenge
         const results = await Submission.find({
             student: req.user._id,
+            schoolId: req.user.schoolId, // FIXED: Isolated query
             status: "Graded"
         })
             .populate('assignment', 'title subject grade')
             .sort({ updatedAt: -1 });
 
-        console.log("Found results count:", results.length); // Terminal check karo
         res.json(results);
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching results' });

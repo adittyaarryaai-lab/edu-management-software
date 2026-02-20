@@ -3,19 +3,16 @@ const router = express.Router();
 const Book = require('../models/Book');
 const { protect } = require('../middleware/authMiddleware');
 
-// @desc    Get all books or search books
 router.get('/', protect, async (req, res) => {
     try {
         const { search } = req.query;
-        let query = {};
+        let query = { schoolId: req.user.schoolId }; // FIXED: Base isolation
         if (search) {
-            query = {
-                $or: [
-                    { title: { $regex: search, $options: 'i' } },
-                    { author: { $regex: search, $options: 'i' } },
-                    { category: { $regex: search, $options: 'i' } }
-                ]
-            };
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { author: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
+            ];
         }
         const books = await Book.find(query);
         res.json(books);
@@ -24,19 +21,24 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
-// @desc    Add a new book (Admin/Teacher Only)
 router.post('/add', protect, async (req, res) => {
     try {
-        const newBook = await Book.create(req.body);
+        const newBook = await Book.create({
+            ...req.body,
+            schoolId: req.user.schoolId // FIXED
+        });
         res.status(201).json(newBook);
     } catch (error) {
         res.status(500).json({ message: 'Error adding book' });
     }
 });
-// @desc    Get all digital books (E-Books)
+
 router.get('/ebooks', protect, async (req, res) => {
     try {
-        const ebooks = await Book.find({ isDigital: true }).sort({ createdAt: -1 });
+        const ebooks = await Book.find({ 
+            isDigital: true,
+            schoolId: req.user.schoolId // FIXED
+        }).sort({ createdAt: -1 });
         res.json(ebooks);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching digital material' });

@@ -3,7 +3,7 @@ const generateToken = require('../utils/generateToken');
 
 // @desc    Register a new user
 const registerUser = async (req, res) => {
-    const { name, email, password, role, grade, enrollmentNo, employeeId, subjects } = req.body;
+    const { name, email, password, role, grade, enrollmentNo, employeeId, subjects, schoolId } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -18,7 +18,8 @@ const registerUser = async (req, res) => {
         grade,
         enrollmentNo,
         employeeId,
-        subjects 
+        subjects,
+        schoolId: schoolId || req.user?.schoolId // FIXED: School ID link karna zaroori hai
     });
 
     if (user) {
@@ -28,6 +29,7 @@ const registerUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
+            schoolId: user.schoolId, // FIXED: Response mein schoolId bhejna hai
             avatar: user.avatar,
             token: generateToken(user._id),
         });
@@ -48,6 +50,7 @@ const authUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
+            schoolId: user.schoolId, // FIXED: Login par schoolId dena zaroori hai isolation ke liye
             avatar: user.avatar,
             token: generateToken(user._id),
         });
