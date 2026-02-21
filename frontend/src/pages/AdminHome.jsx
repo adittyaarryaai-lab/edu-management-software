@@ -34,6 +34,24 @@ const AdminHome = () => {
         fetchData();
     }, []);
 
+    // Day 75: Invoice Download Handler
+    const downloadInvoice = async (txId, txNumber) => {
+        try {
+            const response = await API.get(`/school/invoice/${txId}`, {
+                responseType: 'blob', // Important for PDF
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Invoice-${txNumber}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (err) {
+            alert("Could not download invoice.");
+        }
+    };
+
     // Day 73: Advance Payment Handler
     const handleAdvancePayment = async () => {
         if (!window.confirm("Confirm Advance Payment for next month?")) return;
@@ -117,7 +135,7 @@ const AdminHome = () => {
                 )}
             </div>
 
-            {/* Day 74: Payment & Invoice History Section */}
+            {/* Day 74 & 75: Payment & Invoice History Section */}
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden">
                 <div className="flex items-center gap-2 mb-6 ml-2">
                     <FileText size={16} className="text-orange-400" />
@@ -139,7 +157,10 @@ const AdminHome = () => {
                                         <p className="text-green-400 font-black text-xs italic">₹{tx.amount}</p>
                                         <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Success</span>
                                     </div>
-                                    <button className="bg-white/5 p-2 rounded-xl text-slate-400 group-hover:text-blue-400 group-hover:bg-blue-400/10 transition-all">
+                                    <button 
+                                        onClick={() => downloadInvoice(tx._id, tx.transactionId)}
+                                        className="bg-white/5 p-2 rounded-xl text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all"
+                                    >
                                         <Download size={14} />
                                     </button>
                                 </div>
