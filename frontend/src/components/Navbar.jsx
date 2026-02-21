@@ -11,23 +11,30 @@ const Navbar = ({ user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUnreadCount = async () => {
-      // FIXED: SuperAdmin backup check handle
-      const backup = localStorage.getItem('superadmin_backup');
-      if(user?.role === 'admin' && backup) return; // Ghost session mein notices block
+    // FIXED: Agar user login nahi hai, toh fetch karne ki zaroorat hi nahi hai
+    if (!user || !user.token) return;
 
-      if(user?.role === 'admin' || user?.role === 'superadmin') return;
+    const fetchUnreadCount = async () => {
+      // FIXED: SuperAdmin aur Admin ke liye notices fetch block
+      const backup = localStorage.getItem('superadmin_backup');
+      if (user?.role === 'admin' && backup) return; 
+      if (user?.role === 'admin' || user?.role === 'superadmin') return;
 
       try {
         const { data } = await API.get('/notices/my-notices');
         setUnreadCount(data.unreadCount || 0);
       } catch (err) {
-        console.error("Notification Fetch Error:", err);
+        // FIXED: Console error ko thoda clean kiya taaki user logout hone par 401 na dikhe
+        if (err.response?.status !== 401) {
+          console.error("Notification Fetch Error:", err);
+        }
       }
     };
 
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 60000);
+    
+    // Cleanup function: Jab component unmount ho ya user logout ho, interval ruk jaye
     return () => clearInterval(interval);
   }, [user]);
 
@@ -60,7 +67,6 @@ const Navbar = ({ user }) => {
   }, []);
 
   const handleLogout = () => {
-    // FIXED: Agar ghost login session mein hain, toh backup restore karo logout ki jagah
     const backup = localStorage.getItem('superadmin_backup');
     if (backup) {
         localStorage.setItem('user', backup);

@@ -51,6 +51,9 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import SuperAdminOnboard from './pages/SuperAdminOnboard';
 import SuperAdminAccount from './pages/SuperAdminAccount';
 
+// DAY 76: Theme Integration
+import { useTheme } from './context/ThemeContext';
+
 function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -59,6 +62,7 @@ function App() {
   
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDarkMode } = useTheme(); // FIXED: Theme context consume kiya
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -215,7 +219,7 @@ const handleLogin = async (e) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] relative">
+    <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-[#f8fafc]'}`}>
       <Navbar user={user} />
       <main className="relative z-0 pb-32 pt-28"> 
         <Routes>
