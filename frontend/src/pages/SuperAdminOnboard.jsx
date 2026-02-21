@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, School, UserCheck, CreditCard, ShieldCheck, Upload } from 'lucide-react';
+import { ArrowLeft, School, UserCheck, CreditCard, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -8,8 +8,6 @@ const SuperAdminOnboard = () => {
     const navigate = useNavigate();
     const [msg, setMsg] = useState('');
     const [loading, setLoading] = useState(false);
-    
-    // Day 65: Logo file state add ki gayi hai
     const [logoFile, setLogoFile] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -23,25 +21,18 @@ const SuperAdminOnboard = () => {
     const handleOnboard = async (e) => {
         e.preventDefault();
         setLoading(true);
-
-        // Day 65 Update: JSON ki jagah FormData use kar rahe hain image upload ke liye
         const data = new FormData();
         data.append('schoolInfo', JSON.stringify(formData.schoolInfo));
         data.append('adminInfo', JSON.stringify(formData.adminInfo));
         data.append('subscription', JSON.stringify(formData.subscription));
         data.append('tempPassword', formData.tempPassword);
         data.append('sessionYear', formData.sessionYear);
-        
-        if (logoFile) {
-            data.append('logo', logoFile);
-        }
+        if (logoFile) data.append('logo', logoFile);
 
         try {
-            // Backend endpoint ko data bhej rahe hain
             await API.post('/superadmin/onboard-school', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            
             setMsg("Institution Integrated Successfully! 🚀");
             setTimeout(() => navigate('/superadmin/dashboard'), 2000);
         } catch (err) {
@@ -50,90 +41,80 @@ const SuperAdminOnboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24 font-sans italic">
-            <div className="bg-slate-900 text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-2xl">
-                <button onClick={() => navigate(-1)} className="bg-white/10 p-2 rounded-xl mb-6"><ArrowLeft size={20}/></button>
-                <h1 className="text-2xl font-black uppercase tracking-tighter italic">New Onboarding</h1>
-                <p className="text-[10px] font-black opacity-50 uppercase tracking-[0.3em] mt-1 italic">Deploying New Neural Node</p>
+        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-neon/10 to-transparent pointer-events-none"></div>
+                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-6 border border-white/10 text-neon transition-all relative z-10"><ArrowLeft size={20}/></button>
+                <h1 className="text-2xl font-black uppercase tracking-tighter italic relative z-10">Neural Node Deployment</h1>
+                <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em] mt-1 relative z-10 italic">Initializing New Institution Hub</p>
             </div>
 
-            <form onSubmit={handleOnboard} className="px-5 -mt-12 space-y-6 relative z-10">
-                
-                {/* Day 65: New Logo Upload Section (Step 3 ka part) */}
-                <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-white space-y-4">
+            <form onSubmit={handleOnboard} className="px-5 -mt-12 space-y-6 relative z-20">
+                <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl border border-white/5 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <Upload className="text-blue-500" size={18} />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Institutional Logo</h3>
+                        <Upload className="text-neon animate-bounce" size={18} />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-neon/40">Institution Iconography</h3>
                     </div>
-                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl p-6 bg-slate-50/50">
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            id="logoUpload"
-                            className="hidden"
-                            onChange={(e) => setLogoFile(e.target.files[0])} 
-                        />
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl p-6 bg-void/50 group hover:border-neon/30 transition-all">
+                        <input type="file" accept="image/*" id="logoUpload" className="hidden" onChange={(e) => setLogoFile(e.target.files[0])} />
                         <label htmlFor="logoUpload" className="cursor-pointer flex flex-col items-center gap-2">
                             {logoFile ? (
-                                <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">{logoFile.name} Selected!</span>
+                                <span className="text-[10px] font-black text-neon uppercase tracking-widest italic">{logoFile.name} Loaded!</span>
                             ) : (
                                 <>
-                                    <div className="bg-white p-3 rounded-2xl shadow-sm text-slate-400"><Upload size={20}/></div>
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Click to upload official logo</span>
+                                    <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/20 group-hover:text-neon transition-all"><Upload size={20}/></div>
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest text-center group-hover:text-white/40">Upload official institutional identity</span>
                                 </>
                             )}
                         </label>
                     </div>
                 </div>
 
-                {/* 1. School Profile */}
-                <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-white space-y-4">
+                <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl border border-white/5 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <School className="text-blue-500" size={18} />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">School Profile</h3>
+                        <School className="text-neon" size={18} />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-neon/40">Entity Credentials</h3>
                     </div>
-                    <input type="text" placeholder="Official School Name" className="w-full bg-slate-50 p-4 rounded-2xl border outline-none focus:border-blue-500 font-bold" 
+                    <input type="text" placeholder="Institution Name" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase tracking-tight" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, schoolName: e.target.value}})} required />
-                    <input type="text" placeholder="Full Address (City, State, Pin)" className="w-full bg-slate-50 p-4 rounded-2xl border outline-none focus:border-blue-500 font-bold" 
+                    <input type="text" placeholder="Node Headquarters Address" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, address: e.target.value}})} required />
-                    <input type="text" placeholder="Affiliation Number (CBSE/ICSE)" className="w-full bg-slate-50 p-4 rounded-2xl border outline-none focus:border-blue-500 font-bold uppercase" 
+                    <input type="text" placeholder="Registry Affiliation Cipher" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, affiliationNo: e.target.value}})} required />
                 </div>
 
-                {/* 2. Admin & Credentials */}
-                <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-white space-y-4">
+                <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl border border-white/5 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <UserCheck className="text-purple-500" size={18} />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Administrator</h3>
+                        <UserCheck className="text-neon" size={18} />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-neon/40">Primary Operator</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <input type="text" placeholder="Admin Full Name" className="p-4 bg-slate-50 rounded-2xl border font-bold" 
+                        <input type="text" placeholder="Admin Persona" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                             onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, fullName: e.target.value}})} required />
-                        <input type="text" placeholder="Mobile Number" className="p-4 bg-slate-50 rounded-2xl border font-bold" 
+                        <input type="text" placeholder="Signal Contact" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                             onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, mobile: e.target.value}})} required />
                     </div>
-                    <input type="email" placeholder="Official Email Address" className="w-full bg-slate-50 p-4 rounded-2xl border font-bold" 
+                    <input type="email" placeholder="Network Access Email" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                         onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, email: e.target.value}})} required />
-                    <input type="password" placeholder="Temporary Access Key (Password)" className="w-full bg-slate-50 p-4 rounded-2xl border font-bold" 
+                    <input type="password" placeholder="Access Cipher Key" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                         onChange={(e) => setFormData({...formData, tempPassword: e.target.value})} required />
                 </div>
 
-                {/* 3. Subscription & Billing */}
-                <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-white space-y-4">
+                <div className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-2xl border border-white/5 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                        <CreditCard className="text-green-500" size={18} />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Financial Agreement</h3>
+                        <CreditCard className="text-neon" size={18} />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-neon/40">Credit Agreement</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <input type="number" placeholder="Monthly Fee (₹)" className="p-4 bg-slate-50 rounded-2xl border font-bold text-green-600" 
+                        <input type="number" placeholder="Monthly Quota (₹)" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-neon" 
                             onChange={(e) => setFormData({...formData, subscription: {...formData.subscription, monthlyFee: Number(e.target.value)}})} required />
-                        <input type="number" placeholder="Advance Paid (₹)" className="p-4 bg-slate-50 rounded-2xl border font-bold text-blue-600" 
+                        <input type="number" placeholder="Initial Deposit (₹)" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white" 
                             onChange={(e) => setFormData({...formData, subscription: {...formData.subscription, totalPaid: Number(e.target.value)}})} required />
                     </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black uppercase text-sm tracking-[0.3em] shadow-2xl active:scale-95 transition-all">
-                    {loading ? "INITIALIZING NODE..." : "ACTIVATE INSTITUTION"}
+                <button type="submit" disabled={loading} className="w-full bg-neon text-void py-6 rounded-[2.5rem] font-black uppercase text-sm tracking-[0.4em] shadow-[0_0_40px_rgba(61,242,224,0.4)] active:scale-95 transition-all italic">
+                    {loading ? "INITIALIZING NODE CORE..." : "ACTIVATE INSTITUTION MATRIX"}
                 </button>
             </form>
             {msg && <Toast message={msg} onClose={() => setMsg('')} />}

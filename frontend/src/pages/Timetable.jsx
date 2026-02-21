@@ -21,12 +21,10 @@ const Timetable = ({ user }) => {
 
   useEffect(() => {
     const fetchTimetable = async () => {
-      // Check if user and grade exists
       if (!user?.grade) {
         setLoading(false);
         return;
       }
-
       try {
         const { data } = await API.get(`/timetable/${user.grade}`);
         setTimetable(data);
@@ -36,7 +34,6 @@ const Timetable = ({ user }) => {
         setLoading(false);
       }
     };
-
     fetchTimetable();
   }, [user]); 
 
@@ -45,67 +42,67 @@ const Timetable = ({ user }) => {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-20">
-      <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl active:scale-90 transition-all">
+    <div className="min-h-screen bg-void pb-20 font-sans italic text-white">
+      <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-neon/10 to-transparent pointer-events-none"></div>
+        <div className="flex justify-between items-center mb-6 relative z-10">
+          <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-90 border border-white/10 text-neon transition-all">
             <ArrowLeft size={20} />
           </button>
           <div className="text-center">
-            <h1 className="text-xl font-bold uppercase tracking-tight">Time Table</h1>
-            <p className="text-[10px] font-bold opacity-70 tracking-widest uppercase">
-                {user?.grade ? `Grade: ${user.grade}` : "Grade: Not Assigned"}
+            <h1 className="text-xl font-black uppercase tracking-tighter italic">Schedule Matrix</h1>
+            <p className="text-[9px] font-black text-neon/40 tracking-[0.3em] uppercase italic">
+                {user?.grade ? `Sector Node: ${user.grade}` : "Node Not Assigned"}
             </p>
           </div>
           <div className="w-8"></div> 
         </div>
 
-        <div className="flex justify-between overflow-x-auto gap-2 no-scrollbar py-2">
+        <div className="flex justify-between overflow-x-auto gap-2 no-scrollbar py-2 relative z-10 px-2">
           {daysMap.map((day) => (
             <button
               key={day.full}
               onClick={() => setActiveDay(day.full)}
-              className={`flex flex-col items-center min-w-[55px] py-3 rounded-2xl transition-all duration-300 ${
-                activeDay === day.full ? 'bg-white text-blue-600 shadow-xl scale-105' : 'bg-white/10 text-white'
+              className={`flex flex-col items-center min-w-[55px] py-3 rounded-2xl transition-all duration-500 border ${
+                activeDay === day.full ? 'bg-neon text-void border-neon shadow-[0_0_20px_rgba(61,242,224,0.4)] scale-105' : 'bg-white/5 text-neon/40 border-white/5'
               }`}
             >
-              <span className="text-xs font-bold">{day.short}</span>
+              <span className="text-[10px] font-black italic uppercase tracking-widest">{day.short}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="px-5 -mt-8 space-y-4">
+      <div className="px-5 -mt-8 space-y-4 relative z-20">
         {currentSchedule && currentSchedule.periods.length > 0 ? (
           currentSchedule.periods.map((item, index) => (
-            <div key={index} className="glass-card p-5 border-l-4 border-l-blue-500 flex gap-4 animate-in fade-in duration-300">
-              <div className="flex flex-col items-center justify-center border-r border-slate-100 pr-4 min-w-[90px]">
-                <Clock size={16} className="text-slate-400 mb-1" />
-                <span className="text-[10px] font-black text-slate-800 text-center uppercase tracking-tighter">
+            <div key={index} className="bg-white/5 backdrop-blur-xl p-5 border-l-4 border-l-neon shadow-2xl border-white/5 flex gap-4 animate-in fade-in duration-500 italic group">
+              <div className="flex flex-col items-center justify-center border-r border-white/5 pr-4 min-w-[90px]">
+                <Clock size={16} className="text-neon/40 mb-1 group-hover:animate-pulse" />
+                <span className="text-[10px] font-black text-white text-center uppercase tracking-tighter leading-none">
                   {item.startTime}
                 </span>
-                <span className="text-[8px] font-bold text-slate-300 text-center uppercase">
+                <span className="text-[8px] font-black text-white/20 text-center uppercase mt-1">
                   TO {item.endTime}
                 </span>
               </div>
 
               <div className="flex-1">
-                <h3 className="font-black text-slate-800 text-sm mb-1 uppercase leading-tight">{item.subject}</h3>
-                <p className="text-[11px] text-slate-500 font-bold flex items-center gap-1">
-                  <span className="text-blue-500">●</span> {item.teacher?.name || "Professor"}
+                <h3 className="font-black text-white text-sm mb-1 uppercase leading-tight italic group-hover:text-neon transition-colors">{item.subject}</h3>
+                <p className="text-[10px] text-white/30 font-black flex items-center gap-1.5 uppercase italic">
+                  <span className="w-1.5 h-1.5 bg-neon rounded-full shadow-[0_0_8px_rgba(61,242,224,1)]"></span> {item.teacher?.name || "Neural Professor"}
                 </p>
-                <div className="flex items-center gap-1 mt-3 text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-lg">
-                  <MapPin size={12} />
-                  <span className="text-[9px] font-black uppercase">Hall 204</span>
+                <div className="flex items-center gap-1.5 mt-3 text-neon bg-neon/10 w-fit px-3 py-1 rounded-lg border border-neon/20 shadow-inner">
+                  <MapPin size={10} />
+                  <span className="text-[8px] font-black uppercase tracking-widest">Sector Node 204</span>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-20 bg-white rounded-[3rem] shadow-sm border border-dashed border-slate-200">
-            <BookOpen className="mx-auto text-slate-200 mb-4" size={48} />
-            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">No Lectures Scheduled</p>
-            <p className="text-[10px] text-slate-300 font-bold mt-1 uppercase tracking-tight">Select another day or check later</p>
+          <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
+            <BookOpen className="mx-auto text-neon/10 mb-4 animate-pulse" size={48} />
+            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Lectures Scheduled In This Matrix</p>
           </div>
         )}
       </div>

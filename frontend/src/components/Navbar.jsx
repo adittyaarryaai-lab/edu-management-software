@@ -11,11 +11,9 @@ const Navbar = ({ user }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // FIXED: Agar user login nahi hai, toh fetch karne ki zaroorat hi nahi hai
     if (!user || !user.token) return;
 
     const fetchUnreadCount = async () => {
-      // FIXED: SuperAdmin aur Admin ke liye notices fetch block
       const backup = localStorage.getItem('superadmin_backup');
       if (user?.role === 'admin' && backup) return; 
       if (user?.role === 'admin' || user?.role === 'superadmin') return;
@@ -24,7 +22,6 @@ const Navbar = ({ user }) => {
         const { data } = await API.get('/notices/my-notices');
         setUnreadCount(data.unreadCount || 0);
       } catch (err) {
-        // FIXED: Console error ko thoda clean kiya taaki user logout hone par 401 na dikhe
         if (err.response?.status !== 401) {
           console.error("Notification Fetch Error:", err);
         }
@@ -33,8 +30,6 @@ const Navbar = ({ user }) => {
 
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 60000);
-    
-    // Cleanup function: Jab component unmount ho ya user logout ho, interval ruk jaye
     return () => clearInterval(interval);
   }, [user]);
 
@@ -81,22 +76,22 @@ const Navbar = ({ user }) => {
 
   return (
     <>
-      <header className="bg-[#7E8694] text-white px-6 pt-8 pb-16 rounded-b-[3rem] shadow-lg relative z-50 overflow-hidden">
+      <header className="bg-void text-white px-6 pt-8 pb-16 rounded-b-[3rem] shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-b border-neon/20 relative z-50 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon/60 to-transparent animate-pulse"></div>
         </div>
 
         <div className="flex justify-between items-center mb-6 relative z-10">
           <div className="flex items-center gap-3">
             <Menu
               size={24}
-              className="cursor-pointer text-white/80 hover:text-cyan-400 transition-all active:scale-90"
+              className="cursor-pointer text-white/80 hover:text-neon transition-all active:scale-90"
               onClick={() => setIsDrawerOpen(true)}
             />
-            <div className="bg-cyan-500/20 p-2 rounded-xl border border-cyan-400/30 backdrop-blur-md shadow-inner">
-              <Cpu size={14} className="text-cyan-300 animate-spin-slow" />
+            <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 backdrop-blur-md shadow-inner">
+              <Cpu size={14} className="text-neon animate-spin-slow" />
             </div>
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-cyan-200">
+            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-neon/80">
               EDUFLOWAI v2
             </span>
           </div>
@@ -113,19 +108,19 @@ const Navbar = ({ user }) => {
             {user?.role !== 'superadmin' && (
               <div
                 onClick={handleBellClick}
-                className="bg-white/10 p-2 rounded-xl border border-white/10 backdrop-blur-md relative cursor-pointer hover:bg-cyan-500/20 transition-all active:scale-90"
+                className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md relative cursor-pointer hover:bg-neon/20 transition-all active:scale-90"
               >
-                <Bell size={18} />
+                <Bell size={18} className="text-white/80" />
                 {user?.role !== 'admin' && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#7E8694] animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-void animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]">
                     {unreadCount}
                   </span>
                 )}
               </div>
             )}
 
-            <div className="bg-white/10 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-cyan-500/20 transition-all active:scale-90">
-              <Headphones size={18} />
+            <div className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-neon/20 transition-all active:scale-90">
+              <Headphones size={18} className="text-white/80" />
             </div>
           </div>
         </div>
@@ -133,19 +128,19 @@ const Navbar = ({ user }) => {
         <div className="mt-2 text-left relative z-10">
           <h2 className="text-2xl font-black tracking-tight italic">
             {greeting.text} {greeting.emoji}{' '}
-            <span className="text-cyan-200">
+            <span className="text-neon">
               {user?.name?.split(' ')[0]}
             </span>
           </h2>
-          <span className="inline-block mt-2 px-4 py-1 bg-cyan-500/20 border border-cyan-400/30 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-cyan-200 italic">
+          <span className="inline-block mt-2 px-4 py-1 bg-neon/10 border border-neon/30 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-neon italic">
             {user?.role} PORTAL
           </span>
           <div className="mt-6 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-300" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/60" size={18} />
             <input
               type="text"
               placeholder="SEARCH NEURAL MODULES..."
-              className="w-full bg-slate-900/70 border border-cyan-400/20 text-cyan-100 py-4 pl-12 pr-4 rounded-2xl shadow-inner outline-none placeholder:text-cyan-300/50 focus:border-cyan-400 focus:bg-slate-900 transition-all font-black text-[10px] tracking-widest"
+              className="w-full bg-slate-900/50 border border-neon/20 text-white py-4 pl-12 pr-4 rounded-2xl shadow-inner outline-none placeholder:text-neon/30 focus:border-neon focus:bg-slate-900 transition-all font-black text-[10px] tracking-widest"
             />
           </div>
         </div>

@@ -53,64 +53,65 @@ const TeacherAssignments = ({ user }) => {
     if (fetching) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24">
-            <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg relative z-10">
-                <div className="flex justify-between items-center mb-6">
-                    <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl">
+        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-neon/10 to-transparent pointer-events-none"></div>
+                <div className="flex justify-between items-center mb-6 relative z-10">
+                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl border border-white/10 text-neon transition-all active:scale-90">
                         <ArrowLeft size={20} />
                     </button>
-                    <h1 className="text-xl font-bold uppercase tracking-tight">Assignments</h1>
+                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Assignments</h1>
                     <button 
                         onClick={() => setShowForm(!showForm)}
-                        className={`p-2 rounded-xl shadow-lg active:scale-90 transition-all ${showForm ? 'bg-red-500 text-white' : 'bg-white text-blue-600'}`}
+                        className={`p-2 rounded-xl shadow-lg active:scale-90 transition-all border ${showForm ? 'bg-red-500 text-white border-red-500' : 'bg-neon text-void border-neon shadow-[0_0_15px_rgba(61,242,224,0.4)]'}`}
                     >
                         {showForm ? <Plus size={20} className="rotate-45" /> : <Plus size={20} />}
                     </button>
                 </div>
-                <p className="text-[11px] opacity-90 font-medium ml-2 uppercase tracking-widest">Portal: {user?.name}</p>
+                <p className="text-[10px] text-neon/60 font-black uppercase tracking-widest ml-2 italic">Faculty Portal: {user?.name}</p>
             </div>
 
             <div className="px-5 -mt-10 relative z-20 space-y-6">
                 {showForm && (
-                    <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-blue-100 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-tighter">
-                            <FileText size={18} className="text-blue-500" /> New Task
+                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-neon/20 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <h3 className="text-[10px] font-black text-neon uppercase tracking-[0.4em] mb-6 flex items-center gap-2 italic">
+                            <FileText size={18} /> Deploy New Task
                         </h3>
                         <form onSubmit={handlePost} className="space-y-4">
                             <input 
                                 type="text" 
                                 placeholder="Assignment Title" 
-                                className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300 font-bold"
+                                className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-xs font-black text-white italic outline-none focus:border-neon placeholder:text-white/20"
                                 onChange={(e) => setFormData({...formData, title: e.target.value})}
                                 required
                             />
                             <div className="grid grid-cols-2 gap-3">
                                 <input 
                                     type="text" 
-                                    placeholder="Grade (e.g. 10-A)" 
-                                    className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-[10px] outline-none font-bold"
+                                    placeholder="Sector (e.g. 10-A)" 
+                                    className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-[9px] font-black text-white italic outline-none focus:border-neon placeholder:text-white/20"
                                     onChange={(e) => setFormData({...formData, grade: e.target.value})}
                                     required
                                 />
                                 <input 
                                     type="text" 
-                                    placeholder="Subject" 
-                                    className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-[10px] outline-none font-bold"
+                                    placeholder="Core Subject" 
+                                    className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-[9px] font-black text-white italic outline-none focus:border-neon placeholder:text-white/20"
                                     onChange={(e) => setFormData({...formData, subject: e.target.value})}
                                     required
                                 />
                             </div>
                             <textarea 
-                                placeholder="Instructions for students..." 
+                                placeholder="Neural instructions for students..." 
                                 rows="3" 
-                                className="w-full bg-slate-50 border border-slate-100 py-3 px-4 rounded-2xl text-sm outline-none focus:border-blue-300 font-medium"
+                                className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-xs font-black text-white italic outline-none focus:border-neon placeholder:text-white/20"
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                             ></textarea>
                             <div className="relative">
-                                <Calendar className="absolute left-4 top-3.5 text-slate-400" size={16} />
+                                <Calendar className="absolute left-4 top-4 text-neon/40" size={16} />
                                 <input 
                                     type="date" 
-                                    className="w-full bg-slate-50 border border-slate-100 py-3.5 pl-12 pr-4 rounded-2xl text-[10px] outline-none font-black"
+                                    className="w-full bg-void border border-white/5 py-4 pl-12 pr-4 rounded-2xl text-[9px] font-black text-white outline-none focus:border-neon appearance-none italic"
                                     onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
                                     required
                                 />
@@ -118,43 +119,42 @@ const TeacherAssignments = ({ user }) => {
                             <button 
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all uppercase text-[10px] tracking-[0.2em] disabled:bg-slate-300"
+                                className="w-full bg-neon text-void py-5 rounded-[2rem] font-black shadow-[0_0_20px_rgba(61,242,224,0.4)] flex items-center justify-center gap-2 active:scale-95 transition-all uppercase text-[10px] tracking-widest italic disabled:bg-slate-800 disabled:text-white/20"
                             >
-                                {loading ? "Broadcasting..." : <><Send size={16} /> Deploy Assignment</>}
+                                {loading ? "Broadcasting..." : <><Send size={16} /> Deploy Assignment Matrix</>}
                             </button>
                         </form>
                     </div>
                 )}
 
                 <div className="space-y-4">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-2">Class Feed</p>
+                    <p className="text-[10px] font-black text-neon/30 uppercase tracking-[0.4em] ml-2 italic">Active Class Feed</p>
                     {assignments.length > 0 ? (
                         assignments.map((asgn, i) => (
-                            <div key={i} className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all">
+                            <div key={i} className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] shadow-2xl border border-white/5 flex items-center justify-between group hover:border-neon/30 transition-all italic">
                                 <div className="flex items-center gap-4">
-                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl">
+                                    <div className="bg-neon/10 text-neon p-3 rounded-2xl border border-neon/20 shadow-inner group-hover:bg-neon group-hover:text-void transition-all">
                                         <FileText size={24} />
                                     </div>
                                     <div>
-                                        <h4 className="font-extrabold text-slate-800 text-sm leading-tight">{asgn.title}</h4>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
-                                            {asgn.grade} • Due: {new Date(asgn.dueDate).toLocaleDateString()}
+                                        <h4 className="font-black text-white text-sm leading-tight uppercase italic group-hover:text-neon transition-colors">{asgn.title}</h4>
+                                        <p className="text-[9px] font-black text-neon/40 uppercase tracking-tighter mt-1">
+                                            Sector {asgn.grade} • Deadline: {new Date(asgn.dueDate).toLocaleDateString()}
                                         </p>
                                     </div>
                                 </div>
-                                {/* FIXED: Added 'View Submissions' button here */}
                                 <button 
                                     onClick={() => navigate(`/teacher/grade/${asgn._id}`)}
-                                    className="bg-blue-600 text-white p-2.5 rounded-xl shadow-md active:scale-90 transition-all flex items-center gap-2"
+                                    className="bg-neon text-void p-3 rounded-xl shadow-[0_0_15px_rgba(61,242,224,0.3)] active:scale-90 transition-all flex items-center gap-2"
                                 >
                                     <Users size={14} />
-                                    <span className="text-[9px] font-black uppercase tracking-widest">Submissions</span>
+                                    <span className="text-[9px] font-black uppercase tracking-widest italic">Submissions</span>
                                 </button>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
-                            <p className="text-slate-300 font-bold text-[10px] uppercase tracking-[0.2em]">No Active Assignments</p>
+                        <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
+                            <p className="text-white/10 font-black text-[10px] uppercase tracking-[0.4em] italic">No Active Signal Transmissions</p>
                         </div>
                     )}
                 </div>

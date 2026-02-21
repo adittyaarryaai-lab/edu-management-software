@@ -23,32 +23,33 @@ const DigitalMaterial = () => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24 font-sans italic">
-            <div className="nav-gradient text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] relative z-10 overflow-hidden">
-                <button onClick={() => navigate(-1)} className="bg-white/10 backdrop-blur-md p-2.5 rounded-2xl active:scale-90 transition-all border border-white/20 mb-6">
+        <div className="min-h-screen bg-void pb-24 font-sans italic">
+            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.5)] border-b border-neon/20 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-neon/5 to-transparent pointer-events-none"></div>
+                <button onClick={() => navigate(-1)} className="bg-white/5 backdrop-blur-md p-2.5 rounded-2xl active:scale-90 transition-all border border-white/10 text-neon mb-6">
                     <ArrowLeft size={20} />
                 </button>
-                <div className="flex items-center gap-4">
-                    <div className="bg-blue-600 p-4 rounded-[1.8rem] shadow-[0_0_20px_rgba(59,130,246,0.5)]">
-                        <Zap size={28} className="text-white fill-white" />
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="bg-neon text-void p-4 rounded-[1.8rem] shadow-[0_0_25px_rgba(61,242,224,0.4)]">
+                        <Zap size={28} className="fill-void" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black uppercase tracking-tight">Digital Vault</h1>
-                        <p className="text-[10px] font-black opacity-70 uppercase tracking-[0.3em]">Encrypted Study Resources</p>
+                        <h1 className="text-2xl font-black uppercase tracking-tighter italic">Digital Vault</h1>
+                        <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em]">Decrypted Learning Blocks</p>
                     </div>
                 </div>
             </div>
 
             <div className="px-5 -mt-12 relative z-20 space-y-5">
                 {materials.length > 0 ? materials.map((item, i) => (
-                    <div key={i} className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-white flex items-center justify-between group">
+                    <div key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-white/5 flex items-center justify-between group hover:border-neon/30 transition-all">
                         <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 bg-slate-900 text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:bg-blue-600 transition-all">
+                            <div className="w-14 h-14 bg-neon/10 text-neon rounded-3xl flex items-center justify-center border border-neon/20 shadow-inner group-hover:bg-neon group-hover:text-void transition-all">
                                 <FileText size={24} />
                             </div>
                             <div>
-                                <h4 className="font-black text-slate-800 text-sm uppercase leading-tight">{item.title}</h4>
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{item.category} • PDF</p>
+                                <h4 className="font-black text-white text-sm uppercase leading-tight italic tracking-tight">{item.title}</h4>
+                                <p className="text-[9px] font-black text-neon/40 uppercase tracking-widest mt-1 italic">{item.category} • Neural PDF</p>
                             </div>
                         </div>
                         
@@ -57,19 +58,19 @@ const DigitalMaterial = () => {
                                 href={item.fileUrl} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="bg-slate-50 p-3 rounded-xl text-slate-400 hover:text-blue-600 transition-all"
+                                className="bg-void p-3 rounded-xl text-neon/60 border border-neon/10 hover:text-neon hover:border-neon/40 transition-all"
                              >
                                 <Eye size={18} />
                              </a>
-                             <button className="bg-slate-900 text-white p-3 rounded-xl shadow-lg active:scale-90 transition-all">
+                             <button className="bg-neon text-void p-3 rounded-xl shadow-[0_0_15px_rgba(61,242,224,0.3)] active:scale-90 transition-all">
                                 <Download size={18} />
                              </button>
                         </div>
                     </div>
                 )) : (
-                    <div className="bg-white rounded-[3rem] p-16 flex flex-col items-center justify-center border border-dashed border-slate-200">
-                        <ShieldCheck size={50} className="text-slate-100 mb-4" />
-                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Vault is Empty</p>
+                    <div className="bg-white/5 rounded-[3rem] p-16 flex flex-col items-center justify-center border border-dashed border-neon/10">
+                        <ShieldCheck size={50} className="text-neon/10 mb-4 animate-pulse" />
+                        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] italic">Vault Storage Empty</p>
                     </div>
                 )}
             </div>

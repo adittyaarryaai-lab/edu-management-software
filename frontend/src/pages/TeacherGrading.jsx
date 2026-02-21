@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, FileText, CheckCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ExternalLink, Award } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -19,7 +19,7 @@ const TeacherGrading = () => {
             } catch (err) { 
                 console.error(err);
                 if (err.response?.status === 403) {
-                    alert("Access Denied: Only Teachers can access this page.");
+                    alert("Access Denied: Faculty node only.");
                     navigate('/');
                 }
             }
@@ -29,74 +29,75 @@ const TeacherGrading = () => {
     }, [assignmentId, navigate]);
 
     const submitGrade = async (subId) => {
-        if (!gradeData.grade) return alert("Please enter a grade first!");
+        if (!gradeData.grade) return alert("Enter evaluation cipher first!");
         try {
             await API.put(`/assignments/grade/${subId}`, gradeData);
-            alert("Grade Assigned Successfully!");
+            alert("Grade Successfully Transmitted!");
             window.location.reload();
         } catch (err) { 
-            alert("Grading failed: Check if you have teacher permissions."); 
+            alert("Grading failed: Check node permissions."); 
         }
     };
 
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24">
-            <div className="nav-gradient text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-lg">
-                <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl mb-4 active:scale-95 transition-all">
+        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-neon/10 to-transparent pointer-events-none"></div>
+                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-4 active:scale-95 transition-all border border-white/10 text-neon relative z-10">
                     <ArrowLeft size={20}/>
                 </button>
-                <h1 className="text-xl font-black uppercase tracking-tight">Student Submissions</h1>
+                <h1 className="text-xl font-black uppercase tracking-tighter italic relative z-10">Student Node Submissions</h1>
             </div>
 
-            <div className="px-5 -mt-8 space-y-4">
+            <div className="px-5 -mt-8 space-y-4 relative z-20">
                 {submissions.length > 0 ? submissions.map((sub) => (
-                    <div key={sub._id} className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-50">
-                        <div className="flex justify-between items-center mb-4">
-                            <h4 className="font-black text-slate-800 uppercase text-sm">{sub.student?.name}</h4>
+                    <div key={sub._id} className="bg-white/5 backdrop-blur-xl p-6 rounded-[2.5rem] shadow-2xl border border-white/5 italic">
+                        <div className="flex justify-between items-center mb-6">
+                            <h4 className="font-black text-white uppercase text-sm italic tracking-tight">{sub.student?.name}</h4>
                             <a 
                                 href={`http://localhost:5000${sub.fileUrl}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="text-blue-500 flex items-center gap-1 text-[10px] font-black uppercase"
+                                className="text-neon flex items-center gap-2 text-[9px] font-black uppercase tracking-widest bg-neon/5 px-4 py-2 rounded-xl border border-neon/20 hover:bg-neon hover:text-void transition-all shadow-inner"
                             >
-                                View File <ExternalLink size={12}/>
+                                Decrypt Data <ExternalLink size={12}/>
                             </a>
                         </div>
                         
                         {sub.status === 'Graded' ? (
-                            <div className="bg-green-50 p-4 rounded-2xl border border-green-100">
-                                <p className="text-green-600 font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                                    <CheckCircle size={14}/> Grade: {sub.grade}
+                            <div className="bg-neon/5 p-4 rounded-2xl border border-neon/20 shadow-inner">
+                                <p className="text-neon font-black text-xs uppercase tracking-[0.2em] flex items-center gap-2 italic">
+                                    <CheckCircle size={14}/> Evaluation Cipher: {sub.grade}
                                 </p>
-                                <p className="text-[10px] text-green-800/60 mt-1 font-bold italic">"{sub.feedback}"</p>
+                                <p className="text-[10px] text-white/40 mt-2 font-black italic">"{sub.feedback}"</p>
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 <input 
                                     type="text" 
-                                    placeholder="Grade (A, B, 9/10...)" 
-                                    className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs font-bold outline-none focus:border-blue-500"
+                                    placeholder="Evaluation Cipher (A, 9/10...)" 
+                                    className="w-full bg-void border border-white/5 p-4 rounded-2xl text-xs font-black text-white outline-none focus:border-neon italic"
                                     onChange={(e) => setGradeData({...gradeData, grade: e.target.value})} 
                                 />
                                 <textarea 
-                                    placeholder="Teacher's Feedback" 
-                                    className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs font-bold h-20 outline-none focus:border-blue-500"
+                                    placeholder="Faculty Feedback Logs" 
+                                    className="w-full bg-void border border-white/5 p-4 rounded-2xl text-xs font-black text-white h-20 outline-none focus:border-neon italic placeholder:text-white/10"
                                     onChange={(e) => setGradeData({...gradeData, feedback: e.target.value})} 
                                 />
                                 <button 
                                     onClick={() => submitGrade(sub._id)} 
-                                    className="w-full bg-slate-900 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                                    className="w-full bg-neon text-void py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] active:scale-95 transition-all shadow-[0_0_20px_rgba(61,242,224,0.3)] italic"
                                 >
-                                    Submit Grade
+                                    Transmit Evaluation
                                 </button>
                             </div>
                         )}
                     </div>
                 )) : (
-                    <div className="text-center py-20 bg-white rounded-[3rem] shadow-sm border border-dashed border-slate-200">
-                        <p className="text-slate-400 font-bold text-xs uppercase">No submissions yet for this assignment</p>
+                    <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
+                        <p className="text-white/10 font-black text-[10px] uppercase tracking-[0.4em] italic">No Transmission Data Found For This Node</p>
                     </div>
                 )}
             </div>

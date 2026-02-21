@@ -11,14 +11,11 @@ const LiveClass = ({ user }) => {
 
     useEffect(() => {
         const fetchClasses = async () => {
-            // FIX 1: Agar user nahi hai toh loading band karo, wait mat karo
             if (!user || !user.grade) {
                 setLoading(false);
                 return;
             }
-
             try {
-                // FIX 2: setLoading(true) ko yahan rakha hai
                 setLoading(true);
                 const { data } = await API.get(`/live-classes/my-classes/${encodeURIComponent(user.grade)}`);
                 setClasses(data); 
@@ -28,56 +25,55 @@ const LiveClass = ({ user }) => {
                 setLoading(false);
             }
         };
-
         fetchClasses();
-    }, [user?.grade]); // Specially user grade badalne par trigger hoga
+    }, [user?.grade]);
 
-    // FIX 3: Agar loading false hai aur user grade missing hai toh empty state dikhao
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24 font-sans italic">
+        <div className="min-h-screen bg-void pb-24 font-sans italic">
             {/* Header */}
-            <div className="nav-gradient text-white px-6 pt-12 pb-24 rounded-b-[3rem] shadow-lg relative z-10">
-                <div className="flex justify-between items-center mb-6">
-                    <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl active:scale-90 transition-all border border-white/10">
+            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-neon/5 to-transparent pointer-events-none"></div>
+                <div className="flex justify-between items-center mb-6 relative z-10">
+                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-90 border border-white/10 text-neon transition-all">
                         <ArrowLeft size={20} />
                     </button>
-                    <h1 className="text-xl font-black uppercase tracking-tight">Live Classes</h1>
-                    <div className="bg-white/20 p-2 rounded-xl"><Video size={20} /></div>
+                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Live Classes</h1>
+                    <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 text-neon"><Video size={20} /></div>
                 </div>
-                <p className="text-[11px] opacity-90 font-medium ml-2 leading-relaxed uppercase tracking-widest">Join your scheduled online lectures and interactive sessions here.</p>
+                <p className="text-[10px] text-neon/60 font-black uppercase tracking-[0.3em] ml-2 leading-relaxed">Join scheduled neural lectures and interactive sessions.</p>
             </div>
 
             {/* Live Class List */}
             <div className="px-5 -mt-12 relative z-20 space-y-5">
                 {classes.length > 0 ? classes.map((c, i) => (
-                    <div key={i} className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-50 overflow-hidden relative group">
-                        <div className={`absolute top-0 right-0 px-6 py-1.5 rounded-bl-3xl ${c.status === 'Live' ? 'bg-red-500 animate-pulse' : 'bg-blue-500'} text-white text-[9px] font-black uppercase tracking-widest`}>
-                            {c.status === 'Live' ? 'Live Now' : c.status}
+                    <div key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-white/5 overflow-hidden relative group">
+                        <div className={`absolute top-0 right-0 px-6 py-1.5 rounded-bl-3xl ${c.status === 'Live' ? 'bg-red-600 animate-pulse' : 'bg-neon text-void'} text-[9px] font-black uppercase tracking-widest`}>
+                            {c.status === 'Live' ? 'Node Active' : c.status}
                         </div>
 
                         <div className="flex flex-col gap-4 mt-2">
                             <div>
-                                <h3 className="text-lg font-black text-slate-800 leading-tight uppercase italic">{c.subject}</h3>
+                                <h3 className="text-lg font-black text-white leading-tight uppercase italic tracking-tight group-hover:text-neon transition-all">{c.subject}</h3>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <User size={12} className="text-slate-400" />
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Topic: {c.topic}</span>
+                                    <User size={12} className="text-neon/40" />
+                                    <span className="text-[10px] font-black text-neon/40 uppercase tracking-widest italic">Core Topic: {c.topic}</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                                <Clock size={16} className="text-blue-500" />
-                                <span className="text-xs font-black text-slate-700 uppercase tracking-tighter">
+                            <div className="flex items-center gap-2 bg-void p-3 rounded-2xl border border-white/5 shadow-inner">
+                                <Clock size={16} className="text-neon" />
+                                <span className="text-xs font-black text-white/80 uppercase tracking-tighter italic">
                                     {new Date(c.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(c.startTime).toLocaleDateString()}
                                 </span>
                             </div>
 
                             <button
                                 onClick={() => c.meetingLink && window.open(c.meetingLink, "_blank")}
-                                className={`w-full py-4 rounded-3xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 ${c.status === "Live" || c.status === "Upcoming"
-                                        ? "bg-slate-900 text-white shadow-slate-200"
-                                        : "bg-slate-100 text-slate-400 grayscale"
+                                className={`w-full py-4 rounded-3xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 italic ${c.status === "Live" || c.status === "Upcoming"
+                                        ? "bg-neon text-void"
+                                        : "bg-void border border-white/5 text-white/20 grayscale"
                                     }`}
                             >
                                 <ExternalLink size={18} />
@@ -86,9 +82,9 @@ const LiveClass = ({ user }) => {
                         </div>
                     </div>
                 )) : (
-                    <div className="bg-white rounded-[3rem] p-16 flex flex-col items-center justify-center border border-dashed border-slate-200 shadow-inner italic">
-                        <Zap size={40} className="text-slate-100 mb-4" />
-                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] text-center">No Live Classes Scheduled</p>
+                    <div className="bg-white/5 rounded-[3rem] p-16 flex flex-col items-center justify-center border border-dashed border-neon/10 shadow-inner">
+                        <Zap size={40} className="text-neon/10 mb-4 animate-pulse" />
+                        <p className="text-[10px] font-black text-neon/20 uppercase tracking-[0.3em] text-center italic">No Live Transmissions Scheduled</p>
                     </div>
                 )}
             </div>

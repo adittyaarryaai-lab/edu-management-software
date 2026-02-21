@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, IndianRupee, ShieldAlert, TrendingUp, Briefcase, Trash2, Edit3, X, Save, RotateCcw, Users } from 'lucide-react';
+import { Globe, Plus, IndianRupee, TrendingUp, Trash2, Edit3, X, Save, RotateCcw, Users, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -50,127 +50,105 @@ const SuperAdminDashboard = () => {
     const handleGhostLogin = async (schoolId) => {
         try {
             if (!schoolId) return alert("Invalid School Reference");
-
             const currentUser = JSON.parse(localStorage.getItem('user'));
             localStorage.setItem('superadmin_backup', JSON.stringify(currentUser));
-            
             const { data } = await API.get(`/superadmin/login-as-school/${schoolId}`);
-            
             if(data.token) {
                 localStorage.setItem('user', JSON.stringify(data));
                 window.location.href = '/dashboard';
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Ghost Login Protocol Failed!");
+            alert(err.response?.data?.message || "Ghost Login Failed!");
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("CAUTION: This will deactivate the school. Revenue will be preserved in records. Proceed?")) {
+        if (window.confirm("CAUTION: Deactivate node? Revenue preserved. Proceed?")) {
             try {
                 await API.delete(`/superadmin/delete-school/${id}`);
                 fetchStats();
-            } catch (err) {
-                alert("Deletion Failed");
-            }
+            } catch (err) { alert("Deletion Failed"); }
         }
     };
 
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f1f5f9] p-6 font-sans italic">
+        <div className="min-h-screen bg-void p-6 font-sans italic text-white">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Executive Hub</h1>
-                    <p className="text-xs font-bold text-slate-500 tracking-widest uppercase">Global Product Tracking</p>
+                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Executive Hub</h1>
+                    <p className="text-[10px] font-black text-neon/40 tracking-[0.3em] uppercase italic">Global Asset Monitoring</p>
                 </div>
-                <button onClick={() => window.location.href='/superadmin/onboard'} className="bg-blue-600 text-white px-6 py-4 rounded-3xl font-black flex items-center gap-2 shadow-xl shadow-blue-200 active:scale-95 transition-all">
-                    <Plus size={20}/> ONBOARD NEW SCHOOL
+                <button onClick={() => navigate('/superadmin/onboard')} className="bg-neon text-void px-6 py-4 rounded-3xl font-black flex items-center gap-2 shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 transition-all uppercase text-[10px] tracking-widest italic">
+                    <Plus size={20}/> Onboard New Node
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 {[
-                    { label: 'Active Institutions', value: stats?.activeSchools, icon: <Globe />, color: 'text-blue-600', bg: 'bg-blue-100' },
-                    { label: 'Total Revenue Generated', value: `₹${stats?.totalRevenue}`, icon: <IndianRupee />, color: 'text-green-600', bg: 'bg-green-100' },
-                    { label: 'System Load', value: 'Optimal', icon: <TrendingUp />, color: 'text-purple-600', bg: 'bg-purple-100' }
+                    { label: 'Active Nodes', value: stats?.activeSchools, icon: <Globe />, color: 'text-neon', bg: 'bg-neon/10' },
+                    { label: 'Total Revenue', value: `₹${stats?.totalRevenue}`, icon: <IndianRupee />, color: 'text-neon', bg: 'bg-neon/10' },
+                    { label: 'Network Load', value: 'OPTIMAL', icon: <TrendingUp />, color: 'text-neon', bg: 'bg-neon/10' }
                 ].map((s, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[3rem] shadow-xl border border-white flex items-center gap-6">
-                        <div className={`${s.bg} ${s.color} p-5 rounded-3xl`}>{s.icon}</div>
+                    <div key={i} className="bg-white/5 p-8 rounded-[3rem] shadow-2xl border border-white/10 flex items-center gap-6 group hover:border-neon/30 transition-all">
+                        <div className={`${s.bg} ${s.color} p-5 rounded-3xl border border-neon/20 shadow-inner group-hover:shadow-[0_0_15px_rgba(61,242,224,0.2)] transition-all`}>{s.icon}</div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tighter">{s.value}</h3>
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1 italic">{s.label}</p>
+                            <h3 className="text-2xl font-black text-white tracking-tighter italic">{s.value}</h3>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="bg-white rounded-[3.5rem] p-10 shadow-2xl border border-white">
-                <h2 className="text-xl font-black text-slate-800 mb-8 uppercase tracking-tighter">Institution Inventory</h2>
+            <div className="bg-slate-900/50 backdrop-blur-xl rounded-[3.5rem] p-10 shadow-2xl border border-white/5">
+                <h2 className="text-xl font-black text-neon/60 mb-8 uppercase tracking-tighter italic flex items-center gap-3">
+                    <Bot size={20} className="animate-pulse" /> Institution Node Inventory
+                </h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
-                                <th className="pb-4">School Details</th>
-                                <th className="pb-4">Admin Contact</th>
-                                <th className="pb-4">Strength (S/T)</th> {/* DAY 72: Added Strength Header */}
-                                <th className="pb-4">Revenue (Paid)</th>
+                            <tr className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] border-b border-white/5">
+                                <th className="pb-4">Sector Details</th>
+                                <th className="pb-4">Admin Node</th>
+                                <th className="pb-4">Strength (S/F)</th>
+                                <th className="pb-4">Revenue Log</th>
                                 <th className="pb-4">Status</th>
-                                <th className="pb-4">Actions</th>
+                                <th className="pb-4">Protocol</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-white/5">
                             {stats?.schools.map((school, i) => (
-                                <tr key={i} className="group hover:bg-slate-50/50 transition-all cursor-pointer">
+                                <tr key={i} className="group hover:bg-neon/5 transition-all cursor-pointer">
                                     <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <div className="flex items-center gap-4">
-                                            <img 
-                                                src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} 
-                                                className="w-12 h-12 rounded-2xl object-cover border border-slate-100 shadow-sm" 
-                                                alt="logo"
-                                            />
+                                            <img src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} className="w-12 h-12 rounded-2xl object-cover border border-neon/20 shadow-inner grayscale group-hover:grayscale-0 transition-all" alt="logo" />
                                             <div>
-                                                <p className="font-black text-slate-800 text-sm uppercase italic group-hover:text-blue-600 transition-colors">{school.schoolName}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold">{school.affiliationNo}</p>
+                                                <p className="font-black text-white/80 text-sm uppercase italic group-hover:text-neon transition-colors">{school.schoolName}</p>
+                                                <p className="text-[9px] text-white/20 font-black tracking-widest uppercase">{school.affiliationNo}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
-                                        <p className="text-xs font-black text-slate-700">{school.adminDetails.fullName}</p>
-                                        <p className="text-[10px] text-slate-400 font-bold">{school.adminDetails.email}</p>
+                                        <p className="text-xs font-black text-white/70 italic uppercase">{school.adminDetails.fullName}</p>
+                                        <p className="text-[9px] text-white/20 font-black italic">{school.adminDetails.email}</p>
                                     </td>
-                                    {/* DAY 72: Added School strength metrics cell */}
                                     <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <div className="flex flex-col gap-0.5">
-                                            <span className="text-[11px] font-black text-blue-600 uppercase tracking-tighter italic">
-                                                {school.studentCount || 0} Students
-                                            </span>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase">
-                                                {school.teacherCount || 0} Faculty
-                                            </span>
+                                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">{school.studentCount || 0} Nodes</span>
+                                            <span className="text-[8px] font-black text-white/20 uppercase italic">{school.teacherCount || 0} Faculty</span>
                                         </div>
                                     </td>
-                                    <td className="py-6 font-black text-sm text-green-600 italic">₹{school.subscription.totalPaid}</td>
+                                    <td className="py-6 font-black text-sm text-neon/80 italic tracking-tighter">₹{school.subscription.totalPaid}</td>
                                     <td className="py-6">
-                                        <span className={`text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest ${school.subscription.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                                        <span className={`text-[8px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest italic ${school.subscription.status === 'Active' ? 'bg-neon/10 text-neon border border-neon/30' : 'bg-red-500/10 text-red-500 border border-red-500/30'}`}>
                                             {school.subscription.status}
                                         </span>
                                     </td>
                                     <td className="py-6">
                                         <div className="flex gap-2">
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }}
-                                                className="p-3 bg-blue-50 text-blue-400 rounded-xl hover:bg-blue-500 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <Edit3 size={16}/>
-                                            </button>
-                                            <button 
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }}
-                                                className="p-3 bg-slate-100 text-slate-400 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <Trash2 size={16}/>
-                                            </button>
+                                            <button onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }} className="p-3 bg-void border border-white/5 text-neon/40 rounded-xl hover:text-neon hover:border-neon/30 transition-all shadow-lg"><Edit3 size={16}/></button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }} className="p-3 bg-void border border-white/5 text-red-500/40 rounded-xl hover:text-red-500 hover:border-red-500/30 transition-all shadow-lg"><Trash2 size={16}/></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -181,37 +159,23 @@ const SuperAdminDashboard = () => {
             </div>
 
             {editingSchool && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-                    <div className="bg-white w-full max-w-md rounded-[3rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-black uppercase tracking-tighter text-slate-800">Edit Institution</h3>
-                            <button onClick={() => setEditingSchool(null)} className="p-2 bg-slate-50 rounded-full text-slate-400"><X size={20}/></button>
+                <div className="fixed inset-0 bg-void/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                    <div className="bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-neon/20 animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center mb-8">
+                            <h3 className="font-black italic uppercase tracking-tighter text-neon/60">Node Re-Configuration</h3>
+                            <button onClick={() => setEditingSchool(null)} className="p-2 bg-void rounded-full text-white/20 hover:text-white transition-colors"><X size={20}/></button>
                         </div>
-                        <div className="space-y-4">
-                            <input 
-                                className="w-full p-4 bg-slate-50 rounded-2xl border font-bold text-sm outline-none focus:border-blue-500" 
-                                value={editData.schoolName}
-                                onChange={(e) => setEditData({...editData, schoolName: e.target.value})}
-                                placeholder="School Name"
-                            />
+                        <div className="space-y-6">
+                            <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-white uppercase" value={editData.schoolName} onChange={(e) => setEditData({...editData, schoolName: e.target.value})} placeholder="School Name" />
                             <div className="grid grid-cols-2 gap-3">
-                                <input 
-                                    className="p-4 bg-slate-50 rounded-2xl border font-bold text-sm outline-none" 
-                                    value={editData.subscription.totalPaid}
-                                    onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, totalPaid: Number(e.target.value)}})}
-                                    placeholder="Total Paid"
-                                />
-                                <select 
-                                    className="p-4 bg-slate-50 rounded-2xl border font-bold text-sm outline-none"
-                                    value={editData.subscription.status}
-                                    onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, status: e.target.value}})}
-                                >
+                                <input className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-white" value={editData.subscription.totalPaid} onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, totalPaid: Number(e.target.value)}})} placeholder="Total Paid" />
+                                <select className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-neon/60 appearance-none uppercase" value={editData.subscription.status} onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, status: e.target.value}})}>
                                     <option value="Active">Active</option>
                                     <option value="Terminated">Terminated</option>
                                 </select>
                             </div>
-                            <button onClick={handleUpdate} className="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2">
-                                <Save size={18}/> Synchronize Changes
+                            <button onClick={handleUpdate} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-2 italic">
+                                <Save size={18}/> Commit Protocol Changes
                             </button>
                         </div>
                     </div>

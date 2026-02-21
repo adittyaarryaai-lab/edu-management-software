@@ -4,14 +4,14 @@ import { NavLink } from 'react-router-dom';
 
 const BottomNav = () => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#7E8694] border-t border-[#6F7785] px-8 py-0 flex justify-between items-center z-50 rounded-t-[2rem] shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-void border-t border-neon/20 px-8 py-0 flex justify-between items-center z-50 rounded-t-[2rem] shadow-[0_-10px_30px_rgba(61,242,224,0.1)]">
 
       {/* HOME */}
       <NavLink
         to="/dashboard"
         className={({ isActive }) =>
           `flex flex-col items-center gap-1 transition-all ${
-            isActive ? 'text-cyan-400' : 'text-slate-500'
+            isActive ? 'text-neon' : 'text-slate-500'
           }`
         }
       >
@@ -26,14 +26,14 @@ const BottomNav = () => {
 
         <div className="relative group">
           {/* Glow Ring */}
-          <div className="absolute inset-0 rounded-full bg-cyan-400/30 blur-xl animate-pulse"></div>
+          <div className="absolute inset-0 rounded-full bg-neon/30 blur-xl animate-pulse"></div>
 
-          <div className="relative bg-gradient-to-br from-cyan-400 to-blue-600 text-black p-6 rounded-full shadow-[0_0_30px_rgba(0,255,255,0.6)] border-4 border-slate-900 active:scale-95 transition-all cursor-pointer">
+          <div className="relative bg-gradient-to-br from-neon to-cyan-600 text-void p-6 rounded-full shadow-[0_0_30px_rgba(61,242,224,0.6)] border-4 border-void active:scale-95 transition-all cursor-pointer">
             <QrCode size={28} />
           </div>
         </div>
 
-        <span className="mt-2 text-cyan-400 text-[10px] font-black uppercase tracking-[0.3em]">
+        <span className="mt-2 text-neon text-[10px] font-black uppercase tracking-[0.3em]">
           Scan
         </span>
       </div>
@@ -43,7 +43,7 @@ const BottomNav = () => {
         to="/notice-feed"
         className={({ isActive }) =>
           `flex flex-col items-center gap-1 transition-all ${
-            isActive ? 'text-cyan-400' : 'text-slate-500'
+            isActive ? 'text-neon' : 'text-slate-500'
           }`
         }
       >

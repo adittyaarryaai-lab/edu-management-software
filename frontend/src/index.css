@@ -4,15 +4,17 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --color-ems-blue: #3b82f6;
-  --color-ems-bg: #f8fafc;
+  --color-ems-blue: #3DF2E0; /* Updated to Neon Cyan */
+  --color-ems-bg: #0B0F14;   /* Updated to Void Black */
+  --color-void: #0B0F14;
+  --color-neon: #3DF2E0;
 }
 
 /* Base styles without using @apply on body to avoid PostCSS errors */
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a; /* Slate-900 equivalent */
+  background-color: #0B0F14; /* Default to Void Black */
+  color: #ffffff;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -20,17 +22,40 @@ body {
 
 /* Custom Component Classes using standard CSS for stability */
 .nav-gradient {
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(180deg, #0B0F14 0%, #1a1f26 100%);
+  border-bottom: 1px solid rgba(61, 242, 224, 0.2);
 }
 
 .glass-card {
-  background-color: white;
-  border-radius: 2rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 15px -3px rgba(186, 230, 253, 0.5);
-  transition: all 0.2s;
+  background-color: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-radius: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(61, 242, 224, 0.3);
+  box-shadow: 0 0 20px rgba(61, 242, 224, 0.1);
 }
 
 .glass-card:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
+}
+
+/* Cyberpunk scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0F14;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(61, 242, 224, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3DF2E0;
 }

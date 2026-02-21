@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, FileText, Send, CheckCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, FileText, Send, CheckCircle, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -9,19 +9,13 @@ const StudentAssignments = ({ user }) => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
-    // Submit karne ke baad turant UI update karne ke liye state
     const [submittedIds, setSubmittedIds] = useState([]);
 
     useEffect(() => {
         const fetchAssignments = async () => {
             try {
-                // Humne backend se is grade ke assignments mangwaye
                 const { data } = await API.get(`/assignments/${user.grade}`);
                 setAssignments(data);
-                
-                // Extra: Agar aapne backend mein submissions check karne ka logic banaya hai
-                // toh yahan se hum submitted assignments ki list filter kar sakte hain.
-                // Abhi ke liye hum local state se handle karenge submit hote hi.
             } catch (err) {
                 console.error("Error fetching assignments");
             } finally {
@@ -34,29 +28,22 @@ const StudentAssignments = ({ user }) => {
     const handleFileUpload = async (e, assignmentId) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const formData = new FormData();
         formData.append('file', file);
-        
         setUploading(true);
         try {
             const { data: filePath } = await API.post('/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            
             await API.post('/assignments/submit', {
                 assignmentId,
                 fileUrl: filePath,
-                content: "Assignment submitted via student portal"
+                content: "Assignment submitted via student portal node"
             });
-            
-            // Success! Assignment ID ko submitted list mein daal do
             setSubmittedIds([...submittedIds, assignmentId]);
-            
-            // Alert hata kar hum direct UI update dikhayenge
         } catch (err) {
             console.error(err);
-            alert("❌ Submission Failed!");
+            alert("❌ Neural Uplink Failed!");
         } finally {
             setUploading(false);
         }
@@ -65,36 +52,38 @@ const StudentAssignments = ({ user }) => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] pb-24">
-            <div className="nav-gradient text-white px-6 pt-12 pb-24 rounded-b-[3rem] shadow-lg relative">
-                <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-xl mb-6 active:scale-90 transition-all">
+        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-neon/10 to-transparent pointer-events-none"></div>
+                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-6 active:scale-90 transition-all border border-white/10 text-neon relative z-10">
                     <ArrowLeft size={20}/>
                 </button>
-                <h1 className="text-2xl font-black uppercase tracking-tight">Assignments</h1>
-                <p className="text-[10px] font-bold opacity-70 uppercase tracking-[0.2em] mt-1">Academic Task Manager</p>
+                <h1 className="text-2xl font-black uppercase tracking-tighter italic relative z-10">Assignments</h1>
+                <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em] mt-1 relative z-10 italic">Academic Task Manager</p>
+                <div className="absolute right-6 top-16 text-neon/5 animate-spin-slow"><Zap size={120}/></div>
             </div>
 
-            <div className="px-5 -mt-12 space-y-4">
+            <div className="px-5 -mt-12 relative z-20 space-y-4">
                 {assignments.length > 0 ? assignments.map((task) => {
                     const isSubmitted = submittedIds.includes(task._id);
 
                     return (
-                        <div key={task._id} className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-50 relative overflow-hidden group transition-all hover:border-blue-200">
+                        <div key={task._id} className="bg-white/5 backdrop-blur-xl p-6 rounded-[2.5rem] shadow-2xl border border-white/5 relative overflow-hidden group transition-all hover:border-neon/30 italic">
                             <div className="flex justify-between items-start mb-4">
-                                <div className="bg-blue-50 text-blue-600 p-3 rounded-2xl">
+                                <div className="bg-neon/10 text-neon p-3 rounded-2xl border border-neon/20 shadow-inner group-hover:bg-neon group-hover:text-void transition-all">
                                     <BookOpen size={20} />
                                 </div>
-                                <span className="bg-orange-50 text-orange-500 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                                <span className="bg-void border border-orange-500/30 text-orange-400 text-[8px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic shadow-[0_0_10px_rgba(251,146,60,0.1)]">
                                     Due: {new Date(task.dueDate).toLocaleDateString()}
                                 </span>
                             </div>
                             
-                            <h4 className="font-black text-slate-800 text-lg leading-tight mb-2 uppercase tracking-tighter">{task.title}</h4>
-                            <p className="text-xs text-slate-400 font-medium mb-4 line-clamp-2">{task.description}</p>
+                            <h4 className="font-black text-white text-lg leading-tight mb-2 uppercase tracking-tighter group-hover:text-neon transition-colors">{task.title}</h4>
+                            <p className="text-[11px] text-white/40 font-medium mb-4 line-clamp-2 italic">{task.description}</p>
                             
-                            <div className="flex items-center justify-between border-t border-slate-50 pt-4">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-                                    By: {task.teacher?.name} • {task.subject}
+                            <div className="flex items-center justify-between border-t border-white/5 pt-4">
+                                <p className="text-[9px] font-black text-neon/30 uppercase tracking-[0.2em] italic">
+                                    Node: {task.teacher?.name} • {task.subject}
                                 </p>
                                 
                                 <div className="relative overflow-hidden">
@@ -106,16 +95,15 @@ const StudentAssignments = ({ user }) => {
                                                 onChange={(e) => handleFileUpload(e, task._id)}
                                                 disabled={uploading}
                                             />
-                                            <button className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+                                            <button className="flex items-center gap-2 bg-neon text-void px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-[0_0_15px_rgba(61,242,224,0.3)] active:scale-95 transition-all italic">
                                                 <Send size={14}/> 
-                                                {uploading ? "Uploading..." : "Submit File"}
+                                                {uploading ? "Transmitting..." : "Submit Matrix"}
                                             </button>
                                         </>
                                     ) : (
-                                        // ✅ YE HAI WO GREEN BUTTON JO AAPNE BOLA THA
-                                        <div className="flex items-center gap-2 bg-green-50 text-green-600 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-green-100 animate-in zoom-in duration-300">
+                                        <div className="flex items-center gap-2 bg-neon/10 text-neon px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-neon/20 animate-in zoom-in duration-500 italic">
                                             <CheckCircle size={14}/>
-                                            Submitted
+                                            Verified
                                         </div>
                                     )}
                                 </div>
@@ -123,9 +111,9 @@ const StudentAssignments = ({ user }) => {
                         </div>
                     );
                 }) : (
-                    <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-slate-200">
-                        <FileText className="mx-auto text-slate-200 mb-4" size={48} />
-                        <p className="text-slate-400 font-bold text-sm uppercase">No pending assignments</p>
+                    <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
+                        <FileText className="mx-auto text-white/5 mb-4 animate-pulse" size={48} />
+                        <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Pending Tasks Found</p>
                     </div>
                 )}
             </div>

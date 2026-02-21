@@ -99,16 +99,16 @@ const handleLogin = async (e) => {
 
   if (!user) {
     return (
-      <div className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-slate-950">
+      <div className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-[#0B0F14]">
         
         {/* BACKGROUND IMAGE */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 text-center flex items-center justify-center">
           <img 
             src="/image.png.jpeg" 
             alt="AI Background" 
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover opacity-20 grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/40 to-blue-900/20 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#0B0F14] via-[#0B0F14]/80 to-[#3DF2E0]/10 backdrop-blur-[1px]"></div>
         </div>
 
         {/* --- ROBOT ANIMATION SECTION --- */}
@@ -123,11 +123,11 @@ const handleLogin = async (e) => {
           className="absolute left-0 z-30 flex items-center pointer-events-none"
         >
           {/* Robot Body */}
-          <div className="bg-gradient-to-r from-blue-500 to-cyan-400 p-4 rounded-r-full shadow-[0_0_50px_rgba(59,130,246,0.5)] border-y-4 border-r-4 border-white/20">
-            <Bot size={80} className="text-white animate-pulse" />
+          <div className="bg-gradient-to-r from-[#3DF2E0] to-cyan-600 p-4 rounded-r-full shadow-[0_0_50px_rgba(61,242,224,0.4)] border-y-4 border-r-4 border-white/10">
+            <Bot size={80} className="text-[#0B0F14] animate-pulse" />
           </div>
           {/* Mechanical Arm holding the card */}
-          <div className="w-20 h-2 bg-slate-400 shadow-lg"></div>
+          <div className="w-20 h-2 bg-slate-700 shadow-lg border-y border-white/10"></div>
         </motion.div>
 
         {/* --- LOGIN CARD WITH DRAG ANIMATION --- */}
@@ -137,23 +137,23 @@ const handleLogin = async (e) => {
           transition={{ duration: 2, delay: 0.5, type: "spring", stiffness: 50 }}
           className="relative z-10 w-full max-w-lg px-6"
         >
-          <div className="bg-white/10 backdrop-blur-3xl border border-white/20 rounded-[3.5rem] p-10 md:p-14 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden group">
+          <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[3.5rem] p-10 md:p-14 shadow-[0_0_100px_rgba(0,0,0,0.9)] relative overflow-hidden group italic">
             
             {/* Animated scanning line effect */}
             <motion.div 
               animate={{ top: ["0%", "100%", "0%"] }}
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30 z-0"
+              className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#3DF2E0] to-transparent opacity-40 z-0"
             />
 
             <div className="text-center mb-10 relative z-10">
               <div className="flex justify-center gap-4 mb-4">
-                <Cpu className="text-blue-400 animate-spin-slow" size={30} />
-                <h2 className="text-4xl font-black text-white tracking-tight">EduFlowAi</h2>
-                <Zap className="text-yellow-400 animate-bounce" size={30} />
+                <Cpu className="text-[#3DF2E0] animate-spin-slow" size={30} />
+                <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">EduFlowAi</h2>
+                <Zap className="text-[#3DF2E0] animate-bounce" size={30} />
               </div>
-              <div className="h-1.5 w-24 bg-blue-500 mx-auto rounded-full mb-4 shadow-[0_0_20px_rgba(59,130,246,1)]"></div>
-              <p className="text-blue-100/70 font-bold uppercase text-[10px] tracking-[0.4em]">Biometric Auth Required</p>
+              <div className="h-0.5 w-24 bg-[#3DF2E0] mx-auto rounded-full mb-4 shadow-[0_0_15px_rgba(61,242,224,1)]"></div>
+              <p className="text-[#3DF2E0]/40 font-black uppercase text-[9px] tracking-[0.5em] italic">Neural Biometric Authentication Required</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
@@ -162,8 +162,8 @@ const handleLogin = async (e) => {
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Personnel ID / Email"
-                  className="w-full bg-slate-900/50 border border-white/10 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-blue-500 focus:bg-slate-900/80 transition-all font-medium"
+                  placeholder="PERSONNEL ID / UPLINK EMAIL"
+                  className="w-full bg-[#0B0F14]/80 border border-white/5 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-[#3DF2E0] focus:bg-[#0B0F14] transition-all font-black text-xs tracking-widest italic"
                   required
                 />
               </div>
@@ -173,53 +173,53 @@ const handleLogin = async (e) => {
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Access Encryption Key"
-                  className="w-full bg-slate-900/50 border border-white/10 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-blue-500 focus:bg-slate-900/80 transition-all font-medium"
+                  placeholder="ACCESS ENCRYPTION CIPHER"
+                  className="w-full bg-[#0B0F14]/80 border border-white/5 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-[#3DF2E0] focus:bg-[#0B0F14] transition-all font-black text-xs tracking-widest italic"
                   required
                 />
               </div>
 
               <div className="flex items-center justify-between px-4">
-                <div className="flex items-center gap-2 text-blue-400/60">
-                  <ShieldCheck size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Quantum Secured</span>
+                <div className="flex items-center gap-2 text-[#3DF2E0]/40">
+                  <ShieldCheck size={14} className="animate-pulse" />
+                  <span className="text-[8px] font-black uppercase tracking-[0.2em] italic">Quantum Secured Node</span>
                 </div>
-                <button type="button" className="text-[10px] font-black text-blue-400 uppercase tracking-widest hover:text-white transition-colors">Bypass Key?</button>
+                <button type="button" className="text-[8px] font-black text-[#3DF2E0]/40 uppercase tracking-[0.2em] hover:text-[#3DF2E0] transition-colors italic underline decoration-[#3DF2E0]/20">Bypass Protocol?</button>
               </div>
 
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white py-6 rounded-[2rem] font-black shadow-[0_15px_40px_rgba(59,130,246,0.4)] active:scale-95 transition-all uppercase text-sm tracking-[0.2em] mt-6 flex items-center justify-center gap-4 group"
+                className="w-full bg-[#3DF2E0] hover:bg-cyan-400 text-[#0B0F14] py-6 rounded-[2rem] font-black shadow-[0_0_40px_rgba(61,242,224,0.3)] active:scale-95 transition-all uppercase text-sm tracking-[0.3em] mt-6 flex items-center justify-center gap-4 group italic"
               >
                 {loading ? (
-                   <span className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                   <span className="w-6 h-6 border-3 border-[#0B0F14]/30 border-t-[#0B0F14] rounded-full animate-spin"></span>
                 ) : (
                   <>
-                    <span>Execute Login</span>
-                    <Zap size={18} />
+                    <span>Execute Session</span>
+                    <Zap size={18} className="fill-[#0B0F14]" />
                   </>
                 )}
               </button>
             </form>
 
-            <div className="mt-12 text-center opacity-30">
-              <p className="text-[8px] font-black text-white uppercase tracking-[0.5em]">
-                Protocol v4.0.2 • Verified by EduFlowAI
+            <div className="mt-12 text-center opacity-20">
+              <p className="text-[7px] font-black text-white uppercase tracking-[0.6em] italic">
+                PROTOCOL v4.0.5 • VERIFIED BY EDUFLOW INTELLIGENCE
               </p>
             </div>
           </div>
         </motion.div>
 
         {/* Ambient Neural Network Particles */}
-        <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-blue-500 rounded-full animate-ping"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-1 h-1 bg-cyan-400 rounded-full animate-ping delay-1000"></div>
+        <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-[#3DF2E0] rounded-full animate-ping opacity-20"></div>
+        <div className="absolute bottom-1/4 right-1/3 w-1 h-1 bg-cyan-400 rounded-full animate-ping delay-1000 opacity-20"></div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-slate-950' : 'bg-[#f8fafc]'}`}>
+    <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
       <Navbar user={user} />
       <main className="relative z-0 pb-32 pt-28"> 
         <Routes>
@@ -266,7 +266,6 @@ const handleLogin = async (e) => {
           <Route path="/library/digital" element={<DigitalMaterial />} /> 
           <Route path="/live-class" element={<LiveClass user={user} />} />
           
-          {/* FIXED: Removed <div> wrapper to resolve Uncaught Error */}
           <Route path="/feedback" element={<Feedback />} />
           
           <Route path="/requests" element={<Requests />} />

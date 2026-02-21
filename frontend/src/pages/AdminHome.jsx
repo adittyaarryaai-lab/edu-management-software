@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3, Bell, ClipboardList, Wallet, Zap, FileText, Download } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
-import { motion } from 'framer-motion';
 
 const AdminHome = () => {
     const navigate = useNavigate();
@@ -12,21 +11,17 @@ const AdminHome = () => {
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
 
-    // Day 73 & 74: Subscription & Transactions States
     const [subData, setSubData] = useState(null);
-    const [transactions, setTransactions] = useState([]); // Day 74: Payment History
+    const [transactions, setTransactions] = useState([]);
 
     const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', subjects: '' });
     const [studentData, setStudentData] = useState({ name: '', email: '', password: '', grade: '' });
 
-    // Day 73 & 74: Fetch Data
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const { data: sub } = await API.get('/school/subscription-status');
                 setSubData(sub.subscription);
-
-                // Day 74: Fetch Transaction History
                 const { data: txs } = await API.get('/school/transactions');
                 setTransactions(txs);
             } catch (err) { console.error("Data Fetch Error", err); }
@@ -34,25 +29,18 @@ const AdminHome = () => {
         fetchData();
     }, []);
 
-    // Day 75: Invoice Download Handler
     const downloadInvoice = async (txId, txNumber) => {
         try {
-            const response = await API.get(`/school/invoice/${txId}`, {
-                responseType: 'blob', // Important for PDF
-            });
-            
+            const response = await API.get(`/school/invoice/${txId}`, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
             link.setAttribute('download', `Invoice-${txNumber}.pdf`);
             document.body.appendChild(link);
             link.click();
-        } catch (err) {
-            alert("Could not download invoice.");
-        }
+        } catch (err) { alert("Could not download invoice."); }
     };
 
-    // Day 73: Advance Payment Handler
     const handleAdvancePayment = async () => {
         if (!window.confirm("Confirm Advance Payment for next month?")) return;
         setLoading(true);
@@ -60,12 +48,33 @@ const AdminHome = () => {
             const { data } = await API.post('/school/pay-advance');
             setMsg(data.message);
             setSubData(data.subscription);
-            // Refresh transactions after payment
             const { data: updatedTxs } = await API.get('/school/transactions');
             setTransactions(updatedTxs);
-        } catch (err) {
-            alert("Payment Gateway Error: Logic only simulated.");
-        } finally { setLoading(false); }
+        } catch (err) { alert("Payment Gateway Simulated."); } 
+        finally { setLoading(false); }
+    };
+
+    const handleAddTeacher = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const processedData = { ...teacherData, subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [] };
+            const { data } = await API.post('/users/add-teacher', processedData);
+            setMsg(data.message || "Teacher Registered!");
+            setShowTeacherForm(false);
+            setTeacherData({ name: '', email: '', password: '', subjects: '' });
+        } catch (err) { alert(err.response?.data?.message || "Error adding teacher"); } finally { setLoading(false); }
+    };
+
+    const handleAddStudent = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const { data } = await API.post('/users/add-student', studentData);
+            setMsg(data.message || "Student Enrolled!");
+            setShowStudentForm(false);
+            setStudentData({ name: '', email: '', password: '', grade: '' });
+        } catch (err) { alert(err.response?.data?.message || "Error adding student"); } finally { setLoading(false); }
     };
 
     const adminStats = [
@@ -75,7 +84,7 @@ const AdminHome = () => {
     ];
 
     const managementModules = [
-        { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+        { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-neon/10 text-neon border-neon/20' },
         { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
         { id: 'attendance-report', title: 'Attendance Insights', icon: <BarChart3 size={24} />, desc: 'Class-wise tracking', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
         { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24} />, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
@@ -84,154 +93,120 @@ const AdminHome = () => {
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     ];
 
-    const handleAddTeacher = async (e) => {
-        e.preventDefault();
-        if (!teacherData.email || !teacherData.password) return alert("Please fill mandatory fields");
-        setLoading(true);
-        try {
-            const processedData = { ...teacherData, subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [] };
-            const { data } = await API.post('/users/add-teacher', processedData);
-            setMsg(data.message || "Teacher Registered Successfully!");
-            setShowTeacherForm(false);
-            setTeacherData({ name: '', email: '', password: '', subjects: '' });
-        } catch (err) { alert(err.response?.data?.message || "Error adding teacher"); } finally { setLoading(false); }
-    };
-
-    const handleAddStudent = async (e) => {
-        e.preventDefault();
-        if (!studentData.email || !studentData.grade) return alert("Please fill mandatory fields");
-        setLoading(true);
-        try {
-            const { data } = await API.post('/users/add-student', studentData);
-            setMsg(data.message || "Student Enrolled Successfully!");
-            setShowStudentForm(false);
-            setStudentData({ name: '', email: '', password: '', grade: '' });
-        } catch (err) { alert(err.response?.data?.message || "Error adding student"); } finally { setLoading(false); }
-    };
-
     return (
         <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10 font-sans italic">
-            {/* Day 73: Subscription & Auto-Debit Alert Card */}
-            <div className={`p-6 rounded-[2.5rem] border backdrop-blur-xl shadow-2xl transition-all ${subData?.hasPaidAdvance ? 'bg-green-500/10 border-green-500/20' : 'bg-slate-900 border-white/10'}`}>
+            {/* Subscription Card */}
+            <div className={`p-6 rounded-[2.5rem] border backdrop-blur-xl shadow-2xl transition-all ${subData?.hasPaidAdvance ? 'bg-neon/10 border-neon/30' : 'bg-slate-900/80 border-neon/20'}`}>
                 <div className="flex justify-between items-start">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <Zap size={16} className={subData?.hasPaidAdvance ? 'text-green-400' : 'text-blue-400'} />
-                            <h3 className="font-black text-white text-xs uppercase tracking-widest italic">Service Subscription</h3>
+                            <Zap size={16} className={subData?.hasPaidAdvance ? 'text-neon' : 'text-neon/60'} />
+                            <h3 className="font-black text-white text-xs uppercase tracking-widest italic underline decoration-neon/30">Service Subscription</h3>
                         </div>
-                        <p className="text-white font-black text-xl">₹{subData?.monthlyFee || '0'} <span className="text-[10px] text-slate-500 uppercase">/ Month</span></p>
-                        <p className="text-[10px] font-bold text-slate-400 mt-1">Next Billing: {subData?.nextPaymentDate ? new Date(subData.nextPaymentDate).toLocaleDateString() : 'N/A'}</p>
+                        <p className="text-neon font-black text-xl italic tracking-tighter">₹{subData?.monthlyFee || '0'} <span className="text-[10px] text-white/40 uppercase">/ Month</span></p>
+                        <p className="text-[10px] font-bold text-white/30 mt-1 italic uppercase tracking-widest">Next Billing: {subData?.nextPaymentDate ? new Date(subData.nextPaymentDate).toLocaleDateString() : 'N/A'}</p>
                     </div>
-                    <button
-                        onClick={handleAdvancePayment}
-                        disabled={loading || subData?.hasPaidAdvance}
-                        className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${subData?.hasPaidAdvance ? 'bg-green-500 text-white cursor-not-allowed' : 'bg-blue-600 text-white active:scale-90 shadow-lg shadow-blue-500/20'}`}
-                    >
+                    <button onClick={handleAdvancePayment} disabled={loading || subData?.hasPaidAdvance} className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${subData?.hasPaidAdvance ? 'bg-neon text-void' : 'bg-void border border-neon text-neon shadow-[0_0_15px_rgba(61,242,224,0.2)] active:scale-95'}`}>
                         {subData?.hasPaidAdvance ? "Month Secured" : "Pay Advance"}
                     </button>
                 </div>
                 {subData?.hasPaidAdvance && (
-                    <p className="text-[9px] font-black text-green-400 uppercase mt-4 tracking-tighter">Automatic debit paused for next cycle. System synchronized. ✅</p>
+                    <p className="text-[9px] font-black text-neon uppercase mt-4 tracking-tighter italic">Automatic debit paused. System synchronized. ✅</p>
                 )}
             </div>
 
-            {/* Day 74 & 75: Payment & Invoice History Section */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden">
+            {/* Billing History */}
+            <div className="bg-slate-900/50 backdrop-blur-xl border border-neon/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden">
                 <div className="flex items-center gap-2 mb-6 ml-2">
-                    <FileText size={16} className="text-orange-400" />
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Billing History</h3>
+                    <FileText size={16} className="text-neon animate-pulse" />
+                    <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em] italic">Billing History</h3>
                 </div>
                 <div className="space-y-3">
                     {transactions.length > 0 ? (
                         transactions.map((tx, idx) => (
-                            <div key={idx} className="bg-slate-900/40 p-4 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-blue-500/30 transition-all">
+                            <div key={idx} className="bg-void/60 p-4 rounded-3xl border border-neon/5 flex items-center justify-between group hover:border-neon/30 transition-all">
                                 <div className="flex items-center gap-4">
-                                    <div className="bg-orange-500/10 p-3 rounded-2xl text-orange-400"><CreditCard size={18} /></div>
+                                    <div className="bg-neon/10 p-3 rounded-2xl text-neon border border-neon/10"><CreditCard size={18} /></div>
                                     <div>
                                         <p className="text-white font-black text-xs uppercase italic tracking-tighter">{tx.month}</p>
-                                        <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5 tracking-widest">{tx.transactionId}</p>
+                                        <p className="text-[8px] text-neon/30 font-bold uppercase mt-0.5 tracking-widest">{tx.transactionId}</p>
                                     </div>
                                 </div>
-                                <div className="text-right flex items-center gap-4">
+                                <div className="flex items-center gap-4 text-right">
                                     <div>
-                                        <p className="text-green-400 font-black text-xs italic">₹{tx.amount}</p>
-                                        <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Success</span>
+                                        <p className="text-neon font-black text-xs italic">₹{tx.amount}</p>
+                                        <span className="text-[7px] font-black text-white/30 uppercase tracking-widest">Secured</span>
                                     </div>
-                                    <button 
-                                        onClick={() => downloadInvoice(tx._id, tx.transactionId)}
-                                        className="bg-white/5 p-2 rounded-xl text-slate-400 hover:text-blue-400 hover:bg-blue-400/10 transition-all"
-                                    >
-                                        <Download size={14} />
-                                    </button>
+                                    <button onClick={() => downloadInvoice(tx._id, tx.transactionId)} className="bg-neon/10 p-2 rounded-xl text-neon hover:bg-neon hover:text-void transition-all"><Download size={14} /></button>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-6 opacity-30 italic font-bold text-xs text-white">No transactions archived yet.</div>
+                        <div className="text-center py-6 opacity-20 italic font-black text-[10px] uppercase tracking-widest text-white">No transactions archived.</div>
                     )}
                 </div>
             </div>
 
-            <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
+            {/* Stats */}
+            <div className="bg-void border border-neon/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
                 {adminStats.map((stat, i) => (
-                    <div key={i} className="text-center border-r last:border-0 border-white/5 px-1">
-                        <div className="flex justify-center text-blue-400 mb-1">{stat.icon}</div>
-                        <p className="text-[18px] font-black text-white leading-none">{stat.value}</p>
-                        <p className="text-[7px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{stat.label}</p>
+                    <div key={i} className="text-center border-r last:border-0 border-neon/5 px-1">
+                        <div className="flex justify-center text-neon mb-1">{stat.icon}</div>
+                        <p className="text-[18px] font-black text-white leading-none tracking-tighter">{stat.value}</p>
+                        <p className="text-[7px] font-black text-neon/40 uppercase mt-1 tracking-widest leading-none">{stat.label}</p>
                     </div>
                 ))}
             </div>
 
+            {/* Modules */}
             <div className="grid grid-cols-1 gap-4">
-                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-2">Administrative Core</h3>
+                <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] ml-2 italic">Administrative Core</h3>
                 {managementModules.map((m, i) => (
-                    <div key={i}
-                        onClick={() => {
-                            if (m.id === 'add-staff') setShowTeacherForm(true);
-                            if (m.id === 'add-student') setShowStudentForm(true);
-                            if (m.id === 'timetable') navigate('/admin/timetable');
-                            if (m.id === 'fees') navigate('/admin/fees');
-                            if (m.id === 'attendance-report') navigate('/admin/attendance-report');
-                            if (m.id === 'notice') navigate('/admin/global-notice');
-                            if (m.id === 'notice-feed') navigate('/notice-feed');
-                        }}
-                        className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/10 flex items-center justify-between active:scale-95 transition-all cursor-pointer group"
-                    >
+                    <div key={i} onClick={() => {
+                        if (m.id === 'add-staff') setShowTeacherForm(true);
+                        if (m.id === 'add-student') setShowStudentForm(true);
+                        if (m.id === 'timetable') navigate('/admin/timetable');
+                        if (m.id === 'fees') navigate('/admin/fees');
+                        if (m.id === 'attendance-report') navigate('/admin/attendance-report');
+                        if (m.id === 'notice') navigate('/admin/global-notice');
+                        if (m.id === 'notice-feed') navigate('/notice-feed');
+                    }} className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/5 flex items-center justify-between active:scale-95 transition-all cursor-pointer group hover:border-neon/20">
                         <div className="flex items-center gap-4">
                             <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
                             <div>
-                                <h4 className="font-bold text-gray-500 text-sm leading-none">{m.title}</h4>
-                                <p className="text-[10px] text-slate-500 mt-1 font-medium italic">{m.desc}</p>
+                                <h4 className="font-black text-white/80 text-sm leading-none uppercase italic tracking-tighter">{m.title}</h4>
+                                <p className="text-[10px] text-white/30 mt-1 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
                             </div>
                         </div>
-                        <div className="bg-white/5 p-2 rounded-full"><PlusCircle size={14} className="text-slate-500 group-hover:text-blue-400" /></div>
+                        <div className="bg-void p-2 rounded-full border border-white/5"><PlusCircle size={14} className="text-white/20 group-hover:text-neon" /></div>
                     </div>
                 ))}
             </div>
 
+            {/* MODALS ARE BACK HERE BHAI */}
             {(showTeacherForm || showStudentForm) && (
                 <div className="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-                    <div className="bg-slate-900 border border-white/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
-                        <button onClick={() => { setShowTeacherForm(false); setShowStudentForm(false) }} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-white/50"><X size={20} /></button>
-                        <h3 className="font-black text-2xl text-white mb-2">{showTeacherForm ? 'Add Staff' : 'Enroll Student'}</h3>
+                    <div className="bg-slate-900 border border-neon/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
+                        <button onClick={() => { setShowTeacherForm(false); setShowStudentForm(false) }} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-neon/40"><X size={20} /></button>
+                        <h3 className="font-black text-2xl text-white mb-2 uppercase italic">{showTeacherForm ? 'Add Staff' : 'Enroll Student'}</h3>
                         <div className="space-y-4 mt-6">
                             {showTeacherForm ? (
                                 <>
-                                    <input type="text" placeholder="Full Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.name} onChange={(e) => setTeacherData({ ...teacherData, name: e.target.value })} />
-                                    <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.email} onChange={(e) => setTeacherData({ ...teacherData, email: e.target.value })} />
-                                    <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.password} onChange={(e) => setTeacherData({ ...teacherData, password: e.target.value })} />
-                                    <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-purple-500" value={teacherData.subjects} onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />
-                                    <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-purple-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
+                                    <input type="text" placeholder="Full Name" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.name} onChange={(e) => setTeacherData({ ...teacherData, name: e.target.value })} />
+                                    <input type="email" placeholder="Email" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.email} onChange={(e) => setTeacherData({ ...teacherData, email: e.target.value })} />
+                                    <input type="password" placeholder="Password" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.password} onChange={(e) => setTeacherData({ ...teacherData, password: e.target.value })} />
+                                    <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.subjects} onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />
+                                    <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
                                         {loading ? "Initializing..." : "Register System User"}
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <input type="text" placeholder="Student Name" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.name} onChange={(e) => setStudentData({ ...studentData, name: e.target.value })} />
-                                    <input type="email" placeholder="Email" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.email} onChange={(e) => setStudentData({ ...studentData, email: e.target.value })} />
-                                    <input type="password" placeholder="Password" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.password} onChange={(e) => setStudentData({ ...studentData, password: e.target.value })} />
-                                    <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-white/5 rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-blue-500" value={studentData.grade} onChange={(e) => setStudentData({ ...studentData, grade: e.target.value })} />
-                                    <button onClick={handleAddStudent} disabled={loading} className="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
+                                    <input type="text" placeholder="Student Name" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.name} onChange={(e) => setStudentData({ ...studentData, name: e.target.value })} />
+                                    <input type="email" placeholder="Email" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.email} onChange={(e) => setStudentData({ ...studentData, email: e.target.value })} />
+                                    <input type="password" placeholder="Password" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.password} onChange={(e) => setStudentData({ ...studentData, password: e.target.value })} />
+                                    <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.grade} onChange={(e) => setStudentData({ ...studentData, grade: e.target.value })} />
+                                    <button onClick={handleAddStudent} disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
                                         {loading ? "Processing..." : "Enroll To Network"}
                                     </button>
                                 </>
@@ -241,16 +216,16 @@ const AdminHome = () => {
                 </div>
             )}
 
-            <div className="bg-slate-900 border border-blue-500/20 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-void border border-neon/20 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <Bot size={18} className="text-blue-400" />
-                            <h3 className="font-bold text-sm">System: Operational</h3>
+                            <Bot size={18} className="text-neon" />
+                            <h3 className="font-black text-sm uppercase italic tracking-tighter">System: Sovereign</h3>
                         </div>
-                        <p className="text-[10px] opacity-60 font-medium tracking-widest">ENCRYPTED ADMIN SESSION ACTIVE</p>
+                        <p className="text-[10px] text-neon/30 font-black uppercase tracking-widest italic">ENCRYPTED ADMIN SESSION ACTIVE</p>
                     </div>
-                    <Activity className="text-blue-500/50 animate-pulse" size={40} />
+                    <Activity className="text-neon/20 animate-pulse" size={40} />
                 </div>
             </div>
 
