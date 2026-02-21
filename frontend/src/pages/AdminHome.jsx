@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3, Bell, ClipboardList, Wallet, Zap } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, LayoutDashboard, Database, X, Bot, Activity, BarChart3, Bell, ClipboardList, Wallet, Zap, FileText, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -12,21 +12,26 @@ const AdminHome = () => {
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
 
-    // Day 73: Subscription States
+    // Day 73 & 74: Subscription & Transactions States
     const [subData, setSubData] = useState(null);
+    const [transactions, setTransactions] = useState([]); // Day 74: Payment History
 
     const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', subjects: '' });
     const [studentData, setStudentData] = useState({ name: '', email: '', password: '', grade: '' });
 
-    // Day 73: Fetch Subscription Status
+    // Day 73 & 74: Fetch Data
     useEffect(() => {
-        const fetchSubscription = async () => {
+        const fetchData = async () => {
             try {
-                const { data } = await API.get('/school/subscription-status');
-                setSubData(data.subscription);
-            } catch (err) { console.error("Sub Fetch Error", err); }
+                const { data: sub } = await API.get('/school/subscription-status');
+                setSubData(sub.subscription);
+
+                // Day 74: Fetch Transaction History
+                const { data: txs } = await API.get('/school/transactions');
+                setTransactions(txs);
+            } catch (err) { console.error("Data Fetch Error", err); }
         };
-        fetchSubscription();
+        fetchData();
     }, []);
 
     // Day 73: Advance Payment Handler
@@ -37,6 +42,9 @@ const AdminHome = () => {
             const { data } = await API.post('/school/pay-advance');
             setMsg(data.message);
             setSubData(data.subscription);
+            // Refresh transactions after payment
+            const { data: updatedTxs } = await API.get('/school/transactions');
+            setTransactions(updatedTxs);
         } catch (err) {
             alert("Payment Gateway Error: Logic only simulated.");
         } finally { setLoading(false); }
@@ -84,7 +92,7 @@ const AdminHome = () => {
     };
 
     return (
-        <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10">
+        <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10 font-sans italic">
             {/* Day 73: Subscription & Auto-Debit Alert Card */}
             <div className={`p-6 rounded-[2.5rem] border backdrop-blur-xl shadow-2xl transition-all ${subData?.hasPaidAdvance ? 'bg-green-500/10 border-green-500/20' : 'bg-slate-900 border-white/10'}`}>
                 <div className="flex justify-between items-start">
@@ -107,6 +115,40 @@ const AdminHome = () => {
                 {subData?.hasPaidAdvance && (
                     <p className="text-[9px] font-black text-green-400 uppercase mt-4 tracking-tighter">Automatic debit paused for next cycle. System synchronized. ✅</p>
                 )}
+            </div>
+
+            {/* Day 74: Payment & Invoice History Section */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden">
+                <div className="flex items-center gap-2 mb-6 ml-2">
+                    <FileText size={16} className="text-orange-400" />
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Billing History</h3>
+                </div>
+                <div className="space-y-3">
+                    {transactions.length > 0 ? (
+                        transactions.map((tx, idx) => (
+                            <div key={idx} className="bg-slate-900/40 p-4 rounded-3xl border border-white/5 flex items-center justify-between group hover:border-blue-500/30 transition-all">
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-orange-500/10 p-3 rounded-2xl text-orange-400"><CreditCard size={18} /></div>
+                                    <div>
+                                        <p className="text-white font-black text-xs uppercase italic tracking-tighter">{tx.month}</p>
+                                        <p className="text-[8px] text-slate-500 font-bold uppercase mt-0.5 tracking-widest">{tx.transactionId}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right flex items-center gap-4">
+                                    <div>
+                                        <p className="text-green-400 font-black text-xs italic">₹{tx.amount}</p>
+                                        <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Success</span>
+                                    </div>
+                                    <button className="bg-white/5 p-2 rounded-xl text-slate-400 group-hover:text-blue-400 group-hover:bg-blue-400/10 transition-all">
+                                        <Download size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-6 opacity-30 italic font-bold text-xs text-white">No transactions archived yet.</div>
+                    )}
+                </div>
             </div>
 
             <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">

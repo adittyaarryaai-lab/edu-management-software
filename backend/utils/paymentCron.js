@@ -1,7 +1,8 @@
 const cron = require('node-cron');
 const School = require('../models/School');
+const Transaction = require('../models/Transaction'); 
 
-// Testing: Har minute chalega
+// Schedule: Raat ke 12 baje (0 0 * * *) ya testing ke liye '*/1 * * * *' use kar sakte ho
 cron.schedule('0 0 * * *', async () => {
     console.log("--- ⚡ Cron Job Started: Checking Subscriptions ---");
     try {
@@ -34,6 +35,16 @@ cron.schedule('0 0 * * *', async () => {
                     // Total Paid update karo
                     school.subscription.totalPaid += (school.subscription.monthlyFee || 0);
                     school.subscription.lastPaymentDate = today;
+
+                    const newTx = await Transaction.create({
+                        schoolId: school._id,
+                        amount: school.subscription.monthlyFee,
+                        month: today.toLocaleString('default', { month: 'long', year: 'numeric' }),
+                        transactionId: `TXN-${Date.now()}`,
+                        status: 'Success'
+                    });
+                    console.log(`✅ Transaction Record Generated: ${newTx.transactionId}`);
+                    // --------------------------------------------------
                 }
 
                 // Agle mahine ki date set karo
