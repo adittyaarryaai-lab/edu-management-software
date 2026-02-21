@@ -15,10 +15,18 @@ const schoolSchema = new mongoose.Schema({
         monthlyFee: { type: Number, default: 0 },
         totalPaid: { type: Number, default: 0 },
         status: { type: String, enum: ['Active', 'Terminated'], default: 'Active' },
-        onboardingDate: { type: Date, default: Date.now }
+        onboardingDate: { type: Date, default: Date.now },
+        
+        // --- DAY 73: AUTOMATED BILLING FIELDS ---
+        lastPaymentDate: { type: Date, default: Date.now },
+        nextPaymentDate: { 
+            type: Date, 
+            default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default: 30 days from now
+        },
+        hasPaidAdvance: { type: Boolean, default: false } 
     },
     sessionYear: { type: String, default: '2026-27' },
-    isDeleted: { type: Boolean, default: false } // Day 68 fix for revenue preservation
+    isDeleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);

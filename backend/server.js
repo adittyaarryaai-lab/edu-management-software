@@ -18,11 +18,14 @@ const syllabusRoutes = require('./routes/syllabusRoutes')
 const libraryRoutes = require('./routes/libraryRoutes');
 const liveClassRoutes = require('./routes/liveClassRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
+const schoolRoutes = require('./routes/schoolRoutes');
+
 
 dotenv.config();
 
 // Database Connection
 connectDB();
+require('./utils/paymentCron');
 
 const app = express();
 
@@ -60,6 +63,7 @@ app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/live-classes', liveClassRoutes);
 app.use('/api/superadmin', superAdminRoutes);
+app.use('/api/school', schoolRoutes);
 
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
