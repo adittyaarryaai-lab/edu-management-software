@@ -39,7 +39,9 @@ const userSchema = new mongoose.Schema({
     employeeId: String,   // EMP001 Format
     
     grade: String, 
-    subjects: [String]
+    subjects: [String],
+    resetOTP: String,
+    otpExpires: Date
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {

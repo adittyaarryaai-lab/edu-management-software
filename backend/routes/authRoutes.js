@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, authUser, changePassword } = require('../controllers/authController');
+const { registerUser, authUser, changePassword,sendResetOTP, resetPassword} = require('../controllers/authController');
 const router = express.Router();
 const User = require('../models/User'); 
 const { protect } = require('../middleware/authMiddleware'); 
@@ -33,6 +33,8 @@ const upload = multer({
 router.post('/register', registerUser);
 router.post('/login', authUser);
 router.put('/change-password', protect, changePassword);
+router.post('/send-otp', sendResetOTP);
+router.post('/reset-password', resetPassword);
 
 router.put('/update-profile', protect, upload.single('avatar'), async (req, res) => {
     try {

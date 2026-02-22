@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // Animation ke liye
-import { Bot, Cpu, Zap, ShieldCheck } from 'lucide-react'; // Robot icons
+import { Bot, Cpu, Zap, ShieldCheck, X } from 'lucide-react'; // Robot icons
 import API from './api';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -59,7 +59,7 @@ const VisualMatrix = () => {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-10">
       {[...Array(20)].map((_, i) => (
-        <div 
+        <div
           key={i}
           className="absolute text-neon font-mono text-[10px] whitespace-nowrap animate-matrix italic"
           style={{
@@ -80,6 +80,10 @@ function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false); // Password visibility toggle ke liye
+  const [showBypass, setShowBypass] = useState(false);
+  const [bypassStep, setBypassStep] = useState(1); // 1: Email Input, 2: OTP & New Password
+  const [bypassData, setBypassData] = useState({ email: '', otp: '', newPassword: '', confirmPassword: '' });
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -116,6 +120,24 @@ function App() {
       setLoading(false);
       alert(error.response?.data?.message || "Login Failed! Check your credentials.");
     }
+  };
+  const handleSendOTP = async () => {
+    try {
+      await API.post('/auth/send-otp', { email: bypassData.email });
+      setBypassStep(2);
+      alert("OTP Transmitted to your registered signal! 📡");
+    } catch (err) { alert(err.response?.data?.message || "Transmission Failed"); }
+  };
+
+  const handleResetFinal = async () => {
+    if (bypassData.newPassword !== bypassData.confirmPassword) return alert("Ciphers do not match!");
+    try {
+      await API.post('/auth/reset-password', bypassData);
+      alert("Protocol Resynchronized! Login with your new cipher.");
+      setShowBypass(false);
+      setBypassStep(1);
+      setBypassData({ email: '', otp: '', newPassword: '', confirmPassword: '' });
+    } catch (err) { alert(err.response?.data?.message || "Reset Failed"); }
   };
 
   if (!user) {
@@ -166,6 +188,9 @@ function App() {
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
               className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#3DF2E0] to-transparent opacity-40 z-0"
             />
+            {/* Invisible inputs to trap browser auto-fill */}
+            <input type="text" name="prevent_autofill" style={{ display: 'none' }} tabIndex="-1" />
+            <input type="password" name="prevent_autofill_pass" style={{ display: 'none' }} tabIndex="-1" />
 
             <div className="text-center mb-10 relative z-10">
               <div className="flex justify-center gap-4 mb-4">
@@ -191,13 +216,20 @@ function App() {
 
               <div className="relative group">
                 <input
-                  type="password"
+                  type={showPass ? "text" : "password"} // Dynamic type
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="ACCESS ENCRYPTION CIPHER"
-                  className="w-full bg-[#0B0F14]/80 border border-white/5 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-[#3DF2E0] focus:bg-[#0B0F14] transition-all font-black text-xs tracking-widest italic"
+                  className="w-full bg-[#0B0F14]/80 border border-white/5 py-5 px-8 rounded-[2rem] outline-none text-white placeholder:text-white/20 focus:border-[#3DF2E0] transition-all font-black text-xs tracking-widest italic pr-16"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-[#3DF2E0]/40 hover:text-[#3DF2E0]"
+                >
+                  {showPass ? <Zap size={18} /> : <Bot size={18} />} {/* Yahan tu Eye icon bhi use kar sakta hai */}
+                </button>
               </div>
 
               <div className="flex items-center justify-between px-4">
@@ -205,7 +237,7 @@ function App() {
                   <ShieldCheck size={14} className="animate-pulse" />
                   <span className="text-[8px] font-black uppercase tracking-[0.2em] italic">Quantum Secured Node</span>
                 </div>
-                <button type="button" className="text-[8px] font-black text-[#3DF2E0]/40 uppercase tracking-[0.2em] hover:text-[#3DF2E0] transition-colors italic underline decoration-[#3DF2E0]/20">Bypass Protocol?</button>
+                <button type="button" onClick={() => setShowBypass(true)} className="text-[8px] font-black text-[#3DF2E0]/40 uppercase tracking-[0.2em] hover:text-[#3DF2E0] transition-colors italic underline decoration-[#3DF2E0]/20">Bypass Protocol?</button>
               </div>
 
               <button
@@ -231,6 +263,50 @@ function App() {
             </div>
           </div>
         </motion.div>
+        {/* --- BYPASS MODAL --- */}
+        <AnimatePresence>
+          {showBypass && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-[#0B0F14]/95 flex items-center justify-center p-6 backdrop-blur-md italic"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+                className="bg-white/5 border border-[#3DF2E0]/20 p-10 rounded-[3rem] w-full max-w-md shadow-2xl relative overflow-hidden"
+              >
+                {/* Close Button */}
+                <button onClick={() => { setShowBypass(false); setBypassStep(1) }} className="absolute top-6 right-6 text-[#3DF2E0]/40 hover:text-[#3DF2E0] transition-all">
+                  <X size={20} />
+                </button>
+
+                <div className="flex items-center gap-2 mb-6">
+                  <ShieldCheck className="text-[#3DF2E0]" size={20} />
+                  <h3 className="text-xl font-black text-white uppercase tracking-tighter italic">Neural Bypass</h3>
+                </div>
+
+                {bypassStep === 1 ? (
+                  <div className="space-y-4">
+                    <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mb-4">Enter linked email to receive signal</p>
+                    <input type="email" placeholder="IDENTITY EMAIL" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] italic font-black"
+                      onChange={(e) => setBypassData({ ...bypassData, email: e.target.value })} />
+                    <button onClick={handleSendOTP} className="w-full bg-[#3DF2E0] text-[#0B0F14] py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(61,242,224,0.4)] transition-all">Request OTP</button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-[10px] text-[#3DF2E0] uppercase font-black tracking-widest mb-4">OTP Transmitted • Verify Identity</p>
+                    <input type="text" name="otp_code" autoComplete="one-time-code" placeholder="6-DIGIT OTP" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black"
+                      value={bypassData.otp} onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })} />
+                    <input type={showPass ? "text" : "password"} placeholder="NEW ACCESS CIPHER" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black pr-14"
+                      value={bypassData.newPassword} onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })}/>
+                    <input type="password" placeholder="CONFIRM CIPHER" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black"
+                      onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })} />
+                    <button onClick={handleResetFinal} className="w-full bg-[#3DF2E0] text-[#0B0F14] py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(61,242,224,0.4)] transition-all">Re-Sync Identity</button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Ambient Neural Network Particles */}
         <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-[#3DF2E0] rounded-full animate-ping opacity-20"></div>

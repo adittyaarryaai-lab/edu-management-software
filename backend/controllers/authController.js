@@ -1,5 +1,45 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const crypto = require('crypto'); // OTP generate karne ke liye
+
+// 1. Send OTP Protocol
+const sendResetOTP = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: "Network Identity Not Found!" });
+
+    // Generate 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetOTP = otp;
+    user.otpExpires = Date.now() + 600000; // 10 minutes expiry
+    await user.save();
+
+    // SMS SENDING LOGIC (Using a dummy placeholder for Twilio/Fast2SMS)
+    console.log(`Bypass OTP for ${user.phone}: ${otp} ⚡`); 
+    // Yahan tera SMS API call aayega
+    
+    res.json({ message: `Bypass OTP transmitted to ${user.phone.slice(-4)}` });
+};
+
+// 2. Reset Password Protocol
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ 
+        email, 
+        resetOTP: otp, 
+        otpExpires: { $gt: Date.now() } 
+    });
+
+    if (!user) return res.status(400).json({ message: "Invalid or Expired OTP!" });
+
+    user.password = newPassword;
+    user.resetOTP = undefined; // Clear OTP
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Access Cipher Re-encrypted! Login now. 🔐" });
+};
 
 // @desc    Register a new user (with ID Generation Logic)
 const registerUser = async (req, res) => {
@@ -134,4 +174,4 @@ const changePassword = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, authUser, changePassword };
+module.exports = { registerUser, authUser, changePassword, sendResetOTP, resetPassword };
