@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, IndianRupee, TrendingUp, Trash2, Edit3, X, Save, RotateCcw, Users, Bot } from 'lucide-react';
+import { Globe, Plus, IndianRupee, TrendingUp, Trash2, Edit3, X, Save, RotateCcw, Users, Bot, School, Hash, MapPin, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -8,7 +8,7 @@ const SuperAdminDashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+
     const [editingSchool, setEditingSchool] = useState(null);
     const [editData, setEditData] = useState({});
 
@@ -18,7 +18,7 @@ const SuperAdminDashboard = () => {
 
         if (currentUser?.role !== 'superadmin' && backupUser) {
             localStorage.setItem('user', JSON.stringify(backupUser));
-            window.location.reload(); 
+            window.location.reload();
         } else {
             fetchStats();
         }
@@ -29,7 +29,7 @@ const SuperAdminDashboard = () => {
             setLoading(true);
             const { data } = await API.get('/superadmin/stats');
             setStats(data);
-        } catch (err) { 
+        } catch (err) {
             console.error(err);
             if (err.response?.status === 403 || err.response?.status === 401) {
                 localStorage.removeItem('user');
@@ -53,7 +53,7 @@ const SuperAdminDashboard = () => {
             const currentUser = JSON.parse(localStorage.getItem('user'));
             localStorage.setItem('superadmin_backup', JSON.stringify(currentUser));
             const { data } = await API.get(`/superadmin/login-as-school/${schoolId}`);
-            if(data.token) {
+            if (data.token) {
                 localStorage.setItem('user', JSON.stringify(data));
                 window.location.href = '/dashboard';
             }
@@ -81,7 +81,7 @@ const SuperAdminDashboard = () => {
                     <p className="text-[10px] font-black text-neon/40 tracking-[0.3em] uppercase italic">Global Asset Monitoring</p>
                 </div>
                 <button onClick={() => navigate('/superadmin/onboard')} className="bg-neon text-void px-6 py-4 rounded-3xl font-black flex items-center gap-2 shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 transition-all uppercase text-[10px] tracking-widest italic">
-                    <Plus size={20}/> Onboard New Node
+                    <Plus size={20} /> Onboard New Node
                 </button>
             </div>
 
@@ -147,8 +147,8 @@ const SuperAdminDashboard = () => {
                                     </td>
                                     <td className="py-6">
                                         <div className="flex gap-2">
-                                            <button onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }} className="p-3 bg-void border border-white/5 text-neon/40 rounded-xl hover:text-neon hover:border-neon/30 transition-all shadow-lg"><Edit3 size={16}/></button>
-                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }} className="p-3 bg-void border border-white/5 text-red-500/40 rounded-xl hover:text-red-500 hover:border-red-500/30 transition-all shadow-lg"><Trash2 size={16}/></button>
+                                            <button onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }} className="p-3 bg-void border border-white/5 text-neon/40 rounded-xl hover:text-neon hover:border-neon/30 transition-all shadow-lg"><Edit3 size={16} /></button>
+                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }} className="p-3 bg-void border border-white/5 text-red-500/40 rounded-xl hover:text-red-500 hover:border-red-500/30 transition-all shadow-lg"><Trash2 size={16} /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -159,23 +159,78 @@ const SuperAdminDashboard = () => {
             </div>
 
             {editingSchool && (
-                <div className="fixed inset-0 bg-void/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-                    <div className="bg-slate-900 w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-neon/20 animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-center mb-8">
-                            <h3 className="font-black italic uppercase tracking-tighter text-neon/60">Node Re-Configuration</h3>
-                            <button onClick={() => setEditingSchool(null)} className="p-2 bg-void rounded-full text-white/20 hover:text-white transition-colors"><X size={20}/></button>
+                <div className="fixed inset-0 bg-void/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-slate-900 w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border border-neon/20 animate-in zoom-in-95 duration-200 my-8 italic">
+                        <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
+                            <h3 className="font-black italic uppercase tracking-tighter text-neon/60">Node Re-Configuration Matrix</h3>
+                            <button onClick={() => setEditingSchool(null)} className="p-2 bg-void rounded-full text-white/20 hover:text-white transition-colors"><X size={20} /></button>
                         </div>
+
                         <div className="space-y-6">
-                            <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-white uppercase" value={editData.schoolName} onChange={(e) => setEditData({...editData, schoolName: e.target.value})} placeholder="School Name" />
-                            <div className="grid grid-cols-2 gap-3">
-                                <input className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-white" value={editData.subscription.totalPaid} onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, totalPaid: Number(e.target.value)}})} placeholder="Total Paid" />
-                                <select className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm outline-none focus:border-neon text-neon/60 appearance-none uppercase" value={editData.subscription.status} onChange={(e) => setEditData({...editData, subscription: {...editData.subscription, status: e.target.value}})}>
-                                    <option value="Active">Active</option>
-                                    <option value="Terminated">Terminated</option>
-                                </select>
+                            {/* School Details */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Institutional Name</label>
+                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
+                                        <School size={16} className="text-white/20 mr-3" />
+                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.schoolName} onChange={(e) => setEditData({ ...editData, schoolName: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Registry Cipher (Affiliation)</label>
+                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
+                                        <Hash size={16} className="text-white/20 mr-3" />
+                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.affiliationNo} onChange={(e) => setEditData({ ...editData, affiliationNo: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Address */}
+                            <div className="space-y-1">
+                                <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Deployment Sector (Address)</label>
+                                <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
+                                    <MapPin size={16} className="text-white/20 mr-3" />
+                                    <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.address} onChange={(e) => setEditData({ ...editData, address: e.target.value })} />
+                                </div>
+                            </div>
+
+                            {/* Admin Personnel Details */}
+                            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic border-b border-white/5 pb-1">Personnel Node Admin</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Operator Persona</label>
+                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-white uppercase" value={editData.adminDetails?.fullName} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, fullName: e.target.value } })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Signal Contact</label>
+                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
+                                        <Phone size={14} className="text-white/20 mr-3" />
+                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white w-full" value={editData.adminDetails?.mobile} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, mobile: e.target.value } })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Subscription & Status */}
+                            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic border-b border-white/5 pb-1">Credit & Protocol Status</p>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Total Paid</label>
+                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-white" value={editData.subscription?.totalPaid} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, totalPaid: Number(e.target.value) } })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Monthly Quota</label>
+                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-neon" value={editData.subscription?.monthlyFee} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, monthlyFee: Number(e.target.value) } })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Node Status</label>
+                                    <select className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-[10px] outline-none focus:border-neon text-neon/60 appearance-none uppercase" value={editData.subscription?.status} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, status: e.target.value } })}>
+                                        <option value="Active">Active</option>
+                                        <option value="Terminated">Terminated</option>
+                                    </select>
+                                </div>
                             </div>
                             <button onClick={handleUpdate} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-2 italic">
-                                <Save size={18}/> Commit Protocol Changes
+                                <Save size={18} /> Commit Protocol Changes
                             </button>
                         </div>
                     </div>

@@ -77,9 +77,9 @@ const SuperAdminOnboard = () => {
                     </div>
                     <input type="text" placeholder="Institution Name" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase tracking-tight" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, schoolName: e.target.value}})} required />
-                    <input type="text" placeholder="Node Headquarters Address" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
+                    <input type="text" placeholder="Full Address (Plot/Building No., Area, City, State)" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, address: e.target.value}})} required />
-                    <input type="text" placeholder="Registry Affiliation Cipher" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
+                    <input type="text" placeholder="Affiliation Registration Code" className="w-full bg-void p-4 rounded-2xl border border-white/5 outline-none focus:border-neon font-black italic text-sm text-white uppercase" 
                         onChange={(e) => setFormData({...formData, schoolInfo: {...formData.schoolInfo, affiliationNo: e.target.value}})} required />
                 </div>
 
@@ -89,14 +89,14 @@ const SuperAdminOnboard = () => {
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-neon/40">Primary Operator</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <input type="text" placeholder="Admin Persona" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
+                        <input type="text" placeholder="Admin Name" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                             onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, fullName: e.target.value}})} required />
                         <input type="text" placeholder="Signal Contact" className="p-4 bg-void rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                             onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, mobile: e.target.value}})} required />
                     </div>
                     <input type="email" placeholder="Network Access Email" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                         onChange={(e) => setFormData({...formData, adminInfo: {...formData.adminInfo, email: e.target.value}})} required />
-                    <input type="password" placeholder="Access Cipher Key" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
+                    <input type="password" placeholder="Password" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black italic text-sm text-white outline-none focus:border-neon" 
                         onChange={(e) => setFormData({...formData, tempPassword: e.target.value})} required />
                 </div>
 

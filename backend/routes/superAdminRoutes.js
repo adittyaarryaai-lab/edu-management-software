@@ -8,6 +8,7 @@ const upload = require('../middleware/uploadMiddleware');
 const generateToken = require('../utils/generateToken');
 
 // 1. Add New School & Create its Admin
+// 1. Add New School & Create its Admin (FIXED MAP LOGIC)
 router.post('/onboard-school', protect, superAdminOnly, upload.single('logo'), async (req, res) => {
     try {
         const schoolInfo = JSON.parse(req.body.schoolInfo);
@@ -15,7 +16,8 @@ router.post('/onboard-school', protect, superAdminOnly, upload.single('logo'), a
         const subscription = JSON.parse(req.body.subscription);
 
         const logoPath = req.file ? `/${req.file.path.replace(/\\/g, "/")}` : '/uploads/default-school.png';
-        
+
+        // 1. School Document Create
         const newSchool = await School.create({
             ...schoolInfo,
             logo: logoPath,
@@ -24,14 +26,31 @@ router.post('/onboard-school', protect, superAdminOnly, upload.single('logo'), a
             sessionYear: req.body.sessionYear
         });
 
-        // FIXED: Using newSchool._id directly as it is a valid ObjectId
+        // 2. Admin User Document Create (FIXED MAPPING)
+        // Yahan dhyan de: ab hum adminInfo aur schoolInfo ke andar se data nikaal rahe hain
         await User.create({
             name: adminInfo.fullName,
             email: adminInfo.email,
             password: req.body.tempPassword,
             role: 'admin',
-            schoolId: newSchool._id, 
-            grade: 'N/A'
+            schoolId: newSchool._id,
+            phone: adminInfo.mobile,
+            
+            // DAY 78 FIX: Mapping from the correct nested objects
+            fatherName: adminInfo.fatherName || 'Master Root', // Agar frontend se adminInfo mein bhej rahe ho
+            motherName: adminInfo.motherName || 'N/A',
+            dob: adminInfo.dob || null,
+            gender: adminInfo.gender || 'Other',
+            religion: adminInfo.religion || 'Global',
+            
+            address: {
+                fullAddress: schoolInfo.address, // School ka address hi admin ka permanent address
+                state: schoolInfo.state || 'N/A',
+                district: schoolInfo.district || 'N/A',
+                pincode: schoolInfo.pincode || 'N/A',
+                country: 'India'
+            },
+            grade: 'MASTER NODE'
         });
 
         res.status(201).json(newSchool);
@@ -42,6 +61,7 @@ router.post('/onboard-school', protect, superAdminOnly, upload.single('logo'), a
 });
 
 // Update SuperAdmin Profile
+// Update SuperAdmin Profile (FIXED ADDRESS MAPPING)
 router.put('/update-profile', protect, superAdminOnly, upload.single('avatar'), async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
@@ -49,8 +69,15 @@ router.put('/update-profile', protect, superAdminOnly, upload.single('avatar'), 
 
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
-        user.mobile = req.body.mobile || user.mobile;
-        user.address = req.body.address || user.address;
+        user.phone = req.body.mobile || user.phone; // user.mobile ko user.phone kiya schema match karne ke liye
+
+        // ADDRESS FIX: String ko Object ke fullAddress mein dalo
+        if (req.body.address) {
+            user.address = {
+                ...user.address, // purana data rakho
+                fullAddress: req.body.address // naya string yahan dalo
+            };
+        }
 
         if (req.file) {
             user.avatar = `/${req.file.path.replace(/\\/g, "/")}`;
@@ -62,14 +89,14 @@ router.put('/update-profile', protect, superAdminOnly, upload.single('avatar'), 
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
-            mobile: updatedUser.mobile,
-            address: updatedUser.address,
+            phone: updatedUser.phone,
+            address: updatedUser.address?.fullAddress || "", // Frontend ko string wapas bhejo
             avatar: updatedUser.avatar,
             token: req.headers.authorization.split(' ')[1]
         });
     } catch (error) {
         console.error("Update Error:", error);
-        res.status(500).json({ message: 'Master Sync Failed' });
+        res.status(500).json({ message: 'Master Sync Failed: ' + error.message });
     }
 });
 
@@ -81,7 +108,7 @@ router.delete('/delete-school/:id', protect, superAdminOnly, async (req, res) =>
 
         await User.deleteMany({ schoolId: req.params.id });
         school.subscription.status = 'Terminated';
-        school.isDeleted = true; 
+        school.isDeleted = true;
         await school.save();
 
         res.json({ message: 'Institution deactivated. Revenue records preserved. 🗑️' });
@@ -94,15 +121,9 @@ router.delete('/delete-school/:id', protect, superAdminOnly, async (req, res) =>
 router.get('/login-as-school/:id', protect, superAdminOnly, async (req, res) => {
     try {
         const targetId = req.params.id;
-        
-        // FIXED: Searching by schoolId ensuring it matches the stored format
-        const schoolAdmin = await User.findOne({ 
-            schoolId: targetId, 
-            role: 'admin' 
-        });
+        const schoolAdmin = await User.findOne({ schoolId: targetId, role: 'admin' });
 
         if (!schoolAdmin) {
-            // Log for debugging
             console.log("No Admin found for schoolId:", targetId);
             return res.status(404).json({ message: 'Admin for this institution not found. Check if the school was created correctly.' });
         }
@@ -123,7 +144,21 @@ router.get('/login-as-school/:id', protect, superAdminOnly, async (req, res) => 
 
 router.put('/update-school/:id', protect, superAdminOnly, async (req, res) => {
     try {
+        // DAY 78: SuperAdmin can now update ALL details of a school
         const updatedSchool = await School.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+        // Agar school admin ki details badli hain, toh User document bhi update karna hoga
+        if (req.body.adminDetails) {
+            await User.findOneAndUpdate(
+                { schoolId: req.params.id, role: 'admin' },
+                {
+                    name: req.body.adminDetails.fullName,
+                    email: req.body.adminDetails.email,
+                    phone: req.body.adminDetails.mobile
+                }
+            );
+        }
+
         res.json(updatedSchool);
     } catch (error) {
         res.status(500).json({ message: 'Update failed' });
@@ -133,9 +168,9 @@ router.put('/update-school/:id', protect, superAdminOnly, async (req, res) => {
 // Stats Route 
 router.get('/stats', protect, superAdminOnly, async (req, res) => {
     try {
-        const allSchools = await School.find(); 
+        const allSchools = await School.find();
         const totalRevenue = allSchools.reduce((acc, curr) => acc + curr.subscription.totalPaid, 0);
-        
+
         const visibleSchools = allSchools.filter(s => !s.isDeleted);
         const activeSchools = visibleSchools.filter(s => s.subscription.status === 'Active').length;
 
@@ -143,14 +178,14 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
         const schoolsWithStats = await Promise.all(visibleSchools.map(async (school) => {
             const studentCount = await User.countDocuments({ schoolId: school._id, role: 'student' });
             const teacherCount = await User.countDocuments({ schoolId: school._id, role: 'teacher' });
-            
+
             return {
                 ...school._doc,
                 studentCount,
                 teacherCount
             };
         }));
-        
+
         res.json({
             totalSchools: visibleSchools.length,
             activeSchools,

@@ -3,10 +3,14 @@ const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
-// Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic)
-// Admin adds a teacher (EMP001 sequence for whole school)
+// Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic + DAY 78 Extended Fields)
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
-    const { name, email, password, subjects } = req.body;
+    const { 
+        name, email, password, subjects,
+        fatherName, motherName, dob, gender, religion,
+        phone, address 
+    } = req.body;
+
     try {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
@@ -21,10 +25,9 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
         if (lastTeacher && lastTeacher.employeeId && lastTeacher.employeeId.startsWith('EMP')) {
             const lastNo = parseInt(lastTeacher.employeeId.replace('EMP', ''));
             const nextNo = lastNo + 1;
-            // PadStart will make it 001, 002... and if it reaches 1000, it stays 1000
             nextEmpId = `EMP${nextNo.toString().padStart(3, '0')}`;
         } else {
-            nextEmpId = 'EMP001'; // Starting from 001 as requested
+            nextEmpId = 'EMP001';
         }
 
         const teacher = await User.create({
@@ -34,7 +37,14 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
             password, 
             role: 'teacher', 
             employeeId: nextEmpId,
-            subjects
+            subjects,
+            fatherName,
+            motherName,
+            dob,
+            gender,
+            religion,
+            phone,
+            address // day 78 address object (pincode, district, state, etc)
         });
         res.status(201).json({ message: `Teacher assigned with ID: ${nextEmpId}`, teacher });
     } catch (error) {
@@ -42,9 +52,14 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     }
 });
 
-// Admin adds a student (STU001 sequence SEPARATE for each Grade)
+// Admin adds a student (STU001 sequence SEPARATE for each Grade + DAY 78 Extended Fields)
 router.post('/add-student', protect, adminOnly, async (req, res) => {
-    const { name, email, password, grade } = req.body;
+    const { 
+        name, email, password, grade,
+        fatherName, motherName, dob, gender, religion, admissionNo,
+        phone, address 
+    } = req.body;
+
     try {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
@@ -53,18 +68,16 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
         const lastStudent = await User.findOne({ 
             schoolId: req.user.schoolId, 
             role: 'student',
-            grade: grade // Class-wise filter logic
+            grade: grade 
         }).sort({ createdAt: -1 });
 
         let nextEnrollNo;
         if (lastStudent && lastStudent.enrollmentNo && lastStudent.enrollmentNo.startsWith('STU')) {
-            // Hum sirf number nikalenge (e.g., STU001 -> 1)
             const lastNo = parseInt(lastStudent.enrollmentNo.replace('STU', ''));
             const nextNo = lastNo + 1;
-            // PadStart handle karega: 009 -> 010 and 999 -> 1000 automatically
             nextEnrollNo = `STU${nextNo.toString().padStart(3, '0')}`;
         } else {
-            nextEnrollNo = 'STU001'; // Har nayi class ka pehla bacha STU001 se shuru hoga
+            nextEnrollNo = 'STU001'; 
         }
 
         const student = await User.create({
@@ -74,7 +87,15 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
             password, 
             role: 'student', 
             enrollmentNo: nextEnrollNo,
-            grade
+            grade,
+            fatherName,
+            motherName,
+            dob,
+            gender,
+            religion,
+            admissionNo,
+            phone,
+            address // day 78 address object
         });
         res.status(201).json({ message: `Student enrolled in ${grade} with ID: ${nextEnrollNo}`, student });
     } catch (error) {
@@ -82,17 +103,57 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
     }
 });
 
+// Admin fetching students by grade (Added select for new fields if needed)
 router.get('/students/:grade', protect, async (req, res) => {
     try {
         const students = await User.find({
             role: 'student',
             grade: req.params.grade,
-            schoolId: req.user.schoolId // FIXED Isolation
-        }).select('name enrollmentNo grade');
+            schoolId: req.user.schoolId 
+        }).select('name enrollmentNo grade fatherName motherName dob gender religion admissionNo phone address');
 
         res.json(students);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// Admin fetching all teachers
+router.get('/teachers', protect, adminOnly, async (req, res) => {
+    try {
+        const teachers = await User.find({
+            role: 'teacher',
+            schoolId: req.user.schoolId
+        }).select('-password');
+        res.json(teachers);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// Admin Update User Sequence (DAY 78)
+router.put('/update/:id', protect, adminOnly, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Update fields
+        Object.assign(user, req.body);
+        await user.save();
+
+        res.json({ message: 'User updated successfully', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Update failed' });
+    }
+});
+
+// Admin Delete User (DAY 78)
+router.delete('/delete/:id', protect, adminOnly, async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ message: 'User identity purged' });
+    } catch (error) {
+        res.status(500).json({ message: 'Delete failed' });
     }
 });
 

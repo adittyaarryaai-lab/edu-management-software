@@ -13,9 +13,17 @@ const AdminHome = () => {
 
     const [subData, setSubData] = useState(null);
     const [transactions, setTransactions] = useState([]);
+    const [teacherData, setTeacherData] = useState({
+        name: '', email: '', password: '', subjects: '',
+        fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '',
+        phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
+    });
 
-    const [teacherData, setTeacherData] = useState({ name: '', email: '', password: '', subjects: '' });
-    const [studentData, setStudentData] = useState({ name: '', email: '', password: '', grade: '' });
+    const [studentData, setStudentData] = useState({
+        name: '', email: '', password: '', grade: '',
+        fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '', admissionNo: '',
+        phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,7 +58,7 @@ const AdminHome = () => {
             setSubData(data.subscription);
             const { data: updatedTxs } = await API.get('/school/transactions');
             setTransactions(updatedTxs);
-        } catch (err) { alert("Payment Gateway Simulated."); } 
+        } catch (err) { alert("Payment Gateway Simulated."); }
         finally { setLoading(false); }
     };
 
@@ -58,11 +66,26 @@ const AdminHome = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const processedData = { ...teacherData, subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [] };
-            const { data } = await API.post('/users/add-teacher', processedData);
-            setMsg(data.message || "Teacher Registered!");
+            // Logged in admin ki details nikalna
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const sId = currentUser?.schoolId;
+
+            const processedData = {
+                ...teacherData,
+                role: 'teacher',
+                schoolId: sId, // STRICTLY SENDING SCHOOL ID
+                subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : []
+            };
+
+            const { data } = await API.post('/auth/register', processedData);
+            setMsg(`Teacher Node Active: ID ${data.generatedId} ⚡`);
             setShowTeacherForm(false);
-            setTeacherData({ name: '', email: '', password: '', subjects: '' });
+            // Reset form
+            setTeacherData({
+                name: '', email: '', password: '', subjects: '',
+                fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '',
+                phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
+            });
         } catch (err) { alert(err.response?.data?.message || "Error adding teacher"); } finally { setLoading(false); }
     };
 
@@ -70,10 +93,25 @@ const AdminHome = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const { data } = await API.post('/users/add-student', studentData);
-            setMsg(data.message || "Student Enrolled!");
+            // Logged in admin ki details nikalna
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const sId = currentUser?.schoolId;
+
+            const processedData = {
+                ...studentData,
+                role: 'student',
+                schoolId: sId // STRICTLY SENDING SCHOOL ID
+            };
+
+            const { data } = await API.post('/auth/register', processedData);
+            setMsg(`Student Enrolled: ID ${data.generatedId} ⚡`);
             setShowStudentForm(false);
-            setStudentData({ name: '', email: '', password: '', grade: '' });
+            // Reset form
+            setStudentData({
+                name: '', email: '', password: '', grade: '',
+                fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '', admissionNo: '',
+                phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
+            });
         } catch (err) { alert(err.response?.data?.message || "Error adding student"); } finally { setLoading(false); }
     };
 
@@ -91,6 +129,7 @@ const AdminHome = () => {
         { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
         { id: 'notice-feed', title: 'Notice Archive', icon: <ClipboardList size={24} />, desc: 'Manage & Delete Notices', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        { id: 'manage-users', title: 'Node Manager', icon: <Users size={24} />, desc: 'Edit or Purge Personnel', color: 'bg-neon/10 text-neon border-neon/20' },
     ];
 
     return (
@@ -163,6 +202,7 @@ const AdminHome = () => {
                 <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] ml-2 italic">Administrative Core</h3>
                 {managementModules.map((m, i) => (
                     <div key={i} onClick={() => {
+                        if (m.id === 'manage-users') navigate('/admin/manage-users');
                         if (m.id === 'add-staff') setShowTeacherForm(true);
                         if (m.id === 'add-student') setShowStudentForm(true);
                         if (m.id === 'timetable') navigate('/admin/timetable');
@@ -183,35 +223,75 @@ const AdminHome = () => {
                 ))}
             </div>
 
-            {/* MODALS ARE BACK HERE BHAI */}
+            {/* MODALS WITH ALL DAY 78 FIELDS */}
             {(showTeacherForm || showStudentForm) && (
-                <div className="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-                    <div className="bg-slate-900 border border-neon/20 w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative">
+                <div className="fixed inset-0 bg-slate-950/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto">
+                    <div className="bg-slate-900 border border-neon/20 w-full max-w-2xl rounded-[3rem] p-8 shadow-2xl relative my-8 italic">
                         <button onClick={() => { setShowTeacherForm(false); setShowStudentForm(false) }} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-neon/40"><X size={20} /></button>
-                        <h3 className="font-black text-2xl text-white mb-2 uppercase italic">{showTeacherForm ? 'Add Staff' : 'Enroll Student'}</h3>
-                        <div className="space-y-4 mt-6">
-                            {showTeacherForm ? (
-                                <>
-                                    <input type="text" placeholder="Full Name" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.name} onChange={(e) => setTeacherData({ ...teacherData, name: e.target.value })} />
-                                    <input type="email" placeholder="Email" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.email} onChange={(e) => setTeacherData({ ...teacherData, email: e.target.value })} />
-                                    <input type="password" placeholder="Password" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.password} onChange={(e) => setTeacherData({ ...teacherData, password: e.target.value })} />
-                                    <input type="text" placeholder="Subjects (Comma separated)" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={teacherData.subjects} onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />
-                                    <button onClick={handleAddTeacher} disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
-                                        {loading ? "Initializing..." : "Register System User"}
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <input type="text" placeholder="Student Name" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.name} onChange={(e) => setStudentData({ ...studentData, name: e.target.value })} />
-                                    <input type="email" placeholder="Email" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.email} onChange={(e) => setStudentData({ ...studentData, email: e.target.value })} />
-                                    <input type="password" placeholder="Password" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.password} onChange={(e) => setStudentData({ ...studentData, password: e.target.value })} />
-                                    <input type="text" placeholder="Grade (10-A)" className="w-full p-4 bg-void rounded-2xl border border-white/10 outline-none text-sm text-white focus:border-neon" value={studentData.grade} onChange={(e) => setStudentData({ ...studentData, grade: e.target.value })} />
-                                    <button onClick={handleAddStudent} disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black text-sm uppercase shadow-xl disabled:bg-slate-800">
-                                        {loading ? "Processing..." : "Enroll To Network"}
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                        <h3 className="font-black text-2xl text-white mb-6 uppercase italic text-center underline decoration-neon/20">{showTeacherForm ? 'Deploy Faculty Node' : 'Initialize Student Link'}</h3>
+
+                        <form onSubmit={showTeacherForm ? handleAddTeacher : handleAddStudent} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Common Fields */}
+                            <input type="text" placeholder="FULL NAME" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, name: e.target.value }) : setStudentData({ ...studentData, name: e.target.value })} required />
+
+                            <input type="email" placeholder="Institutional Email" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, email: e.target.value }) : setStudentData({ ...studentData, email: e.target.value })} required />
+
+                            <input type="password" placeholder="Access Cipher (Password)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, password: e.target.value }) : setStudentData({ ...studentData, password: e.target.value })} required />
+
+                            <input type="text" placeholder="Mobile Signal" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, phone: e.target.value }) : setStudentData({ ...studentData, phone: e.target.value })} required />
+
+                            {/* Specific Fields */}
+                            {showStudentForm && <input type="text" placeholder="Grade Sector (e.g. 10-A)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => setStudentData({ ...studentData, grade: e.target.value })} required />}
+
+                            {showTeacherForm && <input type="text" placeholder="Assigned Subjects (Comma Sep)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />}
+
+                            <input type="text" placeholder="Father's Name" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, fatherName: e.target.value }) : setStudentData({ ...studentData, fatherName: e.target.value })} />
+
+                            <input type="text" placeholder="Mother's Name" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, motherName: e.target.value }) : setStudentData({ ...studentData, motherName: e.target.value })} />
+
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[8px] text-neon/40 ml-4 font-black uppercase">Birth Date</label>
+                                <input type="date" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
+                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, dob: e.target.value }) : setStudentData({ ...studentData, dob: e.target.value })} />
+                            </div>
+
+                            <select className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, gender: e.target.value }) : setStudentData({ ...studentData, gender: e.target.value })}>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+
+                            <input type="text" placeholder="Religion" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, religion: e.target.value }) : setStudentData({ ...studentData, religion: e.target.value })} />
+
+                            {showStudentForm && <input type="text" placeholder="Admission Number" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => setStudentData({ ...studentData, admissionNo: e.target.value })} />}
+
+                            {/* Address Object Fields */}
+                            <div className="md:col-span-2 grid grid-cols-3 gap-2">
+                                <input type="text" placeholder="Pincode" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon"
+                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, pincode: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, pincode: e.target.value } })} />
+                                <input type="text" placeholder="District" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon uppercase"
+                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, district: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, district: e.target.value } })} />
+                                <input type="text" placeholder="State" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon uppercase"
+                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, state: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, state: e.target.value } })} />
+                            </div>
+
+                            <textarea placeholder="FULL PERMANENT ADDRESS..." className="md:col-span-2 p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
+                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, fullAddress: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, fullAddress: e.target.value } })}></textarea>
+
+                            <button type="submit" disabled={loading} className="md:col-span-2 w-full bg-neon text-void py-5 rounded-[2rem] font-black text-xs uppercase shadow-[0_0_30px_rgba(61,242,224,0.3)] active:scale-95 transition-all mt-4">
+                                {loading ? "TRANSMITTING DATA..." : (showTeacherForm ? "AUTHORIZE FACULTY" : "SYNC STUDENT LINK")}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}

@@ -45,6 +45,7 @@ import TeacherLiveClass from './pages/TeacherLiveClass';
 import StudentAttendance from './pages/StudentAttendance';
 import AdminAttendance from './pages/AdminAttendance'; 
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
+import ManageUsers from './pages/ManageUsers';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -248,6 +249,7 @@ const handleLogin = async (e) => {
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} /> 
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} /> 
+          <Route path="/admin/manage-users" element={<ManageUsers />} /> 
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
