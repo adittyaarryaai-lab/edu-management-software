@@ -114,7 +114,7 @@ const ManageUsers = () => {
                     {loading ? <Loader /> : usersList.map((u) => (
                         <div key={u._id} className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] border border-white/5 flex items-center justify-between group hover:border-neon/30 transition-all">
                             <div className="flex items-center gap-4">
-                                <img src={u.avatar} className="w-12 h-12 rounded-2xl border border-neon/20 grayscale group-hover:grayscale-0 transition-all" alt="user" />
+                                <img src={u.avatar} className="w-12 h-12 rounded-2xl border border-neon/20 transition-all" alt="user" />
                                 <div>
                                     <h4 className="font-black text-white text-sm uppercase italic tracking-tight">{u.name}</h4>
                                     <p className="text-[9px] font-black text-neon/40 uppercase tracking-widest">

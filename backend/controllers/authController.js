@@ -74,13 +74,7 @@ const registerUser = async (req, res) => {
 
     if (user) {
         res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            grade: user.grade,
-            schoolId: user.schoolId,
-            avatar: user.avatar,
+            ...user._doc, // Teacher jaisa logic: Pura document bhej do
             generatedId: generatedId,
             token: generateToken(user._id),
         });

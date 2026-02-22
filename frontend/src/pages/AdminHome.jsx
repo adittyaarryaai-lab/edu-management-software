@@ -100,7 +100,13 @@ const AdminHome = () => {
             const processedData = {
                 ...studentData,
                 role: 'student',
-                schoolId: sId // STRICTLY SENDING SCHOOL ID
+                schoolId: sId, // STRICTLY SENDING SCHOOL ID
+                address: {
+                    pincode: studentData.address.pincode,
+                    district: studentData.address.district,
+                    state: studentData.address.state,
+                    fullAddress: studentData.address.fullAddress
+                }
             };
 
             const { data } = await API.post('/auth/register', processedData);

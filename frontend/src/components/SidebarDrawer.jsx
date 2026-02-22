@@ -46,10 +46,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                         <div className="w-16 h-16 bg-neon/10 rounded-full overflow-hidden flex items-center justify-center border border-neon/40 backdrop-blur-md shadow-[0_0_20px_rgba(61,242,224,0.2)]">
                             {user?.avatar ? (
                                 <img 
-                                    src={`http://localhost:5000${user.avatar}`} 
-                                    alt="profile" 
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
+                                    src={`http://localhost:5000${user.avatar}`} alt="profile" className="w-full h-full object-cover"onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; }}
                                 />
                             ) : (
                                 <User size={32} className="text-neon" />

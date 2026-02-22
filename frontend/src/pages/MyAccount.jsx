@@ -37,7 +37,13 @@ const MyAccount = ({ user }) => {
         setUploading(true);
         try {
             const { data } = await API.put('/auth/update-profile', formData);
-            localStorage.setItem('user', JSON.stringify(data));
+
+            // Fix: Purana data (Father, Mother, ID) ko naye Avatar ke saath merge karo
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const updatedUser = { ...currentUser, avatar: data.avatar };
+
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
             setPreview(`${BASE_URL}${data.avatar}`);
             alert("Neural Profile Updated! 🧬");
             window.location.reload();
@@ -73,8 +79,7 @@ const MyAccount = ({ user }) => {
                         <div className="relative group">
                             <div className="w-28 h-28 bg-void rounded-full border-4 border-slate-900 shadow-[0_0_30px_rgba(61,242,224,0.3)] flex items-center justify-center overflow-hidden">
                                 {preview ? (
-                                    <img src={preview} alt="profile" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                                ) : (
+                                    <img src={preview} alt="profile" className="w-full h-full object-cover transition-all duration-500" />) : (
                                     <UserCircle size={70} className="text-neon/20" />
                                 )}
                             </div>

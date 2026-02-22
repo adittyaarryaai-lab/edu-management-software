@@ -122,7 +122,7 @@ const SuperAdminDashboard = () => {
                                 <tr key={i} className="group hover:bg-neon/5 transition-all cursor-pointer">
                                     <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
                                         <div className="flex items-center gap-4">
-                                            <img src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} className="w-12 h-12 rounded-2xl object-cover border border-neon/20 shadow-inner grayscale group-hover:grayscale-0 transition-all" alt="logo" />
+                                            <img src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} className="w-12 h-12 rounded-2xl object-cover border border-neon/20 shadow-inner transition-all" alt="logo" />
                                             <div>
                                                 <p className="font-black text-white/80 text-sm uppercase italic group-hover:text-neon transition-colors">{school.schoolName}</p>
                                                 <p className="text-[9px] text-white/20 font-black tracking-widest uppercase">{school.affiliationNo}</p>
