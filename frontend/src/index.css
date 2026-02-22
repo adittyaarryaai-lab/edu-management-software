@@ -4,8 +4,10 @@
 
 @theme {
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --color-ems-blue: #3DF2E0; /* Updated to Neon Cyan */
-  --color-ems-bg: #0B0F14;   /* Updated to Void Black */
+  --color-ems-blue: #3DF2E0;
+  /* Updated to Neon Cyan */
+  --color-ems-bg: #0B0F14;
+  /* Updated to Void Black */
   --color-void: #0B0F14;
   --color-neon: #3DF2E0;
 }
@@ -13,11 +15,48 @@
 /* Base styles without using @apply on body to avoid PostCSS errors */
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #0B0F14; /* Default to Void Black */
+  background-color: #0B0F14;
+  /* Default to Void Black */
   color: #ffffff;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Neural Matrix Animations */
+@keyframes matrix-fall {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(1000%);
+    opacity: 0;
+  }
+}
+
+.animate-matrix {
+  animation: matrix-fall var(--duration) linear infinite;
+}
+
+/* Spin Slow fix for Cpu icon */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
 }
 
 /* Custom Component Classes using standard CSS for stability */
@@ -49,13 +88,16 @@ body {
 ::-webkit-scrollbar {
   width: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: #0B0F14;
 }
+
 ::-webkit-scrollbar-thumb {
   background: rgba(61, 242, 224, 0.2);
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #3DF2E0;
 }

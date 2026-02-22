@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // Animation ke liye
 import { Bot, Cpu, Zap, ShieldCheck } from 'lucide-react'; // Robot icons
-import API from './api'; 
+import API from './api';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
@@ -33,17 +33,17 @@ import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
-import AdminFees from './pages/AdminFees'; 
+import AdminFees from './pages/AdminFees';
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
-import TeacherNotices from './pages/TeacherNotices'; 
-import TeacherSupport from './pages/TeacherSupport'; 
-import ChangePassword from './pages/ChangePassword'; 
-import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus'; 
+import TeacherNotices from './pages/TeacherNotices';
+import TeacherSupport from './pages/TeacherSupport';
+import ChangePassword from './pages/ChangePassword';
+import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus';
 import DigitalMaterial from './pages/DigitalMaterial';
-import TeacherLiveClass from './pages/TeacherLiveClass'; 
+import TeacherLiveClass from './pages/TeacherLiveClass';
 import StudentAttendance from './pages/StudentAttendance';
-import AdminAttendance from './pages/AdminAttendance'; 
+import AdminAttendance from './pages/AdminAttendance';
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
 import ManageUsers from './pages/ManageUsers';
 
@@ -54,16 +54,36 @@ import SuperAdminAccount from './pages/SuperAdminAccount';
 
 // DAY 76: Theme Integration
 import { useTheme } from './context/ThemeContext';
+// --- NEURAL VISUAL MATRIX COMPONENT ---
+const VisualMatrix = () => {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-10">
+      {[...Array(20)].map((_, i) => (
+        <div 
+          key={i}
+          className="absolute text-neon font-mono text-[10px] whitespace-nowrap animate-matrix italic"
+          style={{
+            left: `${i * 5}%`,
+            '--duration': `${Math.random() * 10 + 5}s`,
+            animationDelay: `${Math.random() * 5}s`
+          }}
+        >
+          {Array(20).fill('01NEURAL_DATA_FLOW_').join('')}
+        </div>
+      ))}
+    </div>
+  );
+};;
 
 function App() {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { isDarkMode } = useTheme(); // FIXED: Theme context consume kiya
+  const { isDarkMode, isMatrixActive } = useTheme();
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -76,21 +96,21 @@ function App() {
     }
   }, []);
 
-const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const { data } = await API.post('/auth/login', { email, password });
-      
+
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
-      
+
       setLoading(false);
       // Redirect logic for SuperAdmin
       if (data.role === 'superadmin') {
-          navigate("/superadmin/dashboard");
+        navigate("/superadmin/dashboard");
       } else {
-          navigate("/"); 
+        navigate("/");
       }
     } catch (error) {
       setLoading(false);
@@ -101,25 +121,25 @@ const handleLogin = async (e) => {
   if (!user) {
     return (
       <div className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-[#0B0F14]">
-        
+        {isMatrixActive && <VisualMatrix />}
         {/* BACKGROUND IMAGE */}
         <div className="absolute inset-0 z-0 text-center flex items-center justify-center">
-          <img 
-            src="/image.png.jpeg" 
-            alt="AI Background" 
+          <img
+            src="/image.png.jpeg"
+            alt="AI Background"
             className="w-full h-full object-cover opacity-20 grayscale"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-[#0B0F14] via-[#0B0F14]/80 to-[#3DF2E0]/10 backdrop-blur-[1px]"></div>
         </div>
 
         {/* --- ROBOT ANIMATION SECTION --- */}
-        <motion.div 
+        <motion.div
           initial={{ x: "-100%" }}
           animate={{ x: ["-100%", "0%", "-100%"] }}
-          transition={{ 
-            duration: 4, 
-            times: [0, 0.5, 1], 
-            ease: "easeInOut" 
+          transition={{
+            duration: 4,
+            times: [0, 0.5, 1],
+            ease: "easeInOut"
           }}
           className="absolute left-0 z-30 flex items-center pointer-events-none"
         >
@@ -132,16 +152,16 @@ const handleLogin = async (e) => {
         </motion.div>
 
         {/* --- LOGIN CARD WITH DRAG ANIMATION --- */}
-        <motion.div 
+        <motion.div
           initial={{ x: "-120%", opacity: 0, rotate: -10 }}
           animate={{ x: 0, opacity: 1, rotate: 0 }}
           transition={{ duration: 2, delay: 0.5, type: "spring", stiffness: 50 }}
           className="relative z-10 w-full max-w-lg px-6"
         >
           <div className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[3.5rem] p-10 md:p-14 shadow-[0_0_100px_rgba(0,0,0,0.9)] relative overflow-hidden group italic">
-            
+
             {/* Animated scanning line effect */}
-            <motion.div 
+            <motion.div
               animate={{ top: ["0%", "100%", "0%"] }}
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
               className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#3DF2E0] to-transparent opacity-40 z-0"
@@ -159,8 +179,8 @@ const handleLogin = async (e) => {
 
             <form onSubmit={handleLogin} className="space-y-6 relative z-10">
               <div className="relative group">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="PERSONNEL ID / UPLINK EMAIL"
@@ -168,10 +188,10 @@ const handleLogin = async (e) => {
                   required
                 />
               </div>
-              
+
               <div className="relative group">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="ACCESS ENCRYPTION CIPHER"
@@ -188,13 +208,13 @@ const handleLogin = async (e) => {
                 <button type="button" className="text-[8px] font-black text-[#3DF2E0]/40 uppercase tracking-[0.2em] hover:text-[#3DF2E0] transition-colors italic underline decoration-[#3DF2E0]/20">Bypass Protocol?</button>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-[#3DF2E0] hover:bg-cyan-400 text-[#0B0F14] py-6 rounded-[2rem] font-black shadow-[0_0_40px_rgba(61,242,224,0.3)] active:scale-95 transition-all uppercase text-sm tracking-[0.3em] mt-6 flex items-center justify-center gap-4 group italic"
               >
                 {loading ? (
-                   <span className="w-6 h-6 border-3 border-[#0B0F14]/30 border-t-[#0B0F14] rounded-full animate-spin"></span>
+                  <span className="w-6 h-6 border-3 border-[#0B0F14]/30 border-t-[#0B0F14] rounded-full animate-spin"></span>
                 ) : (
                   <>
                     <span>Execute Session</span>
@@ -221,21 +241,22 @@ const handleLogin = async (e) => {
 
   return (
     <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
+      {isDarkMode && isMatrixActive && <VisualMatrix />}
       <Navbar user={user} />
-      <main className="relative z-0 pb-32 pt-28"> 
+      <main className="relative z-0 pb-32 pt-28">
         <Routes>
           {/* Main Dashboard Logic based on Role */}
           <Route path="/" element={
-            user.role === 'superadmin' ? <SuperAdminDashboard /> : 
-            user.role === 'admin' ? <AdminHome /> : 
-            user.role === 'teacher' ? <TeacherHome user={user} /> : 
-            <StudentHome user={user} />
+            user.role === 'superadmin' ? <SuperAdminDashboard /> :
+              user.role === 'admin' ? <AdminHome /> :
+                user.role === 'teacher' ? <TeacherHome user={user} /> :
+                  <StudentHome user={user} />
           } />
           <Route path="/dashboard" element={
-            user.role === 'superadmin' ? <SuperAdminDashboard /> : 
-            user.role === 'admin' ? <AdminHome /> : 
-            user.role === 'teacher' ? <TeacherHome user={user} /> : 
-            <StudentHome user={user} />
+            user.role === 'superadmin' ? <SuperAdminDashboard /> :
+              user.role === 'admin' ? <AdminHome /> :
+                user.role === 'teacher' ? <TeacherHome user={user} /> :
+                  <StudentHome user={user} />
           } />
 
           {/* SuperAdmin Specific Routes - Day 64 */}
@@ -247,9 +268,9 @@ const handleLogin = async (e) => {
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/fees" element={<AdminFees />} />
-          <Route path="/admin/attendance-report" element={<AdminAttendance />} /> 
-          <Route path="/admin/global-notice" element={<AdminGlobalNotice />} /> 
-          <Route path="/admin/manage-users" element={<ManageUsers />} /> 
+          <Route path="/admin/attendance-report" element={<AdminAttendance />} />
+          <Route path="/admin/global-notice" element={<AdminGlobalNotice />} />
+          <Route path="/admin/manage-users" element={<ManageUsers />} />
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
@@ -265,21 +286,21 @@ const handleLogin = async (e) => {
           <Route path="/transport" element={<Transport />} />
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
-          <Route path="/library/digital" element={<DigitalMaterial />} /> 
+          <Route path="/library/digital" element={<DigitalMaterial />} />
           <Route path="/live-class" element={<LiveClass user={user} />} />
-          
+
           <Route path="/feedback" element={<Feedback />} />
-          
+
           <Route path="/requests" element={<Requests />} />
           <Route path="/mentors" element={<Mentorship />} />
-          <Route path="/syllabus" element={<Syllabus user={user} />} /> 
+          <Route path="/syllabus" element={<Syllabus user={user} />} />
 
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
           <Route path="/teacher/students" element={<TeacherStudentList />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
           <Route path="/teacher/grade/:assignmentId" element={<TeacherGrading />} />
-          <Route path="/teacher/notices" element={<TeacherNotices />} /> 
+          <Route path="/teacher/notices" element={<TeacherNotices />} />
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
@@ -287,7 +308,7 @@ const handleLogin = async (e) => {
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
-          <Route path="/change-password" element={<ChangePassword />} /> 
+          <Route path="/change-password" element={<ChangePassword />} />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
