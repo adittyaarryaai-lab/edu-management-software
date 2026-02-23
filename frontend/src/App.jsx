@@ -46,6 +46,7 @@ import StudentAttendance from './pages/StudentAttendance';
 import AdminAttendance from './pages/AdminAttendance';
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
 import ManageUsers from './pages/ManageUsers';
+import AdminEditTimetable from './pages/AdminEditTimetable';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -343,6 +344,7 @@ function App() {
           {/* Timetable & Admin Management */}
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
           <Route path="/admin/timetable" element={<AdminTimetable />} />
+          <Route path="/admin/edit-timetable" element={<AdminEditTimetable />} /> {/* Naya Module */}
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} />
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} />

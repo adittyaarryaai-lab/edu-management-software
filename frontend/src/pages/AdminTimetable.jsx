@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
@@ -10,162 +10,127 @@ const AdminTimetable = () => {
     const [day, setDay] = useState('Monday');
     const [msg, setMsg] = useState('');
     const [loading, setLoading] = useState(false);
+    const [teachers, setTeachers] = useState([]);
+
     const [periods, setPeriods] = useState([
-        { startTime: '09:00 AM', endTime: '10:00 AM', subject: '', teacher: '' }
+        { startTime: '', endTime: '', subject: '', room: '', teacherEmpId: '' }
     ]);
 
+    useEffect(() => {
+        fetchTeachers();
+    }, []);
+
+    const fetchTeachers = async () => {
+        try {
+            const { data } = await API.get('/timetable/teachers-list');
+            setTeachers(data);
+        } catch (err) { console.error("Faculty Fetch Failed"); }
+    };
+
     const addPeriod = () => {
-        setPeriods([...periods, { startTime: '', endTime: '', subject: '', teacher: '' }]);
+        setPeriods([...periods, { startTime: '', endTime: '', subject: '', room: '', teacherEmpId: '' }]);
     };
 
     const removePeriod = (index) => {
         setPeriods(periods.filter((_, i) => i !== index));
     };
+
     const handleSave = async () => {
-        if (!grade) return alert("Please enter Grade first!");
+        if (!grade) return alert("Please enter Grade (e.g. 10-A)!");
+        
+        const isIncomplete = periods.some(p => !p.teacherEmpId || !p.startTime || !p.subject);
+        if (isIncomplete) return alert("All Neural Blocks (Start Time, Subject, Teacher) must be filled!");
 
         setLoading(true);
         try {
-            const cleanedPeriods = periods.map(p => {
-                const period = {
-                    startTime: p.startTime.trim(),
-                    endTime: p.endTime.trim(),
-                    subject: p.subject.trim()
-                };
-
-                const isValidId = /^[0-9a-fA-F]{24}$/.test(p.teacher?.trim());
-                if (isValidId) {
-                    period.teacher = p.teacher.trim();
-                }
-                return period;
-            });
-
             const payload = {
                 grade: grade.trim().toUpperCase(),
                 schedule: [{
                     day: day,
-                    periods: cleanedPeriods
+                    periods: periods.map(p => ({
+                        ...p,
+                        subject: p.subject.toUpperCase(),
+                        room: p.room || "N/A"
+                    }))
                 }]
             };
 
-            const { data } = await API.post('/timetable/upload', payload);
+            await API.post('/timetable/upload', payload);
+            setMsg(`Matrix Synchronized for ${grade} (${day})! ⚡`);
 
-            // 1. Success Message
-            setMsg(`Timetable for ${grade} Synchronized! ✅`);
-
-            // 2. FORM RESET LOGIC (Yahan se reset hoga)
-            setGrade(''); // Grade field khali
-            setDay('Monday'); // Day ko default Monday par le aao
-            setPeriods([
-                { startTime: '09:00 AM', endTime: '10:00 AM', subject: '', teacher: '' }
-            ]); // Periods ko wapas ek empty block par reset kar do
-
+            // Creation mode reset:
+            setGrade('');
+            setPeriods([{ startTime: '', endTime: '', subject: '', room: '', teacherEmpId: '' }]);
         } catch (err) {
-            console.error("SERVER ERROR:", err.response?.data);
-            alert(`Failed: ${err.response?.data?.message || "Internal Error"}`);
+            alert("Sync Failed!");
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
             <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-neon/5 to-transparent pointer-events-none"></div>
                 <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-95 border border-white/10 text-neon transition-all">
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Timetable Editor</h1>
+                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl border border-white/10 text-neon"><ArrowLeft size={20} /></button>
+                    <h1 className="text-xl font-black uppercase tracking-tighter">Timetable Creator</h1>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 relative z-10">
+                <div className="grid grid-cols-1 gap-4 relative z-10">
                     <input
-                        type="text" placeholder="Grade (10-A)"
+                        type="text" placeholder="ENTER GRADE (e.g. 10-A)"
                         className="bg-slate-900/50 border border-neon/20 p-4 rounded-2xl outline-none placeholder:text-neon/30 font-black text-xs text-white uppercase italic focus:border-neon"
                         value={grade} onChange={(e) => setGrade(e.target.value)}
                     />
-                    <div className="relative">
-                        <select
-                            className="w-full bg-slate-900/50 border border-neon/20 p-4 rounded-2xl outline-none font-black text-xs text-neon/80 italic appearance-none cursor-pointer"
-                            value={day} onChange={(e) => setDay(e.target.value)}
-                        >
-                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(d => (
-                                <option key={d} value={d} className="bg-void text-white">{d}</option>
-                            ))}
-                        </select>
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neon/40 text-[8px]">▼</div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(d => (
+                            <button
+                                key={d}
+                                onClick={() => setDay(d)}
+                                className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${day === d ? 'bg-neon text-void' : 'bg-white/5 text-white/40 border border-white/5'}`}
+                            >
+                                {d}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
 
             <div className="px-5 -mt-8 space-y-4 relative z-20">
                 {periods.map((p, index) => (
-                    <div key={index} className="bg-white/5 backdrop-blur-xl p-6 rounded-[2.5rem] shadow-2xl border border-white/5 relative group italic">
-                        {periods.length > 1 && (
-                            <button onClick={() => removePeriod(index)} className="absolute top-4 right-4 text-red-500/50 hover:text-red-500 p-2 transition-all">
-                                <Trash2 size={18} />
-                            </button>
-                        )}
+                    <div key={index} className="bg-white/5 backdrop-blur-xl p-6 rounded-[2.5rem] border border-white/5 relative group">
+                        <button onClick={() => removePeriod(index)} className="absolute top-4 right-4 text-red-500/30 hover:text-red-500 transition-all"><Trash2 size={16} /></button>
 
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-[9px] font-black text-neon/40 uppercase ml-2 italic tracking-widest leading-none">Start Cycle</label>
-                                    <input type="text" placeholder="09:00 AM" className="w-full bg-void p-3 rounded-xl border border-neon/10 text-xs font-black text-white italic outline-none focus:border-neon/40 mt-1"
-                                        value={p.startTime} onChange={(e) => {
-                                            const newPeriods = [...periods];
-                                            newPeriods[index].startTime = e.target.value;
-                                            setPeriods(newPeriods);
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[9px] font-black text-neon/40 uppercase ml-2 italic tracking-widest leading-none">End Cycle</label>
-                                    <input type="text" placeholder="10:00 AM" className="w-full bg-void p-3 rounded-xl border border-neon/10 text-xs font-black text-white italic outline-none focus:border-neon/40 mt-1"
-                                        value={p.endTime} onChange={(e) => {
-                                            const newPeriods = [...periods];
-                                            newPeriods[index].endTime = e.target.value;
-                                            setPeriods(newPeriods);
-                                        }}
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label className="text-[9px] font-black text-neon/40 uppercase ml-2 italic tracking-widest leading-none">Subject Identity</label>
-                                    <input type="text" placeholder="e.g. QUANTUM PHYSICS" className="w-full bg-void p-4 rounded-2xl border border-neon/10 text-sm font-black text-white italic uppercase outline-none focus:border-neon mt-1"
-                                        value={p.subject} onChange={(e) => {
-                                            const newPeriods = [...periods];
-                                            newPeriods[index].subject = e.target.value;
-                                            setPeriods(newPeriods);
-                                        }}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[9px] font-black text-neon/40 uppercase ml-2 italic tracking-widest leading-none">Faculty Hash (Optional)</label>
-                                    <input type="text" placeholder="24-char ID or blank" className="w-full bg-void p-4 rounded-2xl border border-white/5 text-[10px] font-mono text-neon/60 outline-none focus:border-neon/40 mt-1"
-                                        value={p.teacher} onChange={(e) => {
-                                            const newPeriods = [...periods];
-                                            newPeriods[index].teacher = e.target.value;
-                                            setPeriods(newPeriods);
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <input type="text" placeholder="START (09:00 AM)" className="bg-void p-3 rounded-xl border border-neon/10 text-[10px] font-black text-white outline-none" value={p.startTime} onChange={(e) => { const n = [...periods]; n[index].startTime = e.target.value; setPeriods(n); }} />
+                            <input type="text" placeholder="END (10:00 AM)" className="bg-void p-3 rounded-xl border border-neon/10 text-[10px] font-black text-white outline-none" value={p.endTime} onChange={(e) => { const n = [...periods]; n[index].endTime = e.target.value; setPeriods(n); }} />
+                        </div>
+
+                        <div className="space-y-3">
+                            <input type="text" placeholder="SUBJECT NAME" className="w-full bg-void p-3 rounded-xl border border-neon/10 text-xs font-black text-white uppercase outline-none focus:border-neon" value={p.subject} onChange={(e) => { const n = [...periods]; n[index].subject = e.target.value; setPeriods(n); }} />
+                            <input type="text" placeholder="ROOM NO" className="w-full bg-void p-3 rounded-xl border border-neon/10 text-xs font-black text-neon outline-none" value={p.room} onChange={(e) => { const n = [...periods]; n[index].room = e.target.value; setPeriods(n); }} />
+
+                            <select
+                                className="w-full bg-void p-3 rounded-xl border border-neon/10 text-xs font-black text-white outline-none"
+                                value={p.teacherEmpId} onChange={(e) => { const n = [...periods]; n[index].teacherEmpId = e.target.value; setPeriods(n); }}
+                            >
+                                <option value="">SELECT FACULTY (EMP ID)</option>
+                                {teachers.map(t => (
+                                    <option key={t.employeeId} value={t.employeeId}>
+                                        {t.employeeId} - {t.name} ({t.subjects.join(', ')})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 ))}
 
-                <div className="flex gap-4 mt-6 italic">
-                    <button onClick={addPeriod} className="flex-1 bg-void text-neon border border-neon/20 py-4 rounded-[2rem] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 shadow-xl active:scale-95 transition-all">
-                        <Plus size={20} /> Add Block
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="flex-1 bg-neon text-void py-4 rounded-[2rem] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 transition-all disabled:bg-slate-800 disabled:text-slate-600"
-                    >
-                        <Save size={20} /> {loading ? "Syncing..." : "Execute Sync"}
+                <div className="flex gap-4 pt-4">
+                    <button onClick={addPeriod} className="flex-1 bg-void text-neon border border-neon/20 py-4 rounded-[2rem] font-black uppercase text-[10px] flex items-center justify-center gap-2"><Plus size={18} /> Add Slot</button>
+                    <button onClick={handleSave} disabled={loading} className="flex-1 bg-neon text-void py-4 rounded-[2rem] font-black uppercase text-[10px] shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-2">
+                        <Save size={18} /> {loading ? "SAVING..." : "EXECUTE"}
                     </button>
                 </div>
             </div>

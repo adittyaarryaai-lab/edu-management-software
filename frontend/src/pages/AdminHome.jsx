@@ -135,7 +135,9 @@ const AdminHome = () => {
         { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
         { id: 'notice-feed', title: 'Notice Archive', icon: <ClipboardList size={24} />, desc: 'Manage & Delete Notices', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
         { id: 'timetable', title: 'Timetable Master', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
         { id: 'manage-users', title: 'Node Manager', icon: <Users size={24} />, desc: 'Edit or Purge Personnel', color: 'bg-neon/10 text-neon border-neon/20' },
+        // { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
     ];
 
     return (
@@ -216,6 +218,7 @@ const AdminHome = () => {
                         if (m.id === 'attendance-report') navigate('/admin/attendance-report');
                         if (m.id === 'notice') navigate('/admin/global-notice');
                         if (m.id === 'notice-feed') navigate('/notice-feed');
+                        if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
                     }} className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/5 flex items-center justify-between active:scale-95 transition-all cursor-pointer group hover:border-neon/20">
                         <div className="flex items-center gap-4">
                             <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
