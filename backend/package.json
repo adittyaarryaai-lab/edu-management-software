@@ -21,7 +21,8 @@
     "mongoose": "^7.8.9",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
-    "pdfkit": "^0.17.2"
+    "pdfkit": "^0.17.2",
+    "twilio": "^5.12.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"

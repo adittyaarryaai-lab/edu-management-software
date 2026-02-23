@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
-const crypto = require('crypto'); // OTP generate karne ke liye
-
+const crypto = require('crypto');
+// const axios = require('axios'); // Twilio ki jagah axios use karenge
 // 1. Send OTP Protocol
 const sendResetOTP = async (req, res) => {
     const { email } = req.body;
@@ -15,20 +15,32 @@ const sendResetOTP = async (req, res) => {
     user.otpExpires = Date.now() + 600000; // 10 minutes expiry
     await user.save();
 
-    // SMS SENDING LOGIC (Using a dummy placeholder for Twilio/Fast2SMS)
-    console.log(`Bypass OTP for ${user.phone}: ${otp} ⚡`); 
-    // Yahan tera SMS API call aayega
-    
-    res.json({ message: `Bypass OTP transmitted to ${user.phone.slice(-4)}` });
+    // --- DAY 82: TERMINAL SIGNAL (NO API REQUIRED) ---
+    console.log(`
+    ========================================
+    NEURAL BYPASS SIGNAL DETECTED 📡
+    ========================================
+    User: ${user.name}
+    Email: ${user.email}
+    Phone: ${user.phone}
+    ----------------------------------------
+    ACCESS OTP: ${otp} ⚡
+    ========================================
+    `);
+
+    res.json({ 
+        message: `Bypass OTP transmitted to terminal. 🛡️ (Dev Mode)`,
+        devMode: true 
+    });
 };
 
 // 2. Reset Password Protocol
 const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
-    const user = await User.findOne({ 
-        email, 
-        resetOTP: otp, 
-        otpExpires: { $gt: Date.now() } 
+    const user = await User.findOne({
+        email,
+        resetOTP: otp,
+        otpExpires: { $gt: Date.now() }
     });
 
     if (!user) return res.status(400).json({ message: "Invalid or Expired OTP!" });
