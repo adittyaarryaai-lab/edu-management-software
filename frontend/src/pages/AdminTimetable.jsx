@@ -37,7 +37,7 @@ const AdminTimetable = () => {
 
     const handleSave = async () => {
         if (!grade) return alert("Please enter Grade (e.g. 10-A)!");
-        
+
         const isIncomplete = periods.some(p => !p.teacherEmpId || !p.startTime || !p.subject);
         if (isIncomplete) return alert("All Neural Blocks (Start Time, Subject, Teacher) must be filled!");
 
@@ -62,7 +62,8 @@ const AdminTimetable = () => {
             setGrade('');
             setPeriods([{ startTime: '', endTime: '', subject: '', room: '', teacherEmpId: '' }]);
         } catch (err) {
-            alert("Sync Failed!");
+            // Agar backend se conflict message aaya hai toh Toast mein dikhao
+            setMsg(err.response?.data?.message || "Critical Sync Failure!");
         } finally {
             setLoading(false);
         }

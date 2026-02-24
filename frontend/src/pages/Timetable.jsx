@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Clock, MapPin, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import API from '../api'; 
+import API from '../api';
 import Loader from '../components/Loader';
 
 const Timetable = ({ user }) => {
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState('Monday'); 
+  const [activeDay, setActiveDay] = useState('Monday');
   const [timetable, setTimetable] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,21 +21,15 @@ const Timetable = ({ user }) => {
 
   useEffect(() => {
     const fetchTimetable = async () => {
-      if (!user?.grade) {
-        setLoading(false);
-        return;
-      }
+      if (!user?.grade) { setLoading(false); return; }
       try {
         const { data } = await API.get(`/timetable/${user.grade}`);
         setTimetable(data);
-      } catch (err) {
-        console.error("Timetable fetch error");
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error("Timetable fetch error"); }
+      finally { setLoading(false); }
     };
     fetchTimetable();
-  }, [user]); 
+  }, [user]);
 
   const currentSchedule = timetable?.schedule?.find(d => d.day === activeDay);
 
@@ -52,10 +46,10 @@ const Timetable = ({ user }) => {
           <div className="text-center">
             <h1 className="text-xl font-black uppercase tracking-tighter italic">Schedule Matrix</h1>
             <p className="text-[9px] font-black text-neon/40 tracking-[0.3em] uppercase italic">
-                {user?.grade ? `Sector Node: ${user.grade}` : "Node Not Assigned"}
+              {user?.grade ? `Sector Node: ${user.grade}` : "Node Not Assigned"}
             </p>
           </div>
-          <div className="w-8"></div> 
+          <div className="w-8"></div>
         </div>
 
         <div className="flex justify-between overflow-x-auto gap-2 no-scrollbar py-2 relative z-10 px-2">
@@ -63,9 +57,8 @@ const Timetable = ({ user }) => {
             <button
               key={day.full}
               onClick={() => setActiveDay(day.full)}
-              className={`flex flex-col items-center min-w-[55px] py-3 rounded-2xl transition-all duration-500 border ${
-                activeDay === day.full ? 'bg-neon text-void border-neon shadow-[0_0_20px_rgba(61,242,224,0.4)] scale-105' : 'bg-white/5 text-neon/40 border-white/5'
-              }`}
+              className={`flex flex-col items-center min-w-[55px] py-3 rounded-2xl transition-all duration-500 border ${activeDay === day.full ? 'bg-neon text-void border-neon shadow-[0_0_20px_rgba(61,242,224,0.4)] scale-105' : 'bg-white/5 text-neon/40 border-white/5'
+                }`}
             >
               <span className="text-[10px] font-black italic uppercase tracking-widest">{day.short}</span>
             </button>
@@ -90,11 +83,14 @@ const Timetable = ({ user }) => {
               <div className="flex-1">
                 <h3 className="font-black text-white text-sm mb-1 uppercase leading-tight italic group-hover:text-neon transition-colors">{item.subject}</h3>
                 <p className="text-[10px] text-white/30 font-black flex items-center gap-1.5 uppercase italic">
-                  <span className="w-1.5 h-1.5 bg-neon rounded-full shadow-[0_0_8px_rgba(61,242,224,1)]"></span> {item.teacher?.name || "Neural Professor"}
+                  <span className="w-1.5 h-1.5 bg-neon rounded-full shadow-[0_0_8px_rgba(61,242,224,1)]"></span>
+                  {/* AB YAHAN NAAM DIKHEGA EMP ID NAHI */}
+                  PROFESSOR: {item.teacherName || "NOT ASSIGNED"}
                 </p>
                 <div className="flex items-center gap-1.5 mt-3 text-neon bg-neon/10 w-fit px-3 py-1 rounded-lg border border-neon/20 shadow-inner">
                   <MapPin size={10} />
-                  <span className="text-[8px] font-black uppercase tracking-widest">Sector Node 204</span>
+                  {/* UPDATE: Yahan ab asli Room No dikhega */}
+                  <span className="text-[8px] font-black uppercase tracking-widest">ROOM: {item.room || "N/A"}</span>
                 </div>
               </div>
             </div>
@@ -102,7 +98,7 @@ const Timetable = ({ user }) => {
         ) : (
           <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
             <BookOpen className="mx-auto text-neon/10 mb-4 animate-pulse" size={48} />
-            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Lectures Scheduled In This Matrix</p>
+            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic text-center">Free from today classes! ⚡</p>
           </div>
         )}
       </div>
