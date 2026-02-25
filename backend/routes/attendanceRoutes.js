@@ -59,37 +59,37 @@ router.get('/view', protect, async (req, res) => {
 router.get('/student-stats', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
-        const { month } = req.query; // Frontend se month aayega (e.g., "2026-02")
+        const schoolId = req.user.schoolId;
+        const { month } = req.query; // Frontend se aayega (e.g., "2026-02")
 
-        // 1. Saari records fetch karo overall stats ke liye
+        // 1. Overall Stats ke liye saari records fetch karo
         const allRecords = await Attendance.find({
             'records.studentId': studentId,
-            schoolId: req.user.schoolId
-        }).sort({ date: 1 });
+            schoolId: schoolId
+        }).sort({ date: -1 }); // Latest records pehle
 
-        // 2. Sirf selected month ki records filter karo history ke liye
-        // Agar month query mein hai toh filter karo, nahi toh saari dikhao
-        const filteredRecords = month 
-            ? allRecords.filter(r => r.date.startsWith(month)) 
-            : allRecords;
-
-        let presentDays = 0;
         let totalDays = allRecords.length;
-        
-        // Overall Percentage nikalne ke liye loop
+        let presentDays = 0;
+
+        // Loop for Overall Percentage
         allRecords.forEach(record => {
             const entry = record.records.find(r => r.studentId.toString() === studentId.toString());
             if (entry && entry.status === 'Present') presentDays++;
         });
 
-        // Detailed History (Date + Status) taiyar karo selected month ke liye
-        const history = filteredRecords.map(record => {
-            const entry = record.records.find(r => r.studentId.toString() === studentId.toString());
-            return {
-                date: record.date,
-                status: entry ? entry.status : 'N/A'
-            };
-        });
+        // 2. Monthly Filter Logic for History Matrix
+        // Agar month query mein hai toh us month ka data, nahi toh current month ka
+        const filterMonth = month || new Date().toISOString().slice(0, 7);
+        
+        const history = allRecords
+            .filter(r => r.date.startsWith(filterMonth))
+            .map(record => {
+                const entry = record.records.find(r => r.studentId.toString() === studentId.toString());
+                return {
+                    date: record.date,
+                    status: entry ? entry.status : 'N/A'
+                };
+            });
 
         const percentage = totalDays === 0 ? 0 : ((presentDays / totalDays) * 100).toFixed(1);
 
@@ -98,10 +98,11 @@ router.get('/student-stats', protect, async (req, res) => {
             presentDays,
             absentDays: totalDays - presentDays,
             percentage,
-            history // Ye bache ko niche list mein dikhega
+            history // Ye bacha UI mein timeline mein dekhega
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error fetching stats' });
+        console.error("History Matrix Error:", error);
+        res.status(500).json({ message: 'Neural History Sync Failed' });
     }
 });
 
