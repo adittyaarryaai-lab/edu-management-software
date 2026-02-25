@@ -132,18 +132,37 @@ router.get('/teachers', protect, adminOnly, async (req, res) => {
 });
 
 // Admin Update User Sequence (DAY 78)
+// Admin Update User (DAY 85: Added AssignedClass Conflict Check)
 router.put('/update/:id', protect, adminOnly, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
+        // --- CONFLICT CHECK FOR TEACHER ASSIGNMENT ---
+        if (user.role === 'teacher' && req.body.assignedClass) {
+            const classTaken = await User.findOne({ 
+                role: 'teacher', 
+                assignedClass: req.body.assignedClass.toUpperCase(), 
+                schoolId: req.user.schoolId,
+                _id: { $ne: req.params.id } // Khud ko chhod kar
+            });
+            if (classTaken) {
+                return res.status(400).json({ 
+                    message: `CONFLICT: Class ${req.body.assignedClass} is already assigned to EMP: ${classTaken.employeeId}!` 
+                });
+            }
+        }
+
         // Update fields
         Object.assign(user, req.body);
+        if (user.role === 'teacher' && user.assignedClass) {
+            user.assignedClass = user.assignedClass.toUpperCase();
+        }
+        
         await user.save();
-
         res.json({ message: 'User updated successfully', user });
     } catch (error) {
-        res.status(500).json({ message: 'Update failed' });
+        res.status(500).json({ message: 'Update failed: ' + error.message });
     }
 });
 

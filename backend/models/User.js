@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema({
     employeeId: String,   // EMP001 Format
     
     grade: String, 
+    assignedClass: { type: String, default: null }, // Day 85: Single class assigned to a teacher
     subjects: [String],
     resetOTP: String,
     otpExpires: Date

@@ -212,11 +212,18 @@ const ManageUsers = () => {
                                         onChange={(e) => setEditingUser({ ...editingUser, admissionNo: e.target.value })} placeholder="ADMISSION NO" />
                                 </div>
                             ) : (
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 ml-4 uppercase">Subjects (Comma Sep)</label>
-                                    <input type="text" value={editingUser.subjects?.join(', ')} className="w-full p-4 bg-void rounded-2xl border border-white/5 text-xs text-white focus:border-neon uppercase outline-none"
-                                        onChange={(e) => setEditingUser({ ...editingUser, subjects: e.target.value.split(',').map(s => s.trim()) })} placeholder="SUBJECTS" />
-                                </div>
+                                <>
+                                    <div className="space-y-1">
+                                        <label className="text-[8px] font-black text-neon/40 ml-4 uppercase">Subjects (Comma Sep)</label>
+                                        <input type="text" value={editingUser.subjects?.join(', ')} className="w-full p-4 bg-void rounded-2xl border border-white/5 text-xs text-white focus:border-neon uppercase outline-none"
+                                            onChange={(e) => setEditingUser({ ...editingUser, subjects: e.target.value.split(',').map(s => s.trim()) })} placeholder="SUBJECTS" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[8px] font-black text-neon/40 ml-4 uppercase text-neon">Assign Attendance Class</label>
+                                        <input type="text" value={editingUser.assignedClass || ''} className="w-full p-4 bg-void rounded-2xl border border-neon/20 text-xs text-neon focus:border-neon uppercase outline-none"
+                                            onChange={(e) => setEditingUser({ ...editingUser, assignedClass: e.target.value })} placeholder="e.g. 10-A" />
+                                    </div>
+                                </>
                             )}
 
                             {/* Address Object */}

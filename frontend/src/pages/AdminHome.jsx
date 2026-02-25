@@ -14,7 +14,7 @@ const AdminHome = () => {
     const [subData, setSubData] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [teacherData, setTeacherData] = useState({
-        name: '', email: '', password: '', subjects: '',
+        name: '', email: '', password: '', subjects: '', assignedClass: '',
         fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '',
         phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
     });
@@ -74,6 +74,7 @@ const AdminHome = () => {
                 ...teacherData,
                 role: 'teacher',
                 schoolId: sId, // STRICTLY SENDING SCHOOL ID
+                assignedClass: teacherData.assignedClass ? teacherData.assignedClass.trim().toUpperCase() : null, // DAY 85
                 subjects: teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : []
             };
 
@@ -82,7 +83,7 @@ const AdminHome = () => {
             setShowTeacherForm(false);
             // Reset form
             setTeacherData({
-                name: '', email: '', password: '', subjects: '',
+                name: '', email: '', password: '', subjects: '', assignedClass: '',
                 fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '',
                 phone: '', address: { pincode: '', district: '', state: '', fullAddress: '' }
             });
@@ -259,7 +260,19 @@ const AdminHome = () => {
 
                             {showTeacherForm && <input type="text" placeholder="Assigned Subjects (Comma Sep)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
                                 onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />}
-
+                            {/* DAY 85: New Field for Class Assignment */}
+                            {showTeacherForm && (
+                                <div className="md:col-span-2">
+                                    <label className="text-[8px] text-neon/40 ml-4 font-black uppercase">Assign Primary Attendance Class (Optional)</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. 10-A (Leave blank if no class assigned)"
+                                        className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase mt-1"
+                                        value={teacherData.assignedClass}
+                                        onChange={(e) => setTeacherData({ ...teacherData, assignedClass: e.target.value })}
+                                    />
+                                </div>
+                            )}
                             <input type="text" placeholder="Father's Name" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
                                 onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, fatherName: e.target.value }) : setStudentData({ ...studentData, fatherName: e.target.value })} />
 

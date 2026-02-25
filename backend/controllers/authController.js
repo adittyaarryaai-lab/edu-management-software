@@ -28,9 +28,9 @@ const sendResetOTP = async (req, res) => {
     ========================================
     `);
 
-    res.json({ 
+    res.json({
         message: `Bypass OTP transmitted to terminal. 🛡️ (Dev Mode)`,
-        devMode: true 
+        devMode: true
     });
 };
 
@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
     const {
         name, email, password, role, grade, subjects, schoolId,
         fatherName, motherName, dob, gender, religion, admissionNo,
-        phone, address
+        phone, address, assignedClass // assignedClass ko destructure kiya
     } = req.body;
 
     const userExists = await User.findOne({ email });
@@ -69,29 +69,38 @@ const registerUser = async (req, res) => {
     let generatedId = "";
     const currentSchoolId = schoolId || req.user?.schoolId;
 
-    if (role === 'student') {
-        // 1. Grade ko clean karo (e.g., "10-A" becomes "10A")
-        const classCode = grade ? grade.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : "GEN";
+    // --- DAY 85: TEACHER CLASS CONFLICT CHECK ---
+    // Agar admin kisi teacher ko class assign kar raha hai, toh check karo wo occupied toh nahi hai
+    if (role === 'teacher' && assignedClass) {
+        const classTaken = await User.findOne({
+            role: 'teacher',
+            assignedClass: assignedClass,
+            schoolId: currentSchoolId
+        });
 
-        // 2. Sirf IS School aur IS Specific Grade ke bacho ko dhundo
+        if (classTaken) {
+            return res.status(400).json({
+                message: `CONFLICT: Class ${assignedClass} is already assigned to EMP: ${classTaken.employeeId}! ⚠️`
+            });
+        }
+    }
+
+    if (role === 'student') {
+        const classCode = grade ? grade.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : "GEN";
         const lastStudent = await User.findOne({
             role: 'student',
             schoolId: currentSchoolId,
-            grade: grade // Strict Grade check
+            grade: grade
         }).sort({ createdAt: -1 });
 
-        // 3. Sequence logic
         let lastNum = 0;
         if (lastStudent && lastStudent.enrollmentNo) {
-            // ID ke aakhri 3 digit nikalo
             const parts = lastStudent.enrollmentNo.match(/\d+$/);
             lastNum = parts ? parseInt(parts[0]) : 0;
         }
-
         generatedId = `STU${classCode}${String(lastNum + 1).padStart(3, '0')}`;
 
     } else if (role === 'teacher') {
-        // Teachers are only isolated by school, not by class
         const lastTeacher = await User.findOne({
             role: 'teacher',
             schoolId: currentSchoolId
@@ -112,6 +121,7 @@ const registerUser = async (req, res) => {
         grade,
         enrollmentNo: role === 'student' ? generatedId : undefined,
         employeeId: role === 'teacher' ? generatedId : undefined,
+        assignedClass: role === 'teacher' ? assignedClass : undefined, // Field added here
         subjects,
         schoolId: currentSchoolId,
         fatherName,
@@ -126,7 +136,7 @@ const registerUser = async (req, res) => {
 
     if (user) {
         res.status(201).json({
-            ...user._doc, // Teacher jaisa logic: Pura document bhej do
+            ...user._doc,
             generatedId: generatedId,
             token: generateToken(user._id),
         });
@@ -149,6 +159,7 @@ const authUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
+            assignedClass: user.assignedClass, // DAY 85 FIX: Send assigned class to frontend
             schoolId: user.schoolId,
             avatar: user.avatar,
 
