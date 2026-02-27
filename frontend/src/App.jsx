@@ -47,6 +47,7 @@ import AdminAttendance from './pages/AdminAttendance';
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
 import ManageUsers from './pages/ManageUsers';
 import AdminEditTimetable from './pages/AdminEditTimetable';
+import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics Page
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -344,6 +345,7 @@ function App() {
           {/* Timetable & Admin Management */}
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
           <Route path="/admin/timetable" element={<AdminTimetable />} />
+          <Route path="/admin/student-report/:studentId" element={<StudentDetail />} /> {/* DAY 87: Deep Profile Route */}
           <Route path="/admin/edit-timetable" element={<AdminEditTimetable />} /> {/* Naya Module */}
           <Route path="/admin/fees" element={<AdminFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} />

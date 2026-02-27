@@ -14,7 +14,7 @@ router.get('/my-students', protect, teacherOnly, async (req, res) => {
             role: 'student',
             grade: assignedClass,
             schoolId: req.user.schoolId
-        }).select('name email enrollmentNo grade');
+        }).select('name email enrollmentNo grade avatar');
 
         res.json({ students, assignedClass });
     } catch (error) {
@@ -149,6 +149,51 @@ router.get('/admin-report/:grade', protect, adminOnly, async (req, res) => {
         res.json(report);
     } catch (error) {
         res.status(500).json({ message: 'Admin report fetch failed' });
+    }
+});
+// GET: Admin - Specific Student Deep Analytics
+router.get('/student-report/:studentId', protect, adminOnly, async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        
+        // 1. Bache ki profile fetch karo
+        const student = await User.findOne({ 
+            _id: studentId, 
+            schoolId: req.user.schoolId 
+        }).select('name email role schoolId fatherName motherName dob gender religion admissionNo phone address avatar enrollmentNo grade');
+
+        if (!student) return res.status(404).json({ message: "Student Node Not Found" });
+
+        // 2. Us bache ki saari attendance history fetch karo
+        const attendanceData = await Attendance.find({ 
+            schoolId: req.user.schoolId,
+            grade: student.grade 
+        });
+
+        let totalDays = 0;
+        let presentDays = 0;
+
+        attendanceData.forEach(day => {
+            const record = day.records.find(r => r.studentId.toString() === studentId);
+            if (record) {
+                totalDays++;
+                if (record.status === 'Present') presentDays++;
+            }
+        });
+
+        const percentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
+
+        res.json({
+            profile: student,
+            stats: {
+                totalDays,
+                presentDays,
+                absentDays: totalDays - presentDays,
+                percentage
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Neural Link Error: ' + error.message });
     }
 });
 

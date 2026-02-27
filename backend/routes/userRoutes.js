@@ -5,10 +5,10 @@ const User = require('../models/User');
 
 // Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic + DAY 78 Extended Fields)
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
-    const { 
+    const {
         name, email, password, subjects,
         fatherName, motherName, dob, gender, religion,
-        phone, address 
+        phone, address
     } = req.body;
 
     try {
@@ -16,9 +16,9 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
         // Step 1: Find the latest teacher in THIS school
-        const lastTeacher = await User.findOne({ 
-            schoolId: req.user.schoolId, 
-            role: 'teacher' 
+        const lastTeacher = await User.findOne({
+            schoolId: req.user.schoolId,
+            role: 'teacher'
         }).sort({ createdAt: -1 });
 
         let nextEmpId;
@@ -32,10 +32,10 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
 
         const teacher = await User.create({
             schoolId: req.user.schoolId,
-            name, 
-            email, 
-            password, 
-            role: 'teacher', 
+            name,
+            email,
+            password,
+            role: 'teacher',
             employeeId: nextEmpId,
             subjects,
             fatherName,
@@ -54,10 +54,10 @@ router.post('/add-teacher', protect, adminOnly, async (req, res) => {
 
 // Admin adds a student (STU001 sequence SEPARATE for each Grade + DAY 78 Extended Fields)
 router.post('/add-student', protect, adminOnly, async (req, res) => {
-    const { 
+    const {
         name, email, password, grade,
         fatherName, motherName, dob, gender, religion, admissionNo,
-        phone, address 
+        phone, address
     } = req.body;
 
     try {
@@ -65,10 +65,10 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
         // FIXED: Find latest student in THIS school AND in THIS specific GRADE
-        const lastStudent = await User.findOne({ 
-            schoolId: req.user.schoolId, 
+        const lastStudent = await User.findOne({
+            schoolId: req.user.schoolId,
             role: 'student',
-            grade: grade 
+            grade: grade
         }).sort({ createdAt: -1 });
 
         let nextEnrollNo;
@@ -77,15 +77,15 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
             const nextNo = lastNo + 1;
             nextEnrollNo = `STU${nextNo.toString().padStart(3, '0')}`;
         } else {
-            nextEnrollNo = 'STU001'; 
+            nextEnrollNo = 'STU001';
         }
 
         const student = await User.create({
             schoolId: req.user.schoolId,
-            name, 
-            email, 
-            password, 
-            role: 'student', 
+            name,
+            email,
+            password,
+            role: 'student',
             enrollmentNo: nextEnrollNo,
             grade,
             fatherName,
@@ -109,8 +109,8 @@ router.get('/students/:grade', protect, async (req, res) => {
         const students = await User.find({
             role: 'student',
             grade: req.params.grade,
-            schoolId: req.user.schoolId 
-        }).select('name enrollmentNo grade fatherName motherName dob gender religion admissionNo phone address');
+            schoolId: req.user.schoolId
+        }).select('name enrollmentNo grade fatherName motherName dob gender religion admissionNo phone address avatar');
 
         res.json(students);
     } catch (error) {
@@ -140,15 +140,15 @@ router.put('/update/:id', protect, adminOnly, async (req, res) => {
 
         // --- CONFLICT CHECK FOR TEACHER ASSIGNMENT ---
         if (user.role === 'teacher' && req.body.assignedClass) {
-            const classTaken = await User.findOne({ 
-                role: 'teacher', 
-                assignedClass: req.body.assignedClass.toUpperCase(), 
+            const classTaken = await User.findOne({
+                role: 'teacher',
+                assignedClass: req.body.assignedClass.toUpperCase(),
                 schoolId: req.user.schoolId,
                 _id: { $ne: req.params.id } // Khud ko chhod kar
             });
             if (classTaken) {
-                return res.status(400).json({ 
-                    message: `CONFLICT: Class ${req.body.assignedClass} is already assigned to EMP: ${classTaken.employeeId}!` 
+                return res.status(400).json({
+                    message: `CONFLICT: Class ${req.body.assignedClass} is already assigned to EMP: ${classTaken.employeeId}!`
                 });
             }
         }
@@ -158,7 +158,7 @@ router.put('/update/:id', protect, adminOnly, async (req, res) => {
         if (user.role === 'teacher' && user.assignedClass) {
             user.assignedClass = user.assignedClass.toUpperCase();
         }
-        
+
         await user.save();
         res.json({ message: 'User updated successfully', user });
     } catch (error) {
@@ -173,6 +173,20 @@ router.delete('/delete/:id', protect, adminOnly, async (req, res) => {
         res.json({ message: 'User identity purged' });
     } catch (error) {
         res.status(500).json({ message: 'Delete failed' });
+    }
+});
+// Admin fetching unique grades from Student list (DAY 87 FIX)
+router.get('/grades/all', protect, adminOnly, async (req, res) => {
+    try {
+        const grades = await User.find({
+            schoolId: req.user.schoolId,
+            role: 'student'
+        }).distinct('grade');
+
+        // Sort grades alphabetically (Optional)
+        res.json(grades.sort());
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching grades from students' });
     }
 });
 

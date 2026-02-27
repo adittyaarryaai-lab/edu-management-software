@@ -131,13 +131,13 @@ const AdminHome = () => {
     const managementModules = [
         { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-neon/10 text-neon border-neon/20' },
         { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-        { id: 'attendance-report', title: 'Attendance Insights', icon: <BarChart3 size={24} />, desc: 'Class-wise tracking', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
+        { id: 'attendance-report', title: 'Student Performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
         { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24} />, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
-        { id: 'notice', title: 'Global Notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
+        { id: 'notice', title: 'Publish Notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
         { id: 'notice-feed', title: 'Notice Archive', icon: <ClipboardList size={24} />, desc: 'Manage & Delete Notices', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-        { id: 'timetable', title: 'Timetable Master', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+        { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
         { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-        { id: 'manage-users', title: 'Node Manager', icon: <Users size={24} />, desc: 'Edit or Purge Personnel', color: 'bg-neon/10 text-neon border-neon/20' },
+        { id: 'manage-users', title: 'Manage Student and Teacher', icon: <Users size={24} />, desc: 'Edit or Purge Personnel', color: 'bg-neon/10 text-neon border-neon/20' },
         // { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
     ];
 

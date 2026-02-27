@@ -1,83 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ShieldAlert, BarChart3, Users } from 'lucide-react';
+import { ArrowLeft, Search, GraduationCap, ChevronRight, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
 
 const AdminAttendance = () => {
     const navigate = useNavigate();
-    const [selectedGrade, setSelectedGrade] = useState('10-A');
-    const [report, setReport] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [grades, setGrades] = useState([]);
+    const [selectedGrade, setSelectedGrade] = useState('');
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const fetchReport = async () => {
+        const fetchGrades = async () => {
             try {
-                setLoading(true);
-                const { data } = await API.get(`/attendance/admin-report/${selectedGrade}`);
-                setReport(data);
-            } catch (err) { console.error(err); }
-            finally { setLoading(false); }
+                // FIXED: Now fetching from Student Grade List instead of Timetable
+                const { data } = await API.get('/users/grades/all');
+                setGrades(data);
+            } catch (err) { console.error("Grade Fetch Error"); }
         };
-        fetchReport();
-    }, [selectedGrade]);
+        fetchGrades();
+    }, []);
+
+    const fetchStudents = async (grade) => {
+        if (!grade) return;
+        setLoading(true);
+        try {
+            const { data } = await API.get(`/users/students/${grade}`);
+            setStudents(data);
+        } catch (err) { console.error("Fetch Error"); }
+        finally { setLoading(false); }
+    };
 
     return (
-        <div className="min-h-screen bg-void dark:bg-void pb-24 font-sans italic">
-            {/* Admin Header */}
-            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-2xl relative overflow-hidden border-b border-neon/20">
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-neon/5 to-transparent"></div>
-                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-6 border border-white/10 text-neon transition-all hover:bg-neon/20"><ArrowLeft size={20}/></button>
-                <div className="flex justify-between items-center relative z-10">
-                    <div>
-                        <h1 className="text-2xl font-black uppercase tracking-tighter italic flex items-center gap-2">
-                            <BarChart3 className="text-neon animate-pulse" /> Command Center
-                        </h1>
-                        <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em] mt-1">Master Attendance Protocols</p>
-                    </div>
-                    <div className="bg-neon text-void p-4 rounded-3xl shadow-[0_0_25px_rgba(61,242,224,0.4)]">
-                        <Users size={24} />
-                    </div>
+        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden text-center">
+                <div className="absolute inset-0 bg-gradient-to-b from-neon/10 to-transparent pointer-events-none"></div>
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute top-12 left-6 z-[100] bg-white/5 p-2 rounded-xl border border-white/10 text-neon transition-all active:scale-90 hover:bg-white/10"
+                >
+                    <ArrowLeft size={20} />
+                </button>
+
+                <h1 className="text-xl font-black uppercase tracking-tighter italic mb-8">Personnel Information</h1>
+
+                {/* Styled Dropdown in Center */}
+                <div className="relative max-w-xs mx-auto z-10">
+                    <select
+                        value={selectedGrade}
+                        onChange={(e) => { setSelectedGrade(e.target.value); fetchStudents(e.target.value); }}
+                        className="w-full bg-slate-900/80 border border-neon/30 p-4 rounded-2xl outline-none font-black text-xs text-white uppercase italic appearance-none cursor-pointer text-center"
+                    >
+                        <option value="">SELECT CLASS SECTOR</option>
+                        {grades.map(g => <option key={g} value={g} className="bg-void">{g}</option>)}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neon"><Filter size={14} /></div>
                 </div>
             </div>
 
-            <div className="px-5 -mt-12 relative z-20 space-y-6">
-                {/* Grade Filter */}
-                <div className="bg-slate-900/80 backdrop-blur-xl p-2 rounded-[2.5rem] shadow-2xl border border-neon/20 flex gap-2">
-                    {['10-A', '12-C'].map((grade) => (
-                        <button 
-                            key={grade}
-                            onClick={() => setSelectedGrade(grade)}
-                            className={`flex-1 py-4 rounded-[2rem] font-black uppercase text-[10px] tracking-widest transition-all ${selectedGrade === grade ? 'bg-neon text-void shadow-[0_0_15px_rgba(61,242,224,0.3)]' : 'text-neon/40 hover:text-neon/60'}`}
-                        >
-                            Grade {grade}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Report List */}
-                <div className="space-y-4">
-                    {loading ? <div className="text-center py-10 font-black uppercase text-[10px] tracking-[0.3em] text-neon/30 animate-pulse italic">Decrypting Neural Data...</div> : (
-                        report.map((std, i) => (
-                            <div key={i} className="bg-white/5 backdrop-blur-xl p-5 rounded-[2.5rem] shadow-lg border border-white/5 flex justify-between items-center group hover:border-neon/30 transition-all">
+            <div className="px-5 -mt-8 space-y-4 relative z-20">
+                {loading ? <Loader /> : (
+                    students.length > 0 ? (
+                        students.map((stu) => (
+                            <div
+                                key={stu._id}
+                                onClick={() => navigate(`/admin/student-report/${stu._id}`)}
+                                className="bg-white/5 backdrop-blur-xl p-4 rounded-[2.5rem] border border-white/5 flex items-center justify-between group hover:border-neon/30 transition-all active:scale-95 cursor-pointer"
+                            >
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-3xl flex items-center justify-center font-black text-xs shadow-inner border ${std.status === 'Low' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-neon/10 text-neon border-neon/20'}`}>
-                                        {std.percentage}%
+                                    <div className="w-12 h-12 bg-void text-neon border border-neon/20 rounded-2xl flex items-center justify-center font-black text-xs shadow-inner group-hover:bg-neon group-hover:text-void transition-all duration-300">
+                                        {stu.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-white text-sm uppercase italic tracking-tight">{std.name}</h4>
-                                        <p className="text-[9px] font-bold text-neon/40 uppercase tracking-widest">Roll: {std.roll}</p>
+                                        <h4 className="font-black text-white text-sm uppercase tracking-tighter italic">{stu.name}</h4>
+                                        <p className="text-[9px] font-black text-neon/40 uppercase tracking-widest italic">{stu.enrollmentNo}</p>
                                     </div>
                                 </div>
-                                {std.status === 'Low' && (
-                                    <div className="bg-red-600 text-white p-2 rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.4)] animate-bounce">
-                                        <ShieldAlert size={16} />
-                                    </div>
-                                )}
+                                <div className="bg-white/5 p-2 rounded-xl text-white/20 group-hover:text-neon transition-all">
+                                    <ChevronRight size={18} />
+                                </div>
                             </div>
                         ))
-                    )}
-                </div>
+                    ) : (
+                        <div className="text-center py-20 opacity-20 italic font-black text-[10px] uppercase tracking-[0.4em]">
+                            Initialize Sector Selection
+                        </div>
+                    )
+                )}
             </div>
         </div>
     );
