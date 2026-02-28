@@ -252,4 +252,26 @@ router.get('/finance/students-ledger/:grade', protect, async (req, res) => {
     }
 });
 
+// --- DAY 91: ADD NEW PAYMENT (Point 3) ---
+router.post('/finance/add-payment', protect, async (req, res) => {
+    const { studentId, amountPaid, month, year, paymentMode, remarks } = req.body;
+
+    try {
+        const feeRecord = await Fee.create({
+            schoolId: req.user.schoolId,
+            student: studentId,
+            amountPaid: Number(amountPaid),
+            month,
+            year: Number(year),
+            paymentMode,
+            remarks: remarks || "Monthly Fees",
+            date: new Date()
+        });
+
+        res.status(201).json({ message: 'Payment recorded successfully! ✅', feeRecord });
+    } catch (error) {
+        res.status(500).json({ message: 'Payment failed' });
+    }
+});
+
 module.exports = router;

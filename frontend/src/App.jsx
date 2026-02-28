@@ -51,6 +51,7 @@ import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 import StudentsFees from './pages/finance/StudentsFees';
+import AddPayment from './pages/finance/AddPayment';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -394,6 +395,7 @@ function App() {
 
           <Route path="/finance/dashboard" element={<FinanceDashboard />} />
           <Route path="/finance/fees" element={<StudentsFees />} />
+          <Route path="/finance/add-payment" element={<AddPayment />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />

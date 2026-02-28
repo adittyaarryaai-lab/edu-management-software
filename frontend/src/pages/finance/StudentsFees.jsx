@@ -39,10 +39,10 @@ const StudentsFees = () => {
             <div className="space-y-4 mb-10">
                 <div className="bg-slate-900/60 p-5 rounded-3xl border border-white/5 flex items-center gap-4 focus-within:border-neon/30 transition-all">
                     <Search size={18} className="text-white/20" />
-                    <input 
-                        type="text" 
-                        placeholder="SEARCH BY NAME..." 
-                        className="bg-transparent outline-none text-xs w-full uppercase font-black" 
+                    <input
+                        type="text"
+                        placeholder="SEARCH BY NAME..."
+                        className="bg-transparent outline-none text-xs w-full uppercase font-black"
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
@@ -51,7 +51,7 @@ const StudentsFees = () => {
                     <label className="text-[8px] font-black text-neon/40 ml-4 uppercase tracking-[0.3em]">Filter By Sector (Class)</label>
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {grades.map((grade) => (
-                            <button 
+                            <button
                                 key={grade}
                                 onClick={() => { setSelectedGrade(grade); fetchLedger(grade); }}
                                 className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase whitespace-nowrap transition-all border ${selectedGrade === grade ? 'bg-neon text-void border-neon shadow-[0_0_15px_rgba(61,242,224,0.3)]' : 'bg-white/5 text-white/40 border-white/5'}`}
@@ -66,8 +66,8 @@ const StudentsFees = () => {
             {/* Students List Grid */}
             <div className="space-y-3">
                 {students.filter(s => s.name.toLowerCase().includes(search.toLowerCase())).map((student) => (
-                    <div 
-                        key={student._id} 
+                    <div
+                        key={student._id}
                         onClick={() => navigate(`/finance/student-profile/${student._id}`)}
                         className="bg-slate-900/40 p-5 rounded-[2.5rem] border border-white/5 flex justify-between items-center group active:scale-95 transition-all cursor-pointer hover:border-neon/20"
                     >
@@ -78,6 +78,10 @@ const StudentsFees = () => {
                             <div>
                                 <h3 className="text-sm font-black uppercase leading-none group-hover:text-white transition-colors">{student.name}</h3>
                                 <p className="text-[8px] text-white/20 font-black uppercase mt-2 tracking-widest">{student.enrollmentNo} • SEC: {student.grade}</p>
+                                {/* DAY 91 TESTING FIX: Database ID dikhane ke liye */}
+                                <p className="text-[7px] text-cyan-400/40 font-mono mt-1 select-all">
+                                    ID: {student._id}
+                                </p>
                             </div>
                         </div>
                         <div className="bg-void p-3 rounded-xl border border-white/5 text-white/20 group-hover:text-neon group-hover:border-neon/30">
