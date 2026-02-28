@@ -122,7 +122,7 @@ router.get('/students/:grade', protect, async (req, res) => {
 router.get('/teachers', protect, adminOnly, async (req, res) => {
     try {
         const teachers = await User.find({
-            role: 'teacher',
+            role: { $in: ['teacher', 'finance'] },
             schoolId: req.user.schoolId
         }).select('-password');
         res.json(teachers);

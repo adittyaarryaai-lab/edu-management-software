@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const crypto = require('crypto');
-// const axios = require('axios'); // Twilio ki jagah axios use karenge
+
 // 1. Send OTP Protocol
 const sendResetOTP = async (req, res) => {
     const { email } = req.body;
@@ -9,13 +9,11 @@ const sendResetOTP = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "Network Identity Not Found!" });
 
-    // Generate 6-digit numeric OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetOTP = otp;
-    user.otpExpires = Date.now() + 600000; // 10 minutes expiry
+    user.otpExpires = Date.now() + 600000; 
     await user.save();
 
-    // --- DAY 82: TERMINAL SIGNAL (NO API REQUIRED) ---
     console.log(`
     ========================================
     NEURAL BYPASS SIGNAL DETECTED 📡
@@ -46,124 +44,125 @@ const resetPassword = async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid or Expired OTP!" });
 
     user.password = newPassword;
-    user.resetOTP = undefined; // Clear OTP
+    user.resetOTP = undefined; 
     user.otpExpires = undefined;
     await user.save();
 
     res.json({ message: "Access Cipher Re-encrypted! Login now. 🔐" });
 };
 
-// @desc    Register a new user (with ID Generation Logic)
+// @desc    Register a new user (FIXED ID Generation Logic)
 const registerUser = async (req, res) => {
     const {
         name, email, password, role, grade, subjects, schoolId,
         fatherName, motherName, dob, gender, religion, admissionNo,
-        phone, address, assignedClass // assignedClass ko destructure kiya
+        phone, address, assignedClass 
     } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-        return res.status(400).json({ message: 'User already exists' });
-    }
+    try {
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
 
-    let generatedId = "";
-    const currentSchoolId = schoolId || req.user?.schoolId;
+        let generatedId = "";
+        const currentSchoolId = schoolId || req.user?.schoolId;
 
-    // --- DAY 85: TEACHER CLASS CONFLICT CHECK ---
-    // Agar admin kisi teacher ko class assign kar raha hai, toh check karo wo occupied toh nahi hai
-    if (role === 'teacher' && assignedClass) {
-        const classTaken = await User.findOne({
-            role: 'teacher',
-            assignedClass: assignedClass,
-            schoolId: currentSchoolId
-        });
-
-        if (classTaken) {
-            return res.status(400).json({
-                message: `CONFLICT: Class ${assignedClass} is already assigned to EMP: ${classTaken.employeeId}! ⚠️`
+        // --- DAY 85: TEACHER CLASS CONFLICT CHECK ---
+        if (role === 'teacher' && assignedClass) {
+            const classTaken = await User.findOne({
+                role: 'teacher',
+                assignedClass: assignedClass,
+                schoolId: currentSchoolId
             });
-        }
-    }
 
-    if (role === 'student') {
-        const classCode = grade ? grade.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : "GEN";
-        const lastStudent = await User.findOne({
-            role: 'student',
+            if (classTaken) {
+                return res.status(400).json({
+                    message: `CONFLICT: Class ${assignedClass} is already assigned to EMP: ${classTaken.employeeId}! ⚠️`
+                });
+            }
+        }
+
+        if (role === 'student') {
+            const classCode = grade ? grade.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : "GEN";
+            const lastStudent = await User.findOne({
+                role: 'student',
+                schoolId: currentSchoolId,
+                grade: grade
+            }).sort({ createdAt: -1 });
+
+            let lastNum = 0;
+            if (lastStudent && lastStudent.enrollmentNo) {
+                const parts = lastStudent.enrollmentNo.match(/\d+$/);
+                lastNum = parts ? parseInt(parts[0]) : 0;
+            }
+            generatedId = `STU${classCode}${String(lastNum + 1).padStart(3, '0')}`;
+
+        } else if (role === 'teacher' || role === 'finance') { 
+            // FIX 1: Using lastEmployee variable correctly
+            const lastEmployee = await User.findOne({
+                role: { $in: ['teacher', 'finance'] }, 
+                schoolId: currentSchoolId
+            }).sort({ createdAt: -1 });
+
+            const lastNum = (lastEmployee && lastEmployee.employeeId)
+                ? parseInt(lastEmployee.employeeId.replace('EMP', ''))
+                : 0;
+
+            generatedId = `EMP${String(lastNum + 1).padStart(3, '0')}`;
+        }
+
+        // FIX 2: Fixed the syntax error in object creation
+        const user = await User.create({
+            name,
+            email,
+            password,
+            role,
+            grade,
+            enrollmentNo: role === 'student' ? generatedId : undefined,
+            employeeId: (role === 'teacher' || role === 'finance') ? generatedId : undefined,
+            assignedClass: role === 'teacher' ? assignedClass : undefined, 
+            subjects,
             schoolId: currentSchoolId,
-            grade: grade
-        }).sort({ createdAt: -1 });
-
-        let lastNum = 0;
-        if (lastStudent && lastStudent.enrollmentNo) {
-            const parts = lastStudent.enrollmentNo.match(/\d+$/);
-            lastNum = parts ? parseInt(parts[0]) : 0;
-        }
-        generatedId = `STU${classCode}${String(lastNum + 1).padStart(3, '0')}`;
-
-    } else if (role === 'teacher') {
-        const lastTeacher = await User.findOne({
-            role: 'teacher',
-            schoolId: currentSchoolId
-        }).sort({ createdAt: -1 });
-
-        const lastNum = (lastTeacher && lastTeacher.employeeId)
-            ? parseInt(lastTeacher.employeeId.replace('EMP', ''))
-            : 0;
-
-        generatedId = `EMP${String(lastNum + 1).padStart(3, '0')}`;
-    }
-
-    const user = await User.create({
-        name,
-        email,
-        password,
-        role,
-        grade,
-        enrollmentNo: role === 'student' ? generatedId : undefined,
-        employeeId: role === 'teacher' ? generatedId : undefined,
-        assignedClass: role === 'teacher' ? assignedClass : undefined, // Field added here
-        subjects,
-        schoolId: currentSchoolId,
-        fatherName,
-        motherName,
-        dob,
-        gender,
-        religion,
-        admissionNo,
-        phone,
-        address
-    });
-
-    if (user) {
-        res.status(201).json({
-            ...user._doc,
-            generatedId: generatedId,
-            token: generateToken(user._id),
+            fatherName,
+            motherName,
+            dob,
+            gender,
+            religion,
+            admissionNo,
+            phone,
+            address
         });
-    } else {
-        res.status(400).json({ message: 'Invalid user data' });
+
+        if (user) {
+            res.status(201).json({
+                ...user._doc,
+                generatedId: generatedId,
+                token: generateToken(user._id),
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error in Registration' });
     }
 };
 
 const authUser = async (req, res) => {
     const { email, password } = req.body;
-
-    // 1. Saari fields fetch karo database se
     const user = await User.findOne({ email });
 
     if (user && (await require('bcryptjs').compare(password, user.password))) {
-        // 2. RESPONSE MEIN SAARI DETAILS BHEJO (Jo MyAccount ko chahiye)
         res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
             grade: user.grade,
-            assignedClass: user.assignedClass, // DAY 85 FIX: Send assigned class to frontend
+            assignedClass: user.assignedClass, 
             schoolId: user.schoolId,
             avatar: user.avatar,
-
-            // --- DAY 78: SYNC ALL IDENTITY DATA ---
             fatherName: user.fatherName,
             motherName: user.motherName,
             dob: user.dob,
@@ -171,12 +170,10 @@ const authUser = async (req, res) => {
             religion: user.religion,
             admissionNo: user.admissionNo,
             phone: user.phone,
-            address: user.address, // Full address object (pincode, district, etc.)
-
-            enrollmentNo: user.enrollmentNo, // STU10A001 wala format
-            employeeId: user.employeeId,     // EMP001 wala format
+            address: user.address,
+            enrollmentNo: user.enrollmentNo, 
+            employeeId: user.employeeId,     
             subjects: user.subjects,
-
             token: generateToken(user._id),
         });
     } else {

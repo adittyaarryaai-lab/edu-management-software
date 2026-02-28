@@ -118,7 +118,10 @@ const ManageUsers = () => {
                                 <div>
                                     <h4 className="font-black text-white text-sm uppercase italic tracking-tight">{u.name}</h4>
                                     <p className="text-[9px] font-black text-neon/40 uppercase tracking-widest">
-                                        {u.role === 'teacher' ? u.employeeId : u.enrollmentNo} • {u.role === 'teacher' ? u.subjects?.join(', ') : u.grade}
+                                        {/* Agar role finance hai toh EMP ID ke saath FINANCE likha aayega */}
+                                        {u.role === 'finance' ? `${u.employeeId} • FINANCE` : (u.role === 'teacher' ? u.employeeId : u.enrollmentNo)}
+                                        •
+                                        {u.role === 'finance' ? 'ACCOUNTING' : (u.role === 'teacher' ? u.subjects?.join(', ') : u.grade)}
                                     </p>
                                 </div>
                             </div>
@@ -213,16 +216,26 @@ const ManageUsers = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="space-y-1">
-                                        <label className="text-[8px] font-black text-neon/40 ml-4 uppercase">Subjects (Comma Sep)</label>
-                                        <input type="text" value={editingUser.subjects?.join(', ')} className="w-full p-4 bg-void rounded-2xl border border-white/5 text-xs text-white focus:border-neon uppercase outline-none"
-                                            onChange={(e) => setEditingUser({ ...editingUser, subjects: e.target.value.split(',').map(s => s.trim()) })} placeholder="SUBJECTS" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[8px] font-black text-neon/40 ml-4 uppercase text-neon">Assign Attendance Class</label>
-                                        <input type="text" value={editingUser.assignedClass || ''} className="w-full p-4 bg-void rounded-2xl border border-neon/20 text-xs text-neon focus:border-neon uppercase outline-none"
-                                            onChange={(e) => setEditingUser({ ...editingUser, assignedClass: e.target.value })} placeholder="e.g. 10-A" />
-                                    </div>
+                                    {/* Day 88: Restricted Fields for Finance Node */}
+                                    {editingUser.role === 'finance' ? (
+                                        <div className="md:col-span-2 bg-neon/5 border border-neon/20 p-6 rounded-[2rem] text-center my-2">
+                                            <p className="text-[10px] font-black text-neon uppercase italic tracking-[0.2em]">Finance Node Identity Active</p>
+                                            <p className="text-[8px] text-white/20 uppercase mt-1">Class and Subject protocols are restricted for this role.</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-neon/40 ml-4 uppercase">Subjects (Comma Sep)</label>
+                                                <input type="text" value={editingUser.subjects?.join(', ')} className="w-full p-4 bg-void rounded-2xl border border-white/5 text-xs text-white focus:border-neon uppercase outline-none"
+                                                    onChange={(e) => setEditingUser({ ...editingUser, subjects: e.target.value.split(',').map(s => s.trim()) })} placeholder="SUBJECTS" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[8px] font-black text-neon/40 ml-4 uppercase text-neon">Assign Attendance Class</label>
+                                                <input type="text" value={editingUser.assignedClass || ''} className="w-full p-4 bg-void rounded-2xl border border-neon/20 text-xs text-neon focus:border-neon uppercase outline-none"
+                                                    onChange={(e) => setEditingUser({ ...editingUser, assignedClass: e.target.value })} placeholder="e.g. 10-A" />
+                                            </div>
+                                        </>
+                                    )}
                                 </>
                             )}
 

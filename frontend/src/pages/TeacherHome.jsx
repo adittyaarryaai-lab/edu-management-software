@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  CheckSquare, BookOpen, Users, FilePlus, CalendarDays, 
-  ClipboardList, Bot, Activity, Megaphone, MessageCircle, 
+import {
+  CheckSquare, BookOpen, Users, FilePlus, CalendarDays,
+  ClipboardList, Bot, Activity, Megaphone, MessageCircle,
   Layers, Video
 } from 'lucide-react';
-import API from '../api'; 
+import API from '../api';
 
 const TeacherHome = ({ user }) => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const TeacherHome = ({ user }) => {
         setStudentCount(data.totalStudents);
       } catch (err) {
         console.error("Error fetching student stats:", err);
-        setStudentCount(120); 
+        setStudentCount(120);
       }
     };
     fetchStats();
@@ -37,15 +37,15 @@ const TeacherHome = ({ user }) => {
   ];
 
   const quickStats = [
-    { label: 'Active Blocks', value: '4', icon: <BookOpen size={16}/> },
-    { label: 'Neural Nodes', value: studentCount, icon: <Users size={16}/> }, 
-    { label: 'Downtime', value: '2', icon: <ClipboardList size={16}/> },
+    { label: 'Active Blocks', value: '4', icon: <BookOpen size={16} /> },
+    { label: 'Neural Nodes', value: studentCount, icon: <Users size={16} /> },
+    { label: 'Downtime', value: '2', icon: <ClipboardList size={16} /> },
   ];
 
   return (
     <div className="min-h-screen bg-void font-sans italic text-white">
       <div className="px-5 mt-0 space-y-6 relative z-10 pb-24">
-        
+
         {/* Quick Stats Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-neon/20 flex justify-between items-center italic">
           {quickStats.map((stat, i) => (
@@ -73,10 +73,12 @@ const TeacherHome = ({ user }) => {
         <div className="bg-void border border-neon/20 rounded-[3rem] p-7 text-white shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative overflow-hidden group">
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-2">
-                <Activity size={18} className="text-neon animate-pulse" />
-                <h3 className="font-black text-lg tracking-tight uppercase italic text-white/90">Personnel Briefing</h3>
+              <Activity size={18} className="text-neon animate-pulse" />
+              <h3 className="font-black text-lg tracking-tight uppercase italic text-white/90">Personnel Briefing</h3>
             </div>
-            <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-relaxed italic">System synchronization sequence today at 1600 HRS. Node Sector A-204.</p>
+            <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-relaxed italic">
+              System synchronization sequence today at 1600 HRS. Node Sector A-204.
+            </p>
             <button className="mt-6 bg-neon text-void px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.4)] active:scale-90 transition-all italic">
               Acknowledge
             </button>

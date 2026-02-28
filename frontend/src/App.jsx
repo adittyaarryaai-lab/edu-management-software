@@ -49,6 +49,8 @@ import ManageUsers from './pages/ManageUsers';
 import AdminEditTimetable from './pages/AdminEditTimetable';
 import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics Page
 
+import FinanceDashboard from './pages/finance/FinanceDashboard';
+
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import SuperAdminOnboard from './pages/SuperAdminOnboard';
@@ -115,6 +117,8 @@ function App() {
       // Redirect logic for SuperAdmin
       if (data.role === 'superadmin') {
         navigate("/superadmin/dashboard");
+      } else if (data.role === 'finance') {
+        navigate("/finance/dashboard"); // <--- DAY 88: Accountant Redirect
       } else {
         navigate("/");
       }
@@ -299,7 +303,7 @@ function App() {
                     <input type="text" name="otp_code" autoComplete="one-time-code" placeholder="6-DIGIT OTP" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black"
                       value={bypassData.otp} onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })} />
                     <input type={showPass ? "text" : "password"} placeholder="NEW ACCESS CIPHER" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black pr-14"
-                      value={bypassData.newPassword} onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })}/>
+                      value={bypassData.newPassword} onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })} />
                     <input type="password" placeholder="CONFIRM CIPHER" className="w-full bg-[#0B0F14] p-5 rounded-2xl border border-white/5 text-xs text-white outline-none focus:border-[#3DF2E0] font-black"
                       onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })} />
                     <button onClick={handleResetFinal} className="w-full bg-[#3DF2E0] text-[#0B0F14] py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-[0_0_20px_rgba(61,242,224,0.4)] transition-all">Re-Sync Identity</button>
@@ -327,14 +331,16 @@ function App() {
           <Route path="/" element={
             user.role === 'superadmin' ? <SuperAdminDashboard /> :
               user.role === 'admin' ? <AdminHome /> :
-                user.role === 'teacher' ? <TeacherHome user={user} /> :
-                  <StudentHome user={user} />
+                user.role === 'finance' ? <FinanceDashboard /> :
+                  user.role === 'teacher' ? <TeacherHome user={user} /> :
+                    <StudentHome user={user} />
           } />
           <Route path="/dashboard" element={
             user.role === 'superadmin' ? <SuperAdminDashboard /> :
               user.role === 'admin' ? <AdminHome /> :
-                user.role === 'teacher' ? <TeacherHome user={user} /> :
-                  <StudentHome user={user} />
+                user.role === 'finance' ? <FinanceDashboard /> :
+                  user.role === 'teacher' ? <TeacherHome user={user} /> :
+                    <StudentHome user={user} />
           } />
 
           {/* SuperAdmin Specific Routes - Day 64 */}
@@ -385,6 +391,8 @@ function App() {
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
 
+          <Route path="/finance/dashboard" element={<FinanceDashboard />} />
+
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />
           <Route path="/settings" element={<Settings user={user} />} />
@@ -393,8 +401,8 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
-      {/* SuperAdmin aur Admin ke liye BottomNav aksar nahi hota, logic check */}
-      {(user.role !== 'admin' && user.role !== 'superadmin') && <BottomNav />}
+      {/* SuperAdmin, Admin aur Finance ke liye BottomNav nahi dikhega */}
+      {(user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'finance') && <BottomNav />}
     </div>
   );
 }
