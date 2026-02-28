@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
+const Fee = require('../models/Fee'); // Pehle model import karo top par
 
 // Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic + DAY 78 Extended Fields)
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
@@ -187,6 +188,52 @@ router.get('/grades/all', protect, adminOnly, async (req, res) => {
         res.json(grades.sort());
     } catch (error) {
         res.status(500).json({ message: 'Error fetching grades from students' });
+    }
+});
+
+router.get('/finance/stats', protect, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        // 1. Today's Collection
+        const todayFees = await Fee.find({
+            schoolId,
+            date: { $gte: today }
+        });
+        const collectedToday = todayFees.reduce((sum, f) => sum + f.amountPaid, 0);
+
+        // 2. This Month's Collection
+        const monthFees = await Fee.find({
+            schoolId,
+            date: { $gte: startOfMonth }
+        });
+        const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
+
+        // 3. Recent 5 Payments for the List
+        const recentPayments = await Fee.find({ schoolId })
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate('student', 'name grade');
+
+        // Note: Pending fees logic Day 94 mein detail mein aayega
+        res.json({
+            collectedToday,
+            collectedMonth,
+            totalPending: 0, // Day 94 placeholder
+            pendingStudentsCount: 0, // Day 94 placeholder
+            recentPayments: recentPayments.map(p => ({
+                studentName: p.student?.name || 'Unknown',
+                grade: p.student?.grade || 'N/A',
+                amount: p.amountPaid,
+                date: p.date.toLocaleDateString()
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Stats Sync Error' });
     }
 });
 
