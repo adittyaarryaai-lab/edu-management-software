@@ -8,7 +8,7 @@ import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
 import AttendanceDetails from './pages/AttendanceDetails';
 import Timetable from './pages/Timetable';
-import Fees from './pages/Fees';
+// import Fees from './pages/Fees';
 import Notifications from './pages/Notifications';
 import TeacherHome from './pages/TeacherHome';
 import TeacherAttendance from './pages/TeacherAttendance';
@@ -33,7 +33,7 @@ import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
-import AdminFees from './pages/AdminFees';
+// import AdminFees from './pages/AdminFees';
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
 import TeacherNotices from './pages/TeacherNotices';
@@ -347,7 +347,7 @@ function App() {
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/student-report/:studentId" element={<StudentDetail />} /> {/* DAY 87: Deep Profile Route */}
           <Route path="/admin/edit-timetable" element={<AdminEditTimetable />} /> {/* Naya Module */}
-          <Route path="/admin/fees" element={<AdminFees />} />
+          {/* <Route path="/admin/fees" element={<AdminFees />} /> */}
           <Route path="/admin/attendance-report" element={<AdminAttendance />} />
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} />
           <Route path="/admin/manage-users" element={<ManageUsers />} />
@@ -355,7 +355,7 @@ function App() {
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
           <Route path="/attendance" element={user.role === 'student' ? <StudentAttendance /> : <AttendanceDetails />} />
-          <Route path="/fees" element={<Fees user={user} />} />
+          {/* <Route path="/fees" element={<Fees user={user} />} /> */}
           <Route path="/notices" element={<Notifications />} />
           <Route path="/performance" element={<Performance />} />
           <Route path="/holidays" element={<Holidays />} />
