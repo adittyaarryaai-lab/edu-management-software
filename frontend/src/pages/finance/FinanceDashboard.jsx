@@ -1,55 +1,85 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Wallet, Users, AlertCircle, Clock, IndianRupee, Activity, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Wallet, UserCircle, LogOut, ShieldCheck, Activity } from 'lucide-react';
+import API from '../../api';
 
 const FinanceDashboard = () => {
+    const [stats, setStats] = useState({
+        collectedToday: 0,
+        collectedMonth: 0,
+        totalPending: 0,
+        pendingStudentsCount: 0,
+        recentPayments: []
+    });
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = await API.get('/users/finance/stats');
+                setStats(data);
+            } catch (err) { console.error("Stats Error"); }
+        };
+        fetchStats();
+    }, []);
+
+    const statCards = [
+        { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-neon" />, color: "border-neon/20" },
+        { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-cyan-400" />, color: "border-cyan-500/20" },
+        { label: "Total Pending", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20" },
+        { label: "Pending Students", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20" },
+    ];
+
     return (
         <div className="min-h-screen bg-void text-white font-sans italic pb-24">
-            {/* Header Section */}
-            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-slate-900/50 backdrop-blur-md">
-                <div>
-                    <h1 className="text-2xl font-black uppercase tracking-tighter italic text-neon">Finance Node</h1>
-                    <p className="text-[10px] text-white/20 uppercase font-black tracking-widest mt-1">
-                        System Access: {user?.name || 'Authorized Personnel'}
-                    </p>
-                </div>
-            </div>
-
-            {/* Profile Info Card */}
-            <div className="p-6 mx-5 mt-6 bg-slate-900/80 rounded-[2.5rem] border border-neon/20 shadow-2xl flex items-center gap-5">
-                <div className="w-16 h-16 bg-neon/10 border border-neon/30 rounded-[1.5rem] flex items-center justify-center text-neon shadow-[0_0_20px_rgba(61,242,224,0.1)]">
-                    <UserCircle size={40}/>
-                </div>
-                <div>
-                    <h2 className="text-lg font-black uppercase italic leading-none">{user?.name}</h2>
-                    <p className="text-[9px] font-black text-neon/40 uppercase tracking-[0.2em] mt-2 flex items-center gap-1">
-                        <ShieldCheck size={10}/> Role: Finance Teacher / Accountant
-                    </p>
-                </div>
-            </div>
-
-            {/* Empty State: Awaiting Fees Modules */}
-            <div className="mt-12 flex flex-col items-center justify-center opacity-20 text-center px-10">
-                <div className="relative mb-6">
-                    <Wallet size={80} className="text-neon" />
-                    <Activity size={24} className="absolute -bottom-2 -right-2 text-neon animate-pulse" />
-                </div>
-                <h3 className="font-black text-xs uppercase tracking-[0.4em] mb-2 text-white">Dashboard Initialized</h3>
-                <p className="text-[8px] font-bold uppercase tracking-widest leading-relaxed">
-                    Neural history synchronized. <br/> Fees & Salary modules will be deployed in the next cycle.
+            <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md">
+                <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20">Finance Node</h1>
+                <p className="text-[10px] text-white/20 uppercase font-black mt-1 tracking-widest leading-none italic">
+                    Logged in as: {user?.name}
                 </p>
             </div>
 
-            {/* Bottom Status Bar */}
-            <div className="fixed bottom-10 left-5 right-5 bg-void border border-neon/10 rounded-3xl p-4 flex items-center justify-between shadow-2xl">
-                <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-neon rounded-full animate-ping"></div>
-                    <span className="text-[8px] font-black uppercase text-neon/60 tracking-widest">Live: Secure Session</span>
+            <div className="px-5 mt-8 space-y-6 relative z-10">
+                {/* Analytics Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                    {statCards.map((card, i) => (
+                        <div 
+                        key={i} 
+                        onClick={() => navigate('/finance/fees')} // <--- AB KAAM KAREGA
+                        className={`p-5 bg-slate-900/80 rounded-[2.5rem] border ${card.color} shadow-2xl active:scale-95 transition-all cursor-pointer`}
+                    >
+                            <div className="mb-3 opacity-60 group-hover:opacity-100 transition-opacity">{card.icon}</div>
+                            <h3 className="text-xl font-black tracking-tighter">₹{card.value.toLocaleString()}</h3>
+                            <p className="text-[8px] font-black uppercase text-white/30 tracking-widest mt-1">{card.label}</p>
+                        </div>
+                    ))}
                 </div>
-                <p className="text-[8px] font-black uppercase text-white/20 italic">EduFlowAI v3.0</p>
+
+                {/* Recent Payments Section */}
+                <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Clock size={16} className="text-neon animate-pulse" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Recent Ledger Stream</h3>
+                    </div>
+
+                    <div className="space-y-3">
+                        {stats.recentPayments.length > 0 ? stats.recentPayments.map((p, i) => (
+                            <div key={i} className="bg-void/40 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-neon/20 transition-all">
+                                <div>
+                                    <p className="text-[10px] font-black uppercase text-white leading-none">{p.studentName}</p>
+                                    <p className="text-[7px] text-white/20 font-bold uppercase tracking-widest mt-1 italic">{p.grade} • {p.date}</p>
+                                </div>
+                                <span className="text-xs font-black text-neon">₹{p.amount}</span>
+                            </div>
+                        )) : (
+                            <div className="py-8 text-center opacity-10 flex flex-col items-center">
+                                <IndianRupee size={30} className="mb-2" />
+                                <p className="text-[8px] font-black uppercase tracking-widest">No Recent Inflow Detected</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
