@@ -176,18 +176,16 @@ router.delete('/delete/:id', protect, adminOnly, async (req, res) => {
         res.status(500).json({ message: 'Delete failed' });
     }
 });
-// Admin fetching unique grades from Student list (DAY 87 FIX)
-router.get('/grades/all', protect, adminOnly, async (req, res) => {
+
+router.get('/grades/all', protect, async (req, res) => {
     try {
         const grades = await User.find({
             schoolId: req.user.schoolId,
             role: 'student'
         }).distinct('grade');
-
-        // Sort grades alphabetically (Optional)
         res.json(grades.sort());
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching grades from students' });
+        res.status(500).json({ message: 'Error fetching grades' });
     }
 });
 
@@ -234,6 +232,23 @@ router.get('/finance/stats', protect, async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: 'Stats Sync Error' });
+    }
+});
+
+// --- DAY 90: FETCH ALL STUDENTS WITH BASIC FEE INFO ---
+router.get('/finance/students-ledger/:grade', protect, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        const students = await User.find({
+            role: 'student',
+            grade: req.params.grade,
+            schoolId: schoolId
+        }).select('name enrollmentNo grade phone avatar');
+
+        // Note: Future mein yahan total_paid calculation bhi merge karenge
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ message: 'Ledger Fetch Error' });
     }
 });
 
