@@ -217,13 +217,13 @@ router.get('/finance/stats', protect, async (req, res) => {
             .limit(5)
             .populate('student', 'name grade');
 
-        // Note: Pending fees logic Day 94 mein detail mein aayega
         res.json({
             collectedToday,
             collectedMonth,
-            totalPending: 0, // Day 94 placeholder
-            pendingStudentsCount: 0, // Day 94 placeholder
+            totalPending: 0,
+            pendingStudentsCount: 0,
             recentPayments: recentPayments.map(p => ({
+                _id: p._id, // <--- YE LINE ADD KARO (Asli fix yahi hai)
                 studentName: p.student?.name || 'Unknown',
                 grade: p.student?.grade || 'N/A',
                 amount: p.amountPaid,
@@ -271,6 +271,20 @@ router.post('/finance/add-payment', protect, async (req, res) => {
         res.status(201).json({ message: 'Payment recorded successfully! ✅', feeRecord });
     } catch (error) {
         res.status(500).json({ message: 'Payment failed' });
+    }
+});
+
+// --- DAY 92: GET RECEIPT DETAILS WITH SCHOOL INFO ---
+router.get('/finance/receipt/:feeId', protect, async (req, res) => {
+    try {
+        const fee = await Fee.findById(req.params.feeId)
+            .populate('student', 'name enrollmentNo grade phone')
+            .populate({ path: 'schoolId', select: 'name address phone logo' });
+        if (!fee) return res.status(404).json({ message: 'Receipt not found' });
+
+        res.json(fee);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching receipt' });
     }
 });
 

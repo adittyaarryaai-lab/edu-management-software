@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IndianRupee, User, Calendar, CreditCard, FileText, Search} from 'lucide-react';
+import { IndianRupee, User, Calendar, CreditCard, FileText, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 import Toast from '../../components/Toast';
@@ -22,10 +22,21 @@ const AddPayment = () => {
     const handlePayment = async (e) => {
         e.preventDefault();
         try {
-            await API.post('/users/finance/add-payment', formData);
+            // Hum response se data nikalenge taaki receipt ID mil sake
+            const { data } = await API.post('/users/finance/add-payment', formData);
+            
             setMsg("Fee Payment Recorded! ✅");
-            setTimeout(() => navigate('/finance/dashboard'), 2000);
-        } catch (err) { alert("Payment Failed"); }
+
+            // --- DAY 92: REDIRECT TO RECEIPT PAGE ---
+            // Dashboard ki jagah ab seedha receipt page khulega
+            setTimeout(() => {
+                navigate(`/finance/receipt/${data.feeRecord._id}`);
+            }, 2000);
+
+        } catch (err) { 
+            console.error(err);
+            alert(err.response?.data?.message || "Payment Failed"); 
+        }
     };
 
     return (

@@ -125,29 +125,32 @@ const MyAccount = ({ user }) => {
                                         <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Hash size={20} /></div>
                                         <div>
                                             <p className="text-[8px] font-black text-white/20 uppercase italic">Affiliation Cipher</p>
-                                            {/* FIXED: schoolData.affiliationNo fetch logic */}
-                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.affiliationNo || "N/A"}</p>
+                                            {/* FIXED: schoolData se direct access */}
+                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.affiliationNo || user?.schoolData?.affiliationNo || "N/A"}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 group">
                                         <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><UserCheck size={20} /></div>
                                         <div>
                                             <p className="text-[8px] font-black text-white/20 uppercase italic">Primary Operator</p>
-                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.adminDetails?.fullName || user?.name}</p>
+                                            {/* FIXED: Admin Name from schoolData */}
+                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.adminDetails?.fullName || user?.schoolData?.adminDetails?.fullName || user?.name}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 group">
                                         <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Phone size={20} /></div>
                                         <div>
                                             <p className="text-[8px] font-black text-white/20 uppercase italic">Signal Link</p>
-                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.mobile || "N/A"}</p>
+                                            {/* FIXED: Admin Mobile */}
+                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.mobile || user?.schoolData?.adminDetails?.mobile || user?.phone || "N/A"}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4 group">
                                         <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Mail size={20} /></div>
                                         <div>
                                             <p className="text-[8px] font-black text-white/20 uppercase italic">Network Email</p>
-                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.email || user?.email}</p>
+                                            {/* FIXED: Admin Email */}
+                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.email || user?.schoolData?.adminDetails?.email || user?.email}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4 group bg-void/40 p-4 rounded-2xl border border-white/5">

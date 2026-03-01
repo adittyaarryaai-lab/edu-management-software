@@ -52,6 +52,7 @@ import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 import StudentsFees from './pages/finance/StudentsFees';
 import AddPayment from './pages/finance/AddPayment';
+import FeeReceipt from './pages/finance/FeeReceipt';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -326,7 +327,9 @@ function App() {
   return (
     <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
       {isDarkMode && isMatrixActive && <VisualMatrix />}
-      <Navbar user={user} />
+      <div className="print:hidden">
+        <Navbar user={user} />
+      </div>
       <main className="relative z-0 pb-32 pt-28">
         <Routes>
           {/* Main Dashboard Logic based on Role */}
@@ -396,6 +399,7 @@ function App() {
           <Route path="/finance/dashboard" element={<FinanceDashboard />} />
           <Route path="/finance/fees" element={<StudentsFees />} />
           <Route path="/finance/add-payment" element={<AddPayment />} />
+          <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />
@@ -406,7 +410,9 @@ function App() {
         </Routes>
       </main>
       {/* SuperAdmin, Admin aur Finance ke liye BottomNav nahi dikhega */}
-      {(user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'finance') && <BottomNav />}
+      <div className="print:hidden">
+        {(user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'finance') && <BottomNav />}
+      </div>
     </div>
   );
 }

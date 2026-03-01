@@ -151,7 +151,7 @@ const registerUser = async (req, res) => {
 
 const authUser = async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate('schoolId');
 
     if (user && (await require('bcryptjs').compare(password, user.password))) {
         res.json({
@@ -161,7 +161,8 @@ const authUser = async (req, res) => {
             role: user.role,
             grade: user.grade,
             assignedClass: user.assignedClass, 
-            schoolId: user.schoolId,
+            schoolData: user.schoolId, 
+            schoolId: user.schoolId?._id,
             avatar: user.avatar,
             fatherName: user.fatherName,
             motherName: user.motherName,

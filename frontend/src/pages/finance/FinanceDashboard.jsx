@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Users, AlertCircle, Clock, IndianRupee, Activity, TrendingUp, Plus, ArrowRight} from 'lucide-react';
+import { Wallet, Users, AlertCircle, Clock, IndianRupee, Activity, TrendingUp, Plus, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 
@@ -31,20 +31,26 @@ const FinanceDashboard = () => {
         { label: "Pending Students", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20" },
     ];
 
+    
     return (
         <div className="min-h-screen bg-void text-white font-sans italic pb-24">
-            <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md">
-                <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20">Finance Node</h1>
-                <p className="text-[10px] text-white/20 uppercase font-black mt-1 tracking-widest leading-none italic">
-                    Accountant: {user?.name}
-                </p>
+            {/* Header Section - Day 92 Fix */}
+            <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20">Finance Node</h1>
+                    <p className="text-[10px] text-white/20 uppercase font-black mt-1 tracking-widest leading-none italic">
+                        Accountant: {user?.name}
+                    </p>
+                </div>
+                {/* Plus button ab header mein right side mein rahega */}
+                <button
+                    onClick={() => navigate('/finance/add-payment')}
+                    className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all z-30"
+                >
+                    <Plus size={20} strokeWidth={3} />
+                </button>
             </div>
-            <button
-                onClick={() => navigate('/finance/add-payment')}
-                className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all"
-            >
-                <Plus size={20} strokeWidth={3} />
-            </button>
+
             <div className="px-5 mt-8 space-y-6 relative z-10">
                 {/* Analytics Cards */}
                 <div className="grid grid-cols-2 gap-4">
@@ -61,7 +67,6 @@ const FinanceDashboard = () => {
                         </div>
                     ))}
                 </div>
-
                 {/* Recent Payments Section */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden">
                     <div className="flex items-center gap-3 mb-6">
@@ -70,13 +75,21 @@ const FinanceDashboard = () => {
                     </div>
 
                     <div className="space-y-3">
+                        {/* DAY 92: Clickable list items to view receipt */}
                         {stats.recentPayments.length > 0 ? stats.recentPayments.map((p, i) => (
-                            <div key={i} className="bg-void/40 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-neon/20 transition-all">
+                            <div
+                                key={i}
+                                onClick={() => navigate(`/finance/receipt/${p._id}`)} // Receipt page par bhejne ke liye
+                                className="bg-void/40 p-4 rounded-2xl border border-white/5 flex justify-between items-center group hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all cursor-pointer shadow-lg active:scale-95"
+                            >
                                 <div>
-                                    <p className="text-[10px] font-black uppercase text-white leading-none">{p.studentName}</p>
-                                    <p className="text-[7px] text-white/20 font-bold uppercase tracking-widest mt-1 italic">{p.grade} • {p.date}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-[10px] font-black uppercase text-white leading-none group-hover:text-cyan-400 transition-colors">{p.studentName}</p>
+                                        <span className="text-[7px] bg-white/5 px-2 py-0.5 rounded-full text-white/40 font-black">VIEW RECEIPT</span>
+                                    </div>
+                                    <p className="text-[7px] text-white/20 font-bold uppercase tracking-widest mt-1 italic group-hover:text-white/40">{p.grade} • {p.date}</p>
                                 </div>
-                                <span className="text-xs font-black text-neon">₹{p.amount}</span>
+                                <span className="text-xs font-black text-neon group-hover:scale-110 transition-transform">₹{p.amount}</span>
                             </div>
                         )) : (
                             <div className="py-8 text-center opacity-10 flex flex-col items-center">
