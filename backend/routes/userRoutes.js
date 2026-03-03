@@ -3,7 +3,6 @@ const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const Fee = require('../models/Fee'); // Pehle model import karo top par
-
 // Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic + DAY 78 Extended Fields)
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     const {

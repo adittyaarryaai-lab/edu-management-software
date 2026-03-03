@@ -53,6 +53,7 @@ import FinanceDashboard from './pages/finance/FinanceDashboard';
 import StudentsFees from './pages/finance/StudentsFees';
 import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
+import Installments from './pages/finance/Installments';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -400,6 +401,7 @@ function App() {
           <Route path="/finance/fees" element={<StudentsFees />} />
           <Route path="/finance/add-payment" element={<AddPayment />} />
           <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
+          <Route path="/finance/installments" element={<Installments />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />

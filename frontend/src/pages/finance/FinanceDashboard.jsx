@@ -25,16 +25,15 @@ const FinanceDashboard = () => {
     }, []);
 
     const statCards = [
-        { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-neon" />, color: "border-neon/20" },
-        { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-cyan-400" />, color: "border-cyan-500/20" },
-        { label: "Total Pending", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20" },
-        { label: "Pending Students", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20" },
+        { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-cyan-400" />, color: "border-cyan-400/20", path: '/finance/add-payment' },
+        { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/fees' },
+        { label: "Installment Tracker", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20", path: '/finance/installments' }, // <--- DAY 93: Yahan Tracker ka rasta hai
+        { label: "Pending Student", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/fees' }, // <--- Iska label Ledger kar diya (Point 2)
     ];
 
     
     return (
         <div className="min-h-screen bg-void text-white font-sans italic pb-24">
-            {/* Header Section - Day 92 Fix */}
             <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20">Finance Node</h1>
@@ -45,10 +44,12 @@ const FinanceDashboard = () => {
                 {/* Plus button ab header mein right side mein rahega */}
                 <button
                     onClick={() => navigate('/finance/add-payment')}
+                    
                     className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all z-30"
                 >
                     <Plus size={20} strokeWidth={3} />
                 </button>
+                
             </div>
 
             <div className="px-5 mt-8 space-y-6 relative z-10">
@@ -57,7 +58,7 @@ const FinanceDashboard = () => {
                     {statCards.map((card, i) => (
                         <div
                             key={i}
-                            onClick={() => navigate('/finance/fees')}
+                            onClick={() => navigate(card.path)} // <--- Ab ye card ke hisab se sahi page par bhejega
                             className={`p-6 bg-slate-900/80 rounded-[2.5rem] border ${card.color} shadow-2xl active:scale-95 transition-all cursor-pointer relative overflow-hidden group`}
                         >
                             <div className="mb-3 opacity-60 group-hover:opacity-100 transition-opacity">{card.icon}</div>
