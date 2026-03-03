@@ -32,4 +32,23 @@ router.get('/installments/list', protect, async (req, res) => {
     }
 });
 
+// --- DAY 94: FETCH DEFALUTERS (PENDING + OVERDUE) ---
+router.get('/defaulters/list', protect, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        const today = new Date();
+
+        // Query: Status 'Pending' ho AUR dueDate aaj se purani ho
+        const overdue = await Installment.find({
+            schoolId,
+            status: 'Pending',
+            dueDate: { $lt: today }
+        }).populate('student', 'name grade phone enrollmentNo');
+
+        res.json(overdue);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching defaulters' });
+    }
+});
+
 module.exports = router;

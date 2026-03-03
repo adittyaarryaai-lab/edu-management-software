@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
-const Fee = require('../models/Fee'); // Pehle model import karo top par
-// Admin adds a teacher (FIXED: Added Auto-EmployeeID Logic + DAY 78 Extended Fields)
+const Fee = require('../models/Fee'); 
+const Installment = require('../models/Installment');
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     const {
         name, email, password, subjects,
@@ -188,6 +188,7 @@ router.get('/grades/all', protect, async (req, res) => {
     }
 });
 
+// --- DAY 94: DASHBOARD STATS SYNC (Point 6) ---
 router.get('/finance/stats', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -196,33 +197,46 @@ router.get('/finance/stats', protect, async (req, res) => {
 
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        // 1. Today's Collection
+        // 1. Aaj ki total kamai
         const todayFees = await Fee.find({
             schoolId,
             date: { $gte: today }
         });
         const collectedToday = todayFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 2. This Month's Collection
+        // 2. Is mahine ki total kamai
         const monthFees = await Fee.find({
             schoolId,
             date: { $gte: startOfMonth }
         });
         const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 3. Recent 5 Payments for the List
+        // 3. Sabse naye 5 payment (Dashboard list ke liye)
         const recentPayments = await Fee.find({ schoolId })
             .sort({ createdAt: -1 })
             .limit(5)
             .populate('student', 'name grade');
 
+        // --- STEP 2 ASLI KAAM YAHAN HAI (Pending Calculation) ---
+        // Hum 'Installment' model se saari 'Pending' entries mangwa rahe hain
+        const pendingInstallments = await Installment.find({
+            schoolId,
+            status: 'Pending'
+        });
+
+        // Total kitna paisa aana baaki hai (Sum)
+        const totalPendingAmount = pendingInstallments.reduce((sum, ins) => sum + (ins.amountDue || ins.amount || 0), 0);
+        
+        // Kitne alag-alag bacho ki fees baaki hai (Unique Students)
+        const pendingStudentsCount = [...new Set(pendingInstallments.map(ins => ins.student.toString()))].length;
+
         res.json({
             collectedToday,
             collectedMonth,
-            totalPending: 0,
-            pendingStudentsCount: 0,
+            totalPending: totalPendingAmount, // Ab ₹0 ki jagah asli total dikhega
+            pendingStudentsCount: pendingStudentsCount, // Baaki bacho ki ginti
             recentPayments: recentPayments.map(p => ({
-                _id: p._id, // <--- YE LINE ADD KARO (Asli fix yahi hai)
+                _id: p._id,
                 studentName: p.student?.name || 'Unknown',
                 grade: p.student?.grade || 'N/A',
                 amount: p.amountPaid,
@@ -230,6 +244,7 @@ router.get('/finance/stats', protect, async (req, res) => {
             }))
         });
     } catch (error) {
+        console.error("STATS_ERROR:", error);
         res.status(500).json({ message: 'Stats Sync Error' });
     }
 });

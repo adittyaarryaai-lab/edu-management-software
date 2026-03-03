@@ -28,10 +28,10 @@ const FinanceDashboard = () => {
         { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-cyan-400" />, color: "border-cyan-400/20", path: '/finance/add-payment' },
         { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/fees' },
         { label: "Installment Tracker", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20", path: '/finance/installments' }, // <--- DAY 93: Yahan Tracker ka rasta hai
-        { label: "Pending Student", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/fees' }, // <--- Iska label Ledger kar diya (Point 2)
+        { label: "Pending Student", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/pending' }, // <--- Path badal kar /pending kar diya
     ];
 
-    
+
     return (
         <div className="min-h-screen bg-void text-white font-sans italic pb-24">
             <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md flex justify-between items-center">
@@ -44,12 +44,12 @@ const FinanceDashboard = () => {
                 {/* Plus button ab header mein right side mein rahega */}
                 <button
                     onClick={() => navigate('/finance/add-payment')}
-                    
+
                     className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all z-30"
                 >
                     <Plus size={20} strokeWidth={3} />
                 </button>
-                
+
             </div>
 
             <div className="px-5 mt-8 space-y-6 relative z-10">
