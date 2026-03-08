@@ -55,8 +55,24 @@ const Installments = () => {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-black text-white">₹{ins.amount}</p>
-                                <span className={`text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'text-emerald-500' : 'text-rose-500'}`}>{ins.status}</span>
+                                {ins.penalty > 0 && (
+                                    <div className="mb-1">
+                                        <p className="text-[6px] font-black text-rose-500 uppercase tracking-tighter animate-pulse">
+                                            {ins.daysLate} DAYS OVERDUE
+                                        </p>
+                                        <p className="text-[8px] font-black text-rose-500 uppercase">
+                                            + ₹{ins.penalty} FINE
+                                        </p>
+                                    </div>
+                                )}
+
+                                <p className="text-sm font-black text-white">
+                                    ₹{ins.totalWithPenalty}
+                                </p>
+
+                                <span className={`text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    {ins.status}
+                                </span>
                             </div>
                         </div>
                     )) : (

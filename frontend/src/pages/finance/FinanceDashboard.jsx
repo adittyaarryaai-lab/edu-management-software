@@ -9,6 +9,7 @@ const FinanceDashboard = () => {
         collectedMonth: 0,
         totalPending: 0,
         pendingStudentsCount: 0,
+        penaltySettings: { dailyRate: 0, isActive: false },
         recentPayments: []
     });
     const navigate = useNavigate();
@@ -17,9 +18,20 @@ const FinanceDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const { data } = await API.get('/users/finance/stats');
-                setStats(data);
-            } catch (err) { console.error("Stats Error"); }
+                // Dono requests ko ek saath bhej rahe hain
+                const [statsRes, penaltyRes] = await Promise.all([
+                    API.get('/users/finance/stats'),
+                    API.get('/fees/settings/penalty')
+                ]);
+
+                // Dono ka data merge karke ek hi baar state set kar rahe hain
+                setStats({
+                    ...statsRes.data,
+                    penaltySettings: penaltyRes.data
+                });
+            } catch (err) {
+                console.error("Stats Error:", err);
+            }
         };
         fetchStats();
     }, []);
@@ -67,6 +79,54 @@ const FinanceDashboard = () => {
                             <ArrowRight size={12} className="absolute bottom-6 right-6 text-white/10 group-hover:text-cyan-400 transition-colors" />
                         </div>
                     ))}
+                </div>
+                {/* --- DAY 95: PENALTY CONTROL PANEL --- */}
+                <div className="bg-slate-900/60 rounded-[2.5rem] border border-white/5 p-6 shadow-2xl">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Penalty Protocol</h3>
+                            <p className="text-[8px] text-white/20 italic">Automated Late Fee Calculation</p>
+                        </div>
+                        {/* Toggle Switch */}
+                        <button
+                            onClick={async () => {
+                                const newStatus = !stats.penaltySettings?.isActive;
+                                await API.post('/fees/settings/penalty', {
+                                    dailyRate: stats.penaltySettings?.dailyRate || 0,
+                                    isActive: newStatus
+                                });
+                                window.location.reload(); // Refresh to sync
+                            }}
+                            className={`w-12 h-6 rounded-full p-1 transition-all ${stats.penaltySettings?.isActive ? 'bg-neon' : 'bg-white/10'}`}
+                        >
+                            <div className={`w-4 h-4 bg-void rounded-full transition-all ${stats.penaltySettings?.isActive ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+
+                    {stats.penaltySettings?.isActive && (
+                        <div className="flex items-center gap-4 bg-void/40 p-4 rounded-2xl border border-white/5 animate-in fade-in zoom-in duration-300">
+                            <div className="bg-neon/10 p-3 rounded-xl text-neon"><AlertCircle size={18} /></div>
+                            <div className="flex-1">
+                                <p className="text-[8px] font-black text-white/20 uppercase italic">Daily Fine Rate</p>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg font-black italic">₹</span>
+                                    <input
+                                        type="number"
+                                        defaultValue={stats.penaltySettings?.dailyRate}
+                                        onBlur={async (e) => {
+                                            const val = Number(e.target.value); // Number mein convert karo
+                                            await API.post('/fees/settings/penalty', {
+                                                dailyRate: val,
+                                                isActive: true
+                                            });
+                                        }}
+                                        className="bg-transparent border-b border-white/10 w-20 outline-none text-lg font-black italic text-neon"
+                                    />
+                                    <span className="text-[8px] font-bold text-white/20 uppercase italic mt-2">/ per day</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 {/* Recent Payments Section */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden">

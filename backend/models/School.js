@@ -26,6 +26,11 @@ const schoolSchema = new mongoose.Schema({
         hasPaidAdvance: { type: Boolean, default: false } 
     },
     sessionYear: { type: String, default: '2026-27' },
+    // --- DAY 95: PENALTY CONFIGURATION ---
+    penaltySettings: {
+        dailyRate: { type: Number, default: 0 }, // Agar 0 hai toh koi fine nahi lagega
+        isActive: { type: Boolean, default: false }
+    },
     isDeleted: { type: Boolean, default: false } 
 }, { timestamps: true });
 
