@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Phone, User, MessageSquare, Search } from 'lucide-react';
+import { AlertTriangle, Phone, User, MessageSquare, Search, Activity} from 'lucide-react';
 import API from '../../api';
 
 const PendingFees = () => {
@@ -13,6 +13,22 @@ const PendingFees = () => {
         };
         fetchDefaulters();
     }, []);
+
+    const sendAlert = async (studentData) => {
+        try {
+            await API.post('/fees/defaulters/send-alert', {
+                // Backend ko ab hum Enrollment No bhi bhej rahe hain
+                studentEnrollment: studentData.student.enrollmentNo,
+                studentName: studentData.student.name,
+                amount: studentData.totalAmount,
+                dueDate: studentData.dueDate
+            });
+            alert(`Reminder Triggered for ${studentData.student.name}! 📩`);
+        } catch (err) {
+            console.error("Alert Error", err);
+            alert("Failed to send alert.");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-void text-white p-5 pb-24 italic">
@@ -53,7 +69,14 @@ const PendingFees = () => {
                             <div className="flex justify-between items-center bg-void/50 p-4 rounded-2xl mb-4 border border-white/5">
                                 <div>
                                     <p className="text-[7px] font-black text-white/20 uppercase italic">Pending Balance</p>
-                                    <p className="text-lg font-black tracking-tighter text-white">₹{def.amountDue || def.amount}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-lg font-black tracking-tighter text-white">₹{def.totalAmount}</p>
+                                        {def.penalty > 0 && (
+                                            <span className="text-[8px] font-black text-rose-500 italic">
+                                                (+₹{def.penalty} Fine)
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[7px] font-black text-white/20 uppercase italic">Was Due On</p>
@@ -65,10 +88,21 @@ const PendingFees = () => {
                                 <a href={`tel:${def.student.phone}`} className="flex items-center justify-center gap-2 bg-white/5 py-3 rounded-xl text-[8px] font-black uppercase hover:bg-neon hover:text-void transition-all">
                                     <Phone size={12} /> Call Parent
                                 </a>
-                                <button className="flex items-center justify-center gap-2 bg-white/5 py-3 rounded-xl text-[8px] font-black uppercase hover:bg-cyan-400 hover:text-void transition-all">
+                                <button
+                                    onClick={() => sendAlert(def)}
+                                    className="flex items-center justify-center gap-2 bg-white/5 py-3 rounded-xl text-[8px] font-black uppercase hover:bg-cyan-400 hover:text-void transition-all active:scale-95"
+                                >
                                     <MessageSquare size={12} /> Send Alert
                                 </button>
                             </div>
+                            {/* --- DAY 96: FAST WHATSAPP REMINDER --- */}
+                            <a
+                                href={`https://wa.me/${def.student.phone}?text=Dear Parent, this is a reminder from *${def.schoolId?.schoolName || 'School'}* regarding your child *${def.student.name}*'s pending fees of ₹${(def.amountDue || def.amount) + (def.penalty || 0)}. Please clear it soon to avoid further penalty.`}
+                                target="_blank"
+                                className="col-span-2 mt-2 flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-500 py-3 rounded-xl text-[8px] font-black uppercase hover:bg-emerald-500 hover:text-white transition-all"
+                            >
+                                <Activity size={12} /> Fast WhatsApp Remind
+                            </a>
                         </div>
                     ))}
             </div>

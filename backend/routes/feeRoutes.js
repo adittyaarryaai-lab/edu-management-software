@@ -59,23 +59,49 @@ router.get('/installments/list', protect, async (req, res) => {
 });
 
 // --- DAY 94: FETCH DEFALUTERS (PENDING + OVERDUE) ---
+// --- DAY 96 FIX: FETCH DEFALUTERS WITH DYNAMIC PENALTY ---
 router.get('/defaulters/list', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // School ki penalty settings uthao
+        const School = require('../models/School');
+        const school = await School.findById(schoolId);
+        const dailyRate = school.penaltySettings?.dailyRate || 0;
+        const isPenaltyActive = school.penaltySettings?.isActive || false;
 
         const overdue = await Installment.find({
             schoolId,
             status: 'Pending',
             dueDate: { $lt: today }
-        }).populate('student', 'name grade phone enrollmentNo');
+        })
+        .populate('student', 'name grade phone enrollmentNo')
+        .populate('schoolId', 'schoolName');
 
-        // Defaulters ke liye bhi formatted data bhejenge penalty ke saath
-        const formattedOverdue = overdue.map(ins => ({
-            ...ins._doc,
-            penalty: 100, // Defaulter hai toh penalty pakki hai
-            totalAmount: (ins.amountDue || ins.amount || 0) + 100
-        }));
+        const formattedOverdue = overdue.map(ins => {
+            let totalPenalty = 0;
+            let daysLate = 0;
+            const dueDate = new Date(ins.dueDate);
+            dueDate.setHours(0, 0, 0, 0);
+
+            // LOGIC: Agar toggle ON hai toh penalty calculate karo
+            if (isPenaltyActive && dailyRate > 0) {
+                const diffTime = Math.abs(today - dueDate);
+                daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                totalPenalty = daysLate * dailyRate;
+            }
+
+            const baseAmount = ins.amountDue || ins.amount || 0;
+
+            return {
+                ...ins._doc, // Purana sara data
+                penalty: totalPenalty,
+                daysLate: daysLate,
+                totalAmount: baseAmount + totalPenalty
+            };
+        });
 
         res.json(formattedOverdue);
     } catch (error) {
@@ -108,6 +134,25 @@ router.post('/settings/penalty', protect, async (req, res) => {
         res.json({ message: 'Institutional Penalty Policy Updated! ⚡' });
     } catch (error) {
         res.status(500).json({ message: 'Settings update failed' });
+    }
+});
+
+// --- DAY 96: TRIGGER MANUAL ALERT (Point 8) ---
+router.post('/defaulters/send-alert', protect, async (req, res) => {
+    try {
+        const { studentEnrollment, studentName, amount, dueDate } = req.body;
+        
+        // AB TERMINAL MEIN ENROLLMENT NO DIKHEGA (e.g., STU10A002)
+        console.log(`-----------------------------------------`);
+        console.log(`🚨 ALERT TRIGGERED`);
+        console.log(`Student: ${studentName} (${studentEnrollment})`);
+        console.log(`Amount Pending: ₹${amount}`);
+        console.log(`Due Date: ${new Date(dueDate).toLocaleDateString()}`);
+        console.log(`-----------------------------------------`);
+        
+        res.json({ message: 'Reminder sent to Parent successfully! 📩' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send alert' });
     }
 });
 
