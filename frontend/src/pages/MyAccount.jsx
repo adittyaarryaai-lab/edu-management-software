@@ -254,7 +254,7 @@ const MyAccount = ({ user }) => {
                         onClick={() => { localStorage.clear(); navigate('/'); window.location.reload(); }}
                         className="w-full mt-10 bg-red-600/10 text-red-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] active:scale-95 transition-all border border-red-500/20 italic shadow-[0_0_20px_rgba(239,68,68,0.1)]"
                     >
-                        Terminate Session Matrix
+                        End All Active Sessions
                     </button>
                 </div>
             </div>

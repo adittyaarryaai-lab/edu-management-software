@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
+const { protect, financeOnly } = require('../middleware/authMiddleware');
 const Installment = require('../models/Installment');
 const Fee = require('../models/Fee');
 
 // --- DAY 93: FETCH ALL INSTALLMENTS (Point 5) ---
-router.get('/installments/list', protect, async (req, res) => {
+router.get('/installments/list', protect, financeOnly, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         const today = new Date();
@@ -61,7 +61,7 @@ router.get('/installments/list', protect, async (req, res) => {
 
 // --- DAY 94: FETCH DEFALUTERS (PENDING + OVERDUE) ---
 // --- DAY 96 FIX: FETCH DEFALUTERS WITH DYNAMIC PENALTY ---
-router.get('/defaulters/list', protect, async (req, res) => {
+router.get('/defaulters/list', protect, financeOnly, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         const today = new Date();
@@ -139,7 +139,7 @@ router.post('/settings/penalty', protect, async (req, res) => {
 });
 
 // --- DAY 96: TRIGGER MANUAL ALERT (Point 8) ---
-router.get('/reports/summary', protect, async (req, res) => {
+router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         

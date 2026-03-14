@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, ShieldCheck, LogOut, HelpCircle, Settings, ChevronRight, Cpu, LayoutDashboard } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SidebarDrawer = ({ isOpen, onClose, user }) => {
@@ -21,7 +21,19 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <LayoutDashboard size={20}/>, label: 'Executive Hub', color: 'text-neon', path: '/superadmin/dashboard' },
         { icon: <User size={20}/>, label: 'Master Account', color: 'text-neon', path: '/superadmin/account' },
         { icon: <Settings size={20}/>, label: 'Settings', color: 'text-white/40', path: '/settings' },
+    ] : user?.role === 'finance' ? [
+        // --- DAY 98: FINANCE TEACHER SIDEBAR (POINT 8) ---
+        { icon: <User size={20}/>, label: 'My Account', color: 'text-neon', path: '/my-account' },
+        { icon: <LayoutDashboard size={20}/>, label: 'Dashboard', color: 'text-neon', path: '/finance/dashboard' },
+        { icon: <Users size={20}/>, label: 'Students Fees', color: 'text-neon', path: '/finance/fees' },
+        { icon: <PlusCircle size={20}/>, label: 'Add Payment', color: 'text-cyan-400', path: '/finance/add-payment' },
+        { icon: <FileText size={20}/>, label: 'Receipts', color: 'text-neon', path: '/finance/receipts' },
+        { icon: <Clock size={20}/>, label: 'Installments', color: 'text-neon', path: '/finance/installments' },
+        { icon: <AlertCircle size={20}/>, label: 'Pending Fees', color: 'text-rose-500', path: '/finance/pending' },
+        { icon: <PieChart size={20}/>, label: 'Reports', color: 'text-neon', path: '/finance/reports' },
+        { icon: <ShieldCheck size={20}/>, label: 'Security', color: 'text-neon', path: '/settings' },
     ] : [
+        // Normal Teacher/Student Sidebar
         { icon: <User size={20}/>, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <ShieldCheck size={20}/>, label: 'Security', color: 'text-neon', path: '/settings' },
         { icon: <HelpCircle size={20}/>, label: 'Support & Help', color: 'text-neon', path: '/support' },
@@ -72,7 +84,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
 
                     <div className="mt-4 flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] text-neon/40 font-black">
                         <Cpu size={12} className="animate-pulse" />
-                        SYSTEM ENCRYPTED
+                        System Secured
                     </div>
                 </div>
 
@@ -110,7 +122,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                         className="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-black flex items-center justify-center gap-2 border border-red-500/20 hover:bg-red-500/20 transition-all active:scale-95 backdrop-blur-md uppercase text-[10px] tracking-[0.2em] italic"
                     >
                         <LogOut size={20} />
-                        <span>Terminate Session</span>
+                        <span>Logout</span>
                     </button>
                 </div>
             </div>

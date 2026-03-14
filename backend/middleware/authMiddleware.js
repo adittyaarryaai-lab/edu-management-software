@@ -53,5 +53,14 @@ const teacherOnly = (req, res, next) => {
         res.status(403).json({ message: 'Access denied. Teachers only.' });
     }
 };
+// --- DAY 98: FINANCE ACCESS ONLY ---
+const financeOnly = (req, res, next) => {
+    if (req.user && (req.user.role === 'finance' || req.user.role === 'admin')) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Access denied. Finance Personnel Only.' });
+    }
+};
 
-module.exports = { protect, superAdminOnly, adminOnly, teacherOnly };
+// module.exports mein isey add kar do
+module.exports = { protect, superAdminOnly, adminOnly, teacherOnly, financeOnly };
