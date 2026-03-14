@@ -55,6 +55,7 @@ import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
 import Installments from './pages/finance/Installments';
 import PendingFees from './pages/finance/PendingFees';
+import FeeReports from './pages/finance/FeeReports'; // Naya import
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -400,6 +401,7 @@ function App() {
 
           <Route path="/finance/dashboard" element={<FinanceDashboard />} />
           <Route path="/finance/fees" element={<StudentsFees />} />
+          <Route path="/finance/reports" element={<FeeReports />} /> 
           <Route path="/finance/add-payment" element={<AddPayment />} />
           <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
           <Route path="/finance/installments" element={<Installments />} />

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const Installment = require('../models/Installment');
+const Fee = require('../models/Fee');
 
 // --- DAY 93: FETCH ALL INSTALLMENTS (Point 5) ---
 router.get('/installments/list', protect, async (req, res) => {
@@ -138,21 +139,50 @@ router.post('/settings/penalty', protect, async (req, res) => {
 });
 
 // --- DAY 96: TRIGGER MANUAL ALERT (Point 8) ---
-router.post('/defaulters/send-alert', protect, async (req, res) => {
+router.get('/reports/summary', protect, async (req, res) => {
     try {
-        const { studentEnrollment, studentName, amount, dueDate } = req.body;
+        const schoolId = req.user.schoolId;
         
-        // AB TERMINAL MEIN ENROLLMENT NO DIKHEGA (e.g., STU10A002)
-        console.log(`-----------------------------------------`);
-        console.log(`🚨 ALERT TRIGGERED`);
-        console.log(`Student: ${studentName} (${studentEnrollment})`);
-        console.log(`Amount Pending: ₹${amount}`);
-        console.log(`Due Date: ${new Date(dueDate).toLocaleDateString()}`);
-        console.log(`-----------------------------------------`);
-        
-        res.json({ message: 'Reminder sent to Parent successfully! 📩' });
+        // 1. Fetch History (Asli payments ki list)
+        // 'populate' student detail mangwayega
+        const feeHistory = await Fee.find({ schoolId })
+            .sort({ date: -1 })
+            .populate('student', 'name grade');
+
+        // 2. Total Math (Sum of all payments)
+        const totalCollected = feeHistory.reduce((sum, f) => sum + f.amountPaid, 0);
+
+        // 3. Class-wise Math (Aggregation)
+        const classWise = await Fee.aggregate([
+            { $match: { schoolId: req.user.schoolId } },
+            { 
+                $lookup: { 
+                    from: 'users', // Compass mein 'users' collection hai
+                    localField: 'student', 
+                    foreignField: '_id', 
+                    as: 'studentInfo' 
+                } 
+            },
+            { $unwind: { path: '$studentInfo', preserveNullAndEmptyArrays: true } },
+            { 
+                $group: { 
+                    _id: '$studentInfo.grade', 
+                    total: { $sum: '$amountPaid' },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.json({
+            totalCollected,
+            transactionCount: feeHistory.length,
+            classWise: classWise.filter(item => item._id !== null), // Sirf jin bacho ki class hai wo dikhao
+            history: feeHistory // Naye formatted list data frontend ke liye
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to send alert' });
+        console.error("REPORT_API_ERROR:", error);
+        res.status(500).json({ message: 'Failed to generate simple report' });
     }
 });
 

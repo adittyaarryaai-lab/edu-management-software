@@ -38,7 +38,7 @@ const FinanceDashboard = () => {
 
     const statCards = [
         { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-cyan-400" />, color: "border-cyan-400/20", path: '/finance/add-payment' },
-        { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/fees' },
+        { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/reports' },
         { label: "Installment Tracker", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20", path: '/finance/installments' }, // <--- DAY 93: Yahan Tracker ka rasta hai
         { label: "Pending Student", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/pending' }, // <--- Path badal kar /pending kar diya
     ];

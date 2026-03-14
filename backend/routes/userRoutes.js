@@ -188,53 +188,42 @@ router.get('/grades/all', protect, async (req, res) => {
     }
 });
 
-// --- DAY 94: DASHBOARD STATS SYNC (Point 6) ---
+// --- DAY 97: DASHBOARD STATS + AUTO-SCHOOL INFO ---
 router.get('/finance/stats', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
+        
+        // AUTO-FETCH SCHOOL DETAILS: Asli naam aur address yahan se jayega
+        const School = require('../models/School');
+        const schoolDetails = await School.findById(schoolId).select('schoolName address');
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        // 1. Aaj ki total kamai
-        const todayFees = await Fee.find({
-            schoolId,
-            date: { $gte: today }
-        });
+        const todayFees = await Fee.find({ schoolId, date: { $gte: today } });
         const collectedToday = todayFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 2. Is mahine ki total kamai
-        const monthFees = await Fee.find({
-            schoolId,
-            date: { $gte: startOfMonth }
-        });
+        const monthFees = await Fee.find({ schoolId, date: { $gte: startOfMonth } });
         const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 3. Sabse naye 5 payment (Dashboard list ke liye)
         const recentPayments = await Fee.find({ schoolId })
             .sort({ createdAt: -1 })
             .limit(5)
             .populate('student', 'name grade');
 
-        // --- STEP 2 ASLI KAAM YAHAN HAI (Pending Calculation) ---
-        // Hum 'Installment' model se saari 'Pending' entries mangwa rahe hain
-        const pendingInstallments = await Installment.find({
-            schoolId,
-            status: 'Pending'
-        });
-
-        // Total kitna paisa aana baaki hai (Sum)
+        const pendingInstallments = await Installment.find({ schoolId, status: 'Pending' });
         const totalPendingAmount = pendingInstallments.reduce((sum, ins) => sum + (ins.amountDue || ins.amount || 0), 0);
-        
-        // Kitne alag-alag bacho ki fees baaki hai (Unique Students)
         const pendingStudentsCount = [...new Set(pendingInstallments.map(ins => ins.student.toString()))].length;
 
         res.json({
+            // YE HAI AUTO GENERATE DATA
+            schoolName: schoolDetails?.schoolName || "EduFlowAI School",
+            schoolAddress: schoolDetails?.address || "Main Campus, India",
             collectedToday,
             collectedMonth,
-            totalPending: totalPendingAmount, // Ab ₹0 ki jagah asli total dikhega
-            pendingStudentsCount: pendingStudentsCount, // Baaki bacho ki ginti
+            totalPending: totalPendingAmount,
+            pendingStudentsCount,
             recentPayments: recentPayments.map(p => ({
                 _id: p._id,
                 studentName: p.student?.name || 'Unknown',
@@ -244,7 +233,6 @@ router.get('/finance/stats', protect, async (req, res) => {
             }))
         });
     } catch (error) {
-        console.error("STATS_ERROR:", error);
         res.status(500).json({ message: 'Stats Sync Error' });
     }
 });
