@@ -237,11 +237,22 @@ router.get('/student-summary', protect, async (req, res) => {
             .filter(ins => ins.status === 'Pending')
             .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
 
+        // --- DAY 101: ADDING INSTALLMENT LIST TO SUMMARY ---
         res.json({
             totalFees,
             totalPaid,
             remainingFees,
-            breakdown, // Frontend ab iska use karke Tuition/Transport dikhayega
+            breakdown, 
+            // YE NAYA FIELD HAI: Installments ki poori list bhej rahe hain
+            installmentList: installments.map(ins => ({
+                id: ins._id,
+                number: ins.installmentNumber || 0,
+                amount: ins.amountDue || ins.amount || 0,
+                dueDate: ins.dueDate,
+                status: ins.status,
+                type: ins.type || 'Tuition Fee'
+            })).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)), // Date wise sort kiya
+            
             nextDueDate: nextIns ? nextIns.dueDate : 'No Pending',
             lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
             status: totalFees === 0 ? 'Not Set' : remainingFees <= 0 ? 'Fully Paid' : 'Pending'

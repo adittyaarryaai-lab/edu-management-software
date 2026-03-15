@@ -108,10 +108,49 @@ const StudentFees = () => {
 
                         {/* Total Highlight */}
                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Total Course Value</span>
+                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Total Fees</span>
                             <span className="text-lg font-black text-neon">₹{summary.totalFees.toLocaleString()}</span>
                         </div>
                     </div>
+                    {/* --- POINT 3: INSTALLMENT SECTION --- */}
+                    <div className="bg-slate-900/40 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-xl mt-8">
+                        <div className="p-6 border-b border-white/5 bg-white/5 flex items-center gap-3">
+                            <Clock size={14} className="text-neon" />
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Installment Schedule</h3>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-[10px]">
+                                <thead className="bg-white/5 uppercase font-black text-white/30 border-b border-white/5">
+                                    <tr>
+                                        <th className="p-4">Installment</th>
+                                        <th className="p-4">Due Date</th>
+                                        <th className="p-4">Amount</th>
+                                        <th className="p-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {summary.installmentList?.map((ins, i) => (
+                                        <tr key={i} className="hover:bg-white/5 transition-all">
+                                            <td className="p-4 font-black uppercase tracking-tighter">
+                                                {ins.number ? `${ins.number}${ins.number === 1 ? 'st' : ins.number === 2 ? 'nd' : ins.number === 3 ? 'rd' : 'th'} Pay` : ins.type}
+                                            </td>
+                                            <td className="p-4 font-bold opacity-60">
+                                                {new Date(ins.dueDate).toLocaleDateString()}
+                                            </td>
+                                            <td className="p-4 font-black">₹{ins.amount.toLocaleString()}</td>
+                                            <td className="p-4">
+                                                <span className={`px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500 animate-pulse'}`}>
+                                                    {ins.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
