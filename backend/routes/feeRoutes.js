@@ -186,4 +186,40 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
+// --- DAY 99: STUDENT SIDE FEES OVERVIEW ---
+router.get('/student-summary', protect, async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        const schoolId = req.user.schoolId;
+
+        const installments = await Installment.find({ student: studentId, schoolId });
+        const payments = await Fee.find({ student: studentId, schoolId });
+
+        // Math: Total Structure (Aapke case mein 2500)
+        const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
+        
+        // Math: Total Paid (Aapke case mein 12000)
+        const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
+        
+        // Final Remaining (Agar paid zyada hai toh negative aayega, usey frontend par handle karenge)
+        const remainingFees = totalFees - totalPaid;
+
+        const nextIns = installments
+            .filter(ins => ins.status === 'Pending')
+            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+
+        res.json({
+            totalFees,
+            totalPaid,
+            remainingFees,
+            nextDueDate: nextIns ? nextIns.dueDate : 'No Pending',
+            lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
+            // Status Logic
+            status: totalFees === 0 ? 'Not Set' : remainingFees <= 0 ? 'Fully Paid' : 'Pending'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error' });
+    }
+});
+
 module.exports = router;

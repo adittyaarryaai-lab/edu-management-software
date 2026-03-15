@@ -1,0 +1,93 @@
+import React, { useState, useEffect } from 'react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft} from 'lucide-react';
+import API from '../../api';
+import { useNavigate } from 'react-router-dom';
+
+const StudentFees = () => {
+    const [summary, setSummary] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const { data } = await API.get('/fees/student-summary');
+                setSummary(data);
+            } catch (err) { console.error("Summary Load Error"); }
+        };
+        fetchSummary();
+    }, []);
+
+    if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
+
+    return (
+        <div className="min-h-screen bg-void text-white p-5 pb-32 italic font-sans">
+            <div className="flex items-center gap-4 mb-10 border-l-4 border-neon pl-4">
+                {/* Back Button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-2 bg-white/5 rounded-xl border border-white/10 active:scale-90 transition-all hover:bg-neon/20 hover:border-neon/40"
+                >
+                    <ArrowLeft size={20} className="text-neon" />
+                </button>
+
+                <h1 className="text-xl font-black uppercase tracking-tighter">Finance Overview</h1>
+            </div>
+            <div className="space-y-6">
+                {/* --- MAIN BALANCE CARD --- */}
+                <div className="bg-slate-900/60 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden shadow-2xl">
+                    <div className="absolute -top-6 -right-6 opacity-5 rotate-12"><CreditCard size={150} /></div>
+
+                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">
+                        {summary.remainingFees < 0 ? 'Advance Deposited' : 'Net Payable Balance'}
+                    </p>
+
+                    <h2 className={`text-5xl font-black tracking-tighter mb-6 ${summary.remainingFees < 0 ? 'text-emerald-400' : 'text-neon'}`}>
+                        ₹{Math.abs(summary.remainingFees).toLocaleString()}
+                        {summary.remainingFees < 0 && <span className="text-xs ml-2 opacity-50 underline tracking-widest">ADVANCE</span>}
+                    </h2>
+
+                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${summary.status === 'Fully Paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/30'}`}>
+                        {summary.status === 'Fully Paid' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                        {summary.remainingFees < 0 ? 'Advance Paid' : summary.status}
+                    </div>
+                </div>
+
+                {/* --- STATS GRID --- */}
+                <div className="grid grid-cols-2 gap-5">
+                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
+                        <TrendingUp size={20} className="text-emerald-400 mb-2 opacity-40" />
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Total Paid</p>
+                        <p className="text-xl font-black text-white italic">₹{summary.totalPaid.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
+                        <Layers size={20} className="text-white/20 mb-2 opacity-40" />
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Fee Structure</p>
+                        <p className="text-xl font-black text-white/40 italic">₹{summary.totalFees.toLocaleString()}</p>
+                    </div>
+                </div>
+
+                {/* --- TIMELINE INFO --- */}
+                <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5 flex justify-between relative overflow-hidden">
+                    <div className="absolute left-0 top-0 h-full w-1 bg-neon/30"></div>
+                    <div>
+                        <p className="text-[8px] font-black text-white/20 uppercase mb-1">Next Deadline</p>
+                        <p className="text-xs font-black text-rose-400">
+                            {summary.nextDueDate !== 'No Pending' ? new Date(summary.nextDueDate).toLocaleDateString() : 'CLEAR'}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[8px] font-black text-white/20 uppercase mb-1">Last Activity</p>
+                        <p className="text-xs font-black text-emerald-400">
+                            {summary.lastPaymentDate !== 'N/A' ? new Date(summary.lastPaymentDate).toLocaleDateString() : 'NONE'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Layers icon missing ho sakta hai lucide se, use iska alternative 
+const Layers = ({ size, className }) => <div className={className}><CreditCard size={size} /></div>;
+
+export default StudentFees;

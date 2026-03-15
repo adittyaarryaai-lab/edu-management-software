@@ -8,7 +8,7 @@ import BottomNav from './components/BottomNav';
 import StudentHome from './pages/StudentHome';
 import AttendanceDetails from './pages/AttendanceDetails';
 import Timetable from './pages/Timetable';
-// import Fees from './pages/Fees';
+import StudentFees from './pages/student/StudentFees';
 import Notifications from './pages/Notifications';
 import TeacherHome from './pages/TeacherHome';
 import TeacherAttendance from './pages/TeacherAttendance';
@@ -361,7 +361,7 @@ function App() {
           <Route path="/admin/timetable" element={<AdminTimetable />} />
           <Route path="/admin/student-report/:studentId" element={<StudentDetail />} /> {/* DAY 87: Deep Profile Route */}
           <Route path="/admin/edit-timetable" element={<AdminEditTimetable />} /> {/* Naya Module */}
-          {/* <Route path="/admin/fees" element={<AdminFees />} /> */}
+          <Route path="/student/fees" element={<StudentFees />} />
           <Route path="/admin/attendance-report" element={<AdminAttendance />} />
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} />
           <Route path="/admin/manage-users" element={<ManageUsers />} />

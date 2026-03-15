@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, Clock, CreditCard, Bell, Sun, FileText, 
+import {
+  Calendar, Clock, CreditCard, Bell, Sun, FileText,
   TrendingUp, FileSearch, ClipboardCheck,
   Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus, Bot
 } from 'lucide-react';
-import API from '../api'; 
+import API from '../api';
 
 const StudentHome = () => {
   const navigate = useNavigate();
@@ -13,14 +13,14 @@ const StudentHome = () => {
   const mainModules = [
     { title: 'Attendance', icon: <Calendar size={32} />, path: '/attendance', color: 'text-neon bg-neon/10 border-neon/20' },
     { title: 'TimeTable', icon: <Clock size={32} />, path: '/timetable', color: 'text-neon bg-neon/10 border-neon/20' },
-    { title: 'Fees', icon: <CreditCard size={32} />, path: '/fees', color: 'text-neon bg-neon/10 border-neon/20' },
+    { title: 'Fees', icon: <CreditCard size={32} />, path: '/student/fees', color: 'text-neon bg-neon/10 border-neon/20' },
     { title: 'Notice Board', icon: <Megaphone size={32} />, path: '/notice-feed', color: 'text-neon bg-neon/10 border-neon/20' },
   ];
 
   const subModules = [
     { title: 'ERP Notices', icon: <Bell size={20} />, path: '/notices' },
     { title: 'Assignment', icon: <FileText size={20} />, path: '/assignments' },
-    { title: 'Performance', icon: <TrendingUp size={20} />, path: '/performance' }, 
+    { title: 'Performance', icon: <TrendingUp size={20} />, path: '/performance' },
     { title: 'Mentorship', icon: <Users size={20} />, path: '/mentors' },
     { title: 'Library', icon: <Book size={20} />, path: '/library' },
     { title: 'Live Class', icon: <Video size={20} />, path: '/live-class' },
@@ -43,8 +43,8 @@ const StudentHome = () => {
 
       <div className="bg-void/80 backdrop-blur-2xl rounded-[3rem] p-8 border border-neon/20 shadow-2xl">
         <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
-            <Bot size={16} className="text-neon animate-pulse" />
-            <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em]">Neural Sub-Modules</h3>
+          <Bot size={16} className="text-neon animate-pulse" />
+          <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em]">Neural Sub-Modules</h3>
         </div>
         <div className="grid grid-cols-4 gap-y-10 gap-x-2">
           {subModules.map((sm, i) => (
