@@ -8,7 +8,8 @@ const installmentSchema = new mongoose.Schema({
     penaltyAmount: { type: Number, default: 0 }, 
     dueDate: { type: Date, required: true },
     status: { type: String, enum: ['Paid', 'Pending', 'Overdue'], default: 'Pending' },
-    paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Fee' } 
+    paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Fee' },
+    type: { type: String, default: '' } // Ye line add kar do 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Installment', installmentSchema);

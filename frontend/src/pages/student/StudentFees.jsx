@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft} from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft } from 'lucide-react';
 import API from '../../api';
 import { useNavigate } from 'react-router-dom';
 
@@ -80,6 +80,37 @@ const StudentFees = () => {
                         <p className="text-xs font-black text-emerald-400">
                             {summary.lastPaymentDate !== 'N/A' ? new Date(summary.lastPaymentDate).toLocaleDateString() : 'NONE'}
                         </p>
+                    </div>
+                </div>
+                {/* --- POINT 2: FEES DETAILS SECTION --- */}
+                <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-8">
+                    <div className="p-6 border-b border-white/5 bg-white/5 flex items-center gap-3">
+                        <Layers size={14} className="text-neon" />
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Fee Structure Details</h3>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        {/* --- Breakdown Details --- */}
+                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Tuition Fees</span>
+                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.tuition || 0).toLocaleString()}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Transport Fees</span>
+                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.transport || 0).toLocaleString()}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Other Charges</span>
+                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.others || 0).toLocaleString()}</span>
+                        </div>
+
+                        {/* Total Highlight */}
+                        <div className="flex justify-between items-center pt-2">
+                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Total Course Value</span>
+                            <span className="text-lg font-black text-neon">₹{summary.totalFees.toLocaleString()}</span>
+                        </div>
                     </div>
                 </div>
             </div>

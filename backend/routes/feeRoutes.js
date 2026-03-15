@@ -187,22 +187,51 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
 });
 
 // --- DAY 99: STUDENT SIDE FEES OVERVIEW ---
+// --- DAY 100: STUDENT SIDE FEES OVERVIEW + BREAKDOWN (Point 2) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
 
+        // 1. Installments aur Payments fetch karo
         const installments = await Installment.find({ student: studentId, schoolId });
         const payments = await Fee.find({ student: studentId, schoolId });
 
-        // Math: Total Structure (Aapke case mein 2500)
+        // 2. Math Calculations
         const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
-        
-        // Math: Total Paid (Aapke case mein 12000)
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
-        
-        // Final Remaining (Agar paid zyada hai toh negative aayega, usey frontend par handle karenge)
         const remainingFees = totalFees - totalPaid;
+
+        const tuitionAmount = installments
+            .filter(ins => {
+                const type = (ins.type || '').toLowerCase();
+                // Logic: Agar type hai hi nahi YA usme 'tuition' likha hai
+                return !ins.type || type === "" || type.includes('tuition');
+            })
+            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
+
+        const transportAmount = installments
+            .filter(ins => {
+                const type = (ins.type || '').toLowerCase();
+                // Logic: Sirf wahi pakdo jisme 'transport' ho
+                return type.includes('transport');
+            })
+            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
+
+        const othersAmount = installments
+            .filter(ins => {
+                if (!ins.type) return false;
+                const type = ins.type.toLowerCase();
+                // Logic: Jo Tuition aur Transport dono NAHI hai, wo Others hai
+                return !type.includes('tuition') && !type.includes('transport');
+            })
+            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
+
+        const breakdown = {
+            tuition: tuitionAmount,
+            transport: transportAmount,
+            others: othersAmount
+        };
 
         const nextIns = installments
             .filter(ins => ins.status === 'Pending')
@@ -212,13 +241,14 @@ router.get('/student-summary', protect, async (req, res) => {
             totalFees,
             totalPaid,
             remainingFees,
+            breakdown, // Frontend ab iska use karke Tuition/Transport dikhayega
             nextDueDate: nextIns ? nextIns.dueDate : 'No Pending',
             lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
-            // Status Logic
             status: totalFees === 0 ? 'Not Set' : remainingFees <= 0 ? 'Fully Paid' : 'Pending'
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error' });
+        console.error("Day 100 Error:", error);
+        res.status(500).json({ message: 'Error fetching fee summary' });
     }
 });
 
