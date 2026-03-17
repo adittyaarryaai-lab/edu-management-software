@@ -186,79 +186,79 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
-// --- DAY 99: STUDENT SIDE FEES OVERVIEW ---
-// --- DAY 100: STUDENT SIDE FEES OVERVIEW + BREAKDOWN (Point 2) ---
+// --- DAY 102: STUDENT SIDE SUMMARY WITH DYNAMIC PENALTY (Point 4) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        // 1. Installments aur Payments fetch karo
+        // 1. Fetch School Settings for Penalty Calculation
+        const School = require('../models/School');
+        const school = await School.findById(schoolId);
+        const dailyRate = school.penaltySettings?.dailyRate || 0;
+        const isPenaltyActive = school.penaltySettings?.isActive || false;
+
+        // 2. Installments aur Payments fetch karo
         const installments = await Installment.find({ student: studentId, schoolId });
         const payments = await Fee.find({ student: studentId, schoolId });
 
-        // 2. Math Calculations
+        // 3. Process Installment List with Penalty Logic
+        let totalPenaltyAccrued = 0;
+        const processedInstallments = installments.map(ins => {
+            let penalty = 0;
+            const dueDate = new Date(ins.dueDate);
+            dueDate.setHours(0, 0, 0, 0);
+
+            // Logic: Agar status Pending hai aur aaj ki date Due Date se aage nikal gayi hai
+            if (ins.status === 'Pending' && dueDate < today && isPenaltyActive) {
+                const diffTime = Math.abs(today - dueDate);
+                const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                penalty = daysLate * dailyRate;
+                totalPenaltyAccrued += penalty;
+            }
+
+            return {
+                id: ins._id,
+                number: ins.installmentNumber || 0,
+                amount: Number(ins.amountDue) || 0,
+                penalty: penalty,
+                totalWithPenalty: (Number(ins.amountDue) || 0) + penalty,
+                dueDate: ins.dueDate,
+                // Status update: Agar date nikal gayi toh UI ke liye 'Overdue' mark kar rahe hain
+                status: (ins.status === 'Pending' && dueDate < today) ? 'Overdue' : ins.status,
+                type: ins.type || 'Tuition Fee'
+            };
+        }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+        // 4. Final Math Calculations
         const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
-        const remainingFees = totalFees - totalPaid;
-
-        const tuitionAmount = installments
-            .filter(ins => {
-                const type = (ins.type || '').toLowerCase();
-                // Logic: Agar type hai hi nahi YA usme 'tuition' likha hai
-                return !ins.type || type === "" || type.includes('tuition');
-            })
-            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
-
-        const transportAmount = installments
-            .filter(ins => {
-                const type = (ins.type || '').toLowerCase();
-                // Logic: Sirf wahi pakdo jisme 'transport' ho
-                return type.includes('transport');
-            })
-            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
-
-        const othersAmount = installments
-            .filter(ins => {
-                if (!ins.type) return false;
-                const type = ins.type.toLowerCase();
-                // Logic: Jo Tuition aur Transport dono NAHI hai, wo Others hai
-                return !type.includes('tuition') && !type.includes('transport');
-            })
-            .reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
-
+        
+        // Breakdown Calculation
         const breakdown = {
-            tuition: tuitionAmount,
-            transport: transportAmount,
-            others: othersAmount
+            tuition: installments.filter(ins => !ins.type || ins.type.toLowerCase().includes('tuition')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0),
+            transport: installments.filter(ins => ins.type?.toLowerCase().includes('transport')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0),
+            others: installments.filter(ins => ins.type && !ins.type.toLowerCase().includes('tuition') && !ins.type.toLowerCase().includes('transport')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0)
         };
 
-        const nextIns = installments
-            .filter(ins => ins.status === 'Pending')
-            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+        const nextIns = processedInstallments.filter(ins => ins.status !== 'Paid')[0];
 
-        // --- DAY 101: ADDING INSTALLMENT LIST TO SUMMARY ---
         res.json({
             totalFees,
             totalPaid,
-            remainingFees,
-            breakdown, 
-            // YE NAYA FIELD HAI: Installments ki poori list bhej rahe hain
-            installmentList: installments.map(ins => ({
-                id: ins._id,
-                number: ins.installmentNumber || 0,
-                amount: ins.amountDue || ins.amount || 0,
-                dueDate: ins.dueDate,
-                status: ins.status,
-                type: ins.type || 'Tuition Fee'
-            })).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)), // Date wise sort kiya
-            
+            // Ab remaining fees mein Penalty bhi jud kar jayegi
+            remainingFees: (totalFees + totalPenaltyAccrued) - totalPaid,
+            totalPenalty: totalPenaltyAccrued,
+            breakdown,
+            installmentList: processedInstallments,
             nextDueDate: nextIns ? nextIns.dueDate : 'No Pending',
             lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
-            status: totalFees === 0 ? 'Not Set' : remainingFees <= 0 ? 'Fully Paid' : 'Pending'
+            status: totalFees === 0 ? 'Not Set' : (totalFees - totalPaid) <= 0 ? 'Fully Paid' : 'Pending'
         });
     } catch (error) {
-        console.error("Day 100 Error:", error);
+        console.error("Day 102 Backend Error:", error);
         res.status(500).json({ message: 'Error fetching fee summary' });
     }
 });
