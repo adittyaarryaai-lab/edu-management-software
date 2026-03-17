@@ -141,11 +141,10 @@ const StudentFees = () => {
                                             {ins.penalty > 0 ? `+ ₹${ins.penalty.toLocaleString()}` : '--'}
                                         </td>
                                         <td className="p-4">
-                                            <span className={`px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest ${
-                                                ins.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                ins.status === 'Overdue' ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_10px_rgba(225,29,72,0.5)]' :
-                                                'bg-orange-500/10 text-orange-500'
-                                            }`}>
+                                            <span className={`px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                    ins.status === 'Overdue' ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_10px_rgba(225,29,72,0.5)]' :
+                                                        'bg-orange-500/10 text-orange-500'
+                                                }`}>
                                                 {ins.status}
                                             </span>
                                         </td>
@@ -153,6 +152,46 @@ const StudentFees = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                {/* --- POINT 5: PAYMENT HISTORY SECTION --- */}
+                <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-12 mb-10">
+                    <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <CheckCircle size={14} className="text-emerald-400" />
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Payment History</h3>
+                        </div>
+                        <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full uppercase">
+                            Verified Transactions
+                        </span>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        {summary.paymentHistory?.length > 0 ? (
+                            summary.paymentHistory.map((pay, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                            <TrendingUp size={16} className="text-emerald-500" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-white italic">₹{pay.amount.toLocaleString()}</p>
+                                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-tighter">
+                                                {new Date(pay.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {pay.mode}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
+                                        <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-10 text-center opacity-20 text-[10px] font-black uppercase italic tracking-widest">
+                                No Transactions Found In Archive
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
