@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft } from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download } from 'lucide-react';
 import API from '../../api';
 import { useNavigate } from 'react-router-dom';
 
@@ -142,8 +142,8 @@ const StudentFees = () => {
                                         </td>
                                         <td className="p-4">
                                             <span className={`px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                    ins.status === 'Overdue' ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_10px_rgba(225,29,72,0.5)]' :
-                                                        'bg-orange-500/10 text-orange-500'
+                                                ins.status === 'Overdue' ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_10px_rgba(225,29,72,0.5)]' :
+                                                    'bg-orange-500/10 text-orange-500'
                                                 }`}>
                                                 {ins.status}
                                             </span>
@@ -181,9 +181,19 @@ const StudentFees = () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
-                                        <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
+                                    {/* --- POINT 6: RECEIPT DOWNLOAD ACTION --- */}
+                                    <div className="flex flex-col items-end gap-2 group">
+                                        <button
+                                            onClick={() => alert(`Redirecting to Receipt: ${pay.id}`)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-black transition-all active:scale-90"
+                                        >
+                                            <Download size={10} />
+                                            <span className="text-[8px] font-black uppercase tracking-widest">Receipt</span>
+                                        </button>
+                                        <div className="text-right">
+                                            <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
+                                            <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
+                                        </div>
                                     </div>
                                 </div>
                             ))

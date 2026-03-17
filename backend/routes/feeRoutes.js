@@ -268,4 +268,34 @@ router.get('/student-summary', protect, async (req, res) => {
     }
 });
 
+// --- DAY 104: GET RECEIPT DATA (Point 6) ---
+// Is route ka kaam hai payment ki details + student info + school details nikalna
+router.get('/receipt/:paymentId', protect, async (req, res) => {
+    try {
+        const payment = await Fee.findById(req.params.paymentId)
+            .populate({
+                path: 'student',
+                select: 'name enrollmentNo grade fatherName phone address' 
+            })
+            .populate({
+                path: 'schoolId',
+                select: 'schoolName schoolAddress schoolContact logo' // Check your School model fields
+            });
+
+        if (!payment) {
+            return res.status(404).json({ message: 'Receipt Identity Not Found! ❌' });
+        }
+
+        // Security Check: Student sirf apni hi receipt dekh sake
+        if (req.user.role === 'student' && payment.student._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Neural Access Denied: Unauthorized Identity! 🛡️' });
+        }
+
+        res.json(payment);
+    } catch (error) {
+        console.error("Receipt Fetch Error:", error);
+        res.status(500).json({ message: 'Error generating receipt data' });
+    }
+});
+
 module.exports = router;
