@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download } from 'lucide-react';
 import API from '../../api';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // Direct function import karein
 import { useNavigate } from 'react-router-dom';
 
 const StudentFees = () => {
@@ -16,6 +18,72 @@ const StudentFees = () => {
         };
         fetchSummary();
     }, []);
+    const downloadReceipt = async (paymentId) => {
+        try {
+            const { data: p } = await API.get(`/fees/receipt/${paymentId}`);
+            const doc = new jsPDF();
+
+            // --- HEADER DESIGN ---
+            doc.setFillColor(15, 23, 42); // Void Dark Theme Color
+            doc.rect(0, 0, 210, 45, 'F');
+
+            doc.setTextColor(34, 211, 238); // Neon Cyan
+            doc.setFontSize(24);
+            doc.setFont("helvetica", "bold");
+            doc.text(p.schoolId?.schoolName?.toUpperCase() || "EDUFLOWAI INSTITUTION", 105, 20, { align: "center" });
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("OFFICIAL DIGITAL FEE RECEIPT", 105, 30, { align: "center" });
+            doc.text(`${p.schoolId?.address || 'Digital Campus, Cloud Network'}`, 105, 36, { align: "center" });
+
+            // --- RECEIPT METADATA ---
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Receipt ID: #REC-${p._id.slice(-6).toUpperCase()}`, 15, 60);
+            doc.text(`Date: ${new Date(p.date).toLocaleDateString('en-GB')}`, 160, 60);
+
+            // --- DATA TABLE ---
+            autoTable(doc, {
+                startY: 70,
+                head: [['FIELD', 'STUDENT INFORMATION']],
+                body: [
+                    ['STUDENT NAME', p.student?.name || 'N/A'],
+                    ['ENROLLMENT NO', p.student?.enrollmentNo || 'N/A'],
+                    ['GRADE/CLASS', p.student?.grade || 'N/A'],
+                    ['FATHER NAME', p.student?.fatherName || 'N/A'],
+                    ['PAYMENT MODE', p.paymentMode || 'N/A'],
+                    ['BILLING MONTH', `${p.month} ${p.year}`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [15, 23, 42], textColor: [34, 211, 238], fontStyle: 'bold' },
+                styles: { fontSize: 10, cellPadding: 5 },
+            });
+
+            // --- FINAL TOTAL ---
+            const finalY = doc.lastAutoTable.finalY + 15;
+            doc.setDrawColor(34, 211, 238);
+            doc.setLineWidth(1);
+            doc.line(15, finalY, 195, finalY);
+
+            doc.setFontSize(16);
+            doc.text(`TOTAL PAID: INR ${p.amountPaid.toLocaleString()}/-`, 15, finalY + 15);
+
+            // --- FOOTER ---
+            doc.setFontSize(9);
+            doc.setTextColor(150);
+            doc.setFont("helvetica", "italic");
+            doc.text("This is a system-generated secure document. No physical signature is required.", 105, 280, { align: "center" });
+            doc.text("© EduFlowAI Finance Neural Network", 105, 285, { align: "center" });
+
+            doc.save(`Receipt_${p._id.slice(-6)}.pdf`);
+        } catch (err) {
+            console.error("PDF Download Error:", err);
+            alert("Bypass Error: System could not generate PDF. Please check network.");
+        }
+    };
 
     if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
 
@@ -184,7 +252,7 @@ const StudentFees = () => {
                                     {/* --- POINT 6: RECEIPT DOWNLOAD ACTION --- */}
                                     <div className="flex flex-col items-end gap-2 group">
                                         <button
-                                            onClick={() => alert(`Redirecting to Receipt: ${pay.id}`)}
+                                            onClick={() => downloadReceipt(pay.id)} // alert ki jagah ye call karo
                                             className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-black transition-all active:scale-90"
                                         >
                                             <Download size={10} />
