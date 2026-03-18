@@ -62,6 +62,8 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import SuperAdminOnboard from './pages/SuperAdminOnboard';
 import SuperAdminAccount from './pages/SuperAdminAccount';
 
+import StudentCheckout from './pages/student/StudentCheckout'; // Day 109: New Invoice Page
+
 // DAY 76: Theme Integration
 import { useTheme } from './context/ThemeContext';
 // --- NEURAL VISUAL MATRIX COMPONENT ---
@@ -406,6 +408,7 @@ function App() {
           <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
           <Route path="/finance/installments" element={<Installments />} />
           <Route path="/finance/pending" element={<PendingFees />} />
+          <Route path="/student/checkout" element={<StudentCheckout />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />

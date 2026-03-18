@@ -179,7 +179,7 @@ const StudentFees = () => {
                         </div>
 
                         <button
-                            onClick={() => alert("Payment Gateway Integration Coming Soon! (Day 107)")}
+                            onClick={() => navigate('/student/checkout')} // Naye page par navigate karega
                             className="relative z-10 self-center px-6 py-3 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95 shadow-lg shadow-rose-900/20"
                         >
                             Resolve Now

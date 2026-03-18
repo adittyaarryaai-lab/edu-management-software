@@ -188,6 +188,7 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
 
 // --- DAY 102: STUDENT SIDE SUMMARY WITH DYNAMIC PENALTY (Point 4) ---
 // --- DAY 102 & 103: STUDENT SIDE SUMMARY + HISTORY (Point 4 & 5) ---
+// --- DAY 109: ENHANCED SUMMARY WITH ACTUAL STUDENT & SCHOOL DETAILS ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
@@ -195,14 +196,23 @@ router.get('/student-summary', protect, async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        // 1. Fetch Actual Student Details from Database
+        const User = require('../models/User');
+        const student = await User.findById(studentId).populate('schoolId');
+
+        if (!student) return res.status(404).json({ message: 'Student identity not found' });
+
+        // 2. Fetch School & Penalty Settings
         const School = require('../models/School');
         const school = await School.findById(schoolId);
-        const dailyRate = school.penaltySettings?.dailyRate || 0;
-        const isPenaltyActive = school.penaltySettings?.isActive || false;
+        const dailyRate = school?.penaltySettings?.dailyRate || 0;
+        const isPenaltyActive = school?.penaltySettings?.isActive || false;
 
+        // 3. Fetch Installments & Payments
         const installments = await Installment.find({ student: studentId, schoolId });
         const payments = await Fee.find({ student: studentId, schoolId });
 
+        // 4. Penalty & Installment Processing
         let totalPenaltyAccrued = 0;
         const processedInstallments = installments.map(ins => {
             let penalty = 0;
@@ -228,27 +238,26 @@ router.get('/student-summary', protect, async (req, res) => {
             };
         }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
+        // 5. Financial Math
         const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
         
-        const breakdown = {
-            tuition: installments.filter(ins => !ins.type || ins.type.toLowerCase().includes('tuition')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0),
-            transport: installments.filter(ins => ins.type?.toLowerCase().includes('transport')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0),
-            others: installments.filter(ins => ins.type && !ins.type.toLowerCase().includes('tuition') && !ins.type.toLowerCase().includes('transport')).reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0)
-        };
-
-        const nextIns = processedInstallments.filter(ins => ins.status !== 'Paid')[0];
-
-        // --- YAHAN DHAYAN DO: res.json ke andar ye sab bhej rahe hain ---
+        // 6. Final JSON Response with REAL DATA
         res.json({
+            // Student Profile (REAL DB DATA)
+            studentName: student.name,
+            enrollmentNo: student.enrollmentNo || 'N/A',
+            grade: student.grade || 'N/A',
+            fatherName: student.fatherName || 'N/A',
+            address: student.address || 'N/A',
+            schoolName: student.schoolId?.schoolName || "EduFlowAI Institution",
+
+            // Financial Summary
             totalFees,
             totalPaid,
             remainingFees: (totalFees + totalPenaltyAccrued) - totalPaid,
             totalPenalty: totalPenaltyAccrued,
-            breakdown,
             installmentList: processedInstallments,
-            
-            // DAY 103 (Point 5): PAYMENT HISTORY LOGIC ADDED HERE
             paymentHistory: payments.map(p => ({
                 id: p._id,
                 amount: p.amountPaid,
@@ -256,15 +265,15 @@ router.get('/student-summary', protect, async (req, res) => {
                 mode: p.paymentMode || 'N/A',
                 month: p.month,
                 year: p.year
-            })).sort((a, b) => new Date(b.date) - new Date(a.date)), // Latest payments first
+            })).sort((a, b) => new Date(b.date) - new Date(a.date)),
 
-            nextDueDate: nextIns ? nextIns.dueDate : 'No Pending',
+            nextDueDate: processedInstallments.filter(ins => ins.status !== 'Paid')[0]?.dueDate || 'No Pending',
             lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
             status: totalFees === 0 ? 'Not Set' : (totalFees - totalPaid) <= 0 ? 'Fully Paid' : 'Pending'
         });
     } catch (error) {
-        console.error("Day 103 Backend Error:", error);
-        res.status(500).json({ message: 'Error fetching fee summary' });
+        console.error("Day 109 Sync Error:", error);
+        res.status(500).json({ message: 'Neural Sync Failed: Internal Server Error' });
     }
 });
 
