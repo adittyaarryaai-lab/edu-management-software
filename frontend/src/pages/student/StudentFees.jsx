@@ -267,6 +267,17 @@ const StudentFees = () => {
                             Verified Transactions
                         </span>
                     </div>
+                    {/* --- POINT 9: FILTERS FOR PAYMENT HISTORY --- */}
+                    <div className="flex gap-2 p-6 pb-0 overflow-x-auto no-scrollbar">
+                        {['All', '2026', '2025'].map(year => (
+                            <button key={year} className="whitespace-nowrap px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-neon/20 hover:border-neon/40 transition-all active:scale-95">
+                                Year: {year}
+                            </button>
+                        ))}
+                        <button className="ml-auto whitespace-nowrap px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[8px] font-black text-emerald-400 uppercase tracking-widest">
+                            Status: Verified
+                        </button>
+                    </div>
 
                     <div className="p-6 space-y-4">
                         {summary.paymentHistory?.length > 0 ? (
@@ -304,6 +315,38 @@ const StudentFees = () => {
                                 No Transactions Found In Archive
                             </div>
                         )}
+                    </div>
+                    {/* --- POINT 9: QUICK PAY MODAL PLACEHOLDER --- */}
+                    <div className="mt-12 p-8 bg-gradient-to-br from-slate-900 to-black rounded-[3rem] border border-neon/20 shadow-[0_0_50px_-12px_rgba(34,211,238,0.2)] relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+                            <CreditCard size={120} />
+                        </div>
+
+                        <div className="relative z-10 flex items-center justify-between mb-8">
+                            <div>
+                                <h3 className="text-xl font-black italic uppercase tracking-tighter">Digital Checkout</h3>
+                                <p className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em]">Neural Payment Gateway v1.0</p>
+                            </div>
+                            <div className="p-3 bg-neon/10 rounded-2xl border border-neon/20 animate-pulse">
+                                <CreditCard size={24} className="text-neon" />
+                            </div>
+                        </div>
+
+                        <div className="relative z-10 grid grid-cols-3 gap-4 mb-8">
+                            {['UPI', 'CARD', 'BANK'].map(method => (
+                                <div key={method} className="p-6 bg-white/5 border border-white/5 rounded-[2.5rem] flex flex-col items-center gap-3 hover:bg-neon/5 hover:border-neon/20 transition-all cursor-not-allowed group/item">
+                                    <div className="w-2 h-2 rounded-full bg-white/10 group-hover/item:bg-neon transition-colors shadow-[0_0_10px_rgba(34,211,238,0)] group-hover/item:shadow-[0_0_10px_rgba(34,211,238,1)]"></div>
+                                    <p className="text-[10px] font-black tracking-widest text-white/40">{method}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="relative z-10 flex flex-col items-center gap-2">
+                            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4"></div>
+                            <p className="text-[7px] font-black text-neon uppercase tracking-[0.5em] animate-pulse">
+                                Secure 256-bit Encryption Active • Gateways Integration Coming Soon
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
