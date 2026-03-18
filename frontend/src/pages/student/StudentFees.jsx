@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download } from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown } from 'lucide-react';
 import API from '../../api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // Direct function import karein
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const StudentFees = () => {
     const [summary, setSummary] = useState(null);
     const navigate = useNavigate();
+    const [selectedYear, setSelectedYear] = useState('All');
 
     useEffect(() => {
         const fetchSummary = async () => {
@@ -267,52 +268,71 @@ const StudentFees = () => {
                             Verified Transactions
                         </span>
                     </div>
-                    {/* --- POINT 9: FILTERS FOR PAYMENT HISTORY --- */}
-                    <div className="flex gap-2 p-6 pb-0 overflow-x-auto no-scrollbar">
-                        {['All', '2026', '2025'].map(year => (
-                            <button key={year} className="whitespace-nowrap px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[8px] font-black uppercase tracking-widest hover:bg-neon/20 hover:border-neon/40 transition-all active:scale-95">
-                                Year: {year}
-                            </button>
-                        ))}
-                        <button className="ml-auto whitespace-nowrap px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-[8px] font-black text-emerald-400 uppercase tracking-widest">
-                            Status: Verified
-                        </button>
+                    {/* --- DAY 108: DYNAMIC YEAR DROPDOWN FILTER --- */}
+                    <div className="flex items-center gap-4 mb-8 px-2">
+                        <div className="relative group">
+                            <select
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(e.target.value)}
+                                className="appearance-none bg-slate-900 border border-white/10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-neon focus:outline-none focus:border-neon/50 cursor-pointer transition-all hover:bg-white/5"
+                            >
+                                <option value="All">All Years</option>
+                                {/* Unique years nikalne ka logic niche filter mein hai */}
+                                {[...new Set(summary.paymentHistory?.map(p => p.year))].map(yr => (
+                                    <option key={yr} value={yr}>{yr}</option>
+                                ))}
+                            </select>
+                            {/* Chhota down arrow icon (optional) */}
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-30">
+                                <ChevronDown size={12} />
+                            </div>
+                        </div>
+
+                        <div className="ml-auto flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                            <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Live Ledger</span>
+                        </div>
                     </div>
 
+                    {/* --- DAY 108: FILTERED PAYMENT LIST (Step 3) --- */}
                     <div className="p-6 space-y-4">
-                        {summary.paymentHistory?.length > 0 ? (
-                            summary.paymentHistory.map((pay, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-emerald-500/10 rounded-xl">
-                                            <TrendingUp size={16} className="text-emerald-500" />
+                        {summary.paymentHistory
+                            ?.filter(pay => selectedYear === 'All' ? true : pay.year.toString() === selectedYear)
+                            .length > 0 ? (
+                            summary.paymentHistory
+                                ?.filter(pay => selectedYear === 'All' ? true : pay.year.toString() === selectedYear)
+                                .map((pay, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                                <TrendingUp size={16} className="text-emerald-500" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-white italic">₹{pay.amount.toLocaleString()}</p>
+                                                <p className="text-[8px] font-bold text-white/30 uppercase tracking-tighter">
+                                                    {new Date(pay.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {pay.mode}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-black text-white italic">₹{pay.amount.toLocaleString()}</p>
-                                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-tighter">
-                                                {new Date(pay.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {pay.mode}
-                                            </p>
+                                        {/* Receipt Download Action */}
+                                        <div className="flex flex-col items-end gap-2 group">
+                                            <button
+                                                onClick={() => downloadReceipt(pay.id)}
+                                                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-black transition-all active:scale-90"
+                                            >
+                                                <Download size={10} />
+                                                <span className="text-[8px] font-black uppercase tracking-widest">Receipt</span>
+                                            </button>
+                                            <div className="text-right">
+                                                <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
+                                                <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    {/* --- POINT 6: RECEIPT DOWNLOAD ACTION --- */}
-                                    <div className="flex flex-col items-end gap-2 group">
-                                        <button
-                                            onClick={() => downloadReceipt(pay.id)} // alert ki jagah ye call karo
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-black transition-all active:scale-90"
-                                        >
-                                            <Download size={10} />
-                                            <span className="text-[8px] font-black uppercase tracking-widest">Receipt</span>
-                                        </button>
-                                        <div className="text-right">
-                                            <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
-                                            <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
+                                ))
                         ) : (
                             <div className="py-10 text-center opacity-20 text-[10px] font-black uppercase italic tracking-widest">
-                                No Transactions Found In Archive
+                                No Transactions Found for {selectedYear === 'All' ? 'Archive' : selectedYear}
                             </div>
                         )}
                     </div>
