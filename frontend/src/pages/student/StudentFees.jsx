@@ -106,6 +106,12 @@ const StudentFees = () => {
                     <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">
                         {summary.remainingFees < 0 ? 'Advance Deposited' : 'Net Payable Balance'}
                     </p>
+                    {/* Main Card ke andar status badge ke niche ye chhota sa note add karo */}
+                    {summary.totalPenalty > 0 && (
+                        <p className="text-[8px] font-bold text-rose-400/60 mt-3 uppercase tracking-widest">
+                            * Includes ₹{summary.totalPenalty.toLocaleString()} in accumulated late fees
+                        </p>
+                    )}
                     <h2 className={`text-5xl font-black tracking-tighter mb-2 ${summary.remainingFees < 0 ? 'text-emerald-400' : 'text-neon'}`}>
                         ₹{Math.abs(summary.remainingFees).toLocaleString()}
                         {summary.remainingFees < 0 && <span className="text-xs ml-2 opacity-50 underline tracking-widest">ADVANCE</span>}
@@ -151,6 +157,34 @@ const StudentFees = () => {
                         </p>
                     </div>
                 </div>
+                {/* --- POINT 8: PENDING FEES ALERT SECTION --- */}
+                {summary.remainingFees > 0 && (
+                    <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2.5rem] mt-8 flex items-start gap-4 relative overflow-hidden group">
+                        {/* Animated Background Pulse */}
+                        <div className="absolute inset-0 bg-rose-500/5 animate-pulse"></div>
+
+                        <div className="p-3 bg-rose-500/20 rounded-2xl relative z-10">
+                            <AlertCircle size={24} className="text-rose-500" />
+                        </div>
+
+                        <div className="relative z-10 flex-1">
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 mb-1">
+                                Outstanding Dues Detected
+                            </h4>
+                            <p className="text-[11px] font-bold text-white/60 leading-relaxed italic">
+                                Your account shows a pending balance of <span className="text-white">₹{summary.remainingFees.toLocaleString()}</span>.
+                                Please settle the dues before <span className="text-rose-400">{summary.nextDueDate !== 'No Pending' ? new Date(summary.nextDueDate).toLocaleDateString() : 'the next deadline'}</span> to avoid additional late fees.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => alert("Payment Gateway Integration Coming Soon! (Day 107)")}
+                            className="relative z-10 self-center px-6 py-3 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95 shadow-lg shadow-rose-900/20"
+                        >
+                            Resolve Now
+                        </button>
+                    </div>
+                )}
 
                 {/* --- POINT 2: FEES DETAILS SECTION --- */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-8">
