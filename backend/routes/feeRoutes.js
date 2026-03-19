@@ -78,8 +78,8 @@ router.get('/defaulters/list', protect, financeOnly, async (req, res) => {
             status: 'Pending',
             dueDate: { $lt: today }
         })
-        .populate('student', 'name grade phone enrollmentNo')
-        .populate('schoolId', 'schoolName');
+            .populate('student', 'name grade phone enrollmentNo')
+            .populate('schoolId', 'schoolName');
 
         const formattedOverdue = overdue.map(ins => {
             let totalPenalty = 0;
@@ -142,7 +142,7 @@ router.post('/settings/penalty', protect, async (req, res) => {
 router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
-        
+
         // 1. Fetch History (Asli payments ki list)
         // 'populate' student detail mangwayega
         const feeHistory = await Fee.find({ schoolId })
@@ -155,18 +155,18 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
         // 3. Class-wise Math (Aggregation)
         const classWise = await Fee.aggregate([
             { $match: { schoolId: req.user.schoolId } },
-            { 
-                $lookup: { 
+            {
+                $lookup: {
                     from: 'users', // Compass mein 'users' collection hai
-                    localField: 'student', 
-                    foreignField: '_id', 
-                    as: 'studentInfo' 
-                } 
+                    localField: 'student',
+                    foreignField: '_id',
+                    as: 'studentInfo'
+                }
             },
             { $unwind: { path: '$studentInfo', preserveNullAndEmptyArrays: true } },
-            { 
-                $group: { 
-                    _id: '$studentInfo.grade', 
+            {
+                $group: {
+                    _id: '$studentInfo.grade',
                     total: { $sum: '$amountPaid' },
                     count: { $sum: 1 }
                 }
@@ -241,7 +241,7 @@ router.get('/student-summary', protect, async (req, res) => {
         // 5. Financial Math
         const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
-        
+
         // 6. Final JSON Response with REAL DATA & PAYMENT SETTINGS
         res.json({
             // Student Profile
@@ -290,7 +290,7 @@ router.get('/receipt/:paymentId', protect, async (req, res) => {
         const payment = await Fee.findById(req.params.paymentId)
             .populate({
                 path: 'student',
-                select: 'name enrollmentNo grade fatherName phone address' 
+                select: 'name enrollmentNo grade fatherName phone address'
             })
             .populate({
                 path: 'schoolId',
@@ -310,6 +310,161 @@ router.get('/receipt/:paymentId', protect, async (req, res) => {
     } catch (error) {
         console.error("Receipt Fetch Error:", error);
         res.status(500).json({ message: 'Error generating receipt data' });
+    }
+});
+
+// --- DAY 111: FINALIZE ONLINE PAYMENT (Point 9) ---
+router.post('/finalize-online-payment', protect, async (req, res) => {
+    try {
+        const { amount, method, month, year } = req.body;
+        const studentId = req.user._id;
+        const schoolId = req.user.schoolId;
+
+        // 1. Create Real Fee Record
+        const newFee = await Fee.create({
+            schoolId,
+            student: studentId,
+            amountPaid: amount,
+            month: month || new Date().toLocaleString('default', { month: 'long' }),
+            year: year || new Date().getFullYear(),
+            paymentMode: method || 'UPI',
+            date: new Date()
+        });
+
+        // 2. Update Installment Status (Sabse purani pending installment ko 'Paid' karo)
+        // Logic: Jitne paise aaye hain uske hisab se installments update karo
+        const pendingInstallment = await Installment.findOne({
+            student: studentId,
+            schoolId,
+            status: { $in: ['Pending', 'Overdue'] }
+        }).sort({ dueDate: 1 });
+
+        if (pendingInstallment) {
+            pendingInstallment.status = 'Paid';
+            pendingInstallment.paymentId = newFee._id;
+            await pendingInstallment.save();
+        }
+
+        res.status(201).json({
+            message: 'Neural Payment Captured Successfully! ⚡',
+            feeId: newFee._id
+        });
+    } catch (error) {
+        console.error("Payment Finalize Error:", error);
+        res.status(500).json({ message: 'Payment Synchronization Failed' });
+    }
+});
+
+// --- DAY 111: AUTO-DETECTION STATUS CHECK (Point 9) ---
+// Ye route check karega ki pichle 1 minute mein is bache ki koi payment aayi hai?
+router.get('/check-payment-status', protect, async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        // Sirf pichle 60 seconds ki history check karenge taaki purani payments redirect na karein
+        const oneMinuteAgo = new Date(Date.now() - 60000);
+
+        const recentPayment = await Fee.findOne({
+            student: studentId,
+            date: { $gte: oneMinuteAgo }
+        }).sort({ date: -1 });
+
+        if (recentPayment) {
+            return res.json({
+                success: true,
+                message: "Neural Signal Captured: Payment Detected! ⚡"
+            });
+        }
+
+        res.json({ success: false });
+    } catch (error) {
+        console.error("Polling Error:", error);
+        res.status(500).json({ success: false });
+    }
+});
+
+// Ensure this route in feesRoutes.js looks like this:
+// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR ---
+// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR (CRITICAL FIX) ---
+router.post('/capture-online-payment', protect, async (req, res) => {
+    try {
+        const { amount, method } = req.body;
+        const studentId = req.user._id;
+        const schoolId = req.user.schoolId;
+
+        // Validation: Agar amount 0 ya null hai toh process mat karo
+        const finalAmount = Number(amount) || 0;
+        if (finalAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid Amount" });
+        }
+
+        console.log(`[PAYMENT] Attempting capture for Student: ${studentId}, Amount: ${finalAmount}`);
+
+        // 1. Create Fee Record
+        // Make sure Fee model is imported at the top of this file
+        const newFee = await Fee.create({
+            schoolId: schoolId,
+            student: studentId,
+            amountPaid: finalAmount,
+            month: new Date().toLocaleString('default', { month: 'long' }),
+            year: new Date().getFullYear(),
+            paymentMode: 'Online', // 'method' ki jagah direct 'Online' likh do validation bypass karne ke liye
+            date: new Date()
+        });
+
+        // 2. Update Installments Status
+        // Sabhi pending/overdue installments ko 'Paid' mark karo
+        const updateResult = await Installment.updateMany(
+            {
+                student: studentId,
+                schoolId: schoolId,
+                status: { $ne: 'Paid' }
+            },
+            {
+                $set: {
+                    status: 'Paid',
+                    paymentId: newFee._id
+                }
+            }
+        );
+
+        console.log(`[PAYMENT] Success! Fee ID: ${newFee._id}, Updated Docs: ${updateResult.modifiedCount}`);
+
+        res.status(201).json({
+            success: true,
+            message: 'Neural Capture Successful! 🛡️'
+        });
+
+    } catch (error) {
+        // Console mein error dekho: Yahan se pata chalega exact galti kya hai
+        console.error("CRITICAL_BACKEND_ERROR:", error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message
+        });
+    }
+});
+// --- DAY 111: REAL-TIME PAYMENT CHECKER ---
+router.get('/verify-online-status', protect, async (req, res) => {
+    try {
+        const studentId = req.user._id;
+        // Sirf pichle 2 minute ki transactions check karenge
+        const twoMinutesAgo = new Date(Date.now() - 120000);
+
+        const latestPayment = await Fee.findOne({
+            student: studentId,
+            date: { $gte: twoMinutesAgo }
+        }).sort({ date: -1 });
+
+        if (latestPayment) {
+            return res.json({
+                success: true,
+                message: "Neural Signal: Payment Received! ⚡"
+            });
+        }
+        res.json({ success: false });
+    } catch (error) {
+        res.status(500).json({ success: false });
     }
 });
 
