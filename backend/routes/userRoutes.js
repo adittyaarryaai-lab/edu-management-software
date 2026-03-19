@@ -4,6 +4,7 @@ const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const Fee = require('../models/Fee'); 
 const Installment = require('../models/Installment');
+
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     const {
         name, email, password, subjects,
@@ -188,12 +189,11 @@ router.get('/grades/all', protect, async (req, res) => {
     }
 });
 
-// --- DAY 97: DASHBOARD STATS + AUTO-SCHOOL INFO ---
+// --- DAY 112: ENHANCED FINANCE STATS WITH ONLINE NOTIFICATION & TIME ---
 router.get('/finance/stats', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
         
-        // AUTO-FETCH SCHOOL DETAILS: Asli naam aur address yahan se jayega
         const School = require('../models/School');
         const schoolDetails = await School.findById(schoolId).select('schoolName address');
 
@@ -201,38 +201,51 @@ router.get('/finance/stats', protect, async (req, res) => {
         today.setHours(0, 0, 0, 0);
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
+        // 1. Fetch Today's Payments
         const todayFees = await Fee.find({ schoolId, date: { $gte: today } });
         const collectedToday = todayFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
+        // 2. Fetch Monthly Payments
         const monthFees = await Fee.find({ schoolId, date: { $gte: startOfMonth } });
         const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        const recentPayments = await Fee.find({ schoolId })
-            .sort({ createdAt: -1 })
-            .limit(5)
-            .populate('student', 'name grade');
+        // 3. Separate Online Payments Today (For Highlighting)
+        const onlineToday = todayFees
+            .filter(f => ['Online', 'PhonePe', 'Google Pay', 'Paytm', 'UPI'].includes(f.paymentMode))
+            .reduce((sum, f) => sum + f.amountPaid, 0);
 
+        // 4. Recent Payments with Real Time
+        const recentPayments = await Fee.find({ schoolId })
+            .sort({ date: -1 }) // Sort by real date instead of createdAt
+            .limit(10) // 10 dikhao taaki notification miss na ho
+            .populate('student', 'name grade enrollmentNo');
+
+        // 5. Pending Stats
         const pendingInstallments = await Installment.find({ schoolId, status: 'Pending' });
         const totalPendingAmount = pendingInstallments.reduce((sum, ins) => sum + (ins.amountDue || ins.amount || 0), 0);
         const pendingStudentsCount = [...new Set(pendingInstallments.map(ins => ins.student.toString()))].length;
 
         res.json({
-            // YE HAI AUTO GENERATE DATA
             schoolName: schoolDetails?.schoolName || "EduFlowAI School",
             schoolAddress: schoolDetails?.address || "Main Campus, India",
             collectedToday,
             collectedMonth,
+            onlineToday, // <--- Naya field Day 112 ke liye
             totalPending: totalPendingAmount,
             pendingStudentsCount,
             recentPayments: recentPayments.map(p => ({
                 _id: p._id,
                 studentName: p.student?.name || 'Unknown',
+                enrollmentNo: p.student?.enrollmentNo || 'N/A', // Notification ke liye
                 grade: p.student?.grade || 'N/A',
                 amount: p.amountPaid,
-                date: p.date.toLocaleDateString()
+                paymentMode: p.paymentMode, // <--- Mode check karne ke liye
+                date: p.date.toLocaleDateString(),
+                time: p.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) // <--- Time zaroori hai
             }))
         });
     } catch (error) {
+        console.error("Finance Stats Error:", error);
         res.status(500).json({ message: 'Stats Sync Error' });
     }
 });
