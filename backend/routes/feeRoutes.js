@@ -242,15 +242,21 @@ router.get('/student-summary', protect, async (req, res) => {
         const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
         
-        // 6. Final JSON Response with REAL DATA
+        // 6. Final JSON Response with REAL DATA & PAYMENT SETTINGS
         res.json({
-            // Student Profile (REAL DB DATA)
+            // Student Profile
             studentName: student.name,
             enrollmentNo: student.enrollmentNo || 'N/A',
             grade: student.grade || 'N/A',
             fatherName: student.fatherName || 'N/A',
             address: student.address || 'N/A',
             schoolName: student.schoolId?.schoolName || "EduFlowAI Institution",
+
+            // PAYMENT SETTINGS (Ye naya part hai Day 110 ke liye)
+            paymentSettings: {
+                upiId: school?.paymentSettings?.upiId || "",
+                merchantName: school?.paymentSettings?.merchantName || student.schoolId?.schoolName
+            },
 
             // Financial Summary
             totalFees,

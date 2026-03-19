@@ -63,6 +63,7 @@ import SuperAdminOnboard from './pages/SuperAdminOnboard';
 import SuperAdminAccount from './pages/SuperAdminAccount';
 
 import StudentCheckout from './pages/student/StudentCheckout'; // Day 109: New Invoice Page
+import PaymentMethods from './pages/student/PaymentMethods'; // Day 110: New Payment Methods Page
 
 // DAY 76: Theme Integration
 import { useTheme } from './context/ThemeContext';
@@ -409,6 +410,7 @@ function App() {
           <Route path="/finance/installments" element={<Installments />} />
           <Route path="/finance/pending" element={<PendingFees />} />
           <Route path="/student/checkout" element={<StudentCheckout />} />
+          <Route path="/student/payment-methods" element={<PaymentMethods />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />
