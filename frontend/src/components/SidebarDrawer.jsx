@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard} from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SidebarDrawer = ({ isOpen, onClose, user }) => {
@@ -25,6 +25,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         // --- DAY 98: FINANCE TEACHER SIDEBAR (POINT 8) ---
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/finance/dashboard' },
+        { icon: <Layers size={20} />, label: 'Fee Configuration', color: 'text-cyan-400', path: '/finance/fee-setup' },
         { icon: <Users size={20} />, label: 'Students Fees', color: 'text-neon', path: '/finance/fees' },
         { icon: <PlusCircle size={20} />, label: 'Add Payment', color: 'text-cyan-400', path: '/finance/add-payment' },
         { icon: <FileText size={20} />, label: 'Receipts', color: 'text-neon', path: '/finance/receipts' },

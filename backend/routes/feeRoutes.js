@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, financeOnly } = require('../middleware/authMiddleware');
 const Installment = require('../models/Installment');
 const Fee = require('../models/Fee');
+const FeeStructure = require('../models/FeeStructure');
 
 // --- DAY 93: FETCH ALL INSTALLMENTS (Point 5) ---
 router.get('/installments/list', protect, financeOnly, async (req, res) => {
@@ -465,6 +466,64 @@ router.get('/verify-online-status', protect, async (req, res) => {
         res.json({ success: false });
     } catch (error) {
         res.status(500).json({ success: false });
+    }
+});
+
+/**
+ * @DESC   Save or Update Master Fee Structure for a specific class
+ * @ROUTE  POST /api/fees/structure/update
+ * @ACCESS Private (Finance Only)
+ */
+router.post('/structure/update', protect, financeOnly, async (req, res) => {
+    try {
+        const { className, fees } = req.body;
+        const schoolId = req.user.schoolId;
+
+        if (!className) {
+            return res.status(400).json({ message: 'Class Selection Required!' });
+        }
+
+        // findOneAndUpdate ka use karke hum Check + Create/Update ek saath kar rahe hain
+        const structure = await FeeStructure.findOneAndUpdate(
+            { schoolId, className },
+            { 
+                fees, 
+                updatedBy: req.user._id 
+            },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+
+        res.json({ 
+            message: `Neural Link Established: ${className} Configuration Locked! ⚡`, 
+            structure 
+        });
+    } catch (error) {
+        console.error("STRUCTURE_UPDATE_ERROR:", error);
+        res.status(500).json({ message: 'Internal Server Error: Could not sync structure' });
+    }
+});
+
+/**
+ * @DESC   Fetch Fee Structure for a specific class to populate the form
+ * @ROUTE  GET /api/fees/structure/:className
+ * @ACCESS Private (Finance Only)
+ */
+router.get('/structure/:className', protect, financeOnly, async (req, res) => {
+    try {
+        const { className } = req.params;
+        const schoolId = req.user.schoolId;
+
+        const structure = await FeeStructure.findOne({ schoolId, className });
+        
+        if (!structure) {
+            // Agar data nahi hai, toh frontend ko signal bhejo taaki wo khali form dikhaye
+            return res.json({ notFound: true, message: "No blueprint found for this sector." });
+        }
+
+        res.json(structure);
+    } catch (error) {
+        console.error("STRUCTURE_FETCH_ERROR:", error);
+        res.status(500).json({ message: 'Error fetching class blueprint' });
     }
 });
 

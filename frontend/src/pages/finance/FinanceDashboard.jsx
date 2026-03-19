@@ -63,6 +63,7 @@ const FinanceDashboard = () => {
         { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/reports' },
         { label: "Installment Tracker", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20", path: '/finance/installments' },
         { label: "Pending Student", value: stats.pendingStudentsCount, icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/pending' },
+        { label: "Fees Details", value: "Setup", icon: <Layers className="text-neon" />, color: "border-neon/40 bg-neon/5", path: '/finance/fee-setup' },
     ];
 
     return (
