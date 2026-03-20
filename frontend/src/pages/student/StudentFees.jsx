@@ -101,30 +101,39 @@ const StudentFees = () => {
             </div>
 
             <div className="space-y-6">
-                {/* --- MAIN BALANCE CARD --- */}
+                {/* --- MAIN BALANCE CARD (Updated Day 115) --- */}
                 <div className="bg-slate-900/60 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden shadow-2xl">
                     <div className="absolute -top-6 -right-6 opacity-5 rotate-12"><CreditCard size={150} /></div>
+
                     <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">
-                        {summary.remainingFees < 0 ? 'Advance Deposited' : 'Net Payable Balance'}
+                        {summary.remainingFees > 0 ? `${summary.currentMonth} Dues` : 'Account Status'}
                     </p>
-                    {/* Main Card ke andar status badge ke niche ye chhota sa note add karo */}
-                    {summary.totalPenalty > 0 && (
-                        <p className="text-[8px] font-bold text-rose-400/60 mt-3 uppercase tracking-widest">
-                            * Includes ₹{summary.totalPenalty.toLocaleString()} in accumulated late fees
-                        </p>
-                    )}
-                    <h2 className={`text-5xl font-black tracking-tighter mb-2 ${summary.remainingFees < 0 ? 'text-emerald-400' : 'text-neon'}`}>
-                        ₹{Math.abs(summary.remainingFees).toLocaleString()}
-                        {summary.remainingFees < 0 && <span className="text-xs ml-2 opacity-50 underline tracking-widest">ADVANCE</span>}
+
+                    <h2 className={`text-5xl font-black tracking-tighter mb-4 ${summary.remainingFees > 0 ? 'text-rose-500' : 'text-emerald-400'}`}>
+                        ₹{(summary?.remainingFees || 0).toLocaleString()}
+                        {summary.remainingFees <= 0 && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
                     </h2>
+
+                    {/* Naya Advance Badge agar bache ke paise extra hain */}
+                    {summary.advanceBalance > 0 && (
+                        <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
+                            <CheckCircle size={14} className="text-emerald-400" />
+                            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">
+                                Advance Amount: ₹{summary.advanceBalance.toLocaleString()} Secured
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Penalty Text agar fine laga hai */}
                     {summary.totalPenalty > 0 && (
                         <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-4 flex items-center gap-1">
-                            <AlertCircle size={10} /> Includes ₹{summary.totalPenalty.toLocaleString()} Late Fee Penalty
+                            <AlertCircle size={10} /> Includes ₹{summary.totalPenalty.toLocaleString()} Fine
                         </p>
                     )}
-                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${summary.status === 'Fully Paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/30'}`}>
-                        {summary.status === 'Fully Paid' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
-                        {summary.remainingFees < 0 ? 'Advance Paid' : summary.status}
+
+                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${summary.status === 'Clear' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/30'}`}>
+                        {summary.status === 'Clear' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                        {summary.status === 'Clear' ? 'Paid: System Synced' : 'Payment Required'}
                     </div>
                 </div>
 
@@ -133,12 +142,12 @@ const StudentFees = () => {
                     <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
                         <TrendingUp size={20} className="text-emerald-400 mb-2 opacity-40" />
                         <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Total Paid</p>
-                        <p className="text-xl font-black text-white italic">₹{summary.totalPaid.toLocaleString()}</p>
+                        <p className="text-xl font-black text-white italic">₹{(summary?.totalPaid || 0).toLocaleString()}</p>
                     </div>
                     <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
                         <Layers size={20} className="text-white/20 mb-2 opacity-40" />
                         <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Fee Structure</p>
-                        <p className="text-xl font-black text-white/40 italic">₹{summary.totalFees.toLocaleString()}</p>
+                        <p className="text-xl font-black text-white/40 italic">₹{(summary?.totalFees || 0).toLocaleString()}</p>
                     </div>
                 </div>
 
@@ -147,69 +156,70 @@ const StudentFees = () => {
                     <div className="absolute left-0 top-0 h-full w-1 bg-neon/30"></div>
                     <div>
                         <p className="text-[8px] font-black text-white/20 uppercase mb-1">Next Deadline</p>
-                        <p className="text-xs font-black text-rose-400">
-                            {summary.nextDueDate !== 'No Pending' ? new Date(summary.nextDueDate).toLocaleDateString() : 'CLEAR'}
+                        <p className="text-xs font-black text-rose-400 uppercase">
+                            {summary?.remainingFees > 0 ? `01/${new Date().getMonth() + 2}/${new Date().getFullYear()}` : 'CLEAR'}
                         </p>
                     </div>
                     <div className="text-right">
                         <p className="text-[8px] font-black text-white/20 uppercase mb-1">Last Activity</p>
                         <p className="text-xs font-black text-emerald-400">
-                            {summary.lastPaymentDate !== 'N/A' ? new Date(summary.lastPaymentDate).toLocaleDateString() : 'NONE'}
+                            {summary?.paymentHistory?.length > 0
+                                ? new Date(summary.paymentHistory[0].date).toLocaleDateString()
+                                : 'NO ACTIVITY'}
                         </p>
                     </div>
                 </div>
                 {/* --- POINT 8: PENDING FEES ALERT SECTION --- */}
                 {summary.remainingFees > 0 && (
-                    <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2.5rem] mt-8 flex items-start gap-4 relative overflow-hidden group">
-                        {/* Animated Background Pulse */}
-                        <div className="absolute inset-0 bg-rose-500/5 animate-pulse"></div>
-
-                        <div className="p-3 bg-rose-500/20 rounded-2xl relative z-10">
-                            <AlertCircle size={24} className="text-rose-500" />
+                    <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2.5rem] mt-8 flex flex-col gap-4 relative overflow-hidden group">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-rose-500/20 rounded-2xl relative z-10">
+                                <AlertCircle size={24} className="text-rose-500" />
+                            </div>
+                            <div className="relative z-10 flex-1">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 mb-1">
+                                    Balance Adjustment Required
+                                </h4>
+                                <p className="text-[11px] font-bold text-white/60 leading-relaxed italic">
+                                    Account mismatch detected for <span className="text-white">{summary.currentMonth}</span>.
+                                    Pending: <span className="text-white font-black">₹{(summary?.remainingFees || 0).toLocaleString()}</span>.
+                                </p>
+                            </div>
                         </div>
-
-                        <div className="relative z-10 flex-1">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 mb-1">
-                                Outstanding Dues Detected
-                            </h4>
-                            <p className="text-[11px] font-bold text-white/60 leading-relaxed italic">
-                                Your account shows a pending balance of <span className="text-white">₹{summary.remainingFees.toLocaleString()}</span>.
-                                Please settle the dues before <span className="text-rose-400">{summary.nextDueDate !== 'No Pending' ? new Date(summary.nextDueDate).toLocaleDateString() : 'the next deadline'}</span> to avoid additional late fees.
-                            </p>
-                        </div>
-
                         <button
-                            onClick={() => navigate('/student/checkout')} // Naye page par navigate karega
-                            className="relative z-10 self-center px-6 py-3 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95 shadow-lg shadow-rose-900/20"
+                            onClick={() => navigate('/student/checkout')}
+                            className="w-full py-4 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95"
                         >
-                            Resolve Now
+                            Resolve Balance ⚡
                         </button>
                     </div>
                 )}
 
                 {/* --- POINT 2: FEES DETAILS SECTION --- */}
-                <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-8">
-                    <div className="p-6 border-b border-white/5 bg-white/5 flex items-center gap-3">
-                        <Layers size={14} className="text-neon" />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Fee Structure Details</h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Tuition Fees</span>
-                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.tuition || 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Transport Fees</span>
-                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.transport || 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">Other Charges</span>
-                            <span className="text-sm font-black italic text-white">₹{(summary.breakdown?.others || 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-2">
-                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Total Fees</span>
-                            <span className="text-lg font-black text-neon">₹{summary.totalFees.toLocaleString()}</span>
-                        </div>
+                <div className="p-6 space-y-4">
+                    {summary.feeStructure && Object.entries(summary.feeStructure).map(([key, amount], index) => {
+                        // --- LOGIC: Check One-time vs Monthly ---
+                        const isOneTime = ['admissionFees', 'registrationFees', 'securityFees'].includes(key);
+
+                        return (
+                            <div key={index} className="flex justify-between items-center border-b border-white/5 pb-3">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">
+                                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                                    </span>
+                                    {/* Badge: One Time vs Per Month */}
+                                    <span className={`text-[6px] font-black uppercase tracking-widest mt-0.5 ${isOneTime ? 'text-amber-500/60' : 'text-cyan-500/60'}`}>
+                                        {isOneTime ? '• One Time' : '• Per Month'}
+                                    </span>
+                                </div>
+                                <span className="text-sm font-black italic text-white">₹{amount.toLocaleString()}</span>
+                            </div>
+                        );
+                    })}
+
+                    <div className="flex justify-between items-center pt-2">
+                        <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Monthly Fees</span>
+                        <span className="text-lg font-black text-neon">₹{(summary?.monthlyFee || 0).toLocaleString()}</span>
                     </div>
                 </div>
 

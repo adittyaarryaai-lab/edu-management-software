@@ -187,100 +187,85 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
-// --- DAY 102: STUDENT SIDE SUMMARY WITH DYNAMIC PENALTY (Point 4) ---
-// --- DAY 102 & 103: STUDENT SIDE SUMMARY + HISTORY (Point 4 & 5) ---
-// --- DAY 109: ENHANCED SUMMARY WITH ACTUAL STUDENT & SCHOOL DETAILS ---
+// --- DAY 115: FINAL SIMPLIFIED BILLING LOGIC (CURRENT MONTH ONLY) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const currentMonthName = today.toLocaleString('default', { month: 'long' });
 
-        // 1. Fetch Actual Student Details from Database
         const User = require('../models/User');
         const student = await User.findById(studentId).populate('schoolId');
+        if (!student) return res.status(404).json({ message: 'Identity not found' });
 
-        if (!student) return res.status(404).json({ message: 'Student identity not found' });
+        // Section Ignore Logic
+        const rawGrade = student.grade || "";
+        const numericPart = rawGrade.match(/\d+/); 
+        const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
 
-        // 2. Fetch School & Penalty Settings
-        const School = require('../models/School');
-        const school = await School.findById(schoolId);
-        const dailyRate = school?.penaltySettings?.dailyRate || 0;
-        const isPenaltyActive = school?.penaltySettings?.isActive || false;
+        const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
+        
+        let monthlyBase = 0;
+        let oneTimeTotal = 0;
+        let structureDetails = {};
 
-        // 3. Fetch Installments & Payments
-        const installments = await Installment.find({ student: studentId, schoolId });
+        if (structure && structure.fees) {
+            Object.keys(structure.fees).forEach(key => {
+                const feeItem = structure.fees[key];
+                if (feeItem && !feeItem.isNone) {
+                    const amount = Number(feeItem.amount) || 0;
+                    structureDetails[key] = amount;
+                    // One-time fees check
+                    if (['admissionFees', 'registrationFees', 'securityFees'].includes(key)) {
+                        oneTimeTotal += amount;
+                    } else {
+                        monthlyBase += amount;
+                    }
+                }
+            });
+        }
+
         const payments = await Fee.find({ student: studentId, schoolId });
-
-        // 4. Penalty & Installment Processing
-        let totalPenaltyAccrued = 0;
-        const processedInstallments = installments.map(ins => {
-            let penalty = 0;
-            const dueDate = new Date(ins.dueDate);
-            dueDate.setHours(0, 0, 0, 0);
-
-            if (ins.status === 'Pending' && dueDate < today && isPenaltyActive) {
-                const diffTime = Math.abs(today - dueDate);
-                const daysLate = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                penalty = daysLate * dailyRate;
-                totalPenaltyAccrued += penalty;
-            }
-
-            return {
-                id: ins._id,
-                number: ins.installmentNumber || 0,
-                amount: Number(ins.amountDue) || 0,
-                penalty: penalty,
-                totalWithPenalty: (Number(ins.amountDue) || 0) + penalty,
-                dueDate: ins.dueDate,
-                status: (ins.status === 'Pending' && dueDate < today) ? 'Overdue' : ins.status,
-                type: ins.type || 'Tuition Fee'
-            };
-        }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
-        // 5. Financial Math
-        const totalFees = installments.reduce((sum, ins) => sum + (Number(ins.amountDue) || 0), 0);
         const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // 6. Final JSON Response with REAL DATA & PAYMENT SETTINGS
+        // --- NEW LOGIC: ONLY CURRENT MONTH + ONE TIME ---
+        // Hum purane mahino ko multiply NAHI karenge. 
+        // Bache ko sirf ye dikhega: (Admission + Registration) + (Current Month Tuition)
+        const totalExpectedForNow = oneTimeTotal + monthlyBase;
+        
+        let remainingFees = 0;
+        let advanceBalance = 0;
+
+        if (totalPaid >= totalExpectedForNow) {
+            // Agar paid zyada hai toh advance dikhao
+            advanceBalance = totalPaid - totalExpectedForNow;
+            remainingFees = 0;
+        } else {
+            // Agar paid kam hai toh dues dikhao
+            remainingFees = totalExpectedForNow - totalPaid;
+            advanceBalance = 0;
+        }
+
         res.json({
-            // Student Profile
             studentName: student.name,
-            enrollmentNo: student.enrollmentNo || 'N/A',
-            grade: student.grade || 'N/A',
-            fatherName: student.fatherName || 'N/A',
-            address: student.address || 'N/A',
-            schoolName: student.schoolId?.schoolName || "EduFlowAI Institution",
-
-            // PAYMENT SETTINGS (Ye naya part hai Day 110 ke liye)
-            paymentSettings: {
-                upiId: school?.paymentSettings?.upiId || "",
-                merchantName: school?.paymentSettings?.merchantName || student.schoolId?.schoolName
-            },
-
-            // Financial Summary
-            totalFees,
+            enrollmentNo: student.enrollmentNo,
+            grade: student.grade,
+            schoolName: student.schoolId?.schoolName,
+            currentMonth: currentMonthName,
+            monthlyFee: monthlyBase,
             totalPaid,
-            remainingFees: (totalFees + totalPenaltyAccrued) - totalPaid,
-            totalPenalty: totalPenaltyAccrued,
-            installmentList: processedInstallments,
+            advanceBalance,
+            remainingFees,
+            totalFees: totalExpectedForNow, // Screen par total expected amount
+            status: remainingFees <= 0 ? 'Clear' : 'Pending',
+            feeStructure: structureDetails,
             paymentHistory: payments.map(p => ({
-                id: p._id,
-                amount: p.amountPaid,
-                date: p.date,
-                mode: p.paymentMode || 'N/A',
-                month: p.month,
-                year: p.year
-            })).sort((a, b) => new Date(b.date) - new Date(a.date)),
-
-            nextDueDate: processedInstallments.filter(ins => ins.status !== 'Paid')[0]?.dueDate || 'No Pending',
-            lastPaymentDate: payments.length > 0 ? payments[0].date : 'N/A',
-            status: totalFees === 0 ? 'Not Set' : (totalFees - totalPaid) <= 0 ? 'Fully Paid' : 'Pending'
+                id: p._id, amount: p.amountPaid, date: p.date, mode: p.paymentMode, month: p.month, year: p.year
+            })).sort((a,b) => new Date(b.date) - new Date(a.date))
         });
     } catch (error) {
-        console.error("Day 109 Sync Error:", error);
-        res.status(500).json({ message: 'Neural Sync Failed: Internal Server Error' });
+        res.status(500).json({ message: 'Neural Sync Failed' });
     }
 });
 
