@@ -527,4 +527,16 @@ router.get('/structure/:className', protect, financeOnly, async (req, res) => {
     }
 });
 
+// feesRoutes.js mein ye naya route add karo
+router.get('/structure/list/all', protect, financeOnly, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        // Sirf className aur updatedAt uthayenge list ke liye
+        const list = await FeeStructure.find({ schoolId }).select('className updatedAt').sort({ className: 1 });
+        res.json(list);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching list' });
+    }
+});
+
 module.exports = router;
