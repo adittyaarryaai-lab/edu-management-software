@@ -32,8 +32,11 @@ const FeeSetup = () => {
         { key: 'miscellaneousCharges', label: '18. Misc Charges', desc: 'Extra trips, etc.' }
     ];
 
+    // Update initial state logic
     const initialFeesState = feeCategories.reduce((acc, cat) => {
-        acc[cat.key] = { amount: 0, isNone: false };
+        // Default logic: Tuition/Library/Lab/Activity/SmartClass ko monthly baaki ko one-time
+        const isDefaultMonthly = ['tuitionFees', 'libraryFees', 'laboratoryFees', 'activityFees', 'smartClassFees'].includes(cat.key);
+        acc[cat.key] = { amount: 0, isNone: false, billingCycle: isDefaultMonthly ? 'monthly' : 'one-time' };
         return acc;
     }, {});
 
@@ -75,7 +78,7 @@ const FeeSetup = () => {
             setSuccessMsg(`${selectedClass} Structure Locked! ⚡`);
             setSelectedClass('');
             setFeeData(initialFeesState);
-            fetchConfiguredList(); 
+            fetchConfiguredList();
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err) { alert("Sync Failed."); } finally { setLoading(false); }
     };
@@ -97,7 +100,7 @@ const FeeSetup = () => {
                         <div key={idx} className="bg-slate-900/40 p-5 rounded-[2rem] border border-white/5 flex justify-between items-center group hover:border-neon/30 transition-all">
                             {/* View Action (List Click) */}
                             <div className="flex items-center gap-4 cursor-pointer flex-1" onClick={() => { setSelectedClass(item.className); setIsEditMode(false); }}>
-                                <div className="bg-neon/10 p-3 rounded-xl text-neon"><Layers size={16}/></div>
+                                <div className="bg-neon/10 p-3 rounded-xl text-neon"><Layers size={16} /></div>
                                 <div>
                                     <p className="text-xs font-black uppercase italic text-white group-hover:text-neon transition-colors">{item.className}</p>
                                     <p className="text-[7px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
@@ -119,14 +122,14 @@ const FeeSetup = () => {
             {/* Class Selector Dropdown */}
             <div className="bg-slate-900/60 p-6 rounded-[2.5rem] border border-white/5 mb-8 shadow-2xl">
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Initialize New Class Structure</p>
-                <select 
+                <select
                     value={selectedClass}
                     onChange={(e) => { setSelectedClass(e.target.value); setIsEditMode(true); }}
                     className="w-full bg-void border border-neon/20 p-5 rounded-3xl text-sm font-black text-neon uppercase outline-none focus:border-neon transition-all appearance-none cursor-pointer"
                 >
                     <option value="">-- CHOOSE CLASS --</option>
                     {[
-                        'Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 
+                        'Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5',
                         'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10',
                         'Class 11 (Science)', 'Class 11 (Commerce)', 'Class 11 (Arts)',
                         'Class 12 (Science)', 'Class 12 (Commerce)', 'Class 12 (Arts)'
@@ -146,7 +149,7 @@ const FeeSetup = () => {
                                 </p>
                             </div>
                         </div>
-                        <button onClick={() => { setSelectedClass(''); setFeeData(initialFeesState); }} className="p-2 text-white/20 hover:text-rose-500 transition-colors"><Trash2 size={20}/></button>
+                        <button onClick={() => { setSelectedClass(''); setFeeData(initialFeesState); }} className="p-2 text-white/20 hover:text-rose-500 transition-colors"><Trash2 size={20} /></button>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
@@ -157,27 +160,38 @@ const FeeSetup = () => {
                                         <h4 className="text-xs font-black uppercase tracking-tight text-white/80 italic">{cat.label}</h4>
                                         <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5 italic">{cat.desc}</p>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-void/50 p-2 rounded-xl border border-white/5">
-                                        <input 
-                                            type="checkbox" 
+                                    <div className="flex items-center gap-3 bg-void/50 p-2 rounded-xl border border-white/5">
+                                    <select
+                                        disabled={!isEditMode || feeData[cat.key].isNone}
+                                        value={feeData[cat.key].billingCycle || 'one-time'}
+                                        onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], billingCycle: e.target.value } })}
+                                        className="bg-transparent text-[8px] font-black uppercase text-neon outline-none cursor-pointer border-r border-white/10 pr-2"
+                                    >
+                                        <option value="one-time">One Time</option>
+                                        <option value="monthly">Per Month</option>
+                                    </select>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
                                             disabled={!isEditMode}
                                             checked={feeData[cat.key].isNone}
-                                            onChange={(e) => setFeeData({...feeData, [cat.key]: {...feeData[cat.key], isNone: e.target.checked, amount: e.target.checked ? 0 : feeData[cat.key].amount}})}
+                                            onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], isNone: e.target.checked, amount: e.target.checked ? 0 : feeData[cat.key].amount } })}
                                             className="accent-neon w-3 h-3 cursor-pointer disabled:opacity-20"
                                         />
                                         <label className="text-[8px] font-black text-white/40 uppercase cursor-pointer italic">None</label>
+                                    </div>
                                     </div>
                                 </div>
 
                                 <div className="relative">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/40 font-black italic text-lg">₹</span>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         disabled={!isEditMode || feeData[cat.key].isNone}
                                         value={feeData[cat.key].amount === 0 ? '' : feeData[cat.key].amount}
-                                        onFocus={(e) => { if(isEditMode && feeData[cat.key].amount === 0) setFeeData({...feeData, [cat.key]: {...feeData[cat.key], amount: ''}}) }}
-                                        onBlur={(e) => { if(isEditMode && e.target.value === '') setFeeData({...feeData, [cat.key]: {...feeData[cat.key], amount: 0}}) }}
-                                        onChange={(e) => setFeeData({...feeData, [cat.key]: {...feeData[cat.key], amount: e.target.value === '' ? 0 : Number(e.target.value)}})}
+                                        onFocus={(e) => { if (isEditMode && feeData[cat.key].amount === 0) setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: '' } }) }}
+                                        onBlur={(e) => { if (isEditMode && e.target.value === '') setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: 0 } }) }}
+                                        onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: e.target.value === '' ? 0 : Number(e.target.value) } })}
                                         className="w-full bg-void/80 border border-white/5 p-4 pl-10 rounded-2xl outline-none text-sm font-black italic focus:border-neon transition-all disabled:opacity-50"
                                         placeholder={isEditMode ? "ENTER AMOUNT" : "NOT SET"}
                                     />
@@ -188,7 +202,7 @@ const FeeSetup = () => {
 
                     {/* Commit Button - Only shows in Edit Mode */}
                     {isEditMode && (
-                        <button 
+                        <button
                             onClick={handleSave}
                             disabled={loading}
                             className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] bg-neon text-void py-6 rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] shadow-[0_0_50px_rgba(34,211,238,0.4)] z-50 flex items-center justify-center gap-3 active:scale-95 transition-all italic"

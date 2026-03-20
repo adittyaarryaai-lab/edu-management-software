@@ -197,25 +197,19 @@ const StudentFees = () => {
 
                 {/* --- POINT 2: FEES DETAILS SECTION --- */}
                 <div className="p-6 space-y-4">
-                    {summary.feeStructure && Object.entries(summary.feeStructure).map(([key, amount], index) => {
-                        // --- LOGIC: Check One-time vs Monthly ---
-                        const isOneTime = ['admissionFees', 'registrationFees', 'securityFees'].includes(key);
-
-                        return (
-                            <div key={index} className="flex justify-between items-center border-b border-white/5 pb-3">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">
-                                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                                    </span>
-                                    {/* Badge: One Time vs Per Month */}
-                                    <span className={`text-[6px] font-black uppercase tracking-widest mt-0.5 ${isOneTime ? 'text-amber-500/60' : 'text-cyan-500/60'}`}>
-                                        {isOneTime ? '• One Time' : '• Per Month'}
-                                    </span>
-                                </div>
-                                <span className="text-sm font-black italic text-white">₹{amount.toLocaleString()}</span>
+                    {summary.feeStructure && Object.entries(summary.feeStructure).map(([key, data], index) => (
+                        <div key={index} className="flex justify-between items-center border-b border-white/5 pb-3">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight">
+                                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                                </span>
+                                <span className={`text-[6px] font-black uppercase tracking-widest mt-0.5 ${data.billingCycle === 'one-time' ? 'text-amber-500/60' : 'text-cyan-500/60'}`}>
+                                    • {data.billingCycle === 'one-time' ? 'One Time' : 'Per Month'}
+                                </span>
                             </div>
-                        );
-                    })}
+                            <span className="text-sm font-black italic text-white">₹{(data.amount || 0).toLocaleString()}</span>
+                        </div>
+                    ))}
 
                     <div className="flex justify-between items-center pt-2">
                         <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Monthly Fees</span>

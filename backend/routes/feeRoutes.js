@@ -201,11 +201,11 @@ router.get('/student-summary', protect, async (req, res) => {
 
         // Section Ignore Logic
         const rawGrade = student.grade || "";
-        const numericPart = rawGrade.match(/\d+/); 
+        const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
 
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        
+
         let monthlyBase = 0;
         let oneTimeTotal = 0;
         let structureDetails = {};
@@ -215,12 +215,15 @@ router.get('/student-summary', protect, async (req, res) => {
                 const feeItem = structure.fees[key];
                 if (feeItem && !feeItem.isNone) {
                     const amount = Number(feeItem.amount) || 0;
-                    structureDetails[key] = amount;
-                    // One-time fees check
-                    if (['admissionFees', 'registrationFees', 'securityFees'].includes(key)) {
-                        oneTimeTotal += amount;
-                    } else {
+                    const cycle = feeItem.billingCycle || 'one-time';
+                    
+                    structureDetails[key] = { amount, billingCycle: cycle };
+
+                    // USE DATABASE CYCLE INSTEAD OF HARDCODED ARRAY
+                    if (cycle === 'monthly') {
                         monthlyBase += amount;
+                    } else {
+                        oneTimeTotal += amount;
                     }
                 }
             });
@@ -233,7 +236,7 @@ router.get('/student-summary', protect, async (req, res) => {
         // Hum purane mahino ko multiply NAHI karenge. 
         // Bache ko sirf ye dikhega: (Admission + Registration) + (Current Month Tuition)
         const totalExpectedForNow = oneTimeTotal + monthlyBase;
-        
+
         let remainingFees = 0;
         let advanceBalance = 0;
 
@@ -262,7 +265,7 @@ router.get('/student-summary', protect, async (req, res) => {
             feeStructure: structureDetails,
             paymentHistory: payments.map(p => ({
                 id: p._id, amount: p.amountPaid, date: p.date, mode: p.paymentMode, month: p.month, year: p.year
-            })).sort((a,b) => new Date(b.date) - new Date(a.date))
+            })).sort((a, b) => new Date(b.date) - new Date(a.date))
         });
     } catch (error) {
         res.status(500).json({ message: 'Neural Sync Failed' });
@@ -471,16 +474,16 @@ router.post('/structure/update', protect, financeOnly, async (req, res) => {
         // findOneAndUpdate ka use karke hum Check + Create/Update ek saath kar rahe hain
         const structure = await FeeStructure.findOneAndUpdate(
             { schoolId, className },
-            { 
-                fees, 
-                updatedBy: req.user._id 
+            {
+                fees,
+                updatedBy: req.user._id
             },
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
-        res.json({ 
-            message: `Neural Link Established: ${className} Configuration Locked! ⚡`, 
-            structure 
+        res.json({
+            message: `Neural Link Established: ${className} Configuration Locked! ⚡`,
+            structure
         });
     } catch (error) {
         console.error("STRUCTURE_UPDATE_ERROR:", error);
@@ -499,7 +502,7 @@ router.get('/structure/:className', protect, financeOnly, async (req, res) => {
         const schoolId = req.user.schoolId;
 
         const structure = await FeeStructure.findOne({ schoolId, className });
-        
+
         if (!structure) {
             // Agar data nahi hai, toh frontend ko signal bhejo taaki wo khali form dikhaye
             return res.json({ notFound: true, message: "No blueprint found for this sector." });
