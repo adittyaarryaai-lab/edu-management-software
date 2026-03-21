@@ -157,6 +157,7 @@ const StudentFees = () => {
                     <div>
                         <p className="text-[8px] font-black text-white/20 uppercase mb-1">Next Deadline</p>
                         <p className="text-xs font-black text-rose-400 uppercase">
+                            {/* Agar fees baki hai toh mahine ki 1st date dikhao */}
                             {summary?.remainingFees > 0 ? `01/${new Date().getMonth() + 2}/${new Date().getFullYear()}` : 'CLEAR'}
                         </p>
                     </div>
@@ -217,50 +218,6 @@ const StudentFees = () => {
                     </div>
                 </div>
 
-                {/* --- POINT 4: INSTALLMENT SECTION (Fixing Nesting) --- */}
-                <div className="bg-slate-900/40 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-xl mt-8">
-                    <div className="p-6 border-b border-white/5 bg-white/5 flex items-center gap-3">
-                        <Clock size={14} className="text-neon" />
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Installment Schedule</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-[10px]">
-                            <thead className="bg-white/5 uppercase font-black text-white/30 border-b border-white/5">
-                                <tr>
-                                    <th className="p-4">Installment</th>
-                                    <th className="p-4">Due Date</th>
-                                    <th className="p-4">Amount</th>
-                                    <th className="p-4 text-rose-400">Late Fee</th>
-                                    <th className="p-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {summary.installmentList?.map((ins, i) => (
-                                    <tr key={i} className="hover:bg-white/5 transition-all">
-                                        <td className="p-4 font-black uppercase tracking-tighter">
-                                            {ins.number ? `${ins.number}${ins.number === 1 ? 'st' : ins.number === 2 ? 'nd' : ins.number === 3 ? 'rd' : 'th'} Pay` : ins.type}
-                                        </td>
-                                        <td className={`p-4 font-bold ${ins.status === 'Overdue' ? 'text-rose-400' : 'opacity-60'}`}>
-                                            {new Date(ins.dueDate).toLocaleDateString()}
-                                        </td>
-                                        <td className="p-4 font-black">₹{ins.amount.toLocaleString()}</td>
-                                        <td className="p-4 font-black text-rose-500">
-                                            {ins.penalty > 0 ? `+ ₹${ins.penalty.toLocaleString()}` : '--'}
-                                        </td>
-                                        <td className="p-4">
-                                            <span className={`px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-widest ${ins.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                ins.status === 'Overdue' ? 'bg-rose-600 text-white animate-pulse shadow-[0_0_10px_rgba(225,29,72,0.5)]' :
-                                                    'bg-orange-500/10 text-orange-500'
-                                                }`}>
-                                                {ins.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
                 {/* --- POINT 5: PAYMENT HISTORY SECTION --- */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-12 mb-10">
                     <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">

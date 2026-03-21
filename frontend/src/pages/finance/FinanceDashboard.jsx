@@ -8,10 +8,8 @@ const FinanceDashboard = () => {
     const [stats, setStats] = useState({
         collectedToday: 0,
         collectedMonth: 0,
-        totalPending: 0,
-        pendingStudentsCount: 0,
-        penaltySettings: { dailyRate: 0, isActive: false },
-        recentPayments: []
+        recentPayments: [],
+        penaltySettings: { dailyRate: 0, isActive: false }
     });
     
     // --- DAY 112: NEW PAYMENT ALERT STATE ---
@@ -61,7 +59,6 @@ const FinanceDashboard = () => {
     const statCards = [
         { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-cyan-400" />, color: "border-cyan-400/20", path: '/finance/add-payment' },
         { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/reports' },
-        { label: "Installment Tracker", value: stats.totalPending, icon: <AlertCircle className="text-rose-500" />, color: "border-rose-500/20", path: '/finance/installments' },
         { label: "Students", value: "Fees", icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/fees-tracker' },
         { label: "Fees Details", value: " Fee Setup for each class", icon: <Layers className="text-neon" />, color: "border-neon/40 bg-neon/5", path: '/finance/fee-setup' },
     ];

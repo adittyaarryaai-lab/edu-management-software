@@ -3,8 +3,6 @@ const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
 const Fee = require('../models/Fee'); 
-const Installment = require('../models/Installment');
-
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     const {
         name, email, password, subjects,
@@ -189,7 +187,7 @@ router.get('/grades/all', protect, async (req, res) => {
     }
 });
 
-// --- DAY 112: ENHANCED FINANCE STATS WITH ONLINE NOTIFICATION & TIME ---
+// --- DAY 112/118: ENHANCED FINANCE STATS (FIXED - NO INSTALLMENTS) ---
 router.get('/finance/stats', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
@@ -209,44 +207,41 @@ router.get('/finance/stats', protect, async (req, res) => {
         const monthFees = await Fee.find({ schoolId, date: { $gte: startOfMonth } });
         const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 3. Separate Online Payments Today (For Highlighting)
+        // 3. Separate Online Payments Today
         const onlineToday = todayFees
             .filter(f => ['Online', 'PhonePe', 'Google Pay', 'Paytm', 'UPI'].includes(f.paymentMode))
             .reduce((sum, f) => sum + f.amountPaid, 0);
 
-        // 4. Recent Payments with Real Time
+        // 4. Recent Payments
         const recentPayments = await Fee.find({ schoolId })
-            .sort({ date: -1 }) // Sort by real date instead of createdAt
-            .limit(10) // 10 dikhao taaki notification miss na ho
+            .sort({ date: -1 })
+            .limit(10)
             .populate('student', 'name grade enrollmentNo');
 
-        // 5. Pending Stats
-        const pendingInstallments = await Installment.find({ schoolId, status: 'Pending' });
-        const totalPendingAmount = pendingInstallments.reduce((sum, ins) => sum + (ins.amountDue || ins.amount || 0), 0);
-        const pendingStudentsCount = [...new Set(pendingInstallments.map(ins => ins.student.toString()))].length;
+        // NOTE: Pending Installments logic removed as per Day 118 plan
 
         res.json({
             schoolName: schoolDetails?.schoolName || "EduFlowAI School",
             schoolAddress: schoolDetails?.address || "Main Campus, India",
             collectedToday,
             collectedMonth,
-            onlineToday, // <--- Naya field Day 112 ke liye
-            totalPending: totalPendingAmount,
-            pendingStudentsCount,
+            onlineToday,
+            totalPending: 0, // Dashboard crash na ho isliye temporary 0 bhej rahe hain
+            pendingStudentsCount: 0,
             recentPayments: recentPayments.map(p => ({
                 _id: p._id,
                 studentName: p.student?.name || 'Unknown',
-                enrollmentNo: p.student?.enrollmentNo || 'N/A', // Notification ke liye
+                enrollmentNo: p.student?.enrollmentNo || 'N/A',
                 grade: p.student?.grade || 'N/A',
                 amount: p.amountPaid,
-                paymentMode: p.paymentMode, // <--- Mode check karne ke liye
+                paymentMode: p.paymentMode,
                 date: p.date.toLocaleDateString(),
-                time: p.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) // <--- Time zaroori hai
+                time: p.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             }))
         });
     } catch (error) {
         console.error("Finance Stats Error:", error);
-        res.status(500).json({ message: 'Stats Sync Error' });
+        res.status(500).json({ message: 'Stats Sync Error: ' + error.message });
     }
 });
 
