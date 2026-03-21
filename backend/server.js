@@ -31,7 +31,8 @@ const app = express();
 
 // Middlewares
 app.use(cors({
-    origin: 'http://localhost:5173', // Vite ka default port, ise allow karna zaroori hai
+    // Isse 5173 aur 5174 dono allow ho jayenge
+    origin: ['http://localhost:5173', 'http://localhost:5174'], 
     credentials: true
 }));
 app.use(express.json());

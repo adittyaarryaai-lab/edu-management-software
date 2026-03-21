@@ -50,7 +50,7 @@ const StudentAttendance = () => {
                         <div className="absolute inset-0 rounded-full border-[6px] border-neon shadow-[0_0_30px_rgba(61,242,224,0.4)] opacity-50"></div>
                     </div>
                 </div>
-                <h2 className="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-neon italic relative z-10">Neural Presence Score</h2>
+                <h2 className="mt-6 text-[10px] font-black uppercase tracking-[0.4em] text-neon italic relative z-10">Attendance Percentage</h2>
                 <div className="absolute -right-8 top-16 text-neon/5 animate-spin-slow"><Cpu size={140} /></div>
             </div>
 
@@ -59,8 +59,8 @@ const StudentAttendance = () => {
                 <div className="grid grid-cols-3 gap-3">
                     {[
                         { label: 'TOTAL DAYS', value: stats?.totalDays, bg: 'bg-slate-900', color: 'text-white', icon: <Calendar size={14} /> },
-                        { label: 'PRESENT', value: stats?.presentDays, bg: 'bg-neon/10', color: 'text-neon', icon: <CheckCircle size={14} /> },
-                        { label: 'ABSENT', value: stats?.absentDays, bg: 'bg-red-600/10', color: 'text-red-500', icon: <XCircle size={14} /> }
+                        { label: 'PRESENT DAYS', value: stats?.presentDays, bg: 'bg-neon/10', color: 'text-neon', icon: <CheckCircle size={14} /> },
+                        { label: 'ABSENT DAYS', value: stats?.absentDays, bg: 'bg-red-600/10', color: 'text-red-500', icon: <XCircle size={14} /> }
                     ].map((item, i) => (
                         <div key={i} className={`${item.bg} p-4 rounded-3xl border border-white/5 shadow-2xl flex flex-col items-center justify-center group hover:border-neon/20 transition-all h-24`}>
                             <div className={`${item.color || 'text-white/40'} mb-1 group-hover:scale-110 transition-transform`}>{item.icon}</div>
@@ -88,7 +88,7 @@ const StudentAttendance = () => {
 
                 {/* 3. HISTORY MATRIX (Timeline) */}
                 <div className="space-y-3 pb-10">
-                    <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] mb-2 ml-4 italic">Attendance Timeline</h3>
+                    <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] mb-2 ml-4 italic">Per Day Attendance</h3>
 
                     {stats?.history && stats.history.length > 0 ? (
                         stats.history.map((log, i) => (
@@ -111,7 +111,7 @@ const StudentAttendance = () => {
                         ))
                     ) : (
                         <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-dashed border-white/10 mx-2">
-                            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Matrix Data Found</p>
+                            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Data Available ✅</p>
                         </div>
                     )}
                 </div>

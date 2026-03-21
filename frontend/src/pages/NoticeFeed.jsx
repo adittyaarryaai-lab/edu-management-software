@@ -50,7 +50,7 @@ const NoticeFeed = ({ user }) => {
                         <ArrowLeft size={20} />
                     </button>
                     <div className="flex flex-col items-center">
-                        <h1 className="text-xl font-black uppercase tracking-[0.3em] italic">Broadcasts</h1>
+                        <h1 className="text-xl font-black uppercase tracking-[0.3em] italic">Notices</h1>
                         <div className="h-0.5 w-16 bg-neon mt-1 shadow-[0_0_15px_rgba(61,242,224,1)]"></div>
                     </div>
                     <div className="bg-neon/10 p-2.5 rounded-2xl border border-neon/30 text-neon">
@@ -131,7 +131,7 @@ const NoticeFeed = ({ user }) => {
                         <div className="bg-neon/5 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
                             <Megaphone className="text-neon/10" size={40} />
                         </div>
-                        <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Broadcast Signals Found</p>
+                        <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Notices Available 📢</p>
                     </div>
                 )}
             </div>

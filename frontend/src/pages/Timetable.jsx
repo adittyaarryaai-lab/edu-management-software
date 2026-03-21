@@ -44,9 +44,9 @@ const Timetable = ({ user }) => {
             <ArrowLeft size={20} />
           </button>
           <div className="text-center">
-            <h1 className="text-xl font-black uppercase tracking-tighter italic">Schedule Matrix</h1>
+            <h1 className="text-xl font-black uppercase tracking-tighter italic"> Class Schedule</h1>
             <p className="text-[9px] font-black text-neon/40 tracking-[0.3em] uppercase italic">
-              {user?.grade ? `Sector Node: ${user.grade}` : "Node Not Assigned"}
+              {user?.grade ? `Class: ${user.grade}` : "Node Not Assigned"}
             </p>
           </div>
           <div className="w-8"></div>
@@ -85,7 +85,7 @@ const Timetable = ({ user }) => {
                 <p className="text-[10px] text-white/30 font-black flex items-center gap-1.5 uppercase italic">
                   <span className="w-1.5 h-1.5 bg-neon rounded-full shadow-[0_0_8px_rgba(61,242,224,1)]"></span>
                   {/* AB YAHAN NAAM DIKHEGA EMP ID NAHI */}
-                  PROFESSOR: {item.teacherName || "NOT ASSIGNED"}
+                  TEACHER: {item.teacherName || "NOT ASSIGNED"}
                 </p>
                 <div className="flex items-center gap-1.5 mt-3 text-neon bg-neon/10 w-fit px-3 py-1 rounded-lg border border-neon/20 shadow-inner">
                   <MapPin size={10} />
@@ -98,7 +98,7 @@ const Timetable = ({ user }) => {
         ) : (
           <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
             <BookOpen className="mx-auto text-neon/10 mb-4 animate-pulse" size={48} />
-            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic text-center">Free from today classes! ⚡</p>
+            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic text-center">Free from today's classes! ⚡</p>
           </div>
         )}
       </div>

@@ -44,7 +44,7 @@ const StudentHome = () => {
       <div className="bg-void/80 backdrop-blur-2xl rounded-[3rem] p-8 border border-neon/20 shadow-2xl">
         <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
           <Bot size={16} className="text-neon animate-pulse" />
-          <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em]">Neural Sub-Modules</h3>
+          <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em]">Sub-Modules</h3>
         </div>
         <div className="grid grid-cols-4 gap-y-10 gap-x-2">
           {subModules.map((sm, i) => (
