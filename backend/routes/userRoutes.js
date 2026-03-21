@@ -262,25 +262,45 @@ router.get('/finance/students-ledger/:grade', protect, async (req, res) => {
     }
 });
 
-// --- DAY 91: ADD NEW PAYMENT (Point 3) ---
+// --- DAY 119: ADD PAYMENT BY ENROLLMENT NO & FEE CATEGORY ---
 router.post('/finance/add-payment', protect, async (req, res) => {
-    const { studentId, amountPaid, month, year, paymentMode, remarks } = req.body;
+    // 1. Ab hum 'studentId' ki jagah frontend se 'enrollmentNo' aur 'feeCategory' mangwa rahe hain
+    const { enrollmentNo, amountPaid, month, year, paymentMode, remarks, feeCategory } = req.body;
 
     try {
+        // 2. Enrollment Number se database mein student ko dhoondo
+        const student = await User.findOne({ 
+            enrollmentNo: enrollmentNo, 
+            schoolId: req.user.schoolId,
+            role: 'student' 
+        });
+
+        // 3. Agar bacha nahi milta toh error do
+        if (!student) {
+            return res.status(404).json({ message: "Student Identity Not Found! Check Enrollment No. ❌" });
+        }
+
+        // 4. Fee record create karo (Lekin database mein ID hi store hogi for linking)
         const feeRecord = await Fee.create({
             schoolId: req.user.schoolId,
-            student: studentId,
+            student: student._id, // Idhar student ki asli ID map ho jayegi
             amountPaid: Number(amountPaid),
             month,
             year: Number(year),
             paymentMode,
-            remarks: remarks || "Monthly Fees",
+            // 5. Remarks mein auto-purpose add kar rahe hain agar remarks khali hai
+            remarks: remarks || `Fee payment for: ${feeCategory || 'General'}`,
+            feeCategory: feeCategory || 'General', // Naya field tracking ke liye
             date: new Date()
         });
 
-        res.status(201).json({ message: 'Payment recorded successfully! ✅', feeRecord });
+        res.status(201).json({ 
+            message: `Payment Linked to ${student.name} Successfully! ✅`, 
+            feeRecord 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Payment failed' });
+        console.error("Payment Process Error:", error);
+        res.status(500).json({ message: 'Neural Payment Protocol Failed' });
     }
 });
 

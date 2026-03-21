@@ -516,4 +516,50 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     }
 });
 
+// 1. Get all classes
+router.get('/setup/classes', protect, financeOnly, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const classes = await User.distinct('grade', { schoolId: req.user.schoolId, role: 'student' });
+        res.json(classes.sort());
+    } catch (error) { res.status(500).json({ message: 'Error' }); }
+});
+
+// 2. Get students by class
+router.get('/setup/students/:grade', protect, financeOnly, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const students = await User.find({ 
+            grade: req.params.grade, 
+            schoolId: req.user.schoolId, 
+            role: 'student' 
+        }).select('name enrollmentNo');
+        res.json(students);
+    } catch (error) { res.status(500).json({ message: 'Error' }); }
+});
+
+// 3. Get active fee fields for a specific class structure
+router.get('/setup/fields/:grade', protect, financeOnly, async (req, res) => {
+    try {
+        // Section hatakar sirf Class Name (e.g., 'Class 9')
+        const rawGrade = req.params.grade;
+        const numericPart = rawGrade.match(/\d+/);
+        const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
+
+        const structure = await FeeStructure.findOne({ schoolId: req.user.schoolId, className: classMatch });
+        if (!structure) return res.json([]);
+
+        // Sirf wahi fields jo 'isNone: false' hain
+        const activeFields = Object.keys(structure.fees)
+            .filter(key => !structure.fees[key].isNone)
+            .map(key => ({
+                key,
+                label: key.replace(/([A-Z])/g, ' $1').trim().toUpperCase(),
+                amount: structure.fees[key].amount
+            }));
+
+        res.json(activeFields);
+    } catch (error) { res.status(500).json({ message: 'Error' }); }
+});
+
 module.exports = router;
