@@ -527,4 +527,35 @@ router.get('/structure/list/all', protect, financeOnly, async (req, res) => {
     }
 });
 
+// --- DAY 116: FETCH CLASSES THAT HAVE STUDENTS ---
+router.get('/tracker/classes', protect, financeOnly, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        // Sirf un grades ki list nikalna jinmein 'student' role wale bache hain
+        const classes = await User.distinct('grade', { 
+            schoolId: req.user.schoolId, 
+            role: 'student' 
+        });
+        res.json(classes.sort());
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching classes' });
+    }
+});
+
+// --- DAY 116: FETCH STUDENTS BY CLASS FOR TRACKER ---
+// --- DAY 116: FETCH STUDENTS BY CLASS (Updated Fields) ---
+router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const students = await User.find({ 
+            schoolId: req.user.schoolId, 
+            grade: req.params.grade,
+            role: 'student'
+        }).select('name enrollmentNo grade admissionNo phone'); // admissionNo add kiya agar alag hai toh
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching students' });
+    }
+});
+
 module.exports = router;

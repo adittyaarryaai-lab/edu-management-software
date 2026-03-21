@@ -54,7 +54,7 @@ import StudentsFees from './pages/finance/StudentsFees';
 import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
 import Installments from './pages/finance/Installments';
-import PendingFees from './pages/finance/PendingFees';
+import FeesTracker from './pages/finance/FeesTracker';
 import FeeReports from './pages/finance/FeeReports'; // Naya import
 import FeeSetup from './pages/finance/FeeSetup'; // Day 114: Class Fee Configuration
 
@@ -411,7 +411,7 @@ function App() {
           <Route path="/finance/add-payment" element={<AddPayment />} />
           <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
           <Route path="/finance/installments" element={<Installments />} />
-          <Route path="/finance/pending" element={<PendingFees />} />
+          <Route path="/finance/fees-tracker" element={<FeesTracker />} />
           <Route path="/student/checkout" element={<StudentCheckout />} />
           <Route path="/student/payment-methods" element={<PaymentMethods />} />
 
