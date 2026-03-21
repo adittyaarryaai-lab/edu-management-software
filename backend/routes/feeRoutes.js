@@ -558,4 +558,83 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
     }
 });
 
+// --- DAY 117: INDIVIDUAL STUDENT FINANCIAL AUDIT (FINAL FIX) ---
+router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
+    try {
+        const studentId = req.params.studentId;
+        const schoolId = req.user.schoolId;
+        const today = new Date();
+        const currentMonthName = today.toLocaleString('default', { month: 'long' });
+
+        const User = require('../models/User');
+        const student = await User.findById(studentId);
+        if (!student) return res.status(404).json({ message: 'Student not found' });
+
+        // 1. Structure Linking (Section ignore)
+        const rawGrade = student.grade || "";
+        const numericPart = rawGrade.match(/\d+/); 
+        const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
+        const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
+
+        // 2. Math Logic (Based on billingCycle dropdown)
+        let monthlyBase = 0;
+        let oneTimeTotal = 0;
+        let structureDetails = [];
+
+        if (structure?.fees) {
+            Object.keys(structure.fees).forEach(key => {
+                const feeItem = structure.fees[key];
+                if (feeItem && !feeItem.isNone) {
+                    const amount = Number(feeItem.amount) || 0;
+                    const cycle = feeItem.billingCycle || 'one-time';
+
+                    structureDetails.push({
+                        label: key.replace(/([A-Z])/g, ' $1').trim(),
+                        amount: amount,
+                        cycle: cycle
+                    });
+
+                    // Logic: Multiply only if monthly
+                    if (cycle === 'monthly') monthlyBase += amount;
+                    else oneTimeTotal += amount;
+                }
+            });
+        }
+
+        // 3. Expected Total (Current Month Only)
+        // Expected = One-time total + (Monthly base for current month)
+        const totalExpected = oneTimeTotal + monthlyBase;
+
+        // 4. Paid Amount Calculation
+        const payments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
+        const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
+
+        const remaining = totalExpected - totalPaid;
+        const status = remaining <= 0 ? 'COMPLETED' : 'PENDING';
+        const advance = totalPaid > totalExpected ? totalPaid - totalExpected : 0;
+
+        res.json({
+            student,
+            status,
+            totalExpected,
+            totalPaid,
+            remaining: remaining > 0 ? remaining : 0,
+            advance,
+            currentMonth: currentMonthName,
+            structureDetails, // Naye list ke liye
+            history: payments.map(p => ({
+                amount: p.amountPaid,
+                date: p.date,
+                mode: p.paymentMode,
+                month: p.month,
+                year: p.year,
+                id: p._id
+            }))
+        });
+    } catch (error) {
+        console.error("Audit Sync Error:", error);
+        res.status(500).json({ message: 'Audit Error' });
+    }
+});
+
 module.exports = router;
