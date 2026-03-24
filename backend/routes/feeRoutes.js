@@ -80,88 +80,99 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
-// --- DAY 115: FINAL SIMPLIFIED BILLING LOGIC (CURRENT MONTH ONLY) ---
+// --- DAY 120: FINAL ULTIMATE STUDENT SUMMARY (STRICT BIFURCATION) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
         const today = new Date();
         const currentMonthName = today.toLocaleString('default', { month: 'long' });
+        const currentYear = today.getFullYear();
 
         const User = require('../models/User');
         const student = await User.findById(studentId).populate('schoolId');
-        if (!student) return res.status(404).json({ message: 'Identity not found' });
+        if (!student) return res.status(404).json({ message: 'Identity missing' });
 
-        // Section Ignore Logic
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
-
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
+        const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
 
-        let monthlyBase = 0;
-        let oneTimeTotal = 0;
+        // 1. Core Logic Variables
+        let monthlyStructureTotal = 0; // Sirf Monthly components ka sum (Box ke liye)
+        let oneTimeLabels = [];       // Isolation filter ke liye
         let structureDetails = {};
 
         if (structure && structure.fees) {
             Object.keys(structure.fees).forEach(key => {
-                const feeItem = structure.fees[key];
-                if (feeItem && !feeItem.isNone) {
-                    const amount = Number(feeItem.amount) || 0;
-                    const cycle = feeItem.billingCycle || 'one-time';
+                const item = structure.fees[key];
+                if (item && !item.isNone && item.amount > 0) {
+                    const amount = Number(item.amount) || 0;
+                    const label = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
                     
-                    structureDetails[key] = { amount, billingCycle: cycle };
-
-                    // USE DATABASE CYCLE INSTEAD OF HARDCODED ARRAY
-                    if (cycle === 'monthly') {
-                        monthlyBase += amount;
+                    if (item.billingCycle === 'monthly') {
+                        monthlyStructureTotal += amount;
+                        structureDetails[key] = { label, amount, billingCycle: 'monthly' };
                     } else {
-                        oneTimeTotal += amount;
+                        // ONE-TIME: Sirf label store karo, math mein mat jodo
+                        oneTimeLabels.push(label);
+                        structureDetails[key] = { label, amount, billingCycle: 'one-time' };
                     }
                 }
             });
         }
 
-        const payments = await Fee.find({ student: studentId, schoolId });
-        const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
+        // 2. Strict Collection Filter (NO ONE-TIME IN STATS)
+        const paidThisMonth = allPayments.filter(p => {
+            const isCurrent = p.month === currentMonthName && p.year === currentYear;
+            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
+            return isCurrent && !isOneTime;
+        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // --- NEW LOGIC: ONLY CURRENT MONTH + ONE TIME ---
-        // Hum purane mahino ko multiply NAHI karenge. 
-        // Bache ko sirf ye dikhega: (Admission + Registration) + (Current Month Tuition)
-        const totalExpectedForNow = oneTimeTotal + monthlyBase;
+        // 3. Balance Logic (Strictly Tenure-Based Monthly)
+        const joinDate = new Date(student.createdAt);
+        const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
+        
+        const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
+        
+        // Sirf un payments ka sum jo Monthly category ki hain
+        const totalMonthlyPaidSoFar = allPayments.filter(p => {
+            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
+            return !isOneTime;
+        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        let remainingFees = 0;
-        let advanceBalance = 0;
+        const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-        if (totalPaid >= totalExpectedForNow) {
-            // Agar paid zyada hai toh advance dikhao
-            advanceBalance = totalPaid - totalExpectedForNow;
-            remainingFees = 0;
-        } else {
-            // Agar paid kam hai toh dues dikhao
-            remainingFees = totalExpectedForNow - totalPaid;
-            advanceBalance = 0;
-        }
+        // 4. History Grouping (Including ALL types for records)
+        const groupedHistory = allPayments.reduce((acc, pay) => {
+            const key = `${pay.month} ${pay.year}`;
+            if (!acc[key]) acc[key] = [];
+            acc[key].push({
+                id: pay._id,
+                amount: pay.amountPaid,
+                category: pay.remarks?.split(': ')[1] || 'GENERAL FEE', // Slip par naam dikhane ke liye
+                date: pay.date,
+                mode: pay.paymentMode
+            });
+            return acc;
+        }, {});
 
         res.json({
             studentName: student.name,
-            enrollmentNo: student.enrollmentNo,
-            grade: student.grade,
-            schoolName: student.schoolId?.schoolName,
             currentMonth: currentMonthName,
-            monthlyFee: monthlyBase,
-            totalPaid,
-            advanceBalance,
-            remainingFees,
-            totalFees: totalExpectedForNow, // Screen par total expected amount
-            status: remainingFees <= 0 ? 'Clear' : 'Pending',
+            totalPaidThisMonth: paidThisMonth, // Reset on 1st + Strictly Monthly
+            lastActivity: allPayments.length > 0 ? allPayments[0].date : null,
+            remainingFees: balance > 0 ? balance : 0,
+            advanceBalance: balance < 0 ? Math.abs(balance) : 0,
+            totalFeesStructure: monthlyStructureTotal, // Now strictly monthly
             feeStructure: structureDetails,
-            paymentHistory: payments.map(p => ({
-                id: p._id, amount: p.amountPaid, date: p.date, mode: p.paymentMode, month: p.month, year: p.year
-            })).sort((a, b) => new Date(b.date) - new Date(a.date))
+            paymentHistory: groupedHistory
         });
+
     } catch (error) {
-        res.status(500).json({ message: 'Neural Sync Failed' });
+        console.error("SUMMARY_CRITICAL_ERROR:", error);
+        res.status(500).json({ message: 'Neural Link Failure' });
     }
 });
 
@@ -411,9 +422,9 @@ router.get('/tracker/classes', protect, financeOnly, async (req, res) => {
     try {
         const User = require('../models/User');
         // Sirf un grades ki list nikalna jinmein 'student' role wale bache hain
-        const classes = await User.distinct('grade', { 
-            schoolId: req.user.schoolId, 
-            role: 'student' 
+        const classes = await User.distinct('grade', {
+            schoolId: req.user.schoolId,
+            role: 'student'
         });
         res.json(classes.sort());
     } catch (error) {
@@ -426,8 +437,8 @@ router.get('/tracker/classes', protect, financeOnly, async (req, res) => {
 router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) => {
     try {
         const User = require('../models/User');
-        const students = await User.find({ 
-            schoolId: req.user.schoolId, 
+        const students = await User.find({
+            schoolId: req.user.schoolId,
             grade: req.params.grade,
             role: 'student'
         }).select('name enrollmentNo grade admissionNo phone'); // admissionNo add kiya agar alag hai toh
@@ -437,82 +448,102 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
     }
 });
 
-// --- DAY 117: INDIVIDUAL STUDENT FINANCIAL AUDIT (FINAL FIX) ---
+// --- DAY 120: STRICT ACCOUNTING AUDIT ROUTE (FINAL) ---
 router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     try {
         const studentId = req.params.studentId;
         const schoolId = req.user.schoolId;
         const today = new Date();
         const currentMonthName = today.toLocaleString('default', { month: 'long' });
+        const currentYear = today.getFullYear();
 
         const User = require('../models/User');
-        const student = await User.findById(studentId);
-        if (!student) return res.status(404).json({ message: 'Student not found' });
+        const student = await User.findOne({ _id: studentId, schoolId: schoolId });
+        if (!student) return res.status(404).json({ message: 'Identity missing' });
 
-        // 1. Structure Linking (Section ignore)
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/); 
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
+        const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
 
-        // 2. Math Logic (Based on billingCycle dropdown)
-        let monthlyBase = 0;
-        let oneTimeTotal = 0;
+        // 1. Component Bifurcation (Strict Isolation)
+        let monthlyOnlyStructureTotal = 0; // Box 2 ke liye (Strictly Monthly)
         let structureDetails = [];
+        let oneTimeLabels = [];
 
-        if (structure?.fees) {
+        if (structure && structure.fees) {
             Object.keys(structure.fees).forEach(key => {
-                const feeItem = structure.fees[key];
-                if (feeItem && !feeItem.isNone) {
-                    const amount = Number(feeItem.amount) || 0;
-                    const cycle = feeItem.billingCycle || 'one-time';
+                const item = structure.fees[key];
+                if (item && !item.isNone && item.amount > 0) {
+                    const labelName = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+                    const amount = Number(item.amount);
 
+                    if (item.billingCycle === 'monthly') {
+                        monthlyOnlyStructureTotal += amount;
+                    } else {
+                        oneTimeLabels.push(labelName);
+                        // One-time yahan total mein add NAHI ho raha
+                    }
+
+                    // Ye sirf table mein dikhane ke liye hai
+                    const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName));
                     structureDetails.push({
-                        label: key.replace(/([A-Z])/g, ' $1').trim(),
+                        label: labelName,
                         amount: amount,
-                        cycle: cycle
+                        cycle: item.billingCycle,
+                        isPaid: isPaidAlready && item.billingCycle === 'one-time'
                     });
-
-                    // Logic: Multiply only if monthly
-                    if (cycle === 'monthly') monthlyBase += amount;
-                    else oneTimeTotal += amount;
                 }
             });
         }
 
-        // 3. Expected Total (Current Month Only)
-        // Expected = One-time total + (Monthly base for current month)
-        const totalExpected = oneTimeTotal + monthlyBase;
+        // 2. Strict Collection: Sirf Current Month + Strictly NO One-time
+        const collectedThisMonth = allPayments.filter(p => {
+            const isCurrentMonth = p.month === currentMonthName && p.year === currentYear;
+            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
+            return isCurrentMonth && !isOneTime;
+        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // 4. Paid Amount Calculation
-        const payments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
-        const totalPaid = payments.reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
+        // 3. Balance Math (Only Monthly Tenure Based)
+        const joinDate = new Date(student.createdAt);
+        const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
+        
+        // Kitna Monthly paisa banta tha Admission se ab tak
+        const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
+        
+        // Kitna Monthly paisa asliyat mein diya (One-time ko hata kar)
+        const totalMonthlyPaidAllTime = allPayments.filter(p => {
+            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
+            return !isOneTime;
+        }).reduce((sum, p) => sum + p.amountPaid, 0);
 
-        const remaining = totalExpected - totalPaid;
-        const status = remaining <= 0 ? 'COMPLETED' : 'PENDING';
-        const advance = totalPaid > totalExpected ? totalPaid - totalExpected : 0;
+        const balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
 
         res.json({
             student,
-            status,
-            totalExpected,
-            totalPaid,
-            remaining: remaining > 0 ? remaining : 0,
-            advance,
+            totalPaidThisMonth: collectedThisMonth, // Box 1: Zero ho jayega naye mahine par
+            totalExpected: monthlyOnlyStructureTotal, // Box 2: Sirf Per Month total
+            remaining: balance > 0 ? balance : 0,   
+            advance: balance < 0 ? Math.abs(balance) : 0, 
             currentMonth: currentMonthName,
-            structureDetails, // Naye list ke liye
-            history: payments.map(p => ({
-                amount: p.amountPaid,
-                date: p.date,
-                mode: p.paymentMode,
-                month: p.month,
-                year: p.year,
-                id: p._id
-            }))
+            structureDetails, // List mein sab dikhega settled tag ke sath
+            history: allPayments.reduce((acc, pay) => {
+                const key = `${pay.month} ${pay.year}`;
+                if (!acc[key]) acc[key] = [];
+                acc[key].push({
+                    id: pay._id, amount: pay.amountPaid,
+                    category: pay.remarks?.split(': ')[1] || 'General Fee',
+                    date: pay.date, mode: pay.paymentMode
+                });
+                return acc;
+            }, {}),
+            status: balance <= 0 ? 'COMPLETED' : 'PENDING'
         });
+
     } catch (error) {
-        console.error("Audit Sync Error:", error);
-        res.status(500).json({ message: 'Audit Error' });
+        console.error("STRICT_AUDIT_ERROR:", error);
+        res.status(500).json({ message: 'Neural Ledger Mismatch' });
     }
 });
 
@@ -529,29 +560,36 @@ router.get('/setup/classes', protect, financeOnly, async (req, res) => {
 router.get('/setup/students/:grade', protect, financeOnly, async (req, res) => {
     try {
         const User = require('../models/User');
-        const students = await User.find({ 
-            grade: req.params.grade, 
-            schoolId: req.user.schoolId, 
-            role: 'student' 
+        const students = await User.find({
+            grade: req.params.grade,
+            schoolId: req.user.schoolId,
+            role: 'student'
         }).select('name enrollmentNo');
         res.json(students);
     } catch (error) { res.status(500).json({ message: 'Error' }); }
 });
 
-// 3. Get active fee fields for a specific class structure
+// --- DAY 120: GET ACTIVE FEE FIELDS (CLEAN LOGIC) ---
 router.get('/setup/fields/:grade', protect, financeOnly, async (req, res) => {
     try {
-        // Section hatakar sirf Class Name (e.g., 'Class 9')
         const rawGrade = req.params.grade;
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
 
-        const structure = await FeeStructure.findOne({ schoolId: req.user.schoolId, className: classMatch });
+        const structure = await FeeStructure.findOne({
+            schoolId: req.user.schoolId,
+            className: classMatch
+        });
+
         if (!structure) return res.json([]);
 
-        // Sirf wahi fields jo 'isNone: false' hain
+        // Filter: Sirf wahi components bhej rahe hain jo 'None' nahi hain aur jinki amount set hai
         const activeFields = Object.keys(structure.fees)
-            .filter(key => !structure.fees[key].isNone)
+            .filter(key =>
+                structure.fees[key] &&
+                structure.fees[key].isNone === false &&
+                structure.fees[key].amount > 0
+            )
             .map(key => ({
                 key,
                 label: key.replace(/([A-Z])/g, ' $1').trim().toUpperCase(),
@@ -559,7 +597,10 @@ router.get('/setup/fields/:grade', protect, financeOnly, async (req, res) => {
             }));
 
         res.json(activeFields);
-    } catch (error) { res.status(500).json({ message: 'Error' }); }
+    } catch (error) {
+        console.error("FIELDS_FETCH_ERROR:", error);
+        res.status(500).json({ message: 'Fields Sync Error' });
+    }
 });
 
 module.exports = router;

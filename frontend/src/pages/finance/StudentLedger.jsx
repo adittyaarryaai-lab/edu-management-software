@@ -18,6 +18,13 @@ const StudentLedger = () => {
 
     if (!audit) return <div className="p-20 text-center text-orange-500 animate-pulse font-black uppercase">Decrypting Ledger...</div>;
 
+    // --- DAY 120: SMART MATH LOGIC (TEACHER VIEW) ---
+    const isFeesDone = (audit?.remaining || 0) <= 0;
+    const statusText = isFeesDone ? "COMPLETED" : "PENDING";
+
+    // Total Structure (Isme One-time + Monthly ka total backend se aa raha hai)
+    const structureTotal = audit?.totalExpected || 0;
+    const totalPaidAllTime = audit?.totalPaid || 0;
     return (
         <div className="min-h-screen bg-void text-white p-6 font-sans italic pb-24">
             {/* Header */}
@@ -28,8 +35,8 @@ const StudentLedger = () => {
                 <h1 className="text-xl font-black uppercase tracking-tighter">Student Records Check</h1>
             </div>
 
-            {/* --- TOP STATUS BAR --- */}
-            <div className={`p-8 rounded-[2.5rem] border-2 mb-8 relative overflow-hidden ${audit.status === 'COMPLETED' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
+            {/* --- TOP STATUS BAR (TEACHER VIEW SYNC) --- */}
+            <div className={`p-8 rounded-[2.5rem] border-2 mb-8 relative overflow-hidden ${isFeesDone ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
                 <div className="flex justify-between items-start relative z-10">
                     <div>
                         <h2 className="text-2xl font-black uppercase tracking-tighter mb-1">{audit.student.name}</h2>
@@ -37,21 +44,23 @@ const StudentLedger = () => {
                             ADM: {audit.student.admissionNo || 'N/A'} • SEC: {audit.student.grade}
                         </p>
                     </div>
-                    <div className={`px-4 py-2 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-2 ${audit.status === 'COMPLETED' ? 'bg-emerald-500 text-black' : 'bg-rose-600 text-white animate-pulse'}`}>
-                        {audit.status === 'COMPLETED' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                        {audit.status}
+                    <div className={`px-4 py-2 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-2 ${isFeesDone ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-rose-600 text-white animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.4)]'}`}>
+                        {isFeesDone ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                        {statusText}
                     </div>
                 </div>
 
                 <div className="mt-8 flex items-baseline gap-2">
-                    <span className="text-4xl font-black tracking-tighter">₹{audit.remaining.toLocaleString()}</span>
-                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Balance Dues</span>
+                    <span className="text-4xl font-black tracking-tighter">₹{audit?.remaining?.toLocaleString() || "0"}</span>
+                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Outstanding Balance</span>
                 </div>
 
-                {audit.advance > 0 && (
+                {audit?.advance > 0 && (
                     <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
                         <Wallet size={12} className="text-emerald-400" />
-                        <span className="text-[9px] font-black text-emerald-400 uppercase">Advance Secured: ₹{audit.advance.toLocaleString()}</span>
+                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic">
+                            Surplus Adjusted: ₹{audit.advance.toLocaleString()} Secured
+                        </span>
                     </div>
                 )}
             </div>
@@ -59,63 +68,98 @@ const StudentLedger = () => {
             {/* --- QUICK STATS GRID --- */}
             <div className="grid grid-cols-2 gap-4 mb-10">
                 <div className="bg-slate-900/60 p-6 rounded-[2rem] border border-white/5">
-                    <p className="text-[7px] font-black text-white/20 uppercase mb-2">Collected So Far</p>
-                    <p className="text-lg font-black text-emerald-400">₹{audit.totalPaid.toLocaleString()}</p>
+                    <p className="text-[7px] font-black text-white/20 uppercase mb-2">Collected in {audit?.currentMonth}</p>
+                    <p className="text-lg font-black text-emerald-400">₹{audit?.totalPaidThisMonth?.toLocaleString() || "0"}</p>
                 </div>
                 <div className="bg-slate-900/60 p-6 rounded-[2rem] border border-white/5">
-                    <p className="text-[7px] font-black text-white/20 uppercase mb-2">Expected Total</p>
-                    <p className="text-lg font-black text-white/40">₹{audit.totalExpected.toLocaleString()}</p>
+                    <p className="text-[7px] font-black text-white/20 uppercase mb-2">Active Structure Balance</p>
+                    <p className="text-lg font-black text-white/40">₹{audit?.totalExpected?.toLocaleString() || "0"}</p>
                 </div>
             </div>
 
-            {/* --- DETAILED FEE STRUCTURE LIST --- */}
+            {/* --- ASSESSMENT BREAKDOWN (SETTLED LOGIC) --- */}
             <div className="bg-slate-900/60 rounded-[2.5rem] border border-white/5 overflow-hidden mb-10 shadow-2xl">
                 <div className="p-6 bg-white/5 border-b border-white/5 flex items-center gap-3">
                     <Layers size={14} className="text-orange-500" />
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Assessment Breakdown</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Component Integrity Check</h3>
                 </div>
                 <div className="p-6 space-y-4">
-                    {audit.structureDetails?.map((item, i) => (
-                        <div key={i} className="flex justify-between items-center border-b border-white/5 pb-3 last:border-0">
+                    {audit?.structureDetails?.map((item, i) => (
+                        <div key={i} className={`flex justify-between items-center border-b border-white/5 pb-3 last:border-0 ${item.isPaid ? 'opacity-30' : ''}`}>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-white/60 uppercase">{item.label}</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-white/60 uppercase">{item.label}</span>
+                                    {item.isPaid && <span className="text-[6px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded-full font-black italic">SETTLED</span>}
+                                </div>
                                 <span className={`text-[6px] font-black uppercase tracking-widest mt-1 ${item.cycle === 'monthly' ? 'text-cyan-400' : 'text-amber-500'}`}>
                                     {item.cycle === 'monthly' ? '• Per Month' : '• One Time'}
                                 </span>
                             </div>
-                            <span className="text-sm font-black italic">₹{item.amount.toLocaleString()}</span>
+                            <span className={`text-sm font-black italic ${item.isPaid ? 'line-through' : ''}`}>₹{item?.amount?.toLocaleString() || "0"}</span>
                         </div>
                     ))}
                     <div className="pt-4 border-t border-orange-500/20 flex justify-between items-center">
-                        <span className="text-[10px] font-black text-orange-500 uppercase italic">Net Expected for {audit.currentMonth}</span>
-                        <span className="text-xl font-black text-white">₹{audit.totalExpected.toLocaleString()}</span>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-orange-500 uppercase italic">Expected Exposure</span>
+                            <span className="text-[6px] text-white/20 uppercase font-black">Net since join date</span>
+                        </div>
+                        <span className="text-xl font-black text-white italic tracking-tighter">₹{structureTotal.toLocaleString()}</span>
                     </div>
                 </div>
             </div>
 
-            {/* --- TRANSACTION CHRONOLOGY --- */}
-            <div className="space-y-4">
+            {/* --- UPGRADED TEACHER VIEW: MONTHLY GROUPED HISTORY --- */}
+            <div className="space-y-6 mt-12">
                 <div className="flex items-center gap-2 ml-2 mb-4">
                     <History size={14} className="text-orange-500" />
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Payment History</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">Verified Ledger Entries</h3>
                 </div>
 
-                {audit.history.length > 0 ? audit.history.map((h, idx) => (
-                    <div key={idx} className="bg-slate-900/40 p-5 rounded-[2rem] border border-white/5 flex justify-between items-center group">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-white/5 p-3 rounded-xl text-white/20"><Calendar size={16} /></div>
-                            <div>
-                                <p className="text-xs font-black uppercase">₹{h.amount.toLocaleString()} Received</p>
-                                <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5">{new Date(h.date).toLocaleDateString()} • {h.mode}</p>
+                {audit.history && Object.keys(audit.history).length > 0 ? (
+                    Object.entries(audit.history).map(([monthYear, records]) => (
+                        <div key={monthYear} className="space-y-4 mb-8">
+                            {/* Month Header Label */}
+                            <div className="flex items-center gap-4 px-2">
+                                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent"></div>
+                                <span className="text-[9px] font-black uppercase tracking-[0.4em] text-orange-500/60">{monthYear}</span>
+                                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-orange-500/20 to-transparent"></div>
+                            </div>
+
+                            {/* Monthly Records List */}
+                            <div className="space-y-3">
+                                {records.map((h, idx) => (
+                                    <div key={idx} className="bg-slate-900/40 p-5 rounded-[2.2rem] border border-white/5 flex justify-between items-center group hover:bg-orange-500/5 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-white/5 p-3 rounded-2xl text-orange-500 group-hover:bg-orange-500 group-hover:text-void transition-colors">
+                                                <Calendar size={16} />
+                                            </div>
+                                            <div>
+                                                {/* Field Label: Jaise Tuition Fees ya Uniform Fees */}
+                                                <p className="text-[11px] font-black uppercase text-white tracking-tight">
+                                                    {h.category?.replace(/([A-Z])/g, ' $1').trim() || 'General Component'}
+                                                </p>
+                                                <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5">
+                                                    {new Date(h.date).toLocaleDateString('en-GB')} • {h.mode}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-black text-emerald-400 italic">+ ₹{h.amount.toLocaleString()}</p>
+                                            <div className="flex items-center justify-end gap-1 opacity-20 group-hover:opacity-100 transition-opacity">
+                                                <div className="w-1 h-1 rounded-full bg-emerald-400"></div>
+                                                <p className="text-[6px] font-black text-white uppercase tracking-widest">Captured</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-[7px] font-black text-orange-500 uppercase tracking-widest">{h.month}</p>
-                            <p className="text-[9px] font-bold text-white/10 italic">SYNCED</p>
-                        </div>
+                    ))
+                ) : (
+                    <div className="text-center py-20 bg-slate-900/20 rounded-[3rem] border border-dashed border-white/5 mx-2">
+                        <AlertCircle size={30} className="mx-auto mb-4 text-white/10" />
+                        <p className="text-[9px] font-black uppercase tracking-widest text-white/20 italic">No Transactional Data Logged</p>
                     </div>
-                )) : (
-                    <div className="text-center py-10 opacity-20 text-[9px] font-black uppercase tracking-widest">No Records Captured</div>
                 )}
             </div>
         </div>

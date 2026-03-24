@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown } from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown} from 'lucide-react';
 import API from '../../api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // Direct function import karein
@@ -54,6 +54,7 @@ const StudentFees = () => {
                     ['STUDENT NAME', p.student?.name || 'N/A'],
                     ['ENROLLMENT NO', p.student?.enrollmentNo || 'N/A'],
                     ['GRADE/CLASS', p.student?.grade || 'N/A'],
+                    ['FEE COMPONENT', p.feeCategory || 'General Fees'], // Ye naya add kiya
                     ['FATHER NAME', p.student?.fatherName || 'N/A'],
                     ['PAYMENT MODE', p.paymentMode || 'N/A'],
                     ['BILLING MONTH', `${p.month} ${p.year}`]
@@ -86,8 +87,27 @@ const StudentFees = () => {
         }
     };
 
-    if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
+ if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
 
+    // --- DAY 120: MASTER MATH LOGIC ---
+    const currentMonthPaid = summary?.totalPaidThisMonth || 0;
+    const finalBalance = summary?.remainingFees || 0;
+    const advanceMoney = summary?.advanceBalance || 0;
+
+    const totalExpectedAll = summary?.totalFeesStructure || 0;
+    
+    // Status Logic
+    const isFeesDone = finalBalance <= 0;
+    const statusText = isFeesDone ? "FEES COMPLETED" : "PAYMENT REQUIRED";
+
+    // Activity & Dates
+    const lastDate = summary?.lastActivity ? new Date(summary.lastActivity).toLocaleDateString('en-GB') : "NO ACTIVITY";
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const deadlineStr = nextMonth.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    // Total Structure (Box ke liye)
+    const structureTotal = summary?.totalFeesStructure || 0;
     return (
         <div className="min-h-screen bg-void text-white p-5 pb-32 italic font-sans">
             <div className="flex items-center gap-4 mb-10 border-l-4 border-neon pl-4">
@@ -101,73 +121,61 @@ const StudentFees = () => {
             </div>
 
             <div className="space-y-6">
-                {/* --- MAIN BALANCE CARD (Updated Day 115) --- */}
+                {/* --- MAIN BALANCE CARD (FINAL UPGRADE) --- */}
                 <div className="bg-slate-900/60 p-10 rounded-[3rem] border border-white/5 relative overflow-hidden shadow-2xl">
                     <div className="absolute -top-6 -right-6 opacity-5 rotate-12"><CreditCard size={150} /></div>
 
                     <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-2">
-                        {summary.remainingFees > 0 ? `${summary.currentMonth} Dues` : 'Account Status'}
+                        {!isFeesDone ? `${summary?.currentMonth} Outstanding` : 'Account Integrity'}
                     </p>
 
-                    <h2 className={`text-5xl font-black tracking-tighter mb-4 ${summary.remainingFees > 0 ? 'text-rose-500' : 'text-emerald-400'}`}>
-                        ₹{(summary?.remainingFees || 0).toLocaleString()}
-                        {summary.remainingFees <= 0 && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
+                    <h2 className={`text-5xl font-black tracking-tighter mb-4 ${!isFeesDone ? 'text-rose-500' : 'text-emerald-400'}`}>
+                        ₹{finalBalance.toLocaleString()}
+                        {isFeesDone && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
                     </h2>
 
-                    {/* Naya Advance Badge agar bache ke paise extra hain */}
-                    {summary.advanceBalance > 0 && (
+                    {/* Surplus Adjusted Badge */}
+                    {advanceMoney > 0 && (
                         <div className="flex items-center gap-2 mb-4 bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
                             <CheckCircle size={14} className="text-emerald-400" />
                             <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">
-                                Advance Amount: ₹{summary.advanceBalance.toLocaleString()} Secured
+                                Surplus Adjusted: ₹{advanceMoney.toLocaleString()} Secured
                             </span>
                         </div>
                     )}
 
-                    {/* Penalty Text agar fine laga hai */}
-                    {summary.totalPenalty > 0 && (
-                        <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-4 flex items-center gap-1">
-                            <AlertCircle size={10} /> Includes ₹{summary.totalPenalty.toLocaleString()} Fine
-                        </p>
-                    )}
-
-                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${summary.status === 'Clear' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/30'}`}>
-                        {summary.status === 'Clear' ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
-                        {summary.status === 'Clear' ? 'Paid: System Synced' : 'Payment Required'}
+                    <div className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest ${isFeesDone ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-500 animate-pulse border border-rose-500/30'}`}>
+                        {isFeesDone ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                        {isFeesDone ? 'Fees Completed: Neural Synced' : 'Payment Required'}
                     </div>
                 </div>
 
-                {/* --- STATS GRID --- */}
+                {/* --- STATS GRID: MONTHLY FOCUS --- */}
                 <div className="grid grid-cols-2 gap-5">
-                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
+                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center text-center">
                         <TrendingUp size={20} className="text-emerald-400 mb-2 opacity-40" />
-                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Total Paid</p>
-                        <p className="text-xl font-black text-white italic">₹{(summary?.totalPaid || 0).toLocaleString()}</p>
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Paid For {summary?.currentMonth}</p>
+                        <p className="text-xl font-black text-white italic">₹{currentMonthPaid.toLocaleString()}</p>
                     </div>
-                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center">
+                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex flex-col items-center text-center">
                         <Layers size={20} className="text-white/20 mb-2 opacity-40" />
-                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Fee Structure</p>
-                        <p className="text-xl font-black text-white/40 italic">₹{(summary?.totalFees || 0).toLocaleString()}</p>
+                        <p className="text-[7px] font-black text-white/20 uppercase tracking-widest mb-1">Active Structure</p>
+                        <p className="text-xl font-black text-white/40 italic">₹{structureTotal.toLocaleString()}</p>
                     </div>
                 </div>
 
-                {/* --- TIMELINE INFO --- */}
+                {/* --- TIMELINE INFO: DYNAMIC DEADLINE --- */}
                 <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5 flex justify-between relative overflow-hidden">
                     <div className="absolute left-0 top-0 h-full w-1 bg-neon/30"></div>
                     <div>
                         <p className="text-[8px] font-black text-white/20 uppercase mb-1">Next Deadline</p>
                         <p className="text-xs font-black text-rose-400 uppercase">
-                            {/* Agar fees baki hai toh mahine ki 1st date dikhao */}
-                            {summary?.remainingFees > 0 ? `01/${new Date().getMonth() + 2}/${new Date().getFullYear()}` : 'CLEAR'}
+                            {isFeesDone ? 'NEXT CYCLE: ' : 'DUE BY: '} {deadlineStr}
                         </p>
                     </div>
                     <div className="text-right">
                         <p className="text-[8px] font-black text-white/20 uppercase mb-1">Last Activity</p>
-                        <p className="text-xs font-black text-emerald-400">
-                            {summary?.paymentHistory?.length > 0
-                                ? new Date(summary.paymentHistory[0].date).toLocaleDateString()
-                                : 'NO ACTIVITY'}
-                        </p>
+                        <p className="text-xs font-black text-emerald-400 uppercase">{lastDate}</p>
                     </div>
                 </div>
                 {/* --- POINT 8: PENDING FEES ALERT SECTION --- */}
@@ -214,86 +222,69 @@ const StudentFees = () => {
 
                     <div className="flex justify-between items-center pt-2">
                         <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">Monthly Fees</span>
-                        <span className="text-lg font-black text-neon">₹{(summary?.monthlyFee || 0).toLocaleString()}</span>
+                        <span className="text-lg font-black text-neon">₹{totalExpectedAll.toLocaleString()}</span>
                     </div>
                 </div>
 
-                {/* --- POINT 5: PAYMENT HISTORY SECTION --- */}
+                {/* --- UPGRADED MONTHLY GROUPED HISTORY --- */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl mt-12 mb-10">
                     <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <CheckCircle size={14} className="text-emerald-400" />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Payment History</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Verified Transactions</h3>
                         </div>
-                        <span className="text-[8px] font-black bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full uppercase">
-                            Verified Transactions
-                        </span>
-                    </div>
-                    {/* --- DAY 108: DYNAMIC YEAR DROPDOWN FILTER --- */}
-                    <div className="flex items-center gap-4 mb-8 px-2">
-                        <div className="relative group">
-                            <select
-                                value={selectedYear}
-                                onChange={(e) => setSelectedYear(e.target.value)}
-                                className="appearance-none bg-slate-900 border border-white/10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-neon focus:outline-none focus:border-neon/50 cursor-pointer transition-all hover:bg-white/5"
-                            >
-                                <option value="All">All Years</option>
-                                {/* Unique years nikalne ka logic niche filter mein hai */}
-                                {[...new Set(summary.paymentHistory?.map(p => p.year))].map(yr => (
-                                    <option key={yr} value={yr}>{yr}</option>
-                                ))}
-                            </select>
-                            {/* Chhota down arrow icon (optional) */}
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-30">
-                                <ChevronDown size={12} />
-                            </div>
-                        </div>
-
-                        <div className="ml-auto flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Live Ledger</span>
+                            <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Monthly Ledger Sync</span>
                         </div>
                     </div>
 
-                    {/* --- DAY 108: FILTERED PAYMENT LIST (Step 3) --- */}
-                    <div className="p-6 space-y-4">
-                        {summary.paymentHistory
-                            ?.filter(pay => selectedYear === 'All' ? true : pay.year.toString() === selectedYear)
-                            .length > 0 ? (
-                            summary.paymentHistory
-                                ?.filter(pay => selectedYear === 'All' ? true : pay.year.toString() === selectedYear)
-                                .map((pay, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-emerald-500/20 transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-emerald-500/10 rounded-xl">
-                                                <TrendingUp size={16} className="text-emerald-500" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-white italic">₹{pay.amount.toLocaleString()}</p>
-                                                <p className="text-[8px] font-bold text-white/30 uppercase tracking-tighter">
-                                                    {new Date(pay.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {pay.mode}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        {/* Receipt Download Action */}
-                                        <div className="flex flex-col items-end gap-2 group">
-                                            <button
-                                                onClick={() => downloadReceipt(pay.id)}
-                                                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500 hover:text-black transition-all active:scale-90"
-                                            >
-                                                <Download size={10} />
-                                                <span className="text-[8px] font-black uppercase tracking-widest">Receipt</span>
-                                            </button>
-                                            <div className="text-right">
-                                                <p className="text-[7px] font-black text-emerald-400 uppercase tracking-widest">SUCCESS</p>
-                                                <p className="text-[9px] font-bold text-white/20 italic">{pay.month} {pay.year}</p>
-                                            </div>
-                                        </div>
+                    <div className="p-6 space-y-10">
+                        {summary.paymentHistory && Object.keys(summary.paymentHistory).length > 0 ? (
+                            Object.entries(summary.paymentHistory).map(([monthYear, records]) => (
+                                <div key={monthYear} className="space-y-4">
+                                    {/* Month Divider Label */}
+                                    <div className="flex items-center gap-3 ml-2">
+                                        <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.3em]">{monthYear}</span>
+                                        <div className="h-[1px] flex-1 bg-white/5"></div>
                                     </div>
-                                ))
+
+                                    {/* Inside each month box */}
+                                    <div className="grid gap-3">
+                                        {records.map((pay, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-5 bg-[#0B0F14] rounded-[2rem] border border-white/5 hover:border-cyan-400/30 transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-cyan-400/10 group-hover:text-cyan-400 transition-colors">
+                                                        <TrendingUp size={16} />
+                                                    </div>
+                                                    <div>
+                                                        {/* Category Name: Jaise 'TUITION FEES' */}
+                                                        <p className="text-[11px] font-black text-white uppercase italic tracking-tight">
+                                                            {pay.category?.replace(/([A-Z])/g, ' $1').trim() || 'General Payment'}
+                                                        </p>
+                                                        <p className="text-[8px] font-bold text-white/20 uppercase">
+                                                            {new Date(pay.date).toLocaleDateString('en-GB')} • {pay.mode}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right flex flex-col items-end gap-2">
+                                                    <p className="text-sm font-black text-white italic">₹{pay.amount.toLocaleString()}</p>
+                                                    <button
+                                                        onClick={() => downloadReceipt(pay.id)}
+                                                        className="flex items-center gap-1 text-[7px] font-black uppercase text-cyan-400/40 hover:text-cyan-400 transition-colors"
+                                                    >
+                                                        <Download size={8} /> Download Slip
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
                         ) : (
-                            <div className="py-10 text-center opacity-20 text-[10px] font-black uppercase italic tracking-widest">
-                                No Transactions Found for {selectedYear === 'All' ? 'Archive' : selectedYear}
+                            <div className="py-20 text-center flex flex-col items-center opacity-20">
+                                <Clock size={40} className="mb-4" />
+                                <p className="text-[10px] font-black uppercase tracking-widest">No payment records found in the neural link.</p>
                             </div>
                         )}
                     </div>
