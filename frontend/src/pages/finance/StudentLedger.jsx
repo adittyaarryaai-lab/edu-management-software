@@ -59,7 +59,7 @@ const StudentLedger = () => {
                     <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
                         <Wallet size={12} className="text-emerald-400" />
                         <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic">
-                            Surplus Adjusted: ₹{audit.advance.toLocaleString()} Secured
+                            Advance payment: ₹{audit.advance.toLocaleString()} Secured
                         </span>
                     </div>
                 )}
@@ -129,14 +129,15 @@ const StudentLedger = () => {
                             <div className="space-y-3">
                                 {records.map((h, idx) => (
                                     <div key={idx} className="bg-slate-900/40 p-5 rounded-[2.2rem] border border-white/5 flex justify-between items-center group hover:bg-orange-500/5 transition-all">
+                                        {/* --- StudentLedger.jsx Fix --- */}
                                         <div className="flex items-center gap-4">
                                             <div className="bg-white/5 p-3 rounded-2xl text-orange-500 group-hover:bg-orange-500 group-hover:text-void transition-colors">
                                                 <Calendar size={16} />
                                             </div>
                                             <div>
-                                                {/* Field Label: Jaise Tuition Fees ya Uniform Fees */}
+                                                {/* Yahan 'pay' ki jagah 'h' use karna hai kyunki loop variable 'h' hai */}
                                                 <p className="text-[11px] font-black uppercase text-white tracking-tight">
-                                                    {h.category?.replace(/([A-Z])/g, ' $1').trim() || 'General Component'}
+                                                    {h.category || 'GENERAL FEE'}
                                                 </p>
                                                 <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5">
                                                     {new Date(h.date).toLocaleDateString('en-GB')} • {h.mode}

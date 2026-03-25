@@ -110,7 +110,7 @@ router.get('/student-summary', protect, async (req, res) => {
                 if (item && !item.isNone && item.amount > 0) {
                     const amount = Number(item.amount) || 0;
                     const label = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
-                    
+
                     if (item.billingCycle === 'monthly') {
                         monthlyStructureTotal += amount;
                         structureDetails[key] = { label, amount, billingCycle: 'monthly' };
@@ -133,9 +133,9 @@ router.get('/student-summary', protect, async (req, res) => {
         // 3. Balance Logic (Strictly Tenure-Based Monthly)
         const joinDate = new Date(student.createdAt);
         const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-        
+
         const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
-        
+
         // Sirf un payments ka sum jo Monthly category ki hain
         const totalMonthlyPaidSoFar = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
@@ -144,14 +144,35 @@ router.get('/student-summary', protect, async (req, res) => {
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-        // 4. History Grouping (Including ALL types for records)
         const groupedHistory = allPayments.reduce((acc, pay) => {
             const key = `${pay.month} ${pay.year}`;
             if (!acc[key]) acc[key] = [];
+
+            // --- DAY 121: THE ULTIMATE CLEANER ---
+            const rawRemarks = pay.remarks || "";
+            let displayCategory = "GENERAL FEE";
+
+            // 1. Agar remarks mein hamara naya format hai (PURPOSE: EXAM FEES)
+            if (rawRemarks.toUpperCase().includes("PURPOSE:")) {
+                displayCategory = rawRemarks.split(":")[1].trim();
+            }
+            // 2. Agar remark purana hai (Fee payment for: Tuition Fees)
+            else if (rawRemarks.includes(":")) {
+                displayCategory = rawRemarks.split(":").pop().trim();
+            }
+            // 3. Agar feeCategory field bhari hai (Fallback)
+            else if (pay.feeCategory && pay.feeCategory !== 'General') {
+                displayCategory = pay.feeCategory;
+            }
+            // 4. Kuch nahi toh pura remark khud
+            else {
+                displayCategory = rawRemarks || "GENERAL FEE";
+            }
+
             acc[key].push({
                 id: pay._id,
                 amount: pay.amountPaid,
-                category: pay.remarks?.split(': ')[1] || 'GENERAL FEE', // Slip par naam dikhane ke liye
+                category: displayCategory.toUpperCase(), // Ab yahan asli naam jayega
                 date: pay.date,
                 mode: pay.paymentMode
             });
@@ -462,7 +483,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         if (!student) return res.status(404).json({ message: 'Identity missing' });
 
         const rawGrade = student.grade || "";
-        const numericPart = rawGrade.match(/\d+/); 
+        const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
         const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
@@ -508,10 +529,10 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         // 3. Balance Math (Only Monthly Tenure Based)
         const joinDate = new Date(student.createdAt);
         const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-        
+
         // Kitna Monthly paisa banta tha Admission se ab tak
         const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
-        
+
         // Kitna Monthly paisa asliyat mein diya (One-time ko hata kar)
         const totalMonthlyPaidAllTime = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
@@ -524,17 +545,34 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             student,
             totalPaidThisMonth: collectedThisMonth, // Box 1: Zero ho jayega naye mahine par
             totalExpected: monthlyOnlyStructureTotal, // Box 2: Sirf Per Month total
-            remaining: balance > 0 ? balance : 0,   
-            advance: balance < 0 ? Math.abs(balance) : 0, 
+            remaining: balance > 0 ? balance : 0,
+            advance: balance < 0 ? Math.abs(balance) : 0,
             currentMonth: currentMonthName,
             structureDetails, // List mein sab dikhega settled tag ke sath
             history: allPayments.reduce((acc, pay) => {
                 const key = `${pay.month} ${pay.year}`;
                 if (!acc[key]) acc[key] = [];
+
+                // --- DAY 121: ADVANCED CATEGORY CLEANER ---
+                const rawRemarks = pay.remarks || "";
+                let displayCategory = "GENERAL FEE";
+
+                if (rawRemarks.toUpperCase().includes("PURPOSE:")) {
+                    displayCategory = rawRemarks.split(":")[1].trim();
+                } else if (rawRemarks.includes(":")) {
+                    displayCategory = rawRemarks.split(":").pop().trim();
+                } else if (pay.feeCategory && pay.feeCategory !== 'General') {
+                    displayCategory = pay.feeCategory;
+                } else {
+                    displayCategory = rawRemarks || "GENERAL FEE";
+                }
+
                 acc[key].push({
-                    id: pay._id, amount: pay.amountPaid,
-                    category: pay.remarks?.split(': ')[1] || 'General Fee',
-                    date: pay.date, mode: pay.paymentMode
+                    id: pay._id,
+                    amount: pay.amountPaid,
+                    category: displayCategory.toUpperCase(),
+                    date: pay.date,
+                    mode: pay.paymentMode
                 });
                 return acc;
             }, {}),

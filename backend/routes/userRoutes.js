@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 const User = require('../models/User');
-const Fee = require('../models/Fee'); 
+const Fee = require('../models/Fee');
 router.post('/add-teacher', protect, adminOnly, async (req, res) => {
     const {
         name, email, password, subjects,
@@ -191,7 +191,7 @@ router.get('/grades/all', protect, async (req, res) => {
 router.get('/finance/stats', protect, async (req, res) => {
     try {
         const schoolId = req.user.schoolId;
-        
+
         const School = require('../models/School');
         const schoolDetails = await School.findById(schoolId).select('schoolName address');
 
@@ -269,10 +269,10 @@ router.post('/finance/add-payment', protect, async (req, res) => {
 
     try {
         // 2. Enrollment Number se database mein student ko dhoondo
-        const student = await User.findOne({ 
-            enrollmentNo: enrollmentNo, 
+        const student = await User.findOne({
+            enrollmentNo: enrollmentNo,
             schoolId: req.user.schoolId,
-            role: 'student' 
+            role: 'student'
         });
 
         // 3. Agar bacha nahi milta toh error do
@@ -280,23 +280,23 @@ router.post('/finance/add-payment', protect, async (req, res) => {
             return res.status(404).json({ message: "Student Identity Not Found! Check Enrollment No. ❌" });
         }
 
-        // 4. Fee record create karo (Lekin database mein ID hi store hogi for linking)
+        // userRoutes.js mein add-payment route ke andar Fee.create wala hissa:
         const feeRecord = await Fee.create({
             schoolId: req.user.schoolId,
-            student: student._id, // Idhar student ki asli ID map ho jayegi
+            student: student._id,
             amountPaid: Number(amountPaid),
             month,
             year: Number(year),
             paymentMode,
-            // 5. Remarks mein auto-purpose add kar rahe hain agar remarks khali hai
-            remarks: remarks || `Fee payment for: ${feeCategory || 'General'}`,
-            feeCategory: feeCategory || 'General', // Naya field tracking ke liye
+            // Strict Labeling: Isse history mein kabhi General Fee nahi aayega
+            remarks: `PURPOSE: ${feeCategory}`,
+            feeCategory: feeCategory,
             date: new Date()
-        });
+        });;
 
-        res.status(201).json({ 
-            message: `Payment Linked to ${student.name} Successfully! ✅`, 
-            feeRecord 
+        res.status(201).json({
+            message: `Payment Linked to ${student.name} Successfully! ✅`,
+            feeRecord
         });
     } catch (error) {
         console.error("Payment Process Error:", error);

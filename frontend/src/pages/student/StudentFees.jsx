@@ -87,7 +87,7 @@ const StudentFees = () => {
         }
     };
 
- if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
+    if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
 
     // --- DAY 120: MASTER MATH LOGIC ---
     const currentMonthPaid = summary?.totalPaidThisMonth || 0;
@@ -95,7 +95,7 @@ const StudentFees = () => {
     const advanceMoney = summary?.advanceBalance || 0;
 
     const totalExpectedAll = summary?.totalFeesStructure || 0;
-    
+
     // Status Logic
     const isFeesDone = finalBalance <= 0;
     const statusText = isFeesDone ? "FEES COMPLETED" : "PAYMENT REQUIRED";
@@ -257,10 +257,10 @@ const StudentFees = () => {
                                                     <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-cyan-400/10 group-hover:text-cyan-400 transition-colors">
                                                         <TrendingUp size={16} />
                                                     </div>
+                                                    {/* StudentFees.jsx mein mapping ke andar */}
                                                     <div>
-                                                        {/* Category Name: Jaise 'TUITION FEES' */}
-                                                        <p className="text-[11px] font-black text-white uppercase italic tracking-tight">
-                                                            {pay.category?.replace(/([A-Z])/g, ' $1').trim() || 'General Payment'}
+                                                        <p className="text-[11px] font-black uppercase text-white tracking-tight">
+                                                            {pay.category || h.category} {/* Backend se aane wala Clean Name */}
                                                         </p>
                                                         <p className="text-[8px] font-bold text-white/20 uppercase">
                                                             {new Date(pay.date).toLocaleDateString('en-GB')} • {pay.mode}

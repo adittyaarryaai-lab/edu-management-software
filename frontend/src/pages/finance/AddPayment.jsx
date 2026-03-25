@@ -117,18 +117,31 @@ const AddPayment = () => {
                                 <button type="button" onClick={handleAllSelect} className="text-[8px] font-black text-cyan-400 border border-cyan-400/30 px-3 py-1 rounded-full uppercase hover:bg-cyan-400 hover:text-black">Select All Fields</button>
                             </div>
 
+                            {/* // AddPayment.jsx mein Fee Purpose ka select dropdown update karo */}
                             <select
                                 className="w-full bg-[#0B0F14] p-4 rounded-2xl border border-white/5 text-xs text-cyan-400 font-bold outline-none"
-                                value={formData.feeCategory}
+                                // Yahan hum state se wahi key nikalenge jo label se match kare
+                                value={activeFields.find(f => f.label === formData.feeCategory)?.key || formData.feeCategory}
                                 onChange={(e) => {
-                                    const selected = activeFields.find(f => f.key === e.target.value);
-                                    setFormData({ ...formData, feeCategory: e.target.value, amountPaid: selected ? selected.amount : '' });
+                                    const val = e.target.value;
+                                    const selected = activeFields.find(f => f.key === val);
+
+                                    setFormData({
+                                        ...formData,
+                                        // Database mein 'label' jaye (e.g. ADMISSION FEES)
+                                        feeCategory: selected ? selected.label : val,
+                                        amountPaid: selected ? selected.amount : ''
+                                    });
                                 }}
                                 required
                             >
                                 <option value="">-- CHOOSE FEE TYPE --</option>
                                 <option value="ALL" className="font-black text-white bg-cyan-900">ALL (FULL SETTLEMENT)</option>
-                                {activeFields.map(f => <option key={f.key} value={f.key}>{f.label} - ₹{f.amount}</option>)}
+                                {activeFields.map(f => (
+                                    <option key={f.key} value={f.key}>
+                                        {f.label} - ₹{f.amount}
+                                    </option>
+                                ))}
                             </select>
 
                             <div className="relative mt-4">
