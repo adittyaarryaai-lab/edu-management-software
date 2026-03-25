@@ -304,15 +304,41 @@ router.post('/finance/add-payment', protect, async (req, res) => {
     }
 });
 
-// --- DAY 92: GET RECEIPT DETAILS WITH SCHOOL INFO ---
 router.get('/finance/receipt/:feeId', protect, async (req, res) => {
     try {
         const fee = await Fee.findById(req.params.feeId)
-            .populate('student', 'name enrollmentNo grade phone')
-            .populate({ path: 'schoolId', select: 'name address phone logo' });
+            .populate('student', 'name enrollmentNo grade phone fatherName')
+            .populate({ 
+                path: 'schoolId', 
+                select: 'schoolName name address phone schoolContact logo' 
+            });
+
         if (!fee) return res.status(404).json({ message: 'Receipt not found' });
 
-        res.json(fee);
+        // --- DYNAMIC PURPOSE EXTRACTION (Flexible) ---
+        const rawRemarks = fee.remarks || "";
+        let cleanPurpose = "MONTHLY FEES";
+
+        if (rawRemarks.toUpperCase().includes("PURPOSE:")) {
+            // Case-insensitive split aur cleanup
+            cleanPurpose = rawRemarks.split(/purpose:/i)[1].trim().toUpperCase();
+        } else if (fee.feeCategory && fee.feeCategory !== 'General') {
+            cleanPurpose = fee.feeCategory.toUpperCase();
+        }
+
+        // Date Format Fix
+        const d = new Date(fee.date);
+        const formattedDate = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+
+        const enhancedFee = fee.toObject();
+        enhancedFee.displayPurpose = cleanPurpose;
+        enhancedFee.formattedIssuedDate = formattedDate;
+        enhancedFee.displaySchoolName = fee.schoolId?.schoolName || fee.schoolId?.name || "EDUFLOWAI INSTITUTION";
+        
+        // Contact Priority Logic: schoolContact -> phone -> fallback
+        enhancedFee.displayContact = fee.schoolId?.schoolContact || fee.schoolId?.phone || "9874637875"; // Defaulting to your backend phone for now
+
+        res.json(enhancedFee);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching receipt' });
     }
