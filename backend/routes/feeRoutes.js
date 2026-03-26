@@ -15,7 +15,7 @@ router.get('/settings/penalty', protect, async (req, res) => {
     }
 });
 
-// --- DAY 95: UPDATE PENALTY SETTINGS FROM FRONTEND ---
+// --- DAY 123: UPDATE PENALTY SETTINGS (WITH ACTIVATION TIMESTAMP) ---
 router.post('/settings/penalty', protect, async (req, res) => {
     try {
         const { dailyRate, isActive } = req.body;
@@ -23,10 +23,11 @@ router.post('/settings/penalty', protect, async (req, res) => {
 
         await School.findByIdAndUpdate(req.user.schoolId, {
             'penaltySettings.dailyRate': dailyRate,
-            'penaltySettings.isActive': isActive
+            'penaltySettings.isActive': isActive,
+            'penaltySettings.activatedAt': isActive ? new Date() : null // ON hone par time save
         });
 
-        res.json({ message: 'Institutional Penalty Policy Updated! ⚡' });
+        res.json({ message: isActive ? 'Penalty Activated! ⚡' : 'Penalty Paused! 🛡️' });
     } catch (error) {
         res.status(500).json({ message: 'Settings update failed' });
     }
@@ -80,7 +81,7 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
-// --- DAY 120: FINAL ULTIMATE STUDENT SUMMARY (STRICT BIFURCATION) ---
+// --- DAY 123: ULTIMATE STUDENT SUMMARY (CARRY-FORWARD PENALTY) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
@@ -99,9 +100,8 @@ router.get('/student-summary', protect, async (req, res) => {
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
         const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
 
-        // 1. Core Logic Variables
-        let monthlyStructureTotal = 0; // Sirf Monthly components ka sum (Box ke liye)
-        let oneTimeLabels = [];       // Isolation filter ke liye
+        let monthlyStructureTotal = 0;
+        let oneTimeLabels = [];
         let structureDetails = {};
 
         if (structure && structure.fees) {
@@ -110,12 +110,10 @@ router.get('/student-summary', protect, async (req, res) => {
                 if (item && !item.isNone && item.amount > 0) {
                     const amount = Number(item.amount) || 0;
                     const label = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
-
                     if (item.billingCycle === 'monthly') {
                         monthlyStructureTotal += amount;
                         structureDetails[key] = { label, amount, billingCycle: 'monthly' };
                     } else {
-                        // ONE-TIME: Sirf label store karo, math mein mat jodo
                         oneTimeLabels.push(label);
                         structureDetails[key] = { label, amount, billingCycle: 'one-time' };
                     }
@@ -123,20 +121,16 @@ router.get('/student-summary', protect, async (req, res) => {
             });
         }
 
-        // 2. Strict Collection Filter (NO ONE-TIME IN STATS)
         const paidThisMonth = allPayments.filter(p => {
             const isCurrent = p.month === currentMonthName && p.year === currentYear;
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return isCurrent && !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // 3. Balance Logic (Strictly Tenure-Based Monthly)
         const joinDate = new Date(student.createdAt);
         const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-
         const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
 
-        // Sirf un payments ka sum jo Monthly category ki hain
         const totalMonthlyPaidSoFar = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return !isOneTime;
@@ -144,49 +138,64 @@ router.get('/student-summary', protect, async (req, res) => {
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
+        // --- DAY 123: INSTANT HIT PENALTY LOGIC ---
+        const School = require('../models/School');
+        const schoolData = await School.findById(schoolId);
+        const pSettings = schoolData.penaltySettings;
+        let accruedPenalty = 0;
+
+        if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+            const activationDate = new Date(pSettings.activatedAt);
+            const today = new Date();
+
+            // Difference in days (Minimum 1 day logic)
+            const diffTime = Math.abs(today.getTime() - activationDate.getTime());
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            // RULE: Button daba toh Day 1 ki penalty (₹100) toh lagegi hi lagegi
+            diffDays += 1;
+
+            // 11:00 AM Rule: Agar aaj subah ke 11 baj chuke hain 
+            // aur activation 11 se pehle ki hai (yaani ek din pura ho gaya technicaly)
+            if (today.getHours() >= 11 && today.getDate() !== activationDate.getDate()) {
+                // diffDays automatic 2nd day utha lega milliseconds ki wajah se
+            }
+
+            accruedPenalty = diffDays * (pSettings.dailyRate || 0);
+        }
+
         const groupedHistory = allPayments.reduce((acc, pay) => {
             const key = `${pay.month} ${pay.year}`;
             if (!acc[key]) acc[key] = [];
-
-            // --- DAY 121: THE ULTIMATE CLEANER ---
             const rawRemarks = pay.remarks || "";
             let displayCategory = "GENERAL FEE";
-
-            // 1. Agar remarks mein hamara naya format hai (PURPOSE: EXAM FEES)
-            if (rawRemarks.toUpperCase().includes("PURPOSE:")) {
-                displayCategory = rawRemarks.split(":")[1].trim();
-            }
-            // 2. Agar remark purana hai (Fee payment for: Tuition Fees)
-            else if (rawRemarks.includes(":")) {
-                displayCategory = rawRemarks.split(":").pop().trim();
-            }
-            // 3. Agar feeCategory field bhari hai (Fallback)
-            else if (pay.feeCategory && pay.feeCategory !== 'General') {
-                displayCategory = pay.feeCategory;
-            }
-            // 4. Kuch nahi toh pura remark khud
-            else {
-                displayCategory = rawRemarks || "GENERAL FEE";
-            }
+            if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
+            else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
+            else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }
+            else { displayCategory = rawRemarks || "GENERAL FEE"; }
 
             acc[key].push({
-                id: pay._id,
-                amount: pay.amountPaid,
-                category: displayCategory.toUpperCase(), // Ab yahan asli naam jayega
-                date: pay.date,
-                mode: pay.paymentMode
+                id: pay._id, amount: pay.amountPaid,
+                category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode
             });
             return acc;
         }, {});
 
         res.json({
             studentName: student.name,
+            enrollmentNo: student.enrollmentNo, // <--- YE ADD KIYA
+            fatherName: student.fatherName,     // <--- YE ADD KIYA
+            mobile: student.phone,              // <--- YE ADD KIYA
+            grade: student.grade,               // <--- YE ADD KIYA
+            schoolName: student.schoolId?.schoolName || "EDUFLOWAI INSTITUTION",
             currentMonth: currentMonthName,
-            totalPaidThisMonth: paidThisMonth, // Reset on 1st + Strictly Monthly
+            totalPaidThisMonth: paidThisMonth,
             lastActivity: allPayments.length > 0 ? allPayments[0].date : null,
-            remainingFees: balance > 0 ? balance : 0,
+            totalPenalty: accruedPenalty,
+            remainingFees: balance > 0 ? balance : 0, // Ye bina penalty ka pending hai
+            grandTotal: (balance > 0 ? balance : 0) + accruedPenalty, // Ye penalty jod kar hai
             advanceBalance: balance < 0 ? Math.abs(balance) : 0,
-            totalFeesStructure: monthlyStructureTotal, // Now strictly monthly
+            totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
             paymentHistory: groupedHistory
         });
@@ -469,7 +478,7 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
     }
 });
 
-// --- DAY 120: STRICT ACCOUNTING AUDIT ROUTE (FINAL) ---
+// --- DAY 123: STRICT AUDIT ROUTE (CARRY-FORWARD PENALTY) ---
 router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     try {
         const studentId = req.params.studentId;
@@ -488,8 +497,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
         const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
 
-        // 1. Component Bifurcation (Strict Isolation)
-        let monthlyOnlyStructureTotal = 0; // Box 2 ke liye (Strictly Monthly)
+        let monthlyOnlyStructureTotal = 0;
         let structureDetails = [];
         let oneTimeLabels = [];
 
@@ -499,41 +507,28 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
                 if (item && !item.isNone && item.amount > 0) {
                     const labelName = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
                     const amount = Number(item.amount);
+                    if (item.billingCycle === 'monthly') { monthlyOnlyStructureTotal += amount; }
+                    else { oneTimeLabels.push(labelName); }
 
-                    if (item.billingCycle === 'monthly') {
-                        monthlyOnlyStructureTotal += amount;
-                    } else {
-                        oneTimeLabels.push(labelName);
-                        // One-time yahan total mein add NAHI ho raha
-                    }
-
-                    // Ye sirf table mein dikhane ke liye hai
                     const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName));
                     structureDetails.push({
-                        label: labelName,
-                        amount: amount,
-                        cycle: item.billingCycle,
+                        label: labelName, amount: amount, cycle: item.billingCycle,
                         isPaid: isPaidAlready && item.billingCycle === 'one-time'
                     });
                 }
             });
         }
 
-        // 2. Strict Collection: Sirf Current Month + Strictly NO One-time
         const collectedThisMonth = allPayments.filter(p => {
             const isCurrentMonth = p.month === currentMonthName && p.year === currentYear;
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return isCurrentMonth && !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // 3. Balance Math (Only Monthly Tenure Based)
         const joinDate = new Date(student.createdAt);
         const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-
-        // Kitna Monthly paisa banta tha Admission se ab tak
         const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
 
-        // Kitna Monthly paisa asliyat mein diya (One-time ko hata kar)
         const totalMonthlyPaidAllTime = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return !isOneTime;
@@ -541,42 +536,53 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
 
         const balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
 
+        // --- DAY 123: INSTANT HIT PENALTY LOGIC ---
+        const School = require('../models/School');
+        const schoolData = await School.findById(schoolId);
+        const pSettings = schoolData.penaltySettings;
+        let accruedPenalty = 0;
+
+        if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+            const activationDate = new Date(pSettings.activatedAt);
+            const today = new Date();
+
+            // Difference in days (Minimum 1 day logic)
+            const diffTime = Math.abs(today.getTime() - activationDate.getTime());
+            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            // RULE: Button daba toh Day 1 ki penalty (₹100) toh lagegi hi lagegi
+            diffDays += 1;
+
+            // 11:00 AM Rule: Agar aaj subah ke 11 baj chuke hain 
+            // aur activation 11 se pehle ki hai (yaani ek din pura ho gaya technicaly)
+            if (today.getHours() >= 11 && today.getDate() !== activationDate.getDate()) {
+                // diffDays automatic 2nd day utha lega milliseconds ki wajah se
+            }
+
+            accruedPenalty = diffDays * (pSettings.dailyRate || 0);
+        }
         res.json({
             student,
-            totalPaidThisMonth: collectedThisMonth, // Box 1: Zero ho jayega naye mahine par
-            totalExpected: monthlyOnlyStructureTotal, // Box 2: Sirf Per Month total
-            remaining: balance > 0 ? balance : 0,
+            totalPaidThisMonth: collectedThisMonth,
+            totalExpected: monthlyOnlyStructureTotal,
+            totalPenalty: accruedPenalty,
+            remaining: (balance > 0 ? balance : 0) + accruedPenalty,
             advance: balance < 0 ? Math.abs(balance) : 0,
             currentMonth: currentMonthName,
-            structureDetails, // List mein sab dikhega settled tag ke sath
+            structureDetails,
             history: allPayments.reduce((acc, pay) => {
                 const key = `${pay.month} ${pay.year}`;
                 if (!acc[key]) acc[key] = [];
-
-                // --- DAY 121: ADVANCED CATEGORY CLEANER ---
                 const rawRemarks = pay.remarks || "";
                 let displayCategory = "GENERAL FEE";
-
-                if (rawRemarks.toUpperCase().includes("PURPOSE:")) {
-                    displayCategory = rawRemarks.split(":")[1].trim();
-                } else if (rawRemarks.includes(":")) {
-                    displayCategory = rawRemarks.split(":").pop().trim();
-                } else if (pay.feeCategory && pay.feeCategory !== 'General') {
-                    displayCategory = pay.feeCategory;
-                } else {
-                    displayCategory = rawRemarks || "GENERAL FEE";
-                }
-
-                acc[key].push({
-                    id: pay._id,
-                    amount: pay.amountPaid,
-                    category: displayCategory.toUpperCase(),
-                    date: pay.date,
-                    mode: pay.paymentMode
-                });
+                if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
+                else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
+                else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }
+                else { displayCategory = rawRemarks || "GENERAL FEE"; }
+                acc[key].push({ id: pay._id, amount: pay.amountPaid, category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode });
                 return acc;
             }, {}),
-            status: balance <= 0 ? 'COMPLETED' : 'PENDING'
+            status: ((balance > 0 ? balance : 0) + accruedPenalty) <= 0 ? 'COMPLETED' : 'PENDING'
         });
 
     } catch (error) {

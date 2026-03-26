@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown} from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown } from 'lucide-react';
 import API from '../../api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // Direct function import karein
@@ -129,8 +129,23 @@ const StudentFees = () => {
                         {!isFeesDone ? `${summary?.currentMonth} Outstanding` : 'Account Integrity'}
                     </p>
 
+                    {/* --- StudentFees.jsx Update --- */}
+
+                    {/* Surplus Adjusted Badge ke upar ya niche ye Penalty Alert daldo */}
+                    {summary?.totalPenalty > 0 && (
+                        <div className="flex items-center gap-2 mb-4 bg-rose-500/10 p-4 rounded-3xl border border-rose-500/20 shadow-lg shadow-rose-500/5">
+                            <AlertCircle size={16} className="text-rose-500 animate-pulse" />
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em]">School Fine due to late fees</span>
+                                <span className="text-[8px] font-bold text-white/30 uppercase italic">Late fee of ₹{summary.totalPenalty.toLocaleString()} added to dues</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Main Balance Heading badal do */}
                     <h2 className={`text-5xl font-black tracking-tighter mb-4 ${!isFeesDone ? 'text-rose-500' : 'text-emerald-400'}`}>
-                        ₹{finalBalance.toLocaleString()}
+                        {/* backend se aane wala grandTotal use karo jo balance + penalty hai */}
+                        ₹{(summary?.grandTotal || finalBalance).toLocaleString()}
                         {isFeesDone && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
                     </h2>
 
@@ -179,7 +194,7 @@ const StudentFees = () => {
                     </div>
                 </div>
                 {/* --- POINT 8: PENDING FEES ALERT SECTION --- */}
-                {summary.remainingFees > 0 && (
+                {(summary.remainingFees > 0 || summary.totalPenalty > 0) && (
                     <div className="bg-rose-500/10 border border-rose-500/20 p-6 rounded-[2.5rem] mt-8 flex flex-col gap-4 relative overflow-hidden group">
                         <div className="flex items-start gap-4">
                             <div className="p-3 bg-rose-500/20 rounded-2xl relative z-10">
@@ -190,8 +205,8 @@ const StudentFees = () => {
                                     Balance Adjustment Required
                                 </h4>
                                 <p className="text-[11px] font-bold text-white/60 leading-relaxed italic">
-                                    Account mismatch detected for <span className="text-white">{summary.currentMonth}</span>.
-                                    Pending: <span className="text-white font-black">₹{(summary?.remainingFees || 0).toLocaleString()}</span>.
+                                    Current Monthly Fees: <span className="text-white font-black">₹{summary.remainingFees.toLocaleString()}</span>
+                                    {summary.totalPenalty > 0 && <> <br /> Late Fee Penalty: <span className="text-rose-400 font-black">₹{summary.totalPenalty.toLocaleString()}</span></>}
                                 </p>
                             </div>
                         </div>
@@ -199,7 +214,8 @@ const StudentFees = () => {
                             onClick={() => navigate('/student/checkout')}
                             className="w-full py-4 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95"
                         >
-                            Resolve Balance ⚡
+                            {/* Button text change */}
+                            Resolve Total: ₹{(summary.grandTotal || summary.remainingFees).toLocaleString()} ⚡
                         </button>
                     </div>
                 )}

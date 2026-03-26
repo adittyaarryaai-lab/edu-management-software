@@ -16,20 +16,22 @@ const schoolSchema = new mongoose.Schema({
         totalPaid: { type: Number, default: 0 },
         status: { type: String, enum: ['Active', 'Terminated'], default: 'Active' },
         onboardingDate: { type: Date, default: Date.now },
-        
+
         // --- DAY 73: AUTOMATED BILLING FIELDS ---
         lastPaymentDate: { type: Date, default: Date.now },
-        nextPaymentDate: { 
-            type: Date, 
+        nextPaymentDate: {
+            type: Date,
             default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Default: 30 days from now
         },
-        hasPaidAdvance: { type: Boolean, default: false } 
+        hasPaidAdvance: { type: Boolean, default: false }
     },
     sessionYear: { type: String, default: '2026-27' },
     // --- DAY 95: PENALTY CONFIGURATION ---
+    // School.js mein penaltySettings wala part update karo
     penaltySettings: {
-        dailyRate: { type: Number, default: 0 }, // Agar 0 hai toh koi fine nahi lagega
-        isActive: { type: Boolean, default: false }
+        dailyRate: { type: Number, default: 0 },
+        isActive: { type: Boolean, default: false },
+        activatedAt: { type: Date } // <--- YE NAYI FIELD ADD KARO
     },
 
     // --- DAY 110: ONLINE PAYMENT GATEWAY CONFIG ---
@@ -39,7 +41,7 @@ const schoolSchema = new mongoose.Schema({
         isActive: { type: Boolean, default: false } // Kya ye school online payments accept kar raha hai?
     },
 
-    isDeleted: { type: Boolean, default: false } 
+    isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('School', schoolSchema);

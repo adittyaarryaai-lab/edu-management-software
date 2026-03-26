@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, Users, AlertCircle, Clock, IndianRupee, TrendingUp, Plus, ArrowRight, Bell, Zap, CheckCircle, Layers } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion'; 
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 
@@ -11,10 +11,11 @@ const FinanceDashboard = () => {
         recentPayments: [],
         penaltySettings: { dailyRate: 0, isActive: false }
     });
-    
+
     // --- DAY 112: NEW PAYMENT ALERT STATE ---
     const [newPaymentAlert, setNewPaymentAlert] = useState(null);
-    
+    const [penaltyUpdateMsg, setPenaltyUpdateMsg] = useState(null);
+
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
@@ -50,11 +51,11 @@ const FinanceDashboard = () => {
 
     useEffect(() => {
         fetchStats(); // Initial Load
-        
+
         // --- STEP 2: REAL-TIME POLLING ---
         const interval = setInterval(fetchStats, 10000); // Har 10 sec mein update
         return () => clearInterval(interval);
-    }, [stats.recentPayments]); 
+    }, [stats.recentPayments]);
 
     const statCards = [
         { label: "Today's Collection", value: stats.collectedToday, icon: <Wallet className="text-cyan-400" />, color: "border-cyan-400/20", path: '/finance/add-payment' },
@@ -65,11 +66,11 @@ const FinanceDashboard = () => {
 
     return (
         <div className="min-h-screen bg-void text-white font-sans italic pb-24">
-            
+
             {/* --- STEP 3: FLOATING NOTIFICATION UI --- */}
             <AnimatePresence>
                 {newPaymentAlert && (
-                    <motion.div 
+                    <motion.div
                         initial={{ y: -100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: -100, opacity: 0 }}
@@ -91,22 +92,66 @@ const FinanceDashboard = () => {
                         </div>
                     </motion.div>
                 )}
+                {/* --- PENALTY RATE UPDATE NOTIFICATION --- */}
+                {penaltyUpdateMsg && (
+                    <motion.div
+                        initial={{ y: -100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -100, opacity: 0 }}
+                        className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm bg-slate-900/90 border-2 border-rose-500 p-4 rounded-3xl shadow-[0_20px_60px_rgba(225,29,72,0.3)] backdrop-blur-xl flex items-center gap-4"
+                    >
+                        <div className="p-2.5 bg-rose-500 rounded-2xl text-white">
+                            <AlertCircle size={18} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-rose-500">System Protocol Updated</h4>
+                            <p className="text-[9px] font-bold text-white/70 uppercase italic">Penalty Rate Updated! ⚡</p>
+                        </div>
+                        <CheckCircle size={16} className="text-emerald-400" />
+                    </motion.div>
+                )}
             </AnimatePresence>
 
-            {/* Header */}
-            <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md flex justify-between items-center">
-                <div>
+            {/* --- DAY 123: PRO HEADER WITH PENALTY CONTROL --- */}
+            <div className="p-8 border-b border-white/5 bg-slate-900/50 backdrop-blur-md flex justify-between items-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12"><IndianRupee size={120} /></div>
+
+                <div className="relative z-10">
                     <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20 italic">Finance Node</h1>
                     <p className="text-[10px] text-white/20 uppercase font-black mt-1 tracking-widest leading-none italic">
                         Accountant: {user?.name}
                     </p>
                 </div>
-                <button
-                    onClick={() => navigate('/finance/add-payment')}
-                    className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all z-30"
-                >
-                    <Plus size={20} strokeWidth={3} />
-                </button>
+
+                <div className="flex items-center gap-3 relative z-30">
+                    {/* Dynamic Penalty Toggle in Header */}
+                    <div className="flex flex-col items-end mr-2">
+                        <span className={`text-[7px] font-black uppercase tracking-widest ${stats.penaltySettings?.isActive ? 'text-rose-500' : 'text-white/20'}`}>
+                            {stats.penaltySettings?.isActive ? 'Penalty Active' : 'Penalty Paused'}
+                        </span>
+                        <button
+                            onClick={async () => {
+                                const newStatus = !stats.penaltySettings?.isActive;
+                                await API.post('/fees/settings/penalty', {
+                                    dailyRate: stats.penaltySettings?.dailyRate || 10,
+                                    isActive: newStatus
+                                });
+                                fetchStats(); // Taaki turant UI update ho
+                            }}
+                            className={`w-10 h-5 rounded-full p-1 mt-1 transition-all flex items-center ${stats.penaltySettings?.isActive ? 'bg-rose-500' : 'bg-white/10'}`}
+                        >
+                            <div className={`w-3 h-3 bg-white rounded-full transition-all transform ${stats.penaltySettings?.isActive ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+
+                    {/* Add Payment Button */}
+                    <button
+                        onClick={() => navigate('/finance/add-payment')}
+                        className="p-4 bg-cyan-400 text-black rounded-2xl shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-90 transition-all"
+                    >
+                        <Plus size={20} strokeWidth={3} />
+                    </button>
+                </div>
             </div>
 
             <div className="px-5 mt-8 space-y-6 relative z-10">
@@ -126,54 +171,53 @@ const FinanceDashboard = () => {
                     ))}
                 </div>
 
-                {/* Penalty Protocol Card */}
-                <div className="bg-slate-900/60 rounded-[2.5rem] border border-white/5 p-6 shadow-2xl">
-                    <div className="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Penalty Protocol</h3>
-                            <p className="text-[8px] text-white/20 italic">Automated Late Fee Calculation</p>
+                {/* --- DAY 123: SUBTLE PENALTY INFO WITH ACTION BUTTON --- */}
+                {stats.penaltySettings?.isActive && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                        className="mx-2 p-3 bg-rose-500/5 border border-rose-500/20 rounded-2xl flex justify-between items-center px-5"
+                    >
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></div>
+                            <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest">Protocol Live: Daily Fine</span>
                         </div>
-                        <button
-                            onClick={async () => {
-                                const newStatus = !stats.penaltySettings?.isActive;
-                                await API.post('/fees/settings/penalty', {
-                                    dailyRate: stats.penaltySettings?.dailyRate || 0,
-                                    isActive: newStatus
-                                });
-                                window.location.reload(); 
-                            }}
-                            className={`w-12 h-6 rounded-full p-1 transition-all ${stats.penaltySettings?.isActive ? 'bg-neon' : 'bg-white/10'}`}
-                        >
-                            <div className={`w-4 h-4 bg-void rounded-full transition-all ${stats.penaltySettings?.isActive ? 'translate-x-6' : 'translate-x-0'}`} />
-                        </button>
-                    </div>
 
-                    {stats.penaltySettings?.isActive && (
-                        <div className="flex items-center gap-4 bg-void/40 p-4 rounded-2xl border border-white/5 animate-in fade-in zoom-in duration-300">
-                            <div className="bg-neon/10 p-3 rounded-xl text-neon"><AlertCircle size={18} /></div>
-                            <div className="flex-1">
-                                <p className="text-[8px] font-black text-white/20 uppercase italic">Daily Fine Rate</p>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg font-black italic">₹</span>
-                                    <input
-                                        type="number"
-                                        defaultValue={stats.penaltySettings?.dailyRate}
-                                        onBlur={async (e) => {
-                                            const val = Number(e.target.value);
-                                            await API.post('/fees/settings/penalty', {
-                                                dailyRate: val,
-                                                isActive: true
-                                            });
-                                        }}
-                                        className="bg-transparent border-b border-white/10 w-20 outline-none text-lg font-black italic text-neon"
-                                    />
-                                    <span className="text-[8px] font-bold text-white/20 uppercase italic mt-2">/ per day</span>
-                                </div>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 bg-white/5 p-1 px-2 rounded-xl border border-white/5">
+                                <span className="text-[10px] font-black italic text-rose-400">₹</span>
+                                <input
+                                    id="penaltyRateInput"
+                                    type="number"
+                                    className="bg-transparent w-10 text-[10px] font-black text-white outline-none text-center"
+                                    defaultValue={stats.penaltySettings?.dailyRate}
+                                />
                             </div>
-                        </div>
-                    )}
-                </div>
 
+                            {/* Naya Done/Update Button logic */}
+                            <button
+                                onClick={async () => {
+                                    const val = Number(document.getElementById('penaltyRateInput').value);
+                                    try {
+                                        await API.post('/fees/settings/penalty', {
+                                            dailyRate: val,
+                                            isActive: true
+                                        });
+                                        fetchStats(); // UI Refresh
+
+                                        // --- ALERT KI JAGAH NAYA BOX TRIGGER ---
+                                        setPenaltyUpdateMsg(true);
+                                        setTimeout(() => setPenaltyUpdateMsg(null), 4000); // 4 sec baad gayab
+                                    } catch (err) {
+                                        console.error("Failed to update rate");
+                                    }
+                                }}
+                                className="bg-rose-600 hover:bg-rose-500 text-white text-[8px] font-black uppercase px-3 py-2 rounded-lg transition-all active:scale-90"
+                            >
+                                Update
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
                 {/* Recent Payments Section */}
                 <div className="bg-slate-900/60 rounded-[3rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden">
                     <div className="flex items-center gap-3 mb-6">

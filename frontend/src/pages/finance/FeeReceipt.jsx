@@ -77,7 +77,7 @@ const FeeReceipt = () => {
                             <p className="text-md font-black uppercase text-slate-800 mt-1">{receipt.student?.name}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Grade / Sector</p>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Class</p>
                             <p className="text-md font-black uppercase text-slate-800 mt-1">{receipt.student?.grade}</p>
                         </div>
                         {receipt.student?.enrollmentNo && (

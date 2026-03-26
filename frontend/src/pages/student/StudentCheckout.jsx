@@ -26,7 +26,7 @@ const StudentCheckout = () => {
                 <button onClick={() => navigate(-1)} className="p-2 bg-white/5 rounded-xl border border-white/10">
                     <ArrowLeft size={20} className="text-neon" />
                 </button>
-                <h1 className="text-xl font-black uppercase tracking-tighter">Digital Invoice</h1>
+                <h1 className="text-xl font-black uppercase tracking-tighter">Online Payment Mode</h1>
             </div>
 
             <div className="space-y-6 max-w-2xl mx-auto">
@@ -39,7 +39,7 @@ const StudentCheckout = () => {
                         <div className="flex items-center gap-3">
                             <User size={14} className="text-neon" />
                             <div>
-                                <p className="text-[8px] uppercase text-white/30">Name</p>
+                                <p className="text-[8px] uppercase text-white/30">Student Name</p>
                                 <p className="text-xs font-black uppercase text-white">{summary.studentName}</p>
                             </div>
                         </div>
@@ -50,18 +50,20 @@ const StudentCheckout = () => {
                                 <p className="text-xs font-black uppercase text-white">{summary.enrollmentNo}</p>
                             </div>
                         </div>
+                        {/* NAYA: Father Name */}
                         <div className="flex items-center gap-3">
-                            <BookOpen size={14} className="text-neon" />
+                            <User size={14} className="text-neon" />
                             <div>
-                                <p className="text-[8px] uppercase text-white/30">Class/Grade</p>
-                                <p className="text-xs font-black uppercase text-white">{summary.grade}</p>
+                                <p className="text-[8px] uppercase text-white/30">Father's Name</p>
+                                <p className="text-xs font-black uppercase text-white">{summary.fatherName || 'N/A'}</p>
                             </div>
                         </div>
+                        {/* NAYA: Mobile Number */}
                         <div className="flex items-center gap-3">
-                            <School size={14} className="text-neon" />
+                            <Hash size={14} className="text-neon" />
                             <div>
-                                <p className="text-[8px] uppercase text-white/30">Institution</p>
-                                <p className="text-xs font-black uppercase text-neon">{summary.schoolName}</p>
+                                <p className="text-[8px] uppercase text-white/30">Mobile No.</p>
+                                <p className="text-xs font-black uppercase text-white">{summary.mobile || 'N/A'}</p>
                             </div>
                         </div>
                     </div>
@@ -73,8 +75,10 @@ const StudentCheckout = () => {
 
                     <div className="space-y-4">
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                            <span className="text-[10px] font-bold text-white/40 uppercase">Base Tuition / Transport</span>
-                            <span className="text-sm font-black italic">₹{(summary.remainingFees - (summary.totalPenalty || 0)).toLocaleString()}</span>
+                            {/* Label badal diya */}
+                            <span className="text-[10px] font-bold text-white/40 uppercase">Monthly Fees to be Paid</span>
+                            {/* Asli math: total balance minus penalty */}
+                            <span className="text-sm font-black italic">₹{(summary.remainingFees).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
                             <span className="text-[10px] font-bold text-rose-400 uppercase">Accumulated Penalty</span>
@@ -82,7 +86,8 @@ const StudentCheckout = () => {
                         </div>
                         <div className="flex justify-between items-center pt-2">
                             <span className="text-xs font-black text-neon uppercase italic tracking-widest">Net Payable Amount</span>
-                            <span className="text-2xl font-black text-neon">₹{summary.remainingFees.toLocaleString()}</span>
+                            {/* Grand Total use kiya yahan */}
+                            <span className="text-2xl font-black text-neon">₹{(summary.grandTotal || summary.remainingFees).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

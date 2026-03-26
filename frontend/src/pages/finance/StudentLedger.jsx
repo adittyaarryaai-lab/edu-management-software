@@ -24,6 +24,7 @@ const StudentLedger = () => {
 
     // Total Structure (Isme One-time + Monthly ka total backend se aa raha hai)
     const structureTotal = audit?.totalExpected || 0;
+    const totalPenaltyAccrued = audit?.totalPenalty || 0; // YE LINE ADD KARO
     const totalPaidAllTime = audit?.totalPaid || 0;
     return (
         <div className="min-h-screen bg-void text-white p-6 font-sans italic pb-24">
@@ -50,10 +51,24 @@ const StudentLedger = () => {
                     </div>
                 </div>
 
+                {/* --- StudentLedger.jsx Update --- */}
+
                 <div className="mt-8 flex items-baseline gap-2">
-                    <span className="text-4xl font-black tracking-tighter">₹{audit?.remaining?.toLocaleString() || "0"}</span>
+                    {/* Penalty jod kar final remaining dikhayenge */}
+                    <span className="text-4xl font-black tracking-tighter">₹{(audit?.remaining || 0).toLocaleString()}</span>
                     <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Outstanding Balance</span>
                 </div>
+
+                {/* Naya Penalty Alert Box add karo (Advance Payment ke niche) */}
+                {audit?.totalPenalty > 0 && (
+                    <div className="mt-4 flex items-center gap-2 bg-rose-500/10 px-4 py-3 rounded-2xl border border-rose-500/20">
+                        <AlertCircle size={14} className="text-rose-500" />
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Defaulter Penalty Applied</span>
+                            <span className="text-[8px] font-bold text-white/40 uppercase italic">Amount: ₹{audit.totalPenalty.toLocaleString()} included in balance</span>
+                        </div>
+                    </div>
+                )}
 
                 {audit?.advance > 0 && (
                     <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
