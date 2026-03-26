@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers} from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SidebarDrawer = ({ isOpen, onClose, user }) => {
@@ -84,9 +84,11 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                         {user?.name}
                     </h2>
 
+                    {/* --- DAY 124: DYNAMIC ENROLLMENT NO SYNC --- */}
                     <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-neon/60 mt-2">
                         {user?.role === 'superadmin' ? `Admin ID: ${user?.employeeId || '001'}` :
-                            user?.role === 'student' ? 'Roll No: 2501350071' : `Employee ID: ${user?.employeeId}`}
+                            user?.role === 'student' ? `Enrollment No: ${user?.enrollmentNo || 'NOT ASSIGNED'}` :
+                                `Employee ID: ${user?.employeeId}`}
                     </p>
 
                     <div className="mt-4 flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] text-neon/40 font-black">
