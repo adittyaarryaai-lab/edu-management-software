@@ -138,7 +138,7 @@ router.get('/student-summary', protect, async (req, res) => {
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-        // --- DAY 123: INSTANT HIT PENALTY LOGIC ---
+       // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
         const School = require('../models/School');
         const schoolData = await School.findById(schoolId);
         const pSettings = schoolData.penaltySettings;
@@ -148,20 +148,22 @@ router.get('/student-summary', protect, async (req, res) => {
             const activationDate = new Date(pSettings.activatedAt);
             const today = new Date();
 
-            // Difference in days (Minimum 1 day logic)
-            const diffTime = Math.abs(today.getTime() - activationDate.getTime());
+            // 1. Calculate base days (pure calendar days difference)
+            const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
+            const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            // RULE: Button daba toh Day 1 ki penalty (₹100) toh lagegi hi lagegi
-            diffDays += 1;
+            // 2. Rule: Activation day ka fine turant (+1)
+            let totalDaysToCharge = diffDays + 1;
 
-            // 11:00 AM Rule: Agar aaj subah ke 11 baj chuke hain 
-            // aur activation 11 se pehle ki hai (yaani ek din pura ho gaya technicaly)
-            if (today.getHours() >= 11 && today.getDate() !== activationDate.getDate()) {
-                // diffDays automatic 2nd day utha lega milliseconds ki wajah se
+            // 3. 11:00 AM Check: Agar aaj naya din hai aur abhi subah ke 11 nahi baje hain
+            // Toh aaj ka fine abhi add nahi karenge (Wait until 11 AM)
+            if (diffDays > 0 && today.getHours() < 11) {
+                totalDaysToCharge -= 1; 
             }
 
-            accruedPenalty = diffDays * (pSettings.dailyRate || 0);
+            accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
         const groupedHistory = allPayments.reduce((acc, pay) => {
@@ -536,7 +538,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
 
         const balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
 
-        // --- DAY 123: INSTANT HIT PENALTY LOGIC ---
+        // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
         const School = require('../models/School');
         const schoolData = await School.findById(schoolId);
         const pSettings = schoolData.penaltySettings;
@@ -546,20 +548,22 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             const activationDate = new Date(pSettings.activatedAt);
             const today = new Date();
 
-            // Difference in days (Minimum 1 day logic)
-            const diffTime = Math.abs(today.getTime() - activationDate.getTime());
+            // 1. Calculate base days (pure calendar days difference)
+            const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
+            const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            // RULE: Button daba toh Day 1 ki penalty (₹100) toh lagegi hi lagegi
-            diffDays += 1;
+            // 2. Rule: Activation day ka fine turant (+1)
+            let totalDaysToCharge = diffDays + 1;
 
-            // 11:00 AM Rule: Agar aaj subah ke 11 baj chuke hain 
-            // aur activation 11 se pehle ki hai (yaani ek din pura ho gaya technicaly)
-            if (today.getHours() >= 11 && today.getDate() !== activationDate.getDate()) {
-                // diffDays automatic 2nd day utha lega milliseconds ki wajah se
+            // 3. 11:00 AM Check: Agar aaj naya din hai aur abhi subah ke 11 nahi baje hain
+            // Toh aaj ka fine abhi add nahi karenge (Wait until 11 AM)
+            if (diffDays > 0 && today.getHours() < 11) {
+                totalDaysToCharge -= 1; 
             }
 
-            accruedPenalty = diffDays * (pSettings.dailyRate || 0);
+            accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
         res.json({
             student,
