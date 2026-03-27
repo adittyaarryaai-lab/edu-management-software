@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Send, Megaphone, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Send, Users, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -8,6 +8,7 @@ const TeacherNotices = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [classes, setClasses] = useState([]); // Dynamic classes store karne ke liye
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -15,13 +16,28 @@ const TeacherNotices = () => {
         targetGrade: ''
     });
 
+    // --- DAY 127: FETCH DYNAMIC CLASSES ON MOUNT ---
+    useEffect(() => {
+        const fetchClasses = async () => {
+            try {
+                const { data } = await API.get('/notices/meta/classes');
+                setClasses(data);
+            } catch (err) {
+                console.error("Meta Fetch Error:", err);
+            }
+        };
+        fetchClasses();
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!formData.targetGrade) return alert("Please select a target class!");
+        
         setLoading(true);
         try {
             await API.post('/notices/create', {
                 ...formData,
-                targetGrade: formData.targetGrade.trim().toUpperCase()
+                targetGrade: formData.targetGrade // Dropdown se seedha value jayegi
             });
             setShowToast(true);
             setTimeout(() => navigate('/dashboard'), 2000);
@@ -47,17 +63,30 @@ const TeacherNotices = () => {
 
             <div className="px-5 -mt-8 relative z-20">
                 <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[2.5rem] shadow-2xl border border-neon/20 space-y-6">
+                    
+                    {/* --- DAY 127: DYNAMIC NEURAL SECTOR (DROPDOWN) --- */}
                     <div>
                         <label className="text-[9px] font-black text-neon/40 uppercase ml-2 mb-2 block tracking-widest italic">Target Neural Sector</label>
-                        <div className="relative">
-                            <Users className="absolute left-4 top-4 text-neon/30" size={18} />
-                            <input 
-                                type="text" 
-                                placeholder="e.g. 10-A" 
-                                className="w-full bg-void p-4 pl-12 rounded-2xl border border-white/5 text-sm font-black text-white outline-none focus:border-neon transition-all uppercase italic"
-                                onChange={(e) => setFormData({...formData, targetGrade: e.target.value})} 
-                                required 
-                            />
+                        <div className="relative group">
+                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/30 z-10" size={18} />
+                            <select 
+                                className="w-full bg-void p-4 pl-12 rounded-2xl border border-white/5 text-sm font-black text-white outline-none focus:border-neon transition-all uppercase italic appearance-none cursor-pointer relative z-0"
+                                value={formData.targetGrade}
+                                onChange={(e) => setFormData({...formData, targetGrade: e.target.value})}
+                                required
+                            >
+                                <option value="" disabled className="bg-slate-900">SELECT TARGET CLASS</option>
+                                {classes.length > 0 ? (
+                                    classes.map((cls, idx) => (
+                                        <option key={idx} value={cls} className="bg-slate-900">
+                                            {cls}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled className="bg-slate-900 text-white/20">NO SECTORS ACTIVE</option>
+                                )}
+                            </select>
+                            <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-neon/30 pointer-events-none" />
                         </div>
                     </div>
 

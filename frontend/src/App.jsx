@@ -381,7 +381,7 @@ function App() {
           <Route path="/holidays" element={<Holidays />} />
           <Route path="/academic" element={<Academic />} />
           <Route path="/support" element={<Support />} />
-          <Route path="/notice-feed" element={<NoticeFeed />} />
+          <Route path="/notice-feed" element={<NoticeFeed user={user} />} />
           <Route path="/exams" element={<Exams />} />
           <Route path="/transport" element={<Transport />} />
           <Route path="/id-card" element={<IDCard user={user} />} />

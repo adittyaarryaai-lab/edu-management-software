@@ -11,7 +11,7 @@ const noticeSchema = new mongoose.Schema({
         enum: ['all', 'teachers', 'specific_grade'], 
         default: 'all' 
     }, 
-    targetGrade: { type: String, default: 'All' }, 
+    targetGrade: { type: mongoose.Schema.Types.Mixed, default: 'All' }, // Mixed handles String OR Array 
     category: { 
         type: String, 
         enum: ['Exam', 'Event', 'Holiday', 'General'], 

@@ -16,7 +16,7 @@ router.post('/create', protect, async (req, res) => {
             title,
             content,
             audience: audience || 'all',
-            targetGrade: audience === 'specific_grade' ? targetGrade.trim().toUpperCase() : null,
+            targetGrade: audience === 'specific_grade' ? targetGrade : 'All',
             category: category || 'General',
             postedBy: req.user._id,
             authorRole: req.user.role
@@ -88,17 +88,50 @@ router.put('/:id', protect, async (req, res) => {
 
 router.delete('/:id', protect, async (req, res) => {
     try {
-        const notice = await Notice.findOne({ _id: req.params.id, schoolId: req.user.schoolId }); // FIXED Security
+        const notice = await Notice.findOne({ _id: req.params.id, schoolId: req.user.schoolId });
         if (!notice) return res.status(404).json({ message: 'Notice not found' });
 
-        if (req.user.role === 'admin' || notice.postedBy.toString() === req.user._id.toString()) {
+        // Ensure user is root admin or owner
+        const isMaster = req.user.role.toLowerCase() === 'admin';
+        const isOwner = notice.postedBy.toString() === req.user._id.toString();
+
+        if (isMaster || isOwner) {
             await notice.deleteOne();
             res.json({ message: 'Notice deleted successfully' });
         } else {
-            res.status(403).json({ message: 'Access denied' });
+            res.status(403).json({ message: 'Neural Access Denied: Unauthorized Node' });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Delete failed' });
+        res.status(500).json({ message: 'Internal Matrix Failure' });
+    }
+});
+
+// --- DAY 127: FETCH DYNAMIC CLASSES FOR DROPDOWN ---
+router.get('/meta/classes', protect, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        // School ke saare students se unique grades uthao
+        const classes = await User.distinct('grade', {
+            schoolId: req.user.schoolId,
+            role: 'student'
+        });
+        res.json(classes.sort());
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching classes' });
+    }
+});
+
+// --- DAY 127: FETCH DYNAMIC TEACHERS FOR DROPDOWN ---
+router.get('/meta/teachers', protect, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const teachers = await User.find({
+            schoolId: req.user.schoolId,
+            role: 'teacher'
+        }).select('name _id');
+        res.json(teachers);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching teachers' });
     }
 });
 
