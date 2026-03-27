@@ -101,7 +101,7 @@ const StudentAttendance = () => {
                                         <h4 className="font-black text-white text-xs uppercase italic tracking-tight">
                                             {new Date(log.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', weekday: 'long' })}
                                         </h4>
-                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mt-0.5">Verified Session Log</p>
+                                        <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mt-0.5">Verified By EduFlowAI</p>
                                     </div>
                                 </div>
                                 <span className={`text-[8px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${log.status === 'Present' ? 'bg-neon text-void border-neon shadow-[0_0_10px_rgba(61,242,224,0.3)]' : 'bg-red-500 text-white border-red-500'}`}>

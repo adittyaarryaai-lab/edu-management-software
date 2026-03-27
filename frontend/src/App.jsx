@@ -92,6 +92,7 @@ const VisualMatrix = () => {
 
 function App() {
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -336,7 +337,7 @@ function App() {
     <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
       {isDarkMode && isMatrixActive && <VisualMatrix />}
       <div className="print:hidden">
-        <Navbar user={user} />
+        <Navbar user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </div>
       <main className="relative z-0 pb-32 pt-28">
         <Routes>
@@ -346,14 +347,14 @@ function App() {
               user.role === 'admin' ? <AdminHome /> :
                 user.role === 'finance' ? <FinanceDashboard /> :
                   user.role === 'teacher' ? <TeacherHome user={user} /> :
-                    <StudentHome user={user} />
+                    <StudentHome user={user} searchQuery={searchQuery} />
           } />
           <Route path="/dashboard" element={
             user.role === 'superadmin' ? <SuperAdminDashboard /> :
               user.role === 'admin' ? <AdminHome /> :
                 user.role === 'finance' ? <FinanceDashboard /> :
                   user.role === 'teacher' ? <TeacherHome user={user} /> :
-                    <StudentHome user={user} />
+                    <StudentHome user={user} searchQuery={searchQuery} />
           } />
 
           {/* SuperAdmin Specific Routes - Day 64 */}

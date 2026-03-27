@@ -117,7 +117,7 @@ const StudentFees = () => {
                 >
                     <ArrowLeft size={20} className="text-neon" />
                 </button>
-                <h1 className="text-xl font-black uppercase tracking-tighter">Finance Overview</h1>
+                <h1 className="text-xl font-black uppercase tracking-tighter">My Fees</h1>
             </div>
 
             <div className="space-y-6">
@@ -247,7 +247,7 @@ const StudentFees = () => {
                     <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <CheckCircle size={14} className="text-emerald-400" />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Verified Transactions</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">All Transactions</h3>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -308,32 +308,6 @@ const StudentFees = () => {
                     <div className="mt-12 p-8 bg-gradient-to-br from-slate-900 to-black rounded-[3rem] border border-neon/20 shadow-[0_0_50px_-12px_rgba(34,211,238,0.2)] relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                             <CreditCard size={120} />
-                        </div>
-
-                        <div className="relative z-10 flex items-center justify-between mb-8">
-                            <div>
-                                <h3 className="text-xl font-black italic uppercase tracking-tighter">Digital Checkout</h3>
-                                <p className="text-[8px] font-bold text-white/30 uppercase tracking-[0.3em]">Neural Payment Gateway v1.0</p>
-                            </div>
-                            <div className="p-3 bg-neon/10 rounded-2xl border border-neon/20 animate-pulse">
-                                <CreditCard size={24} className="text-neon" />
-                            </div>
-                        </div>
-
-                        <div className="relative z-10 grid grid-cols-3 gap-4 mb-8">
-                            {['UPI', 'CARD', 'BANK'].map(method => (
-                                <div key={method} className="p-6 bg-white/5 border border-white/5 rounded-[2.5rem] flex flex-col items-center gap-3 hover:bg-neon/5 hover:border-neon/20 transition-all cursor-not-allowed group/item">
-                                    <div className="w-2 h-2 rounded-full bg-white/10 group-hover/item:bg-neon transition-colors shadow-[0_0_10px_rgba(34,211,238,0)] group-hover/item:shadow-[0_0_10px_rgba(34,211,238,1)]"></div>
-                                    <p className="text-[10px] font-black tracking-widest text-white/40">{method}</p>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="relative z-10 flex flex-col items-center gap-2">
-                            <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4"></div>
-                            <p className="text-[7px] font-black text-neon uppercase tracking-[0.5em] animate-pulse">
-                                Secure 256-bit Encryption Active • Gateways Integration Coming Soon
-                            </p>
                         </div>
                     </div>
                 </div>

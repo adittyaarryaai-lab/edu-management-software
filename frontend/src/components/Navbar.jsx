@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Menu, Search, Headphones, LogOut, Cpu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SidebarDrawer from './SidebarDrawer';
-import API from '../api'; 
+import API from '../api';
 
-const Navbar = ({ user }) => {
+const Navbar = ({ user, searchQuery, setSearchQuery }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [greeting, setGreeting] = useState({ text: 'Good Morning', emoji: '☀️' });
-  const [unreadCount, setUnreadCount] = useState(0); 
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const Navbar = ({ user }) => {
 
     const fetchUnreadCount = async () => {
       const backup = localStorage.getItem('superadmin_backup');
-      if (user?.role === 'admin' && backup) return; 
+      if (user?.role === 'admin' && backup) return;
       if (user?.role === 'admin' || user?.role === 'superadmin') return;
 
       try {
@@ -34,17 +34,17 @@ const Navbar = ({ user }) => {
   }, [user]);
 
   const handleBellClick = async () => {
-      try {
-          if (user?.role === 'superadmin') return;
-          if (user?.role !== 'admin' && unreadCount > 0) {
-              await API.put('/notices/mark-all-read'); 
-              setUnreadCount(0);
-          }
-          navigate('/notice-feed'); 
-      } catch (err) {
-          console.error("Redirect error:", err);
-          navigate('/notice-feed');
+    try {
+      if (user?.role === 'superadmin') return;
+      if (user?.role !== 'admin' && unreadCount > 0) {
+        await API.put('/notices/mark-all-read');
+        setUnreadCount(0);
       }
+      navigate('/notice-feed');
+    } catch (err) {
+      console.error("Redirect error:", err);
+      navigate('/notice-feed');
+    }
   };
 
   useEffect(() => {
@@ -64,15 +64,15 @@ const Navbar = ({ user }) => {
   const handleLogout = () => {
     const backup = localStorage.getItem('superadmin_backup');
     if (backup) {
-        localStorage.setItem('user', backup);
-        localStorage.removeItem('superadmin_backup');
-        window.location.href = '/superadmin/dashboard';
+      localStorage.setItem('user', backup);
+      localStorage.removeItem('superadmin_backup');
+      window.location.href = '/superadmin/dashboard';
     } else {
-        localStorage.removeItem('user');
-        window.location.reload();
+      localStorage.removeItem('user');
+      window.location.reload();
     }
   };
-  
+
 
   return (
     <>
@@ -97,14 +97,6 @@ const Navbar = ({ user }) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleLogout}
-              className={`${localStorage.getItem('superadmin_backup') ? 'bg-orange-500/20 border-orange-400/30' : 'bg-red-500/20 border-red-400/30'} p-2 rounded-xl border transition-all active:scale-90`}
-              title={localStorage.getItem('superadmin_backup') ? 'Return to SuperAdmin' : 'Logout'}
-            >
-              <LogOut size={18} className={localStorage.getItem('superadmin_backup') ? 'text-orange-400' : 'text-red-400'} />
-            </button>
-
             {user?.role !== 'superadmin' && (
               <div
                 onClick={handleBellClick}
@@ -140,6 +132,8 @@ const Navbar = ({ user }) => {
             <input
               type="text"
               placeholder="SEARCH NEURAL MODULES..."
+              value={searchQuery} // Add this
+              onChange={(e) => setSearchQuery(e.target.value)} // Add this
               className="w-full bg-slate-900/50 border border-neon/20 text-white py-4 pl-12 pr-4 rounded-2xl shadow-inner outline-none placeholder:text-neon/30 focus:border-neon focus:bg-slate-900 transition-all font-black text-[10px] tracking-widest"
             />
           </div>

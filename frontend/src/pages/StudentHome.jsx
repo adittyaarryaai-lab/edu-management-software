@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import API from '../api';
 
-const StudentHome = () => {
+const StudentHome = ({ user, searchQuery }) => {
   const navigate = useNavigate();
 
   const mainModules = [
@@ -27,7 +27,14 @@ const StudentHome = () => {
     { title: 'Syllabus', icon: <BookOpen size={20} />, path: '/syllabus' },
     { title: 'Exam', icon: <GraduationCap size={20} />, path: '/exams' },
   ];
+  // --- DAY 125: MODULE FILTERING LOGIC ---
+  const filteredMain = mainModules.filter(m =>
+    m.title.toLowerCase().includes(searchQuery?.toLowerCase() || '')
+  );
 
+  const filteredSub = subModules.filter(sm =>
+    sm.title.toLowerCase().includes(searchQuery?.toLowerCase() || '')
+  );
   return (
     <div className="px-5 -mt-10 space-y-8 relative z-10 pb-24 font-sans italic">
       <div className="grid grid-cols-2 gap-4">
@@ -47,7 +54,7 @@ const StudentHome = () => {
           <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em]">Sub-Modules</h3>
         </div>
         <div className="grid grid-cols-4 gap-y-10 gap-x-2">
-          {subModules.map((sm, i) => (
+          {filteredSub.map((sm, i) => (
             <Link to={sm.path} key={i} className="flex flex-col items-center gap-3 group">
               <div className="bg-void text-neon/40 p-3 rounded-2xl border border-white/5 group-hover:bg-neon/10 group-hover:text-neon group-hover:border-neon/30 transition-all active:scale-90 shadow-inner">
                 {sm.icon}

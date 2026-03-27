@@ -57,7 +57,7 @@ const NoticeFeed = ({ user }) => {
                         <Megaphone size={20} className="animate-pulse"/>
                     </div>
                 </div>
-                <p className="text-[9px] text-neon/40 font-black text-center uppercase tracking-[0.4em] italic mt-2">Active Neural Announcement Feed</p>
+                <p className="text-[9px] text-neon/40 font-black text-center uppercase tracking-[0.4em] italic mt-2"></p>
             </div>
 
             <div className="px-5 -mt-12 relative z-20 space-y-6">
