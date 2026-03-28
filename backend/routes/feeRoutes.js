@@ -93,6 +93,7 @@ router.get('/student-summary', protect, async (req, res) => {
         const User = require('../models/User');
         const student = await User.findById(studentId).populate('schoolId');
         if (!student) return res.status(404).json({ message: 'Identity missing' });
+        const schoolAdmin = await User.findOne({ schoolId: schoolId, role: 'admin' }).select('name email phone');
 
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
@@ -148,17 +149,13 @@ router.get('/student-summary', protect, async (req, res) => {
             const activationDate = new Date(pSettings.activatedAt);
             const today = new Date();
 
-            // 1. Calculate base days (pure calendar days difference)
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            // 2. Rule: Activation day ka fine turant (+1)
             let totalDaysToCharge = diffDays + 1;
 
-            // 3. 11:00 AM Check: Agar aaj naya din hai aur abhi subah ke 11 nahi baje hain
-            // Toh aaj ka fine abhi add nahi karenge (Wait until 11 AM)
             if (diffDays > 0 && today.getHours() < 11) {
                 totalDaysToCharge -= 1; 
             }
@@ -189,7 +186,10 @@ router.get('/student-summary', protect, async (req, res) => {
             fatherName: student.fatherName,     // <--- YE ADD KIYA
             mobile: student.phone,              // <--- YE ADD KIYA
             grade: student.grade,               // <--- YE ADD KIYA
-            schoolName: student.schoolId?.schoolName || "EDUFLOWAI INSTITUTION",
+            schoolName: student.schoolId?.schoolName || "N/A",
+            schoolPhone: schoolData?.paymentSettings?.upiId || "N/A",
+            adminName: schoolData?.adminDetails?.fullName || "N/A",
+           adminEmail: schoolData?.adminDetails?.email || "N/A",
             currentMonth: currentMonthName,
             totalPaidThisMonth: paidThisMonth,
             lastActivity: allPayments.length > 0 ? allPayments[0].date : null,

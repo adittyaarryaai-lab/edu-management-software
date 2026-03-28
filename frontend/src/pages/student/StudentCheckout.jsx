@@ -69,9 +69,63 @@ const StudentCheckout = () => {
                     </div>
                 </div>
 
+                {/* --- DAY 128: SCHOOL IDENTIFICATION CARD --- */}
+                <div className="bg-slate-900/60 p-8 rounded-[2.5rem] border border-neon/10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 text-neon"><School size={80} /></div>
+                    <h2 className="text-[10px] font-black text-neon uppercase tracking-[0.4em] mb-6 flex items-center gap-2">
+                        <School size={12} /> School Identification
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* School Name */}
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-neon/5 rounded-lg border border-neon/10">
+                                <School size={14} className="text-neon" />
+                            </div>
+                            <div>
+                                <p className="text-[8px] uppercase text-white/30">School Name</p>
+                                <p className="text-xs font-black uppercase text-white tracking-wider">{summary.schoolName}</p>
+                            </div>
+                        </div>
+
+                        {/* Payment QR Number */}
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-neon/5 rounded-lg border border-neon/10">
+                                <Hash size={14} className="text-neon" />
+                            </div>
+                            <div>
+                                <p className="text-[8px] uppercase text-white/30">Online Payment (NO.)</p>
+                                <p className="text-xs font-black text-neon animate-pulse tracking-widest">{summary.schoolPhone}</p>
+                            </div>
+                        </div>
+
+                        {/* Admin Name */}
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-neon/5 rounded-lg border border-neon/10">
+                                <User size={14} className="text-neon" />
+                            </div>
+                            <div>
+                                <p className="text-[8px] uppercase text-white/30">Admin Name</p>
+                                <p className="text-xs font-black uppercase text-white">{summary.adminName}</p>
+                            </div>
+                        </div>
+
+                        {/* Admin Email */}
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-neon/5 rounded-lg border border-neon/10">
+                                <CreditCard size={14} className="text-neon" />
+                            </div>
+                            <div>
+                                <p className="text-[8px] uppercase text-white/30">Email</p>
+                                <p className="text-xs font-black text-white/70 lowercase">{summary.adminEmail}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* --- BILLING SUMMARY --- */}
                 <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5">
-                    <h2 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] mb-6">Pending Dues Breakdown</h2>
+                    <h2 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] mb-6">Pending Dues</h2>
 
                     <div className="space-y-4">
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
@@ -81,7 +135,7 @@ const StudentCheckout = () => {
                             <span className="text-sm font-black italic">₹{(summary.remainingFees).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                            <span className="text-[10px] font-bold text-rose-400 uppercase">Accumulated Penalty</span>
+                            <span className="text-[10px] font-bold text-rose-400 uppercase">Penalty</span>
                             <span className="text-sm font-black italic text-rose-400">+ ₹{(summary.totalPenalty || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center pt-2">
@@ -98,7 +152,7 @@ const StudentCheckout = () => {
                     className="w-full py-6 bg-neon text-black rounded-[2rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-[0_20px_40px_-15px_rgba(34,211,238,0.3)]"
                 >
                     <CreditCard size={18} />
-                    Secure Checkout
+                    Pay
                     <ChevronRight size={18} />
                 </button>
             </div>
