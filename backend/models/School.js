@@ -36,9 +36,9 @@ const schoolSchema = new mongoose.Schema({
 
     // --- DAY 110: ONLINE PAYMENT GATEWAY CONFIG ---
     paymentSettings: {
-        upiId: { type: String, default: "" }, // Finance teacher yahan apni UPI ID dalega (e.g. school@upi)
-        merchantName: { type: String, default: "" }, // QR scan karte waqt jo naam dikhega
-        isActive: { type: Boolean, default: false } // Kya ye school online payments accept kar raha hai?
+        upiId: { type: String, default: "" }, 
+        merchantName: { type: String, default: "" }, 
+        isActive: { type: Boolean, default: false } 
     },
 
     isDeleted: { type: Boolean, default: false }

@@ -200,11 +200,19 @@ router.get('/finance/stats', protect, async (req, res) => {
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
         // 1. Fetch Today's Payments
-        const todayFees = await Fee.find({ schoolId, date: { $gte: today } });
+        const todayFees = await Fee.find({ 
+            schoolId, 
+            date: { $gte: today },
+            status: 'Verified' 
+        });
         const collectedToday = todayFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
         // 2. Fetch Monthly Payments
-        const monthFees = await Fee.find({ schoolId, date: { $gte: startOfMonth } });
+        const monthFees = await Fee.find({ 
+            schoolId, 
+            date: { $gte: startOfMonth },
+            status: 'Verified' 
+        });
         const collectedMonth = monthFees.reduce((sum, f) => sum + f.amountPaid, 0);
 
         // 3. Separate Online Payments Today
@@ -213,7 +221,10 @@ router.get('/finance/stats', protect, async (req, res) => {
             .reduce((sum, f) => sum + f.amountPaid, 0);
 
         // 4. Recent Payments
-        const recentPayments = await Fee.find({ schoolId })
+        const recentPayments = await Fee.find({ 
+            schoolId,
+            status: 'Verified' 
+        })
             .sort({ date: -1 })
             .limit(10)
             .populate('student', 'name grade enrollmentNo');

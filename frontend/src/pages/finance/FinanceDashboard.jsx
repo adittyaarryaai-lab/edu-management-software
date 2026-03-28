@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Users, AlertCircle, Clock, IndianRupee, TrendingUp, Plus, ArrowRight, Bell, Zap, CheckCircle, Layers } from 'lucide-react';
+import { Wallet, Users, AlertCircle, Clock, IndianRupee, TrendingUp, Plus, ArrowRight, Bell, Zap, CheckCircle, Layers, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
@@ -62,6 +62,13 @@ const FinanceDashboard = () => {
         { label: "Monthly Collection", value: stats.collectedMonth, icon: <TrendingUp className="text-neon" />, color: "border-neon/20", path: '/finance/reports' },
         { label: "Students", value: "Fees", icon: <Users className="text-orange-400" />, color: "border-orange-500/20", path: '/finance/fees-tracker' },
         { label: "Fees Details", value: " Fee Setup for each class", icon: <Layers className="text-neon" />, color: "border-neon/40 bg-neon/5", path: '/finance/fee-setup' },
+        {
+            label: "Payment Gateway",
+            value: "Configure UPI/QR", // Yahan 'value' string kar do
+            icon: <ShieldCheck className="text-emerald-400" />,
+            color: "border-emerald-500/20 bg-emerald-500/5",
+            path: '/finance/gateway'
+        },
     ];
 
     return (

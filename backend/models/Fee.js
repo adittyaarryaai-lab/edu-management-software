@@ -7,8 +7,11 @@ const feeSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
     month: { type: String, required: true }, // e.g., "February"
     year: { type: Number, required: true },
-    paymentMode: {type: String,required: true,enum: ['Cash', 'Bank Transfer', 'Cheque', 'Online', 'PhonePe', 'Google Pay', 'Paytm', 'UPI'], // Inhe add karo
-default: 'Cash'
-}}, { timestamps: true });
+    paymentMode: {
+        type: String, required: true, enum: ['Cash', 'Bank Transfer', 'Cheque', 'Online', 'PhonePe', 'Google Pay', 'Paytm', 'UPI'], // Inhe add karo
+        default: 'Cash'},
+    paymentScreenshot: { type: String }, 
+    status: { type: String, enum: ['Pending', 'Verified'], default: 'Verified' }, 
+}, { timestamps: true });
 
 module.exports = mongoose.model('Fee', feeSchema);

@@ -51,6 +51,7 @@ import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 import StudentsFees from './pages/finance/StudentsFees';
+import FinanceGateway from './pages/finance/FinanceGateway';
 import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
 import Installments from './pages/finance/Installments';
@@ -408,6 +409,7 @@ function App() {
           {/* --- FINANCE MODULE ROUTES --- */}
           <Route path="/finance/dashboard" element={<FinanceDashboard />} />
           <Route path="/finance/fee-setup" element={<FeeSetup />} />
+          <Route path="/finance/gateway" element={<FinanceGateway />} />
           <Route path="/finance/fees" element={<StudentsFees />} />
           <Route path="/finance/reports" element={<FeeReports />} /> 
           <Route path="/finance/add-payment" element={<AddPayment />} />

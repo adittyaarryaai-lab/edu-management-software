@@ -3,13 +3,27 @@ const router = express.Router();
 const { protect, financeOnly } = require('../middleware/authMiddleware');
 const Fee = require('../models/Fee');
 const FeeStructure = require('../models/FeeStructure');
+const multer = require('multer');
+const path = require('path');
 
-// --- DAY 95: GET CURRENT PENALTY SETTINGS ---
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, `SCREENSHOT_${Date.now()}${path.extname(file.originalname)}`)
+});
+const upload = multer({ storage });
+
+// --- DAY 130: GET CURRENT SCHOOL SETTINGS (PENALTY + GATEWAY) ---
 router.get('/settings/penalty', protect, async (req, res) => {
     try {
         const School = require('../models/School');
         const school = await School.findById(req.user.schoolId);
-        res.json(school.penaltySettings || { dailyRate: 0, isActive: false });
+
+        // Fix: Dono settings ek saath bhejo taaki Frontend save rakhe
+        res.json({
+            dailyRate: school.penaltySettings?.dailyRate || 0,
+            isActive: school.penaltySettings?.isActive || false,
+            paymentSettings: school.paymentSettings || { upiId: '', merchantName: '', isActive: false }
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching settings' });
     }
@@ -33,6 +47,75 @@ router.post('/settings/penalty', protect, async (req, res) => {
     }
 });
 
+// --- DAY 130: UPDATE GATEWAY (FINANCE ONLY) ---
+router.post('/settings/gateway', protect, financeOnly, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        await School.findByIdAndUpdate(req.user.schoolId, {
+            'paymentSettings.upiId': req.body.upiId,
+            'paymentSettings.merchantName': req.body.merchantName,
+            'paymentSettings.isActive': true
+        });
+        res.json({ message: 'Gateway Updated! ⚡' });
+    } catch (error) { res.status(500).json({ message: 'Update failed' }); }
+});
+
+// --- DAY 130: CAPTURE WITH SCREENSHOT (STUDENT SIDE) ---
+router.post('/capture-with-screenshot', protect, upload.single('screenshot'), async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const studentId = req.user._id;
+        const schoolId = req.user.schoolId;
+
+        await Fee.create({
+            schoolId,
+            student: studentId,
+            amountPaid: Number(amount),
+            paymentScreenshot: `/uploads/${req.file.filename}`,
+            paymentMode: 'Online',
+            month: new Date().toLocaleString('default', { month: 'long' }),
+            year: new Date().getFullYear(),
+            status: 'Pending' // Finance teacher verify karega
+        });
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ message: 'Signal Interrupted' }); }
+});
+
+// --- DAY 130: GET PENDING LIST (FINANCE SIDE) ---
+router.get('/audit/pending-verifications', protect, financeOnly, async (req, res) => {
+    try {
+        const pending = await Fee.find({
+            schoolId: req.user.schoolId,
+            status: { $in: ['Pending', 'Rejected'] }
+        }).populate('student', 'name enrollmentNo grade fatherName phone');
+        res.json(pending);
+    } catch (error) { res.status(500).json({ message: 'Audit error' }); }
+});
+
+// --- DAY 131: APPROVE ONLINE SIGNAL (STATUS UPDATE) ---
+router.post('/audit/verify-payment', protect, financeOnly, async (req, res) => {
+    try {
+        const { feeId } = req.body;
+        // Status Verified karo - Ab ye bache ke balance mein count hone lagega
+        await Fee.findByIdAndUpdate(feeId, { status: 'Verified' });
+        res.json({ success: true, message: 'Signal Verified. Ledger Updated! ⚡' });
+    } catch (error) {
+        res.status(500).json({ message: 'Verification Failed' });
+    }
+});
+
+// --- DAY 131: REJECT ONLINE SIGNAL ---
+router.post('/audit/reject-payment', protect, financeOnly, async (req, res) => {
+    try {
+        const { feeId } = req.body;
+        // Status Rejected karo - Ye entry database mein rahegi par balance calculation se bahar ho jayegi
+        await Fee.findByIdAndUpdate(feeId, { status: 'Rejected' });
+        res.json({ success: true, message: 'Signal Rejected. Security Maintained! 🛡️' });
+    } catch (error) {
+        res.status(500).json({ message: 'Rejection Failed' });
+    }
+});
+
 // --- DAY 96: TRIGGER MANUAL ALERT (Point 8) ---
 router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     try {
@@ -40,7 +123,10 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
 
         // 1. Fetch History (Asli payments ki list)
         // 'populate' student detail mangwayega
-        const feeHistory = await Fee.find({ schoolId })
+        const feeHistory = await Fee.find({
+            schoolId,
+            status: 'Verified' // Fix: Rejected ko summary mein mat lao
+        })
             .sort({ date: -1 })
             .populate('student', 'name grade');
 
@@ -49,7 +135,7 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
 
         // 3. Class-wise Math (Aggregation)
         const classWise = await Fee.aggregate([
-            { $match: { schoolId: req.user.schoolId } },
+            { $match: { schoolId: req.user.schoolId, status: 'Verified' } },
             {
                 $lookup: {
                     from: 'users', // Compass mein 'users' collection hai
@@ -99,7 +185,12 @@ router.get('/student-summary', protect, async (req, res) => {
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
+        // Fix: Rejected payments ko calculation aur history se bahar rakho
+        const allPayments = await Fee.find({
+            student: studentId,
+            schoolId: schoolId,
+            status: { $ne: 'Rejected' }
+        }).sort({ date: -1 });
 
         let monthlyStructureTotal = 0;
         let oneTimeLabels = [];
@@ -134,12 +225,12 @@ router.get('/student-summary', protect, async (req, res) => {
 
         const totalMonthlyPaidSoFar = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return !isOneTime;
+            return !isOneTime && p.status === 'Verified';
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-       // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
+        // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
         const School = require('../models/School');
         const schoolData = await School.findById(schoolId);
         const pSettings = schoolData.penaltySettings;
@@ -157,7 +248,7 @@ router.get('/student-summary', protect, async (req, res) => {
             let totalDaysToCharge = diffDays + 1;
 
             if (diffDays > 0 && today.getHours() < 11) {
-                totalDaysToCharge -= 1; 
+                totalDaysToCharge -= 1;
             }
 
             accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
@@ -188,8 +279,9 @@ router.get('/student-summary', protect, async (req, res) => {
             grade: student.grade,               // <--- YE ADD KIYA
             schoolName: student.schoolId?.schoolName || "N/A",
             schoolPhone: schoolData?.paymentSettings?.upiId || "N/A",
+            schoolQR: schoolData?.paymentSettings?.qrCode || null,
             adminName: schoolData?.adminDetails?.fullName || "N/A",
-           adminEmail: schoolData?.adminDetails?.email || "N/A",
+            adminEmail: schoolData?.adminDetails?.email || "N/A",
             currentMonth: currentMonthName,
             totalPaidThisMonth: paidThisMonth,
             lastActivity: allPayments.length > 0 ? allPayments[0].date : null,
@@ -293,53 +385,6 @@ router.get('/check-payment-status', protect, async (req, res) => {
     }
 });
 
-// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR (CLEANED) ---
-router.post('/capture-online-payment', protect, async (req, res) => {
-    try {
-        const { amount, method } = req.body;
-        const studentId = req.user._id;
-        const schoolId = req.user.schoolId;
-
-        // Validation: Agar amount 0 ya null hai toh process mat karo
-        const finalAmount = Number(amount) || 0;
-        if (finalAmount <= 0) {
-            return res.status(400).json({ success: false, message: "Invalid Amount" });
-        }
-
-        console.log(`[PAYMENT] Attempting capture for Student: ${studentId}, Amount: ${finalAmount}`);
-
-        // 1. Create Fee Record
-        // Sirf payment capture karke record banana hai
-        const newFee = await Fee.create({
-            schoolId: schoolId,
-            student: studentId,
-            amountPaid: finalAmount,
-            month: new Date().toLocaleString('default', { month: 'long' }),
-            year: new Date().getFullYear(),
-            paymentMode: 'Online', 
-            date: new Date(),
-            remarks: `Online Payment via ${method || 'Neural Gateway'}`
-        });
-
-        // NOTE: Installment logic yahan se hata diya gaya hai taaki 'Installment is not defined' error na aaye
-
-        console.log(`[PAYMENT] Success! Fee ID: ${newFee._id}`);
-
-        res.status(201).json({
-            success: true,
-            message: 'Neural Capture Successful! 🛡️',
-            feeId: newFee._id
-        });
-
-    } catch (error) {
-        console.error("CRITICAL_BACKEND_ERROR:", error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Internal Server Error',
-            error: error.message
-        });
-    }
-});
 // --- DAY 111: REAL-TIME PAYMENT CHECKER ---
 router.get('/verify-online-status', protect, async (req, res) => {
     try {
@@ -482,7 +527,11 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        const allPayments = await Fee.find({ student: studentId, schoolId }).sort({ date: -1 });
+        const allPayments = await Fee.find({
+            student: studentId,
+            schoolId: schoolId,
+            status: { $ne: 'Rejected' }
+        }).sort({ date: -1 });
 
         let monthlyOnlyStructureTotal = 0;
         let structureDetails = [];
@@ -497,7 +546,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
                     if (item.billingCycle === 'monthly') { monthlyOnlyStructureTotal += amount; }
                     else { oneTimeLabels.push(labelName); }
 
-                    const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName));
+                    const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName) && p.status === 'Verified');
                     structureDetails.push({
                         label: labelName, amount: amount, cycle: item.billingCycle,
                         isPaid: isPaidAlready && item.billingCycle === 'one-time'
@@ -509,7 +558,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const collectedThisMonth = allPayments.filter(p => {
             const isCurrentMonth = p.month === currentMonthName && p.year === currentYear;
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return isCurrentMonth && !isOneTime;
+            return isCurrentMonth && !isOneTime && p.status === 'Verified';
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
         const joinDate = new Date(student.createdAt);
@@ -518,8 +567,8 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
 
         const totalMonthlyPaidAllTime = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return !isOneTime;
-        }).reduce((sum, p) => sum + p.amountPaid, 0);
+            return !isOneTime && p.status === 'Verified'; // Sirf Verified count karo
+        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
         const balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
 
@@ -545,7 +594,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             // 3. 11:00 AM Check: Agar aaj naya din hai aur abhi subah ke 11 nahi baje hain
             // Toh aaj ka fine abhi add nahi karenge (Wait until 11 AM)
             if (diffDays > 0 && today.getHours() < 11) {
-                totalDaysToCharge -= 1; 
+                totalDaysToCharge -= 1;
             }
 
             accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
