@@ -591,8 +591,6 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             // 2. Rule: Activation day ka fine turant (+1)
             let totalDaysToCharge = diffDays + 1;
 
-            // 3. 11:00 AM Check: Agar aaj naya din hai aur abhi subah ke 11 nahi baje hain
-            // Toh aaj ka fine abhi add nahi karenge (Wait until 11 AM)
             if (diffDays > 0 && today.getHours() < 11) {
                 totalDaysToCharge -= 1;
             }
