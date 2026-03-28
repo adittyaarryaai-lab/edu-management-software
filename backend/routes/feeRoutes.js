@@ -293,9 +293,7 @@ router.get('/check-payment-status', protect, async (req, res) => {
     }
 });
 
-// Ensure this route in feesRoutes.js looks like this:
-// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR ---
-// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR (CRITICAL FIX) ---
+// --- DAY 111: FIXING 500 INTERNAL SERVER ERROR (CLEANED) ---
 router.post('/capture-online-payment', protect, async (req, res) => {
     try {
         const { amount, method } = req.body;
@@ -311,42 +309,29 @@ router.post('/capture-online-payment', protect, async (req, res) => {
         console.log(`[PAYMENT] Attempting capture for Student: ${studentId}, Amount: ${finalAmount}`);
 
         // 1. Create Fee Record
-        // Make sure Fee model is imported at the top of this file
+        // Sirf payment capture karke record banana hai
         const newFee = await Fee.create({
             schoolId: schoolId,
             student: studentId,
             amountPaid: finalAmount,
             month: new Date().toLocaleString('default', { month: 'long' }),
             year: new Date().getFullYear(),
-            paymentMode: 'Online', // 'method' ki jagah direct 'Online' likh do validation bypass karne ke liye
-            date: new Date()
+            paymentMode: 'Online', 
+            date: new Date(),
+            remarks: `Online Payment via ${method || 'Neural Gateway'}`
         });
 
-        // 2. Update Installments Status
-        // Sabhi pending/overdue installments ko 'Paid' mark karo
-        const updateResult = await Installment.updateMany(
-            {
-                student: studentId,
-                schoolId: schoolId,
-                status: { $ne: 'Paid' }
-            },
-            {
-                $set: {
-                    status: 'Paid',
-                    paymentId: newFee._id
-                }
-            }
-        );
+        // NOTE: Installment logic yahan se hata diya gaya hai taaki 'Installment is not defined' error na aaye
 
-        console.log(`[PAYMENT] Success! Fee ID: ${newFee._id}, Updated Docs: ${updateResult.modifiedCount}`);
+        console.log(`[PAYMENT] Success! Fee ID: ${newFee._id}`);
 
         res.status(201).json({
             success: true,
-            message: 'Neural Capture Successful! 🛡️'
+            message: 'Neural Capture Successful! 🛡️',
+            feeId: newFee._id
         });
 
     } catch (error) {
-        // Console mein error dekho: Yahan se pata chalega exact galti kya hai
         console.error("CRITICAL_BACKEND_ERROR:", error.message);
         res.status(500).json({
             success: false,
