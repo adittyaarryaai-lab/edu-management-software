@@ -95,7 +95,7 @@ const FinanceGateway = () => {
 
                             {/* Details Section */}
                             <div className="w-full md:w-1/3 p-8 border-t md:border-t-0 md:border-l border-white/5 space-y-6 overflow-y-auto">
-                                <h3 className="text-sm font-black text-neon uppercase tracking-[0.2em] border-b border-neon/20 pb-4">Verification Audit</h3>
+                                <h3 className="text-sm font-black text-neon uppercase tracking-[0.2em] border-b border-neon/20 pb-4">Payment <br /> Verification</h3>
 
                                 <div className="space-y-4">
                                     <div className="bg-white/5 p-4 rounded-2xl">
@@ -105,13 +105,13 @@ const FinanceGateway = () => {
                                     </div>
 
                                     <div className="bg-white/5 p-4 rounded-2xl border border-neon/10">
-                                        <p className="text-[8px] text-neon/40 uppercase font-black mb-1 italic">Parent Uplink</p>
+                                        <p className="text-[8px] text-neon/40 uppercase font-black mb-1 italic">Parent Details</p>
                                         <p className="text-xs font-black text-white uppercase flex items-center gap-2"><UserCheck size={14} className="text-neon" /> {selectedSignal.student?.fatherName || 'NOT_FOUND'}</p>
                                         <p className="text-xs font-black text-white mt-2 flex items-center gap-2 tracking-widest"><Phone size={12} className="text-neon" /> {selectedSignal.student?.phone || 'NO_SIGNAL'}</p>
                                     </div>
 
                                     <div className="bg-rose-500/5 p-4 rounded-2xl border border-rose-500/20 text-center">
-                                        <p className="text-[8px] text-rose-500 uppercase font-black mb-1 italic tracking-widest">Amount Reported</p>
+                                        <p className="text-[8px] text-rose-500 uppercase font-black mb-1 italic tracking-widest">Paid Amount</p>
                                         <p className="text-3xl font-black italic tracking-tighter">₹{selectedSignal.amountPaid?.toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -176,7 +176,7 @@ const FinanceGateway = () => {
                         <div className="flex justify-between items-center mb-10 relative z-10">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 bg-neon rounded-full animate-ping"></div>
-                                <h2 className="text-[10px] font-black text-neon uppercase tracking-[0.3em]">Active Uplinks</h2>
+                                <h2 className="text-[10px] font-black text-neon uppercase tracking-[0.3em]">Active UPI Details</h2>
                             </div>
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
@@ -188,11 +188,11 @@ const FinanceGateway = () => {
 
                         <div className="space-y-5 relative z-10">
                             <div className="p-5 rounded-[1.5rem] bg-void/60 border border-white/5">
-                                <p className="text-[8px] uppercase text-white/20 font-black mb-1 tracking-widest italic">UPI ID Address</p>
+                                <p className="text-[8px] uppercase text-white/20 font-black mb-1 tracking-widest italic">UPI ID</p>
                                 <p className="text-xs font-black text-white tracking-widest uppercase break-all italic">{settings.upiId || 'NOT_CONFIGURED'}</p>
                             </div>
                             <div className="p-5 rounded-[1.5rem] bg-void/60 border border-white/5">
-                                <p className="text-[8px] uppercase text-white/20 font-black mb-1 tracking-widest italic">Merchant Name</p>
+                                <p className="text-[8px] uppercase text-white/20 font-black mb-1 tracking-widest italic">Receiver Name</p>
                                 <p className="text-xs font-black text-white uppercase truncate italic">{settings.merchantName || 'NOT_CONFIGURED'}</p>
                             </div>
                         </div>
@@ -205,21 +205,21 @@ const FinanceGateway = () => {
                                 ref={formRef} initial={{ height: 0, opacity: 0, scale: 0.95 }} animate={{ height: 'auto', opacity: 1, scale: 1 }} exit={{ height: 0, opacity: 0, scale: 0.95 }}
                                 onSubmit={handleUpdateSettings} className="bg-slate-900 border-2 border-neon/30 p-8 rounded-[3rem] space-y-6 overflow-hidden shadow-2xl backdrop-blur-2xl"
                             >
-                                <h2 className="text-[11px] font-black text-neon uppercase tracking-[0.3em] mb-2 flex items-center gap-2 italic"><Zap size={14} className="fill-neon" /> Modify Uplink</h2>
+                                <h2 className="text-[11px] font-black text-neon uppercase tracking-[0.3em] mb-2 flex items-center gap-2 italic"><Zap size={14} className="fill-neon" /> Modify UPI Details</h2>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-[9px] font-black text-white/30 uppercase ml-2 italic tracking-widest">New UPI Uplink</label>
+                                        <label className="text-[9px] font-black text-white/30 uppercase ml-2 italic tracking-widest">New UPI ID</label>
                                         <input className="w-full bg-void p-5 rounded-2xl border border-white/10 mt-1 font-black text-neon outline-none focus:border-neon transition-all text-xs"
                                             value={settings.upiId} onChange={e => setSettings({ ...settings, upiId: e.target.value })} placeholder="school@upi" required />
                                     </div>
                                     <div>
-                                        <label className="text-[9px] font-black text-white/30 uppercase ml-2 italic tracking-widest">Display Identity</label>
+                                        <label className="text-[9px] font-black text-white/30 uppercase ml-2 italic tracking-widest">New Receiver Name</label>
                                         <input className="w-full bg-void p-5 rounded-2xl border border-white/10 mt-1 font-black text-white outline-none focus:border-neon transition-all text-xs"
                                             value={settings.merchantName} onChange={e => setSettings({ ...settings, merchantName: e.target.value })} placeholder="Institution Name" required />
                                     </div>
                                 </div>
                                 <button type="submit" className="w-full bg-neon text-void py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all italic">
-                                    Sync Protocol
+                                    Change Details
                                 </button>
                             </motion.form>
                         )}
@@ -231,12 +231,12 @@ const FinanceGateway = () => {
                     <div className="bg-slate-900/40 p-8 md:p-10 rounded-[3.5rem] border border-white/5 backdrop-blur-md min-h-[500px]">
                         <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
                             <div>
-                                <h2 className="text-lg font-black text-rose-500 uppercase tracking-[0.2em] italic underline decoration-rose-500/20">Audit Stream</h2>
-                                <p className="text-[9px] text-white/20 uppercase font-black tracking-[0.4em] mt-1 italic">Real-time signal capturing</p>
+                                <h2 className="text-lg font-black text-rose-500 uppercase tracking-[0.2em] italic underline decoration-rose-500/20">Activity Log</h2>
+                                <p className="text-[9px] text-white/20 uppercase font-black tracking-[0.4em] mt-1 italic">Payment Screenshots</p>
                             </div>
                             <div className="bg-rose-500/10 px-6 py-2.5 rounded-full border border-rose-500/20 flex items-center gap-3">
                                 <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping"></div>
-                                <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">{pendingVerifications.length} Captures Pending</span>
+                                <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">{pendingVerifications.length}-Pending Payment</span>
                             </div>
                         </div>
 

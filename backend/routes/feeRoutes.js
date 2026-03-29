@@ -186,10 +186,10 @@ router.get('/student-summary', protect, async (req, res) => {
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
         // Fix: Rejected payments ko calculation aur history se bahar rakho
-        const allPayments = await Fee.find({
+        const verifiedPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
-            status: { $ne: 'Rejected' }
+            status: 'Verified'
         }).sort({ date: -1 });
 
         let monthlyStructureTotal = 0;
@@ -213,7 +213,8 @@ router.get('/student-summary', protect, async (req, res) => {
             });
         }
 
-        const paidThisMonth = allPayments.filter(p => {
+        // FIX 2: Monthly Total strictly for Verified
+        const paidThisMonth = verifiedPayments.filter(p => {
             const isCurrent = p.month === currentMonthName && p.year === currentYear;
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return isCurrent && !isOneTime;
@@ -223,12 +224,19 @@ router.get('/student-summary', protect, async (req, res) => {
         const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
         const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
 
-        const totalMonthlyPaidSoFar = allPayments.filter(p => {
+        // FIX 3: Total Paid calculation strictly for Verified
+        const totalMonthlyPaidSoFar = verifiedPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return !isOneTime && p.status === 'Verified';
+            return !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
+
+        // --- DAY 132: CHECK FOR PENDING SIGNALS ---
+        const pendingPayment = await Fee.findOne({
+            student: studentId,
+            status: 'Pending'
+        }).sort({ createdAt: -1 });
 
         // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
         const School = require('../models/School');
@@ -254,11 +262,11 @@ router.get('/student-summary', protect, async (req, res) => {
             accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
-        const groupedHistory = allPayments.reduce((acc, pay) => {
+        const groupedHistory = verifiedPayments.reduce((acc, pay) => {
             const key = `${pay.month} ${pay.year}`;
             if (!acc[key]) acc[key] = [];
             const rawRemarks = pay.remarks || "";
-            let displayCategory = "GENERAL FEE";
+            let displayCategory = pay.feeCategory || "GENERAL FEE";
             if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
             else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
             else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }
@@ -284,14 +292,22 @@ router.get('/student-summary', protect, async (req, res) => {
             adminEmail: schoolData?.adminDetails?.email || "N/A",
             currentMonth: currentMonthName,
             totalPaidThisMonth: paidThisMonth,
-            lastActivity: allPayments.length > 0 ? allPayments[0].date : null,
+            lastActivity: verifiedPayments.length > 0 ? verifiedPayments[0].date : null,
             totalPenalty: accruedPenalty,
             remainingFees: balance > 0 ? balance : 0, // Ye bina penalty ka pending hai
             grandTotal: (balance > 0 ? balance : 0) + accruedPenalty, // Ye penalty jod kar hai
             advanceBalance: balance < 0 ? Math.abs(balance) : 0,
             totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
-            paymentHistory: groupedHistory
+            paymentHistory: groupedHistory,
+            // --- DAY 132: PENDING DATA FOR FRONTEND ---
+            pendingSignal: pendingPayment ? {
+                id: pendingPayment._id,
+                amount: pendingPayment.amountPaid,
+                screenshot: pendingPayment.paymentScreenshot,
+                date: pendingPayment.date,
+                status: pendingPayment.status
+            } : null
         });
 
     } catch (error) {
@@ -606,11 +622,11 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             advance: balance < 0 ? Math.abs(balance) : 0,
             currentMonth: currentMonthName,
             structureDetails,
-            history: allPayments.reduce((acc, pay) => {
+            history: allPayments.filter(p => p.status === 'Verified').reduce((acc, pay) => {
                 const key = `${pay.month} ${pay.year}`;
                 if (!acc[key]) acc[key] = [];
                 const rawRemarks = pay.remarks || "";
-                let displayCategory = "GENERAL FEE";
+                let displayCategory = pay.feeCategory || "GENERAL FEE";
                 if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
                 else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
                 else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }

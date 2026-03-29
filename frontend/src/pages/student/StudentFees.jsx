@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown } from 'lucide-react';
+import { CreditCard, Calendar, Clock, CheckCircle, AlertCircle, TrendingUp, ArrowLeft, Download, ChevronDown,X, Zap } from 'lucide-react';
 import API from '../../api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable'; // Direct function import karein
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const StudentFees = () => {
     const [summary, setSummary] = useState(null);
+    const [showPendingModal, setShowPendingModal] = useState(false); // Modal control ke liye
     const navigate = useNavigate();
     const [selectedYear, setSelectedYear] = useState('All');
 
@@ -110,6 +112,31 @@ const StudentFees = () => {
     const structureTotal = summary?.totalFeesStructure || 0;
     return (
         <div className="min-h-screen bg-void text-white p-5 pb-32 italic font-sans">
+
+            {/* --- DAY 132: MODAL FOR PENDING SCREENSHOT PREVIEW --- */}
+            <AnimatePresence>
+                {showPendingModal && summary.pendingSignal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[1000] flex items-center justify-center p-6 backdrop-blur-xl bg-black/80">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-slate-900 w-full max-w-md rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl relative">
+                            <button onClick={() => setShowPendingModal(false)} className="absolute top-6 right-6 z-10 p-2 bg-white/5 rounded-full hover:bg-red-500 transition-colors"><X size={18} /></button>
+                            <div className="p-8 space-y-6">
+                                <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+                                    <div className="p-2 bg-amber-500/20 rounded-xl text-amber-500"><Clock size={20} /></div>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-amber-500 italic">Pending</h3>
+                                </div>
+                                <div className="aspect-[3/4] w-full bg-black rounded-3xl overflow-hidden border border-white/5">
+                                    <img src={`http://localhost:5000${summary.pendingSignal.screenshot}`} className="w-full h-full object-contain" alt="Evidence" />
+                                </div>
+                                <div className="bg-white/5 p-4 rounded-2xl space-y-2">
+                                    <div className="flex justify-between text-[10px] uppercase font-black italic"><span className="opacity-40">Amount Sent:</span><span className="text-neon">₹{summary.pendingSignal.amount.toLocaleString()}</span></div>
+                                    <div className="flex justify-between text-[10px] uppercase font-black italic"><span className="opacity-40">Status:</span><span className="text-amber-500">Pending</span></div>
+                                </div>
+                                <p className="text-[8px] text-white/20 text-center uppercase font-black tracking-widest">Payment Submitted • Waiting for Approval</p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <div className="flex items-center gap-4 mb-10 border-l-4 border-neon pl-4">
                 <button
                     onClick={() => navigate(-1)}
@@ -210,13 +237,24 @@ const StudentFees = () => {
                                 </p>
                             </div>
                         </div>
-                        <button
-                            onClick={() => navigate('/student/checkout')}
-                            className="w-full py-4 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95"
-                        >
-                            {/* Button text change */}
-                            Resolve Total: ₹{(summary.grandTotal || summary.remainingFees).toLocaleString()} ⚡
-                        </button>
+                        {/* --- DAY 132: SMART BUTTON LOGIC --- */}
+                        {summary.pendingSignal ? (
+                            /* PENDING BUTTON */
+                            <button 
+                                onClick={() => setShowPendingModal(true)}
+                                className="w-full py-4 bg-amber-500/20 border-2 border-amber-500/40 text-amber-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-500/30 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Zap size={14} className="animate-pulse" fill="currentColor"/> Pending Approval: ₹{summary.pendingSignal.amount.toLocaleString()} 📡
+                            </button>
+                        ) : (
+                            /* NORMAL RESOLVE BUTTON */
+                            <button
+                                onClick={() => navigate('/student/checkout')}
+                                className="w-full py-4 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-500 transition-all active:scale-95"
+                            >
+                                Resolve Total: ₹{(summary.grandTotal || summary.remainingFees).toLocaleString()} ⚡
+                            </button>
+                        )}
                     </div>
                 )}
 
