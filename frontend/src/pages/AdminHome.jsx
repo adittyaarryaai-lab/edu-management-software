@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
 
-const AdminHome = () => {
+const AdminHome = ({ searchQuery }) => {
     const navigate = useNavigate();
     const [showTeacherForm, setShowTeacherForm] = useState(false);
     const [showStudentForm, setShowStudentForm] = useState(false);
@@ -64,25 +64,25 @@ const AdminHome = () => {
     };
 
     const handleAddTeacher = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-        const currentUser = JSON.parse(localStorage.getItem('user'));
-        const sId = currentUser?.schoolId;
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+            const sId = currentUser?.schoolId;
 
-        const processedData = {
-            ...teacherData,
-            role: isFinance ? 'finance' : 'teacher', 
-            schoolId: sId,
-            // Finance teacher ke liye class aur subject blank jayenge
-            assignedClass: isFinance ? null : (teacherData.assignedClass?.trim().toUpperCase() || null),
-            subjects: isFinance ? [] : (teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [])
-        };
+            const processedData = {
+                ...teacherData,
+                role: isFinance ? 'finance' : 'teacher',
+                schoolId: sId,
+                // Finance teacher ke liye class aur subject blank jayenge
+                assignedClass: isFinance ? null : (teacherData.assignedClass?.trim().toUpperCase() || null),
+                subjects: isFinance ? [] : (teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [])
+            };
 
-        const { data } = await API.post('/auth/register', processedData);
-        setMsg(`${isFinance ? 'Finance Personnel' : 'Faculty Node'} Active: EMP ID ${data.generatedId} ⚡`);
-        setShowTeacherForm(false);
-        setIsFinance(false); // Reset toggle
+            const { data } = await API.post('/auth/register', processedData);
+            setMsg(`${isFinance ? 'Finance Personnel' : 'Faculty Node'} Active: EMP ID ${data.generatedId} ⚡`);
+            setShowTeacherForm(false);
+            setIsFinance(false); // Reset toggle
             // Reset form
             setTeacherData({
                 name: '', email: '', password: '', subjects: '', assignedClass: '',
@@ -211,28 +211,30 @@ const AdminHome = () => {
             {/* Modules */}
             <div className="grid grid-cols-1 gap-4">
                 <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] ml-2 italic">Administrative Core</h3>
-                {managementModules.map((m, i) => (
-                    <div key={i} onClick={() => {
-                        if (m.id === 'manage-users') navigate('/admin/manage-users');
-                        if (m.id === 'add-staff') setShowTeacherForm(true);
-                        if (m.id === 'add-student') setShowStudentForm(true);
-                        if (m.id === 'timetable') navigate('/admin/timetable');
-                        if (m.id === 'fees') navigate('/admin/fees');
-                        if (m.id === 'attendance-report') navigate('/admin/attendance-report');
-                        if (m.id === 'notice') navigate('/admin/global-notice');
-                        if (m.id === 'notice-feed') navigate('/notice-feed');
-                        if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
-                    }} className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/5 flex items-center justify-between active:scale-95 transition-all cursor-pointer group hover:border-neon/20">
-                        <div className="flex items-center gap-4">
-                            <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
-                            <div>
-                                <h4 className="font-black text-white/80 text-sm leading-none uppercase italic tracking-tighter">{m.title}</h4>
-                                <p className="text-[10px] text-white/30 mt-1 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
+                {managementModules
+                    .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
+                    .map((m, i) => (
+                        <div key={i} onClick={() => {
+                            if (m.id === 'manage-users') navigate('/admin/manage-users');
+                            if (m.id === 'add-staff') setShowTeacherForm(true);
+                            if (m.id === 'add-student') setShowStudentForm(true);
+                            if (m.id === 'timetable') navigate('/admin/timetable');
+                            if (m.id === 'fees') navigate('/admin/fees');
+                            if (m.id === 'attendance-report') navigate('/admin/attendance-report');
+                            if (m.id === 'notice') navigate('/admin/global-notice');
+                            if (m.id === 'notice-feed') navigate('/notice-feed');
+                            if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
+                        }} className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/5 flex items-center justify-between active:scale-95 transition-all cursor-pointer group hover:border-neon/20">
+                            <div className="flex items-center gap-4">
+                                <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
+                                <div>
+                                    <h4 className="font-black text-white/80 text-sm leading-none uppercase italic tracking-tighter">{m.title}</h4>
+                                    <p className="text-[10px] text-white/30 mt-1 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
+                                </div>
                             </div>
+                            <div className="bg-void p-2 rounded-full border border-white/5"><PlusCircle size={14} className="text-white/20 group-hover:text-neon" /></div>
                         </div>
-                        <div className="bg-void p-2 rounded-full border border-white/5"><PlusCircle size={14} className="text-white/20 group-hover:text-neon" /></div>
-                    </div>
-                ))}
+                    ))}
             </div>
 
             {/* MODALS WITH ALL DAY 78 FIELDS */}

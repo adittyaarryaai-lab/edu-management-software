@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import API from '../api';
 
-const TeacherHome = ({ user }) => {
+const TeacherHome = ({ user, searchQuery }) => {
   const navigate = useNavigate();
   const [studentCount, setStudentCount] = useState(0);
 
@@ -59,14 +59,16 @@ const TeacherHome = ({ user }) => {
 
         {/* Main Icon Grid */}
         <div className="grid grid-cols-2 gap-4">
-          {teacherModules.map((m, i) => (
-            <Link to={m.path} key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-3 shadow-2xl border border-white/5 active:scale-95 transition-all group hover:border-neon/30 italic">
-              <div className={`p-4 rounded-[2rem] border transition-all group-hover:shadow-[0_0_20px_rgba(61,242,224,0.3)] ${m.color}`}>
-                {m.icon}
-              </div>
-              <span className="font-black text-white/80 text-xs tracking-tight uppercase tracking-[0.1em] group-hover:text-neon transition-colors">{m.title}</span>
-            </Link>
-          ))}
+          {teacherModules
+            .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
+            .map((m, i) => (
+              <Link to={m.path} key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 flex flex-col items-center justify-center gap-3 shadow-2xl border border-white/5 active:scale-95 transition-all group hover:border-neon/30 italic">
+                <div className={`p-4 rounded-[2rem] border transition-all group-hover:shadow-[0_0_20px_rgba(61,242,224,0.3)] ${m.color}`}>
+                  {m.icon}
+                </div>
+                <span className="font-black text-white/80 text-xs tracking-tight uppercase tracking-[0.1em] group-hover:text-neon transition-colors">{m.title}</span>
+              </Link>
+            ))}
         </div>
 
         {/* Staff Briefing Card */}

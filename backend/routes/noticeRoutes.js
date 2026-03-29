@@ -28,9 +28,10 @@ router.post('/create', protect, async (req, res) => {
     }
 });
 
+// --- DAY 134: FETCH NOTICES (WITH STRICT FINANCE FILTERING) ---
 router.get('/my-notices', protect, async (req, res) => {
     try {
-        let baseQuery = { schoolId: req.user.schoolId }; // FIXED: Must be in my school
+        let baseQuery = { schoolId: req.user.schoolId };
 
         if (req.user.role === 'student') {
             const studentGrade = req.user.grade ? req.user.grade.trim().toUpperCase() : '';
@@ -38,11 +39,19 @@ router.get('/my-notices', protect, async (req, res) => {
                 { audience: 'all' },
                 { audience: 'specific_grade', targetGrade: studentGrade }
             ];
-        } else if (req.user.role === 'teacher') {
+        } 
+        // FIX: Finance Teacher ke liye alag logic
+        else if (req.user.role === 'finance') {
+            baseQuery.$or = [
+                { audience: 'all' },       // Jo Admin ne sabko bheje (Teachers + Students)
+                { audience: 'teachers' }    // Jo Admin ne sirf staff/teachers ko bheje
+            ];
+        }
+        else if (req.user.role === 'teacher') {
             baseQuery.$or = [
                 { audience: 'all' },
                 { audience: 'teachers' },
-                { postedBy: req.user._id }
+                { postedBy: req.user._id } // Khud ke bheje hue
             ];
         }
 

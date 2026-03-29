@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SidebarDrawer = ({ isOpen, onClose, user }) => {
     const navigate = useNavigate();
+    // --- DAY 134: BACKGROUND SCROLL LOCK PROTOCOL ---
+    useEffect(() => {
+        if (isOpen) {
+            // Background scroll disable
+            document.body.style.overflow = 'hidden';
+        } else {
+            // Background scroll enable
+            document.body.style.overflow = 'unset';
+        }
+
+        // Cleanup function: Agar component unmount ho jaye toh scroll wapas on ho jaye
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
     const [showConfirm, setShowConfirm] = useState(false);
 
     if (!isOpen) return null;
@@ -30,25 +45,20 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <User size={20} />, label: 'Master Account', color: 'text-neon', path: '/superadmin/account' },
         { icon: <Settings size={20} />, label: 'Settings', color: 'text-white/40', path: '/settings' },
     ] : user?.role === 'finance' ? [
-        // --- DAY 98: FINANCE TEACHER SIDEBAR (POINT 8) ---
-        { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
+        { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/finance/dashboard' },
-        // { icon: <Layers size={20} />, label: 'Fee Configuration', color: 'text-cyan-400', path: '/finance/fee-setup' },
-        // { icon: <Users size={20} />, label: 'Students Fees', color: 'text-neon', path: '/finance/fees' },
         { icon: <PlusCircle size={20} />, label: 'Add Payment', color: 'text-cyan-400', path: '/finance/add-payment' },
-        // { icon: <FileText size={20} />, label: 'Receipts', color: 'text-neon', path: '/finance/receipts' },
-        // { icon: <Clock size={20} />, label: 'Installments', color: 'text-neon', path: '/finance/installments' },
-        // { icon: <AlertCircle size={20} />, label: 'Pending Fees', color: 'text-rose-500', path: '/finance/pending' },
-        // { icon: <PieChart size={20} />, label: 'Reports', color: 'text-neon', path: '/finance/reports' },
+        { icon: <FileText size={20} />, label: 'Finance Reports', color: 'text-neon', path: '/finance/reports' },
+        { icon: <Users size={20} />, label: 'Fees Tracker', color: 'text-orange-400', path: '/finance/fees-tracker' },
+        { icon: <Layers size={20} />, label: 'Fee Setup', color: 'text-neon', path: '/finance/fee-setup' },
+        { icon: <ShieldCheck size={20} />, label: 'Payment Gateway', color: 'text-emerald-400', path: '/finance/gateway' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
     ] : user?.role === 'student' ? [
-        // --- DAY 99: STUDENT SIDEBAR ---
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <CreditCard size={20} />, label: 'My Fees', color: 'text-neon', path: '/student/fees' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
         { icon: <HelpCircle size={20} />, label: 'Support', color: 'text-neon', path: '/support' },
     ] : [
-        // Normal Teacher/Student Sidebar
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
         { icon: <HelpCircle size={20} />, label: 'Support & Help', color: 'text-neon', path: '/support' },
@@ -62,7 +72,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                 <div className="absolute inset-0 bg-void/80 backdrop-blur-md" onClick={onClose}></div>
 
                 {/* Sidebar Menu */}
-                <div className="relative w-80 bg-void h-full shadow-[20px_0_60px_rgba(0,0,0,0.8)] flex flex-col border-r border-neon/20 italic">
+                <div className="relative w-80 bg-void h-full shadow-[20px_0_60px_rgba(0,0,0,0.8)] flex flex-col border-r border-neon/20 italic overflow-y-auto max-h-screen">
                     <div className="p-8 pb-12 rounded-br-[3rem] text-white relative overflow-hidden border-b border-neon/10 bg-gradient-to-b from-neon/5 to-transparent">
                         <div className="flex justify-between items-start mb-6 relative z-10">
                             <div className="w-16 h-16 bg-neon/10 rounded-full overflow-hidden flex items-center justify-center border border-neon/40 backdrop-blur-md shadow-[0_0_20px_rgba(61,242,224,0.2)]">

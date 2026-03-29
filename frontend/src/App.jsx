@@ -345,16 +345,16 @@ function App() {
           {/* Main Dashboard Logic based on Role */}
           <Route path="/" element={
             user.role === 'superadmin' ? <SuperAdminDashboard /> :
-              user.role === 'admin' ? <AdminHome /> :
-                user.role === 'finance' ? <FinanceDashboard /> :
-                  user.role === 'teacher' ? <TeacherHome user={user} /> :
+              user.role === 'admin' ? <AdminHome searchQuery={searchQuery} /> : // <--- Prop Added
+                user.role === 'finance' ? <FinanceDashboard searchQuery={searchQuery} /> : // <--- Prop Added
+                  user.role === 'teacher' ? <TeacherHome user={user} searchQuery={searchQuery} /> : // <--- Prop Added
                     <StudentHome user={user} searchQuery={searchQuery} />
           } />
           <Route path="/dashboard" element={
             user.role === 'superadmin' ? <SuperAdminDashboard /> :
-              user.role === 'admin' ? <AdminHome /> :
-                user.role === 'finance' ? <FinanceDashboard /> :
-                  user.role === 'teacher' ? <TeacherHome user={user} /> :
+              user.role === 'admin' ? <AdminHome searchQuery={searchQuery} /> : // <--- Prop Added
+                user.role === 'finance' ? <FinanceDashboard searchQuery={searchQuery} /> : // <--- Prop Added
+                  user.role === 'teacher' ? <TeacherHome user={user} searchQuery={searchQuery} /> : // <--- Prop Added
                     <StudentHome user={user} searchQuery={searchQuery} />
           } />
 
@@ -407,11 +407,11 @@ function App() {
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
 
           {/* --- FINANCE MODULE ROUTES --- */}
-          <Route path="/finance/dashboard" element={<FinanceDashboard />} />
+          <Route path="/finance/dashboard" element={<FinanceDashboard searchQuery={searchQuery} />} />
           <Route path="/finance/fee-setup" element={<FeeSetup />} />
           <Route path="/finance/gateway" element={<FinanceGateway />} />
           <Route path="/finance/fees" element={<StudentsFees />} />
-          <Route path="/finance/reports" element={<FeeReports />} /> 
+          <Route path="/finance/reports" element={<FeeReports />} />
           <Route path="/finance/add-payment" element={<AddPayment />} />
           <Route path="/finance/receipt/:id" element={<FeeReceipt />} />
           <Route path="/finance/installments" element={<Installments />} />

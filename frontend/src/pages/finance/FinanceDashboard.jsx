@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 
-const FinanceDashboard = () => {
+const FinanceDashboard = ({ searchQuery }) => {
     const [stats, setStats] = useState({
         collectedToday: 0,
         collectedMonth: 0,
@@ -124,7 +124,7 @@ const FinanceDashboard = () => {
                 <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12"><IndianRupee size={120} /></div>
 
                 <div className="relative z-10">
-                    <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20 italic">Finance Node</h1>
+                    <h1 className="text-2xl font-black uppercase tracking-tighter text-neon underline decoration-neon/20 italic">Finance  Dashboard</h1>
                     <p className="text-[10px] text-white/20 uppercase font-black mt-1 tracking-widest leading-none italic">
                         Accountant: {user?.name}
                     </p>
@@ -164,18 +164,20 @@ const FinanceDashboard = () => {
             <div className="px-5 mt-8 space-y-6 relative z-10">
                 {/* Analytics Cards */}
                 <div className="grid grid-cols-2 gap-4">
-                    {statCards.map((card, i) => (
-                        <div
-                            key={i}
-                            onClick={() => navigate(card.path)}
-                            className={`p-6 bg-slate-900/80 rounded-[2.5rem] border ${card.color} shadow-2xl active:scale-95 transition-all cursor-pointer relative overflow-hidden group`}
-                        >
-                            <div className="mb-3 opacity-60 group-hover:opacity-100 transition-opacity">{card.icon}</div>
-                            <h3 className="text-xl font-black tracking-tighter">₹{card.value.toLocaleString()}</h3>
-                            <p className="text-[8px] font-black uppercase text-white/30 tracking-widest mt-1">{card.label}</p>
-                            <ArrowRight size={12} className="absolute bottom-6 right-6 text-white/10 group-hover:text-cyan-400 transition-colors" />
-                        </div>
-                    ))}
+                    {statCards
+                        .filter(card => card.label.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
+                        .map((card, i) => (
+                            <div
+                                key={i}
+                                onClick={() => navigate(card.path)}
+                                className={`p-6 bg-slate-900/80 rounded-[2.5rem] border ${card.color} shadow-2xl active:scale-95 transition-all cursor-pointer relative overflow-hidden group`}
+                            >
+                                <div className="mb-3 opacity-60 group-hover:opacity-100 transition-opacity">{card.icon}</div>
+                                <h3 className="text-xl font-black tracking-tighter">₹{card.value.toLocaleString()}</h3>
+                                <p className="text-[8px] font-black uppercase text-white/30 tracking-widest mt-1">{card.label}</p>
+                                <ArrowRight size={12} className="absolute bottom-6 right-6 text-white/10 group-hover:text-cyan-400 transition-colors" />
+                            </div>
+                        ))}
                 </div>
 
                 {/* --- DAY 123: SUBTLE PENALTY INFO WITH ACTION BUTTON --- */}
