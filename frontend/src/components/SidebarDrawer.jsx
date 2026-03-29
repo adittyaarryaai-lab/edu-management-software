@@ -33,13 +33,13 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         // --- DAY 98: FINANCE TEACHER SIDEBAR (POINT 8) ---
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/finance/dashboard' },
-        { icon: <Layers size={20} />, label: 'Fee Configuration', color: 'text-cyan-400', path: '/finance/fee-setup' },
-        { icon: <Users size={20} />, label: 'Students Fees', color: 'text-neon', path: '/finance/fees' },
+        // { icon: <Layers size={20} />, label: 'Fee Configuration', color: 'text-cyan-400', path: '/finance/fee-setup' },
+        // { icon: <Users size={20} />, label: 'Students Fees', color: 'text-neon', path: '/finance/fees' },
         { icon: <PlusCircle size={20} />, label: 'Add Payment', color: 'text-cyan-400', path: '/finance/add-payment' },
-        { icon: <FileText size={20} />, label: 'Receipts', color: 'text-neon', path: '/finance/receipts' },
-        { icon: <Clock size={20} />, label: 'Installments', color: 'text-neon', path: '/finance/installments' },
-        { icon: <AlertCircle size={20} />, label: 'Pending Fees', color: 'text-rose-500', path: '/finance/pending' },
-        { icon: <PieChart size={20} />, label: 'Reports', color: 'text-neon', path: '/finance/reports' },
+        // { icon: <FileText size={20} />, label: 'Receipts', color: 'text-neon', path: '/finance/receipts' },
+        // { icon: <Clock size={20} />, label: 'Installments', color: 'text-neon', path: '/finance/installments' },
+        // { icon: <AlertCircle size={20} />, label: 'Pending Fees', color: 'text-rose-500', path: '/finance/pending' },
+        // { icon: <PieChart size={20} />, label: 'Reports', color: 'text-neon', path: '/finance/reports' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
     ] : user?.role === 'student' ? [
         // --- DAY 99: STUDENT SIDEBAR ---

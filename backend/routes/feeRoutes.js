@@ -81,17 +81,30 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
     } catch (error) { res.status(500).json({ message: 'Signal Interrupted' }); }
 });
 
-// --- DAY 130: GET PENDING LIST (FINANCE SIDE) ---
+// --- DAY 132: GET SEPARATED ACTIVITY LOGS ---
 router.get('/audit/pending-verifications', protect, financeOnly, async (req, res) => {
     try {
-        const pending = await Fee.find({
-            schoolId: req.user.schoolId,
-            status: { $in: ['Pending', 'Rejected'] }
-        }).populate('student', 'name enrollmentNo grade fatherName phone');
-        res.json(pending);
-    } catch (error) { res.status(500).json({ message: 'Audit error' }); }
-});
+        const schoolId = req.user.schoolId;
 
+        // 1. Sirf Pending uthao (Upar wale box ke liye)
+        const pending = await Fee.find({
+            schoolId,
+            paymentScreenshot: { $exists: true, $ne: null },
+            status: 'Pending'
+        }).populate('student', 'name enrollmentNo grade fatherName phone').sort({ createdAt: -1 });
+
+        // 2. Verified aur Rejected uthao (Niche wale history box ke liye)
+        const resolved = await Fee.find({
+            schoolId,
+            paymentScreenshot: { $exists: true, $ne: null },
+            status: { $in: ['Verified', 'Rejected'] }
+        }).populate('student', 'name enrollmentNo grade fatherName phone').sort({ updatedAt: -1 });
+
+        res.json({ pending, resolved });
+    } catch (error) {
+        res.status(500).json({ message: 'Audit Feed Failure' });
+    }
+});
 // --- DAY 131: APPROVE ONLINE SIGNAL (STATUS UPDATE) ---
 router.post('/audit/verify-payment', protect, financeOnly, async (req, res) => {
     try {

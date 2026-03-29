@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Printer, Layers, Calendar } from 'lucide-react';
+import { Download, Printer, Layers, Calendar, ArrowLeft} from 'lucide-react';
 import API from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 const FeeReports = () => {
-    const [report, setReport] = useState({ 
-        totalCollected: 0, 
-        transactionCount: 0, 
-        classWise: [], 
+    const navigate = useNavigate();
+    const [report, setReport] = useState({
+        totalCollected: 0,
+        transactionCount: 0,
+        classWise: [],
         history: [],
-        schoolName: "", 
-        schoolAddress: "" 
+        schoolName: "",
+        schoolAddress: ""
     });
 
     useEffect(() => {
@@ -18,7 +20,7 @@ const FeeReports = () => {
                 // Pehle stats se school info uthayenge (Auto Generate)
                 const { data: statsData } = await API.get('/users/finance/stats');
                 const { data: reportData } = await API.get('/fees/reports/summary');
-                
+
                 setReport({
                     ...reportData,
                     schoolName: statsData.schoolName,
@@ -33,9 +35,10 @@ const FeeReports = () => {
 
     return (
         <div className="min-h-screen bg-void text-white p-5 pb-24 italic print:bg-white print:text-black print:p-0">
-            
+
             {/* CSS TO REMOVE BROWSER HEADERS (Localhost/Date/Frontend) */}
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @media print {
                     @page { margin: 15mm; }
                     body { -webkit-print-color-adjust: exact; }
@@ -54,10 +57,21 @@ const FeeReports = () => {
 
             {/* --- SCREEN HEADER --- */}
             <div className="flex justify-between items-center mb-10 border-l-4 border-neon pl-4 print:hidden">
-                <div>
-                    <h1 className="text-xl font-black uppercase tracking-tighter">FEE RECORDS</h1>
-                    <p className="text-[8px] text-white/20 uppercase font-black tracking-[0.3em]">Institutional Accounts Node</p>
+                <div className="flex items-center gap-5">
+                    {/* --- BACK NAVIGATION BUTTON --- */}
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="p-3 bg-white/5 rounded-2xl border border-white/10 hover:border-neon/50 hover:bg-neon/5 transition-all active:scale-90 group shadow-lg"
+                    >
+                        <ArrowLeft className="text-white/40 group-hover:text-neon transition-colors" size={20} />
+                    </button>
+
+                    <div>
+                        <h1 className="text-xl font-black uppercase tracking-tighter italic">FEE RECORDS</h1>
+                        <p className="text-[8px] text-white/20 uppercase font-black tracking-[0.3em] italic">Institutional Accounts Node</p>
+                    </div>
                 </div>
+
                 <button onClick={() => window.print()} className="p-4 bg-white/5 rounded-2xl text-neon hover:bg-neon hover:text-void transition-all shadow-xl">
                     <Printer size={20} />
                 </button>

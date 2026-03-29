@@ -1,35 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldCheck, Save, Eye, CheckCircle, Smartphone, User, Hash, Edit3, X, Zap, Activity, Database, Layers, Phone, UserCheck } from 'lucide-react';
+import { ShieldCheck, Save, Eye, CheckCircle, Smartphone, User, Hash, Edit3, X, Zap, Activity, Database, Layers, Phone, UserCheck, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 
 const FinanceGateway = () => {
     const [settings, setSettings] = useState({ upiId: '', merchantName: '' });
+    const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [pendingVerifications, setPendingVerifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showToast, setShowToast] = useState(false);
+    const [toastMsg, setToastMsg] = useState(""); // Toast text ke liye
+    const [resolvedSignals, setResolvedSignals] = useState([]);
     const [selectedSignal, setSelectedSignal] = useState(null); // Selected screenshot detail
+
+
 
     const formRef = useRef(null);
 
     const loadTerminal = async () => {
         try {
             setLoading(true);
-            const { data } = await API.get('/fees/settings/penalty');
-            if (data.paymentSettings) {
+            const { data: config } = await API.get('/fees/settings/penalty');
+            if (config.paymentSettings) {
                 setSettings({
-                    upiId: data.paymentSettings.upiId || '',
-                    merchantName: data.paymentSettings.merchantName || ''
+                    upiId: config.paymentSettings.upiId || '',
+                    merchantName: config.paymentSettings.merchantName || ''
                 });
             }
-            const verifyRes = await API.get('/fees/audit/pending-verifications');
-            setPendingVerifications(verifyRes.data || []);
-        } catch (err) {
-            console.error("Terminal Sync Error");
-        } finally {
-            setLoading(false);
-        }
+
+            // Data separation handle karo
+            const { data } = await API.get('/fees/audit/pending-verifications');
+            setPendingVerifications(data.pending || []);
+            setResolvedSignals(data.resolved || []);
+        } catch (err) { console.error("Sync Error"); }
+        finally { setLoading(false); }
     };
 
     useEffect(() => { loadTerminal(); }, []);
@@ -52,9 +58,14 @@ const FinanceGateway = () => {
             const { data } = await API.post(route, { feeId });
 
             if (data.success) {
-                setShowToast(true); // Success toast dikhayenge
-                setSelectedSignal(null); // Modal band kar denge
-                loadTerminal(); // List refresh karenge
+                // Dynamic message based on action
+                setToastMsg(action === 'verify' ? "Payment Verified: Fees Updated" : "Payment Rejected: Fees Still Pending");
+                setShowToast(true);
+                setSelectedSignal(null);
+
+                // Fix: 5 second baad toast hatana
+                setTimeout(() => setShowToast(false), 5000);
+                loadTerminal(); // Refresh list to show status change
             }
         } catch (err) {
             alert("Action Failed: Check Neural Link");
@@ -64,7 +75,7 @@ const FinanceGateway = () => {
     if (loading) return (
         <div className="min-h-screen bg-void flex flex-col items-center justify-center gap-4 italic font-black uppercase tracking-widest text-[10px] text-neon animate-pulse">
             <div className="w-12 h-12 border-4 border-neon/20 border-t-neon rounded-full animate-spin"></div>
-            Syncing Neural Node...
+            Loading Finance Gateway...
         </div>
     );
 
@@ -146,25 +157,38 @@ const FinanceGateway = () => {
                         className="fixed top-8 left-1/2 -translate-x-1/2 z-[999] bg-slate-900 border-2 border-neon px-8 py-4 rounded-[2rem] shadow-[0_0_50px_rgba(61,242,224,0.4)] flex items-center gap-4 w-fit"
                     >
                         <div className="p-2 bg-neon rounded-full"><CheckCircle size={14} className="text-void" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white tracking-[0.2em]">Protocol Synchronized</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white tracking-[0.2em]">
+                            {toastMsg || "Protocol Synchronized"}
+                        </span>
                     </motion.div>
                 )}
             </AnimatePresence>
 
             {/* --- HEADER --- */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4 relative z-10">
-                <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
-                        <ShieldCheck className="text-neon animate-pulse" size={32} />
-                        Finance <span className="text-neon">Terminal</span>
-                    </h1>
-                    <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.4em] mt-1 ml-1 italic">EduFlowAi Gateway Controller v1.3.0</p>
-                </div>
-                <div className="flex items-center gap-3 bg-white/5 p-2 px-4 rounded-full border border-white/10 backdrop-blur-sm w-fit">
-                    <Activity size={14} className="text-neon animate-pulse" />
-                    <span className="text-[8px] font-black uppercase tracking-widest">Protocol 130 Secure</span>
-                </div>
-            </div>
+    <div className="flex items-center gap-5">
+        {/* --- BACK NAVIGATION BUTTON --- */}
+        <button 
+            onClick={() => navigate(-1)}
+            className="p-3 bg-white/5 rounded-2xl border border-white/10 hover:border-neon/50 hover:bg-neon/5 transition-all active:scale-90 group shadow-lg"
+        >
+            <ArrowLeft className="text-white/40 group-hover:text-neon transition-colors" size={20} />
+        </button>
+
+        <div>
+            <h1 className="text-3xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
+                <ShieldCheck className="text-neon animate-pulse" size={32} />
+                Finance <span className="text-neon">Terminal</span>
+            </h1>
+            <p className="text-[9px] text-white/30 uppercase font-black tracking-[0.4em] mt-1 ml-1 italic">EduFlowAi Gateway Controller v1.3.0</p>
+        </div>
+    </div>
+
+    <div className="flex items-center gap-3 bg-white/5 p-2 px-4 rounded-full border border-white/10 backdrop-blur-sm w-fit">
+        <Activity size={14} className="text-neon animate-pulse" />
+        <span className="text-[8px] font-black uppercase tracking-widest">Protocol 130 Secure</span>
+    </div>
+</div>
 
             <div className="flex flex-col lg:grid lg:grid-cols-3 gap-8 relative z-10">
 
@@ -236,7 +260,7 @@ const FinanceGateway = () => {
                             </div>
                             <div className="bg-rose-500/10 px-6 py-2.5 rounded-full border border-rose-500/20 flex items-center gap-3">
                                 <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping"></div>
-                                <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">{pendingVerifications.length}-Pending Payment</span>
+                                <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">{pendingVerifications.length} Pending Payment</span>
                             </div>
                         </div>
 
@@ -268,8 +292,8 @@ const FinanceGateway = () => {
 
                                             {/* Status Badge - Dynamic Colors */}
                                             <div className={`mt-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-full w-fit ml-auto italic ${item.status === 'Verified' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                    item.status === 'Rejected' ? 'bg-red-500/20 text-red-500' :
-                                                        'bg-amber-500/20 text-amber-500'
+                                                item.status === 'Rejected' ? 'bg-red-500/20 text-red-500' :
+                                                    'bg-amber-500/20 text-amber-500'
                                                 }`}>
                                                 {item.status || 'Pending'}
                                             </div>
@@ -286,11 +310,62 @@ const FinanceGateway = () => {
                             )) : (
                                 <div className="flex flex-col items-center justify-center py-32 opacity-10 italic">
                                     <Zap size={60} className="mb-6 animate-bounce" />
-                                    <p className="text-xs font-black uppercase tracking-[0.8em]">Transmission Idle</p>
+                                    <p className="text-xs font-black uppercase tracking-[0.8em]">Payments</p>
                                 </div>
                             )}
                         </div>
                     </div>
+                {/* --- AUDIT HISTORY BOX (UPDATED LOCATION & SIZE) --- */}
+                <div className="lg:col-span-2 mt-8 bg-slate-900/40 p-8 md:p-10 rounded-[3.5rem] border border-white/5 backdrop-blur-md shadow-2xl">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <Database size={18} className="text-neon opacity-50" />
+                            <h2 className="text-lg font-black text-white/40 uppercase tracking-[0.2em] italic">Online Payment History</h2>
+                        </div>
+                        <span className="text-[7px] bg-white/5 px-4 py-1.5 rounded-full text-white/30 uppercase font-black tracking-widest border border-white/5">v1.3.0</span>
+                    </div>
+
+                    <div className="space-y-3">
+                        {resolvedSignals.length > 0 ? resolvedSignals.map((item, i) => (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                                key={i} onClick={() => setSelectedSignal(item)}
+                                className="bg-void/30 p-5 rounded-[2rem] border border-white/5 flex justify-between items-center group hover:border-neon/20 transition-all cursor-pointer"
+                            >
+                                <div className="flex items-center gap-5">
+                                    <div className={`p-3 rounded-2xl shadow-inner ${item.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                        {item.status === 'Verified' ? <CheckCircle size={20} /> : <X size={20} />}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black uppercase text-white leading-none tracking-tight group-hover:text-neon transition-colors">{item.student?.name}</p>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                            <span className="text-[7px] text-white/20 uppercase font-bold tracking-tighter italic">Ref: {item._id.slice(-8).toUpperCase()}</span>
+                                            <span className="w-1 h-1 bg-white/10 rounded-full"></span>
+                                            <span className="text-[7px] text-white/20 uppercase font-bold tracking-tighter italic">{item.student?.grade}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-6">
+                                    <div className="text-right">
+                                        <p className="text-sm font-black text-white/60 italic tracking-tighter">₹{item.amountPaid?.toLocaleString()}</p>
+                                        <p className={`text-[6px] font-black uppercase mt-0.5 tracking-widest ${item.status === 'Verified' ? 'text-emerald-500' : 'text-red-500'}`}>
+                                            {item.status === 'Verified' ? 'Signal Confirmed' : 'Signal Rejected'}
+                                        </p>
+                                    </div>
+                                    <div className="p-3.5 bg-white/5 text-white/10 rounded-2xl group-hover:text-neon group-hover:bg-neon/10 group-hover:border-neon/20 border border-transparent transition-all">
+                                        <Edit3 size={16} />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )) : (
+                            <div className="flex flex-col items-center justify-center py-16 opacity-10">
+                                <Zap size={30} className="mb-3" />
+                                <p className="text-[9px] uppercase font-black tracking-[0.4em]">None</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
                 </div>
             </div>
         </div>

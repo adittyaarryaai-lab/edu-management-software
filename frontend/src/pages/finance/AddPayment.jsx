@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IndianRupee, User, Calendar, CreditCard, Zap, Layers, ChevronDown } from 'lucide-react';
+import { IndianRupee, User, Calendar, CreditCard, Zap, Layers, ChevronDown, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 import Toast from '../../components/Toast';
@@ -56,7 +56,17 @@ const AddPayment = () => {
 
     return (
         <div className="min-h-screen bg-[#0B0F14] text-white font-sans pb-32 px-5 pt-10 italic">
-            <h1 className="text-xl font-black uppercase tracking-widest mb-8 border-l-4 border-cyan-400 pl-4">Fee Entry Terminal</h1>
+            <div className="flex items-center gap-5 mb-10 border-l-4 border-cyan-400 pl-4">
+                {/* --- BACK NAVIGATION BUTTON --- */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-3 bg-white/5 rounded-2xl border border-white/10 hover:border-cyan-400/50 hover:bg-cyan-400/5 transition-all active:scale-90 group shadow-lg"
+                >
+                    <ArrowLeft className="text-white/40 group-hover:text-cyan-400 transition-colors" size={20} />
+                </button>
+
+                <h1 className="text-xl font-black uppercase tracking-widest italic">Fee Entry Terminal</h1>
+            </div>
 
             <form onSubmit={handlePayment} className="space-y-6">
 
