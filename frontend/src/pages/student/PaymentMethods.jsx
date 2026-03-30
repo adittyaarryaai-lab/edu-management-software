@@ -10,7 +10,7 @@ const PaymentMethods = () => {
     const [paymentMode, setPaymentMode] = useState(null); // 'upi' or 'netbanking'
     const [selectedApp, setSelectedApp] = useState(null); // specific upi app
     const [isProcessing, setIsProcessing] = useState(false);
-    
+
     // --- DAY 130: NEW SCREENSHOT STATES ---
     const [screenshot, setScreenshot] = useState(null);
     const [preview, setPreview] = useState(null);
@@ -39,11 +39,11 @@ const PaymentMethods = () => {
     // --- DAY 130: MANUAL TRANSMISSION LOGIC ---
     const handleFinalSubmit = async () => {
         if (!screenshot) return alert("Please upload payment screenshot first! 🛡️");
-        
+
         setIsProcessing(true);
         const formData = new FormData();
         formData.append('screenshot', screenshot);
-        formData.append('amount', summary.remainingFees);
+        formData.append('amount', summary.grandTotal);
         formData.append('method', selectedApp);
 
         try {
@@ -60,7 +60,7 @@ const PaymentMethods = () => {
     if (!summary) return <div className="p-20 text-center text-neon animate-pulse font-black uppercase tracking-widest">Initializing Neural Gateway...</div>;
 
     // UPI Link generation using Teacher's configured UPI ID
-    const upiLink = `upi://pay?pa=${summary.schoolPhone}&pn=${summary.schoolName}&am=${summary.remainingFees}&cu=INR`;
+    const upiLink = `upi://pay?pa=${summary.schoolPhone}&pn=${summary.schoolName}&am=${summary.grandTotal}&cu=INR`;
 
     return (
         <div className="min-h-screen bg-void text-white font-sans italic flex flex-col items-center justify-center relative overflow-hidden p-6">
@@ -130,7 +130,7 @@ const PaymentMethods = () => {
                 {/* STEP 3: QR & SCREENSHOT UPLOAD PANEL (DAY 130) */}
                 {paymentMode === 'upi' && selectedApp && (
                     <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full bg-slate-900 p-8 rounded-[3.5rem] border border-neon/20 text-center shadow-2xl relative">
-                        
+
                         {isProcessing ? (
                             <div className="py-20 space-y-6">
                                 <Loader2 size={48} className="mx-auto text-neon animate-spin" />
@@ -140,7 +140,7 @@ const PaymentMethods = () => {
                         ) : (
                             <>
                                 <h2 className="text-[10px] font-black text-neon uppercase tracking-[0.3em] mb-6 flex items-center justify-center gap-2">
-                                    <ShieldCheck size={14}/> Institutional Payment Hub
+                                    <ShieldCheck size={14} /> Institutional Payment Hub
                                 </h2>
 
                                 {/* QR DISPLAY (Teacher's UPI ID used here) */}
@@ -149,7 +149,7 @@ const PaymentMethods = () => {
                                 </div>
 
                                 <div className="space-y-1 mb-8">
-                                    <p className="text-3xl font-black italic tracking-tighter">₹{summary.remainingFees.toLocaleString()}</p>
+                                    <p className="text-3xl font-black italic tracking-tighter">₹{summary.grandTotal.toLocaleString()}</p>
                                     <p className="text-[9px] text-white/30 uppercase font-bold tracking-widest">ID: {summary.schoolPhone}</p>
                                 </div>
 
@@ -164,14 +164,14 @@ const PaymentMethods = () => {
                                     ) : (
                                         <div className="relative group">
                                             <img src={preview} className="w-full h-40 object-contain rounded-3xl border border-neon/30 bg-black/40" alt="Payment Preview" />
-                                            <button 
-                                                onClick={() => {setPreview(null); setScreenshot(null)}} 
+                                            <button
+                                                onClick={() => { setPreview(null); setScreenshot(null) }}
                                                 className="absolute -top-3 -right-3 bg-red-500 p-2 rounded-full shadow-lg hover:bg-red-600 transition-colors"
                                             >
-                                                <X size={16}/>
+                                                <X size={16} />
                                             </button>
                                             <p className="text-[9px] font-black text-emerald-400 uppercase mt-2 italic flex items-center justify-center gap-1">
-                                                <CheckCircle2 size={12}/> Screenshot Captured
+                                                <CheckCircle2 size={12} /> Screenshot Captured
                                             </p>
                                         </div>
                                     )}
@@ -179,7 +179,7 @@ const PaymentMethods = () => {
                                     {/* Action Button: Sirf tab dikhega jab screenshot select hoga */}
                                     <AnimatePresence>
                                         {screenshot && (
-                                            <motion.button 
+                                            <motion.button
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 onClick={handleFinalSubmit}

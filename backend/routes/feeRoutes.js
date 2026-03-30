@@ -66,6 +66,7 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
         const { amount } = req.body;
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
+        const student = await User.findById(studentId);
 
         await Fee.create({
             schoolId,
@@ -75,7 +76,9 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
             paymentMode: 'Online',
             month: new Date().toLocaleString('default', { month: 'long' }),
             year: new Date().getFullYear(),
-            status: 'Pending' // Finance teacher verify karega
+            remarks: `ONLINE PAYMENT (INCLUDES PENALTY/LATE FEES)`,
+            feeCategory: 'Monthly Fees + Penalty',
+            status: 'Pending'
         });
         res.json({ success: true });
     } catch (error) { res.status(500).json({ message: 'Signal Interrupted' }); }
