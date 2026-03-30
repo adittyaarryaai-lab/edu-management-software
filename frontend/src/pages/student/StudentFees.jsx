@@ -89,7 +89,7 @@ const StudentFees = () => {
         }
     };
 
-    if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Accessing Ledger...</div>;
+    if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Loading Fees Status...</div>;
 
     // --- DAY 120: MASTER MATH LOGIC ---
     const currentMonthPaid = summary?.totalPaidThisMonth || 0;

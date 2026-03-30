@@ -10,6 +10,7 @@ const PaymentMethods = () => {
     const [paymentMode, setPaymentMode] = useState(null); // 'upi' or 'netbanking'
     const [selectedApp, setSelectedApp] = useState(null); // specific upi app
     const [isProcessing, setIsProcessing] = useState(false);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
     // --- DAY 130: NEW SCREENSHOT STATES ---
     const [screenshot, setScreenshot] = useState(null);
@@ -38,7 +39,11 @@ const PaymentMethods = () => {
 
     // --- DAY 130: MANUAL TRANSMISSION LOGIC ---
     const handleFinalSubmit = async () => {
-        if (!screenshot) return alert("Please upload payment screenshot first! 🛡️");
+        if (!screenshot) {
+            setToast({ show: true, message: "Upload payment screenshot! 🛡️", type: 'error' });
+            setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
+            return;
+        }
 
         setIsProcessing(true);
         const formData = new FormData();
@@ -49,10 +54,13 @@ const PaymentMethods = () => {
         try {
             // Backend route name: capture-with-screenshot
             await API.post('/fees/capture-with-screenshot', formData);
-            alert("Neural Signal Transmitted! Awaiting Finance Verification. 📡");
-            navigate('/student/fees', { replace: true });
+            setToast({ show: true, message: "Payment Submitted Successfully!📡", type: 'success' });
+            setTimeout(() => {
+                navigate('/student/fees', { replace: true });
+            }, 2000);
         } catch (err) {
-            alert("Protocol Failure: Upload Failed.");
+            setToast({ show: true, message: "Upload Failed.", type: 'error' });
+            setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
             setIsProcessing(false);
         }
     };
@@ -63,13 +71,15 @@ const PaymentMethods = () => {
     const upiLink = `upi://pay?pa=${summary.schoolPhone}&pn=${summary.schoolName}&am=${summary.grandTotal}&cu=INR`;
 
     return (
-        <div className="min-h-screen bg-void text-white font-sans italic flex flex-col items-center justify-center relative overflow-hidden p-6">
+        <div className="min-h-screen bg-void text-white font-sans italic flex flex-col items-center justify-start pt-12 relative overflow-hidden p-6">
 
             <AnimatePresence mode="wait">
                 {/* STEP 1: SELECT MODE */}
                 {!paymentMode && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-md space-y-6">
-                        <h1 className="text-xl font-black uppercase text-center mb-10 tracking-widest border-b-2 border-neon/20 pb-4">Select Gateway</h1>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="w-full max-w-md space-y-4 mt-0">
+                        {/* space-y-6 ko 4 kiya aur mt-0 add kiya */}
+                        <h1 className="text-xl font-black uppercase text-center mb-6 tracking-widest border-b-2 border-neon/20 pb-4">Select Gateway</h1>
+                        {/* mb-10 ko 6 kiya taaki upar chadh jaye */}
 
                         <button onClick={() => setPaymentMode('upi')} className="w-full p-8 bg-slate-900 border border-neon/20 rounded-[2.5rem] flex items-center gap-6 hover:bg-neon/5 transition-all group shadow-2xl">
                             <div className="p-4 bg-neon/10 rounded-2xl group-hover:bg-neon group-hover:text-void transition-all"><Zap size={24} /></div>
@@ -94,9 +104,11 @@ const PaymentMethods = () => {
 
                 {/* STEP 2: UPI APP SELECTION */}
                 {paymentMode === 'upi' && !selectedApp && (
-                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full max-w-md">
-                        <button onClick={() => setPaymentMode(null)} className="flex items-center gap-2 text-[9px] font-black uppercase text-neon/40 mb-6 hover:text-neon"><ArrowLeft size={12} /> Back to Modes</button>
-                        <h1 className="text-xl font-black uppercase text-center mb-10 tracking-widest">Select Method</h1>
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="w-full max-w-md mt-0">
+                        <button onClick={() => setPaymentMode(null)} className="flex items-center gap-2 text-[9px] font-black uppercase text-neon/40 mb-4 hover:text-neon"><ArrowLeft size={12} /> Back to Modes</button>
+                        {/* mb-6 ko 4 kiya */}
+                        <h1 className="text-xl font-black uppercase text-center mb-6 tracking-widest">Select Method</h1>
+                        {/* mb-10 ko 6 kiya */}
                         <div className="space-y-4">
                             {['PhonePe', 'Google Pay', 'Paytm', 'Manual QR'].map(app => (
                                 <button key={app} onClick={() => setSelectedApp(app)} className="w-full p-6 bg-slate-900/50 border border-white/5 rounded-2xl flex justify-between items-center hover:border-neon transition-all group">
@@ -140,7 +152,7 @@ const PaymentMethods = () => {
                         ) : (
                             <>
                                 <h2 className="text-[10px] font-black text-neon uppercase tracking-[0.3em] mb-6 flex items-center justify-center gap-2">
-                                    <ShieldCheck size={14} /> Institutional Payment Hub
+                                    <ShieldCheck size={14} /> Fees Payment
                                 </h2>
 
                                 {/* QR DISPLAY (Teacher's UPI ID used here) */}
@@ -203,6 +215,20 @@ const PaymentMethods = () => {
                 <ShieldAlert size={12} />
                 <p className="text-[8px] font-black uppercase tracking-[0.5em]">EduFlowAI Secure Payment Mesh</p>
             </div>
+            {/* --- NEURAL TOAST OVERLAY --- */}
+            <AnimatePresence>
+                {toast.show && (
+                    <motion.div
+                        initial={{ y: -100, opacity: 0 }}
+                        animate={{ y: 20, opacity: 1 }}
+                        exit={{ y: -100, opacity: 0 }}
+                        className={`fixed top-0 z-[100] px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl flex items-center gap-3 ${toast.type === 'success' ? 'bg-neon text-void' : 'bg-red-500 text-white'}`}
+                    >
+                        {toast.type === 'success' ? <CheckCircle2 size={16} /> : <ShieldAlert size={16} />}
+                        {toast.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

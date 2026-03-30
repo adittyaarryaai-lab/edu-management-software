@@ -4,12 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import SidebarDrawer from './SidebarDrawer';
 import API from '../api';
 
-const Navbar = ({ user, searchQuery, setSearchQuery }) => {
+const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [greeting, setGreeting] = useState({ text: 'Good Morning', emoji: '☀️' });
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
-
   useEffect(() => {
     if (!user || !user.token) return;
 
@@ -111,9 +110,15 @@ const Navbar = ({ user, searchQuery, setSearchQuery }) => {
               </div>
             )}
 
-            <div className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-neon/20 transition-all active:scale-90">
-              <Headphones size={18} className="text-white/80" />
-            </div>
+            {/* ISKO MAINE CONDITION MEIN WRAP KAR DIYA HAI */}
+            {user?.role !== 'superadmin' && (
+              <div
+                onClick={onSupportClick}
+                className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-neon/20 transition-all active:scale-90 cursor-pointer"
+              >
+                <Headphones size={18} className="text-white/80" />
+              </div>
+            )}
           </div>
         </div>
 

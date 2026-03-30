@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, financeOnly } = require('../middleware/authMiddleware');
 const Fee = require('../models/Fee');
 const FeeStructure = require('../models/FeeStructure');
+const User = require('../models/User'); // <--- YE LINE ADD KARO AGAR NAHI HAI TOH
 const multer = require('multer');
 const path = require('path');
 
@@ -66,22 +67,37 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
         const { amount } = req.body;
         const studentId = req.user._id;
         const schoolId = req.user.schoolId;
-        const student = await User.findById(studentId);
 
+        // BUG 1 FIX: Sabse pehle check karo ki photo aayi bhi hai ya nahi
+        // Agar photo nahi aayi aur hum req.file.filename use karenge toh server crash ho jayega
+        if (!req.file) {
+            return res.status(400).json({ message: 'Screenshot upload failed. Signal Lost! 🛡️' });
+        }
+
+        // BUG 2 FIX: Tune 'User.findById' likha hai lekin 'User' model require nahi kiya hoga upar
+        // Aur sach bolun toh yahan User fetch karne ki zaroorat hi nahi hai, kyunki tere pass studentId pehle se hai.
+        
         await Fee.create({
             schoolId,
             student: studentId,
-            amountPaid: Number(amount),
+            amountPaid: Number(amount) || 0,
             paymentScreenshot: `/uploads/${req.file.filename}`,
             paymentMode: 'Online',
+            date: new Date(), // Date field add karo taaki calculation sahi rahe
             month: new Date().toLocaleString('default', { month: 'long' }),
             year: new Date().getFullYear(),
             remarks: `ONLINE PAYMENT (INCLUDES PENALTY/LATE FEES)`,
             feeCategory: 'Monthly Fees + Penalty',
             status: 'Pending'
         });
-        res.json({ success: true });
-    } catch (error) { res.status(500).json({ message: 'Signal Interrupted' }); }
+
+        res.json({ success: true, message: "Neural Signal Captured! 📡" });
+
+    } catch (error) { 
+        // Terminal mein error dekhne ke liye (debugging)
+        console.error("CAPTURE_ERROR:", error);
+        res.status(500).json({ message: 'Signal Interrupted: ' + error.message }); 
+    }
 });
 
 // --- DAY 132: GET SEPARATED ACTIVITY LOGS ---

@@ -43,6 +43,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
     const menuItems = user?.role === 'superadmin' ? [
         { icon: <LayoutDashboard size={20} />, label: 'Executive Hub', color: 'text-neon', path: '/superadmin/dashboard' },
         { icon: <User size={20} />, label: 'Master Account', color: 'text-neon', path: '/superadmin/account' },
+        { icon: <ShieldCheck size={20} />, label: 'Technical Logs', color: 'text-cyan-400', path: '/superadmin/technical-logs' },
         { icon: <Settings size={20} />, label: 'Settings', color: 'text-white/40', path: '/settings' },
     ] : user?.role === 'finance' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },

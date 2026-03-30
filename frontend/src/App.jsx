@@ -59,11 +59,13 @@ import FeesTracker from './pages/finance/FeesTracker';
 import StudentLedger from './pages/finance/StudentLedger';
 import FeeReports from './pages/finance/FeeReports'; // Naya import
 import FeeSetup from './pages/finance/FeeSetup'; // Day 114: Class Fee Configuration
+import TechnicalSupportModal from './components/TechnicalSupportModal';
 
 // Day 64: SuperAdmin Module Imports
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import SuperAdminOnboard from './pages/SuperAdminOnboard';
 import SuperAdminAccount from './pages/SuperAdminAccount';
+import SuperAdminTechnical from './pages/SuperAdminTechnical'; // <--- YE ADD KARO (Step 2 wali file)
 
 import StudentCheckout from './pages/student/StudentCheckout'; // Day 109: New Invoice Page
 import PaymentMethods from './pages/student/PaymentMethods'; // Day 110: New Payment Methods Page
@@ -94,6 +96,7 @@ const VisualMatrix = () => {
 function App() {
   const [user, setUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -338,7 +341,7 @@ function App() {
     <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
       {isDarkMode && isMatrixActive && <VisualMatrix />}
       <div className="print:hidden">
-        <Navbar user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <Navbar user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSupportClick={() => setIsTechModalOpen(true)}/>
       </div>
       <main className="relative z-0 pb-32 pt-28">
         <Routes>
@@ -362,6 +365,7 @@ function App() {
           <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
           <Route path="/superadmin/onboard" element={<SuperAdminOnboard />} />
           <Route path="/superadmin/account" element={<SuperAdminAccount user={user} />} />
+          <Route path="/superadmin/technical-logs" element={<SuperAdminTechnical />} /> {/* <--- YE ROUTE ADD KARO */}
 
           {/* Timetable & Admin Management */}
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
@@ -428,6 +432,12 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
+
+      <TechnicalSupportModal 
+        isOpen={isTechModalOpen} 
+        onClose={() => setIsTechModalOpen(false)} 
+        user={user}
+      />
       {/* SuperAdmin, Admin aur Finance ke liye BottomNav nahi dikhega */}
       <div className="print:hidden">
         {(user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'finance') && <BottomNav />}

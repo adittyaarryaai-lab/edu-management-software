@@ -7,6 +7,7 @@ const MyAccount = ({ user }) => {
     const navigate = useNavigate();
     const [uploading, setUploading] = useState(false);
     const [schoolData, setSchoolData] = useState(null);
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
     const BASE_URL = "http://localhost:5000";
     const [preview, setPreview] = useState(
@@ -45,10 +46,11 @@ const MyAccount = ({ user }) => {
             localStorage.setItem('user', JSON.stringify(updatedUser));
 
             setPreview(`${BASE_URL}${data.avatar}`);
-            alert("Neural Profile Updated! 🧬");
-            window.location.reload();
+            setToast({ show: true, message: "Profile Photo Updated! 🧬", type: 'success' });
+            setTimeout(() => window.location.reload(), 2000);
         } catch (err) {
-            alert("Upload failed. Check backend connection.");
+            setToast({ show: true, message: "Only Images (JPG, PNG, WEBP) are allowed!", type: 'error' });
+            setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
         } finally {
             setUploading(false);
         }
@@ -67,7 +69,7 @@ const MyAccount = ({ user }) => {
                     <ArrowLeft size={20} />
                 </button>
                 <h1 className="text-xl font-black uppercase tracking-tighter italic relative z-10">
-                    {user?.role === 'admin' ? 'Institutional Information' :'Personal Information'}
+                    {user?.role === 'admin' ? 'Institutional Information' : 'Personal Information'}
                 </h1>
             </div>
 
@@ -105,7 +107,7 @@ const MyAccount = ({ user }) => {
                             </span>
                             {user?.role !== 'admin' && (
                                 <span className="bg-white/5 text-white/40 border border-white/10 px-4 py-1 rounded-full text-[9px] font-black uppercase italic tracking-widest">
-                                    {user?.role === 'student' ?  user.enrollmentNo : user.employeeId}
+                                    {user?.role === 'student' ? user.enrollmentNo : user.employeeId}
                                 </span>
                             )}
                         </div>
@@ -261,6 +263,11 @@ const MyAccount = ({ user }) => {
                     </div>
                 </div>
             </div>
+            {toast.show && (
+                <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl animate-bounce flex items-center gap-3 ${toast.type === 'success' ? 'bg-cyan-500 text-void' : 'bg-red-500 text-white'}`}>
+                    {toast.type === 'success' ? '✓' : '⚠️'} {toast.message}
+                </div>
+            )}
         </div>
     );
 };
