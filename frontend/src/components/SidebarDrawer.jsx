@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle,  Calendar, TrendingUp, GraduationCap, Book } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,7 +52,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <Users size={20} />, label: 'Fees Tracker', color: 'text-orange-400', path: '/finance/fees-tracker' },
         { icon: <Layers size={20} />, label: 'Fee Setup', color: 'text-neon', path: '/finance/fee-setup' },
         { icon: <ShieldCheck size={20} />, label: 'Payment Gateway', color: 'text-emerald-400', path: '/finance/gateway' },
-        { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
+        { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
     ] : user?.role === 'teacher' ? [
         // --- DAY 136: SYNCED TEACHER MODULES ---
         { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },
@@ -65,16 +65,25 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <Bot size={20} />, label: 'Broadcast', color: 'text-neon', path: '/teacher/notices' },
         { icon: <Megaphone size={20} />, label: 'Notice Feed', color: 'text-neon', path: '/notice-feed' },
         { icon: <MessageCircle size={20} />, label: 'Support', color: 'text-neon', path: '/teacher/support' },
-        { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },   
+        { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },
+        { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },   
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/' },
+        { icon: <Calendar size={20} />, label: 'Attendance', color: 'text-neon', path: '/attendance' },
+        { icon: <Clock size={20} />, label: 'TimeTable', color: 'text-neon', path: '/timetable' },
         { icon: <CreditCard size={20} />, label: 'My Fees', color: 'text-neon', path: '/student/fees' },
-        { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
+        { icon: <Megaphone size={20} />, label: 'Notice Board', color: 'text-neon', path: '/notice-feed' },
+        { icon: <FileText size={20} />, label: 'Assignments', color: 'text-white/60', path: '/assignments' },
+        { icon: <TrendingUp size={20} />, label: 'Performance', color: 'text-white/60', path: '/performance' },
+        { icon: <GraduationCap size={20} />, label: 'Exams', color: 'text-white/60', path: '/exams' },
+        { icon: <Book size={20} />, label: 'Library', color: 'text-white/60', path: '/library' },
+        { icon: <Video size={20} />, label: 'Live Class', color: 'text-white/60', path: '/live-class' },
         { icon: <HelpCircle size={20} />, label: 'Support', color: 'text-neon', path: '/support' },
+        { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
     ] : [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
-        { icon: <HelpCircle size={20} />, label: 'Support & Help', color: 'text-neon', path: '/support' },
         { icon: <Settings size={20} />, label: 'Settings', color: 'text-white/40', path: '/settings' },
     ];
 

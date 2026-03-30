@@ -30,8 +30,8 @@ const ChangePassword = () => {
             <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-neon/10 to-transparent pointer-events-none"></div>
                 <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-4 relative z-10 border border-white/10 text-neon"><ArrowLeft size={20}/></button>
-                <h1 className="text-2xl font-black uppercase tracking-tighter relative z-10 italic">Security Connection</h1>
-                <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em] mt-1 relative z-10 italic">Change Security Keys</p>
+                <h1 className="text-2xl font-black uppercase tracking-tighter relative z-10 italic">Security</h1>
+                <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em] mt-1 relative z-10 italic">Change Security Password</p>
                 <ShieldCheck className="absolute -right-10 top-10 text-neon/5 opacity-40" size={200} />
             </div>
 
@@ -56,7 +56,7 @@ const ChangePassword = () => {
                     </div>
 
                     <button type="submit" disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-3 active:scale-95 transition-all disabled:bg-slate-800 italic">
-                        {loading ? "Transmitting..." : "Update System Security Keys"}
+                        {loading ? "Transmitting..." : "Update Password..."}
                     </button>
                 </form>
             </div>

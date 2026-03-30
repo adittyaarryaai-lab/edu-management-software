@@ -10,10 +10,10 @@ const Settings = () => {
 
     const appSettings = [
         { title: 'Change Password', icon: <Lock size={20}/>, color: 'text-red-400', bg: 'bg-red-500/10', path: '/change-password' },
-        { title: 'Neural Alerts', icon: <Bell size={20}/>, color: 'text-orange-400', bg: 'bg-orange-500/10', isNotif: true },
-        { title: 'Visual Matrix', icon: isDarkMode ? <Moon size={20}/> : <Sun size={20}/>, color: 'text-neon', bg: 'bg-neon/10', isTheme: true },
-        { title: 'Language Pack', icon: <Languages size={20}/>, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-        { title: 'Privacy Cipher', icon: <ShieldAlert size={20}/>, color: 'text-green-400', bg: 'bg-green-500/10' },
+        // { title: 'Neural Alerts', icon: <Bell size={20}/>, color: 'text-orange-400', bg: 'bg-orange-500/10', isNotif: true },
+        { title: 'Animated Background Pattern', icon: isDarkMode ? <Moon size={20}/> : <Sun size={20}/>, color: 'text-neon', bg: 'bg-neon/10', isTheme: true },
+        // { title: 'Language Pack', icon: <Languages size={20}/>, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+        // { title: 'Privacy Cipher', icon: <ShieldAlert size={20}/>, color: 'text-green-400', bg: 'bg-green-500/10' },
     ];
 
     return (
@@ -45,7 +45,7 @@ const Settings = () => {
                             </div>
                             <div className="min-w-0">
                                 <span className="font-black text-[13px] sm:text-sm uppercase tracking-tight block truncate text-white group-hover:text-neon transition-colors">{s.title}</span>
-                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest truncate italic">Protocol Control</p>
+                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest truncate italic">Security Settings</p>
                             </div>
                         </div>
 
@@ -81,19 +81,6 @@ const Settings = () => {
                     </div>
                 ))}
 
-                {/* System Stats Footer */}
-                <div className="mt-10 p-8 text-center rounded-[3rem] overflow-hidden relative shadow-2xl bg-void border border-neon/20 italic">
-                    <div className="relative z-10">
-                        <p className="text-[9px] font-black text-neon/40 uppercase tracking-[0.5em] mb-2 italic">Core Neural Engine Status</p>
-                        <h4 className="text-lg font-black italic uppercase text-white tracking-tighter">Verified v4.0.5</h4>
-                        <div className="mt-4 flex justify-center gap-2">
-                            <div className="h-0.5 w-10 bg-neon rounded-full shadow-[0_0_10px_rgba(61,242,224,1)]"></div>
-                            <div className="h-0.5 w-2 bg-white/10 rounded-full"></div>
-                            <div className="h-0.5 w-2 bg-white/10 rounded-full"></div>
-                        </div>
-                    </div>
-                    <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-neon/5 rounded-full blur-3xl"></div>
-                </div>
             </div>
         </div>
     );

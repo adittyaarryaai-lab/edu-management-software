@@ -67,7 +67,7 @@ const MyAccount = ({ user }) => {
                     <ArrowLeft size={20} />
                 </button>
                 <h1 className="text-xl font-black uppercase tracking-tighter italic relative z-10">
-                    {user?.role === 'admin' ? 'Institutional Hub Matrix' : 'Personnel Node Matrix'}
+                    {user?.role === 'admin' ? 'Institutional Information' :'Personal Information'}
                 </h1>
             </div>
 
@@ -101,11 +101,11 @@ const MyAccount = ({ user }) => {
                         </h2>
                         <div className="flex gap-2 mt-2">
                             <span className="bg-neon/10 text-neon border border-neon/30 px-4 py-1 rounded-full text-[9px] font-black uppercase italic tracking-widest">
-                                {user?.role === 'admin' ? 'Master Node: Authorized' : user?.role === 'student' ? `Grade: ${user.grade}` : 'Faculty Member'}
+                                {user?.role === 'admin' ? 'Master Node: Authorized' : user?.role === 'student' ? `Class: ${user.grade}` : 'Faculty Member'}
                             </span>
                             {user?.role !== 'admin' && (
                                 <span className="bg-white/5 text-white/40 border border-white/10 px-4 py-1 rounded-full text-[9px] font-black uppercase italic tracking-widest">
-                                    {user?.role === 'student' ? user.enrollmentNo : user.employeeId}
+                                    {user?.role === 'student' ?  user.enrollmentNo : user.employeeId}
                                 </span>
                             )}
                         </div>
@@ -114,7 +114,7 @@ const MyAccount = ({ user }) => {
                     {/* --- DETAILS GRID --- */}
                     <div className="space-y-6">
                         <p className="text-[10px] font-black text-neon/30 uppercase tracking-[0.4em] border-b border-white/5 pb-2 italic">
-                            {user?.role === 'admin' ? 'Entity Credentials' : 'Neural Identity Data'}
+                            {user?.role === 'admin' ? 'Account Details' : 'Details'}
                         </p>
 
                         <div className="grid grid-cols-1 gap-6">
@@ -175,6 +175,16 @@ const MyAccount = ({ user }) => {
                                 // Student & Teacher fields (Already existing)
                                 <>
                                     <div className="grid grid-cols-2 gap-4">
+
+                                        {user?.role === 'student' && (
+                                            <div className="col-span-2 flex items-center gap-3 group bg-void/40 p-4 rounded-2xl border border-white/5">
+                                                <div className="bg-void p-2.5 rounded-xl border border-white/5 text-cyan-400/40"><Hash size={18} /></div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Admission Number</p>
+                                                    <p className="text-xs font-black text-cyan-400 uppercase mt-1 tracking-widest">{user?.admissionNo || "NOT_LOGGED"}</p>
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="flex items-center gap-3 group">
                                             <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><User size={18} /></div>
                                             <div>
@@ -194,14 +204,14 @@ const MyAccount = ({ user }) => {
                                         <div className="flex items-center gap-3 group">
                                             <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Calendar size={18} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Birth Cycle</p>
+                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Date of Birth</p>
                                                 <p className="text-xs font-black text-white/80 uppercase mt-1">{formatDate(user?.dob)}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 group">
                                             <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Users size={18} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Gender Node</p>
+                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Gender</p>
                                                 <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.gender || "N/A"}</p>
                                             </div>
                                         </div>
@@ -210,14 +220,14 @@ const MyAccount = ({ user }) => {
                                         <div className="flex items-center gap-3 group">
                                             <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Phone size={18} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Signal Link</p>
+                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Contact</p>
                                                 <p className="text-xs font-black text-white/80 mt-1">{user?.phone || "N/A"}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3 group">
                                             <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><ShieldCheck size={18} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Religion Cipher</p>
+                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Religion</p>
                                                 <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.religion || "N/A"}</p>
                                             </div>
                                         </div>
@@ -228,7 +238,7 @@ const MyAccount = ({ user }) => {
                                         </div>
                                         <div>
                                             <p className="text-[8px] font-black text-neon/40 uppercase italic leading-none">
-                                                {user?.role === 'teacher' ? 'Assigned Subjects' : 'Registry Email'}
+                                                {user?.role === 'teacher' ? 'Assigned Subjects' : 'Registered Email'}
                                             </p>
                                             <p className="text-xs font-black text-white/90 mt-1">
                                                 {user?.role === 'teacher' ? user.subjects?.join(', ') : user?.email}
@@ -238,7 +248,7 @@ const MyAccount = ({ user }) => {
                                     <div className="flex items-start gap-3 group bg-void/40 p-4 rounded-2xl border border-white/5">
                                         <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40 mt-1"><MapPin size={18} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-neon/40 uppercase italic leading-none">Deployment Sector (Address)</p>
+                                            <p className="text-[8px] font-black text-neon/40 uppercase italic leading-none">Address Details</p>
                                             <p className="text-[11px] font-black text-white/70 mt-2 uppercase leading-relaxed">
                                                 {user?.address?.fullAddress}<br />
                                                 {user?.address?.district}, {user?.address?.state} - {user?.address?.pincode}
@@ -249,13 +259,6 @@ const MyAccount = ({ user }) => {
                             )}
                         </div>
                     </div>
-                    {/* --- FOOTER SESSION --- */}
-                    <button
-                        onClick={() => { localStorage.clear(); navigate('/'); window.location.reload(); }}
-                        className="w-full mt-10 bg-red-600/10 text-red-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] active:scale-95 transition-all border border-red-500/20 italic shadow-[0_0_20px_rgba(239,68,68,0.1)]"
-                    >
-                        End All Active Sessions
-                    </button>
                 </div>
             </div>
         </div>
