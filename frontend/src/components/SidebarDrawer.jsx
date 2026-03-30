@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -53,6 +53,19 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <Layers size={20} />, label: 'Fee Setup', color: 'text-neon', path: '/finance/fee-setup' },
         { icon: <ShieldCheck size={20} />, label: 'Payment Gateway', color: 'text-emerald-400', path: '/finance/gateway' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
+    ] : user?.role === 'teacher' ? [
+        // --- DAY 136: SYNCED TEACHER MODULES ---
+        { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },
+        { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/teacher/dashboard' },
+        { icon: <CheckSquare size={20} />, label: 'Attendance', color: 'text-neon', path: '/teacher/attendance' },
+        { icon: <CalendarDays size={20} />, label: 'Schedule', color: 'text-neon', path: '/timetable' },
+        { icon: <PlusCircle size={20} />, label: 'Assignments', color: 'text-neon', path: '/teacher/assignments' },
+        { icon: <Users size={20} />, label: 'Class List', color: 'text-neon', path: '/teacher/students' },
+        { icon: <Video size={20} />, label: 'Live Class', color: 'text-neon', path: '/teacher/live-class' },
+        { icon: <Bot size={20} />, label: 'Broadcast', color: 'text-neon', path: '/teacher/notices' },
+        { icon: <Megaphone size={20} />, label: 'Notice Feed', color: 'text-neon', path: '/notice-feed' },
+        { icon: <MessageCircle size={20} />, label: 'Support', color: 'text-neon', path: '/teacher/support' },
+        { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },   
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <CreditCard size={20} />, label: 'My Fees', color: 'text-neon', path: '/student/fees' },
