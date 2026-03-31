@@ -338,12 +338,12 @@ function App() {
   }
 
   return (
-    <div className={`min-h-screen relative transition-colors duration-500 ${isDarkMode ? 'bg-[#0B0F14]' : 'bg-void'}`}>
+    <div className="min-h-screen relative bg-[#F8FAFC]">
       {isDarkMode && isMatrixActive && <VisualMatrix />}
       <div className="print:hidden">
         <Navbar user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSupportClick={() => setIsTechModalOpen(true)}/>
       </div>
-      <main className="relative z-0 pb-32 pt-28">
+      <main className="relative z-0 pb-32 pt-20 bg-[#F8FAFC]">
         <Routes>
           {/* Main Dashboard Logic based on Role */}
           <Route path="/" element={

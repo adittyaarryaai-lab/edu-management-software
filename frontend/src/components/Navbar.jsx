@@ -75,7 +75,7 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
 
   return (
     <>
-      <header className="bg-void text-white px-6 pt-8 pb-16 rounded-b-[3rem] shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-b border-neon/20 relative z-50 overflow-hidden">
+      <header className="bg-[#42A5F5] text-white px-6 pt-6 pb-12 rounded-b-[2.5rem] shadow-md relative z-50 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon/60 to-transparent animate-pulse"></div>
         </div>
@@ -122,26 +122,25 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
           </div>
         </div>
 
-        <div className="mt-2 text-left relative z-10">
-          <h2 className="text-2xl font-black tracking-tight italic">
-            {greeting.text} {greeting.emoji}{' '}
-            <span className="text-neon">
-              {user?.name?.split(' ')[0]}
+        <div className="mt-4 text-left relative z-10 px-2">
+          <h2 className="text-2xl font-bold tracking-tight text-white/90">
+            {greeting.text} {greeting.emoji}{' '} <span className="text-white font-black">
+              {user?.name?.split(' ')[0].charAt(0).toUpperCase() + user?.name?.split(' ')[0].slice(1).toLowerCase()}
             </span>
           </h2>
-          <span className="inline-block mt-2 px-4 py-1 bg-neon/10 border border-neon/30 rounded-full text-[9px] font-black uppercase tracking-[0.3em] text-neon italic">
-            {user?.role} PORTAL
+          <span className="inline-block mt-2 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[11px] font-bold tracking-wide text-white">
+            {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
           </span>
-          <div className="mt-6 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/60" size={18} />
-            <input
-              type="text"
-              placeholder="SEARCH NEURAL MODULES..."
-              value={searchQuery} // Add this
-              onChange={(e) => setSearchQuery(e.target.value)} // Add this
-              className="w-full bg-slate-900/50 border border-neon/20 text-white py-4 pl-12 pr-4 rounded-2xl shadow-inner outline-none placeholder:text-neon/30 focus:border-neon focus:bg-slate-900 transition-all font-black text-[10px] tracking-widest"
-            />
-          </div>
+          <div className="mt-6 relative px-1">
+  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+  <input
+    type="text"
+    placeholder="Search modules..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    className="w-full bg-white border-none text-slate-700 py-4 pl-12 pr-4 rounded-[1.5rem] shadow-lg outline-none placeholder:text-slate-400 transition-all font-bold text-sm"
+  />
+</div>
         </div>
       </header>
 
