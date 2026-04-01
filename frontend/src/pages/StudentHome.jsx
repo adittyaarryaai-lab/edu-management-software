@@ -50,7 +50,7 @@ const StudentHome = ({ user, searchQuery }) => {
   const noResults = filteredSub.length === 0 && filteredExtra.length === 0;
 
   return (
-    <div className="px-5 -mt-8 space-y-10 relative z-10 pb-24 font-sans bg-[#F8FAFC]">
+    <div className="px-5 -mt-19 space-y-5 relative z-10 pb-24 font-sans bg-[#F8FAFC]">
 
       {/* --- MAIN MODULES (Optimized for Laptop & Mobile) --- */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">

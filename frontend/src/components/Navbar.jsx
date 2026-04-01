@@ -75,7 +75,7 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
 
   return (
     <>
-      <header className="bg-[#42A5F5] text-white px-6 pt-6 pb-12 rounded-b-[2.5rem] shadow-md relative z-50 overflow-hidden">
+      <header className="bg-[#42A5F5] text-white px-6 pt-6 pb-8 rounded-b-[2.5rem] shadow-md relative z-50 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon/60 to-transparent animate-pulse"></div>
         </div>
@@ -88,10 +88,10 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
               onClick={() => setIsDrawerOpen(true)}
             />
             <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 backdrop-blur-md shadow-inner">
-              <Cpu size={14} className="text-neon animate-spin-slow" />
+              <Cpu size={18} className="text-white animate-spin-slow" />
             </div>
-            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-neon/80">
-              EDUFLOWAI v2
+            <span className="text-[15px] font-black  titlecase text-white/80">
+              EduFlowAI v2.0
             </span>
           </div>
 
@@ -128,7 +128,7 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
               {user?.name?.split(' ')[0].charAt(0).toUpperCase() + user?.name?.split(' ')[0].slice(1).toLowerCase()}
             </span>
           </h2>
-          <span className="inline-block mt-2 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[11px] font-bold tracking-wide text-white">
+          <span className="inline-block mt-2 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[15px] font-bold tracking-wide text-white">
             {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
           </span>
           <div className="mt-6 relative px-1">
