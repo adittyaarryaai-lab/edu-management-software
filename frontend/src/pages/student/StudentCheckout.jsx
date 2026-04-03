@@ -125,23 +125,21 @@ const StudentCheckout = () => {
 
                 {/* --- BILLING SUMMARY --- */}
                 <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5">
-                    <h2 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] mb-6">Pending Dues</h2>
+                    <h2 className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] mb-6">Settlement Summary</h2>
 
                     <div className="space-y-4">
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                            {/* Label badal diya */}
-                            <span className="text-[10px] font-bold text-white/40 uppercase">Monthly Fees to be Paid</span>
-                            {/* Asli math: total balance minus penalty */}
-                            <span className="text-sm font-black italic">₹{(summary.remainingFees).toLocaleString()}</span>
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Monthly Fees To Be Paid</span>
+                            {/* Calculation: GrandTotal minus Penalty = Base Fees */}
+                            <span className="text-sm font-black italic">₹{(summary.grandTotal - summary.totalPenalty).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                            <span className="text-[10px] font-bold text-rose-400 uppercase">Penalty</span>
+                            <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Total Penalty</span>
                             <span className="text-sm font-black italic text-rose-400">+ ₹{(summary.totalPenalty || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-xs font-black text-neon uppercase italic tracking-widest">Net Payable Amount</span>
-                            {/* Grand Total use kiya yahan */}
-                            <span className="text-2xl font-black text-neon">₹{(summary.grandTotal || summary.remainingFees).toLocaleString()}</span>
+                            <span className="text-xs font-black text-neon uppercase italic tracking-[0.2em]">Net Payable amount</span>
+                            <span className="text-2xl font-black text-neon animate-pulse">₹{(summary.grandTotal).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

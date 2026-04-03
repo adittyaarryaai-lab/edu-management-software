@@ -18,14 +18,15 @@ const StudentLedger = () => {
 
     if (!audit) return <div className="p-20 text-center text-orange-500 animate-pulse font-black uppercase">Decrypting Ledger...</div>;
 
-    // --- DAY 120: SMART MATH LOGIC (TEACHER VIEW) ---
-    const isFeesDone = (audit?.remaining || 0) <= 0;
-    const statusText = isFeesDone ? "COMPLETED" : "PENDING";
+    // --- DAY 142: SNAPSHOT SYNCED MATH (TEACHER VIEW) ---
+    const totalPenalty = audit?.totalPenalty || 0;
+    const finalRemaining = audit?.remaining || 0; // Backend ab (Balance + Total Penalty) bhej raha hai
+    
+    const isFeesDone = finalRemaining <= 0;
+    const statusText = isFeesDone ? "COMPLETED" : "PAYMENT REQUIRED";
 
-    // Total Structure (Isme One-time + Monthly ka total backend se aa raha hai)
     const structureTotal = audit?.totalExpected || 0;
-    const totalPenaltyAccrued = audit?.totalPenalty || 0; // YE LINE ADD KARO
-    const totalPaidAllTime = audit?.totalPaid || 0;
+    const advanceMoney = audit?.advance || 0;
     return (
         <div className="min-h-screen bg-void text-white p-6 font-sans italic pb-24">
             {/* Header */}
@@ -38,7 +39,7 @@ const StudentLedger = () => {
 
             {/* --- TOP STATUS BAR (TEACHER VIEW SYNC) --- */}
             <div className={`p-8 rounded-[2.5rem] border-2 mb-8 relative overflow-hidden ${isFeesDone ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
-                <div className="flex justify-between items-start relative z-10">
+                <div className="flex justify-between items-start relative z-10 text-left">
                     <div>
                         <h2 className="text-2xl font-black uppercase tracking-tighter mb-1">{audit.student.name}</h2>
                         <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
@@ -53,28 +54,31 @@ const StudentLedger = () => {
 
                 {/* --- StudentLedger.jsx Update --- */}
 
-                <div className="mt-8 flex items-baseline gap-2">
-                    {/* Penalty jod kar final remaining dikhayenge */}
-                    <span className="text-4xl font-black tracking-tighter">₹{(audit?.remaining || 0).toLocaleString()}</span>
-                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Outstanding Balance</span>
+                <div className="mt-8 flex items-baseline gap-2 text-left">
+                    {/* Final Remaining (Includes Live + Frozen Penalty) */}
+                    <span className={`text-4xl font-black tracking-tighter ${isFeesDone ? 'text-emerald-400' : 'text-white'}`}>
+                        ₹{finalRemaining.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Total Outstanding</span>
                 </div>
-
                 {/* Naya Penalty Alert Box add karo (Advance Payment ke niche) */}
-                {audit?.totalPenalty > 0 && (
-                    <div className="mt-4 flex items-center gap-2 bg-rose-500/10 px-4 py-3 rounded-2xl border border-rose-500/20">
-                        <AlertCircle size={14} className="text-rose-500" />
+                {totalPenalty > 0 && (
+                    <div className="mt-4 flex items-center gap-2 bg-rose-500/10 px-4 py-3 rounded-2xl border border-rose-500/20 text-left">
+                        <AlertCircle size={14} className="text-rose-500 animate-pulse" />
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Defaulter Penalty Applied</span>
-                            <span className="text-[8px] font-bold text-white/40 uppercase italic">Amount: ₹{audit.totalPenalty.toLocaleString()} included in balance</span>
+                            <span className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Accrued Penalty Dues</span>
+                            <span className="text-[8px] font-bold text-white/40 uppercase italic">
+                                ₹{totalPenalty.toLocaleString()} Fine included in total balance
+                            </span>
                         </div>
                     </div>
                 )}
 
-                {audit?.advance > 0 && (
-                    <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20">
+                {advanceMoney > 0 && (
+                    <div className="mt-4 flex items-center gap-2 bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/20 w-fit">
                         <Wallet size={12} className="text-emerald-400" />
                         <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic">
-                            Advance payment: ₹{audit.advance.toLocaleString()} Secured
+                            Surplus Secured: ₹{advanceMoney.toLocaleString()}
                         </span>
                     </div>
                 )}

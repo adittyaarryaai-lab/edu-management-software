@@ -91,15 +91,18 @@ const StudentFees = () => {
 
     if (!summary) return <div className="p-20 text-center animate-pulse text-neon uppercase font-black italic tracking-widest">Loading Fees Status...</div>;
 
-    // --- DAY 120: MASTER MATH LOGIC ---
+    // --- DAY 142: MASTER MATH LOGIC (SYNCED WITH BACKEND SNAPSHOT) ---
     const currentMonthPaid = summary?.totalPaidThisMonth || 0;
-    const finalBalance = summary?.remainingFees || 0;
+    
+    // Backend ab grandTotal mein (Live Penalty + Frozen Penalty + Fees) jod kar bhej raha hai
+    const finalOutstanding = summary?.grandTotal || 0; 
     const advanceMoney = summary?.advanceBalance || 0;
+    const totalPenalty = summary?.totalPenalty || 0;
 
     const totalExpectedAll = summary?.totalFeesStructure || 0;
 
     // Status Logic
-    const isFeesDone = finalBalance <= 0;
+    const isFeesDone = finalOutstanding <= 0;
     const statusText = isFeesDone ? "FEES COMPLETED" : "PAYMENT REQUIRED";
 
     // Activity & Dates
@@ -108,7 +111,6 @@ const StudentFees = () => {
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const deadlineStr = nextMonth.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-    // Total Structure (Box ke liye)
     const structureTotal = summary?.totalFeesStructure || 0;
     return (
         <div className="min-h-screen bg-void text-white p-5 pb-32 italic font-sans">

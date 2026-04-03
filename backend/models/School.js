@@ -29,10 +29,11 @@ const schoolSchema = new mongoose.Schema({
     // --- DAY 95: PENALTY CONFIGURATION ---
     // School.js mein penaltySettings wala part update karo
     penaltySettings: {
-        dailyRate: { type: Number, default: 0 },
-        isActive: { type: Boolean, default: false },
-        activatedAt: { type: Date } // <--- YE NAYI FIELD ADD KARO
-    },
+       dailyRate: { type: Number, default: 0 },
+       isActive: { type: Boolean, default: false },
+       activatedAt: { type: Date },
+       lastAutoOffMonth: { type: Number } // <--- YE NAYI FIELD ADD KARO (Month track karne ke liye)
+   },
 
     // --- DAY 110: ONLINE PAYMENT GATEWAY CONFIG ---
     paymentSettings: {

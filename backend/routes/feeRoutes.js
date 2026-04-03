@@ -30,21 +30,87 @@ router.get('/settings/penalty', protect, async (req, res) => {
     }
 });
 
-// --- DAY 123: UPDATE PENALTY SETTINGS (WITH ACTIVATION TIMESTAMP) ---
+// --- DAY 142: UPDATE PENALTY (WITH PERMANENT SNAPSHOT LOGIC) ---
 router.post('/settings/penalty', protect, async (req, res) => {
     try {
         const { dailyRate, isActive } = req.body;
         const School = require('../models/School');
+        const User = require('../models/User');
+        const Fee = require('../models/Fee');
+        const FeeStructure = require('../models/FeeStructure');
 
-        await School.findByIdAndUpdate(req.user.schoolId, {
-            'penaltySettings.dailyRate': dailyRate,
-            'penaltySettings.isActive': isActive,
-            'penaltySettings.activatedAt': isActive ? new Date() : null // ON hone par time save
-        });
+        const school = await School.findById(req.user.schoolId);
+        const oldStatus = school.penaltySettings.isActive;
 
-        res.json({ message: isActive ? 'Penalty Activated! ⚡' : 'Penalty Paused! 🛡️' });
+        // --- AGAR BUTTON ON SE OFF HO RAHA HAI (SAVE PENALTY FOREVER) ---
+        if (oldStatus === true && isActive === false) {
+            console.log("System Signal: Freezing existing penalties...");
+            
+            // 1. Iss school ke saare students pakdo
+            const students = await User.find({ schoolId: req.user.schoolId, role: 'student' });
+
+            for (let student of students) {
+                // 2. Is bache ka current balance nikalo (Logic strictly same as summary)
+                const verifiedPayments = await Fee.find({ student: student._id, status: 'Verified' });
+                
+                // Class matching for structure
+                const numericPart = student.grade?.match(/\d+/);
+                const classMatch = numericPart ? `Class ${numericPart[0]}` : student.grade;
+                const structure = await FeeStructure.findOne({ schoolId: req.user.schoolId, className: classMatch });
+
+                let monthlyRate = 0;
+                if (structure && structure.fees) {
+                    Object.keys(structure.fees).forEach(k => {
+                        if (structure.fees[k].billingCycle === 'monthly') monthlyRate += structure.fees[k].amount;
+                    });
+                }
+
+                const monthsElapsed = (new Date().getFullYear() - new Date(student.createdAt).getFullYear()) * 12 + (new Date().getMonth() - new Date(student.createdAt).getMonth()) + 1;
+                const totalExpected = monthlyRate * monthsElapsed;
+                const totalPaid = verifiedPayments.filter(p => p.paymentMode !== 'Penalty-Fine').reduce((sum, p) => sum + p.amountPaid, 0);
+                const balance = totalExpected - totalPaid;
+
+                // 3. Agar udhaar hai, toh penalty calculate karke permanent save karo
+                if (balance > 0 && school.penaltySettings.activatedAt) {
+                    const start = new Date(school.penaltySettings.activatedAt);
+                    const today = new Date();
+                    const diffDays = Math.floor(Math.abs(today - new Date(start.getFullYear(), start.getMonth(), start.getDate())) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    let daysToCharge = diffDays;
+                    if (diffDays > 0 && today.getHours() < 11) daysToCharge -= 1;
+
+                    const finalFine = daysToCharge * (school.penaltySettings.dailyRate || 0);
+
+                    if (finalFine > 0) {
+                        // Permanent Ledger Entry (₹0 Paid, but Fine Added)
+                        await Fee.create({
+                            schoolId: req.user.schoolId,
+                            student: student._id,
+                            amountPaid: 0, // Bache ne paisa nahi diya abhi
+                            penaltyAmount: finalFine, // Fine database mein save ho gaya
+                            month: new Date().toLocaleString('default', { month: 'long' }),
+                            year: new Date().getFullYear(),
+                            paymentMode: 'UPI', // Dummy mode for system entry
+                            status: 'Verified',
+                            remarks: 'SYSTEM_FREEZE: PENALTY SNAPSHOT'
+                        });
+                    }
+                }
+            }
+        }
+
+        // 4. Update School Settings
+        school.penaltySettings.dailyRate = dailyRate;
+        school.penaltySettings.isActive = isActive;
+        if (isActive) school.penaltySettings.activatedAt = new Date(); // ON hone par clock shuru
+        else school.penaltySettings.activatedAt = null; // OFF hone par clock khatam
+
+        await school.save();
+        res.json({ message: isActive ? 'Penalty Clock Started! ⚡' : 'Penalties Frozen & Saved! 🛡️' });
+
     } catch (error) {
-        res.status(500).json({ message: 'Settings update failed' });
+        console.error("PENALTY_FREEZE_ERROR:", error);
+        res.status(500).json({ message: 'Failed to freeze penalties' });
     }
 });
 
@@ -264,35 +330,35 @@ router.get('/student-summary', protect, async (req, res) => {
 
         const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-        // --- DAY 132: CHECK FOR PENDING SIGNALS ---
-        const pendingPayment = await Fee.findOne({
-            student: studentId,
-            status: 'Pending'
-        }).sort({ createdAt: -1 });
-
         // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
         const School = require('../models/School');
         const schoolData = await School.findById(schoolId);
         const pSettings = schoolData.penaltySettings;
-        let accruedPenalty = 0;
+        let livePenalty = 0;
 
         if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
             const today = new Date();
-
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
             let totalDaysToCharge = diffDays + 1;
-
-            if (diffDays > 0 && today.getHours() < 11) {
-                totalDaysToCharge -= 1;
-            }
-
-            accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
+            if (diffDays > 0 && today.getHours() < 11) {totalDaysToCharge -= 1;}
+            livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
+
+        // 2. Frozen Penalty (Sum of all penaltyAmount saved in database entries)
+        const frozenPenalty = verifiedPayments.reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
+        
+        // 3. Combined Penalty for Display
+        const totalPenaltyToDisplay = livePenalty + frozenPenalty;
+        // --- SNAPSHOT PENALTY LOGIC END ---
+
+        const pendingPayment = await Fee.findOne({
+            student: studentId,
+            status: 'Pending'
+        }).sort({ createdAt: -1 });
 
         const groupedHistory = verifiedPayments.reduce((acc, pay) => {
             const key = `${pay.month} ${pay.year}`;
@@ -311,6 +377,9 @@ router.get('/student-summary', protect, async (req, res) => {
             return acc;
         }, {});
 
+        // Final Debt Calculation
+        const totalOutstanding = (balance > 0 ? balance : 0) + totalPenaltyToDisplay;
+
         res.json({
             studentName: student.name,
             enrollmentNo: student.enrollmentNo, // <--- YE ADD KIYA
@@ -325,10 +394,10 @@ router.get('/student-summary', protect, async (req, res) => {
             currentMonth: currentMonthName,
             totalPaidThisMonth: paidThisMonth,
             lastActivity: verifiedPayments.length > 0 ? verifiedPayments[0].date : null,
-            totalPenalty: accruedPenalty,
-            remainingFees: balance > 0 ? balance : 0, // Ye bina penalty ka pending hai
-            grandTotal: (balance > 0 ? balance : 0) + accruedPenalty, // Ye penalty jod kar hai
-            advanceBalance: balance < 0 ? Math.abs(balance) : 0,
+            totalPenalty: totalPenaltyToDisplay,
+            remainingFees: totalOutstanding > 0 ? totalOutstanding : 0, 
+            grandTotal: totalOutstanding > 0 ? totalOutstanding : 0,
+            advanceBalance: totalOutstanding < 0 ? Math.abs(totalOutstanding) : 0,
             totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
             paymentHistory: groupedHistory,
@@ -624,12 +693,10 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const School = require('../models/School');
         const schoolData = await School.findById(schoolId);
         const pSettings = schoolData.penaltySettings;
-        let accruedPenalty = 0;
-
+        let livePenalty = 0;
         if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
             const today = new Date();
-
             // 1. Calculate base days (pure calendar days difference)
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -638,20 +705,22 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
 
             // 2. Rule: Activation day ka fine turant (+1)
             let totalDaysToCharge = diffDays + 1;
+            if (diffDays > 0 && today.getHours() < 11) {totalDaysToCharge -= 1;}
 
-            if (diffDays > 0 && today.getHours() < 11) {
-                totalDaysToCharge -= 1;
-            }
-
-            accruedPenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
+            livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
+
+        const frozenPenalty = allPayments.filter(p => p.status === 'Verified').reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
+        const totalPenaltySum = livePenalty + frozenPenalty;
+
+        const finalRemainingWithPenalty = (balance > 0 ? balance : 0) + totalPenaltySum;
         res.json({
             student,
             totalPaidThisMonth: collectedThisMonth,
             totalExpected: monthlyOnlyStructureTotal,
-            totalPenalty: accruedPenalty,
-            remaining: (balance > 0 ? balance : 0) + accruedPenalty,
-            advance: balance < 0 ? Math.abs(balance) : 0,
+            totalPenalty: totalPenaltySum,
+            remaining: finalRemainingWithPenalty > 0 ? finalRemainingWithPenalty : 0,
+            advance: finalRemainingWithPenalty < 0 ? Math.abs(finalRemainingWithPenalty) : 0,
             currentMonth: currentMonthName,
             structureDetails,
             history: allPayments.filter(p => p.status === 'Verified').reduce((acc, pay) => {
@@ -666,7 +735,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
                 acc[key].push({ id: pay._id, amount: pay.amountPaid, category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode });
                 return acc;
             }, {}),
-            status: ((balance > 0 ? balance : 0) + accruedPenalty) <= 0 ? 'COMPLETED' : 'PENDING'
+            status: finalRemainingWithPenalty <= 0 ? 'COMPLETED' : 'PENDING'
         });
 
     } catch (error) {

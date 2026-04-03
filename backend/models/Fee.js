@@ -12,6 +12,7 @@ const feeSchema = new mongoose.Schema({
         default: 'Cash'},
     paymentScreenshot: { type: String }, 
     status: { type: String, enum: ['Pending', 'Verified'], default: 'Verified' }, 
+    penaltyAmount: { type: Number, default: 0 }, // Ye field hum penalty save karne ke liye use karenge
 }, { timestamps: true });
 
 module.exports = mongoose.model('Fee', feeSchema);
