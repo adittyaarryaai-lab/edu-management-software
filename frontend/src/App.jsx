@@ -337,13 +337,23 @@ function App() {
     );
   }
 
+  const dashboardPaths = ["/", "/dashboard", "/superadmin/dashboard", "/finance/dashboard"];
+  const isDashboard = dashboardPaths.includes(location.pathname);
+
   return (
-    <div className="min-h-screen relative bg-[#F8FAFC]">
+     <div className="min-h-screen relative bg-[#F8FAFC]">
       {isDarkMode && isMatrixActive && <VisualMatrix />}
-      <div className="print:hidden">
-        <Navbar user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSupportClick={() => setIsTechModalOpen(true)}/>
-      </div>
-      <main className="relative z-0 pb-32 pt-20 bg-[#F8FAFC]">
+      {isDashboard && (
+        <div className="print:hidden">
+          <Navbar 
+            user={user} 
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            onSupportClick={() => setIsTechModalOpen(true)}
+          />
+        </div>
+      )}
+      <main className={`relative z-0 pb-32 ${isDashboard ? 'pt-20' : 'pt-6'} bg-[#F8FAFC]`}>
         <Routes>
           {/* Main Dashboard Logic based on Role */}
           <Route path="/" element={

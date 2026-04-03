@@ -296,7 +296,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                         <div className="space-y-6 relative z-10">
                                             {/* Fees MODULE */}
                                             <button
-                                                onClick={() => handleNavigation('/fees')}
+                                                onClick={() => handleNavigation('/student/fees')}
                                                 className="w-full flex items-center justify-between group/item"
                                             >
                                                 <div className="flex items-center gap-4 text-left">
