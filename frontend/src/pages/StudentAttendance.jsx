@@ -32,9 +32,9 @@ const StudentAttendance = () => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px]">
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {/* Header Section */}
-            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-28 rounded-b-[3.5rem] shadow-lg relative overflow-hidden text-center">
+            <div className="bg-[#42A5F5] text-white px-6 pt-2 pb-28 rounded-b-[3.5rem] shadow-lg relative overflow-hidden text-center">
                 <button
                     onClick={() => navigate('/')}
                     className="absolute top-12 left-6 z-50 bg-white/20 p-2 rounded-xl border border-white/30 text-white active:scale-90 transition-all cursor-pointer"

@@ -36,69 +36,74 @@ const Timetable = ({ user }) => {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-void pb-20 font-sans italic text-white">
-      <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-neon/10 to-transparent pointer-events-none"></div>
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+      <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] shadow-lg relative overflow-hidden">
         <div className="flex justify-between items-center mb-6 relative z-10">
-          <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-90 border border-white/10 text-neon transition-all">
-            <ArrowLeft size={20} />
+          <button onClick={() => navigate(-1)} 
+            className="bg-white/20 p-2 rounded-xl border border-white/30 text-white active:scale-90 transition-all cursor-pointer"
+          >
+            <ArrowLeft size={24} />
           </button>
           <div className="text-center">
-            <h1 className="text-xl font-black uppercase tracking-tighter italic"> Class Schedule</h1>
-            <p className="text-[9px] font-black text-neon/40 tracking-[0.3em] uppercase italic">
-              {user?.grade ? `Class: ${user.grade}` : "Node Not Assigned"}
+            <h1 className="text-3xl font-black italic tracking-tight capitalize">Class schedule</h1>
+            <p className="text-[15px] font-bold text-white/80 tracking-widest italic capitalize mt-1">
+              {user?.grade ? `Class: ${user.grade}` : "Node not assigned"}
             </p>
           </div>
           <div className="w-8"></div>
         </div>
 
-        <div className="flex justify-between overflow-x-auto gap-2 no-scrollbar py-2 relative z-10 px-2">
+        <div className="flex justify-between overflow-x-auto gap-3 no-scrollbar py-2 relative z-10 px-1">
           {daysMap.map((day) => (
             <button
               key={day.full}
               onClick={() => setActiveDay(day.full)}
-              className={`flex flex-col items-center min-w-[55px] py-3 rounded-2xl transition-all duration-500 border ${activeDay === day.full ? 'bg-neon text-void border-neon shadow-[0_0_20px_rgba(61,242,224,0.4)] scale-105' : 'bg-white/5 text-neon/40 border-white/5'
-                }`}
+              className={`flex flex-col items-center min-w-[60px] py-3 rounded-2xl transition-all duration-300 border ${
+                activeDay === day.full 
+                ? 'bg-white text-[#42A5F5] border-white shadow-md scale-105' 
+                : 'bg-white/10 text-white/70 border-white/10'
+              }`}
             >
-              <span className="text-[10px] font-black italic uppercase tracking-widest">{day.short}</span>
+              <span className="text-[13px] font-black italic capitalize tracking-wide">{day.short}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="px-5 -mt-8 space-y-4 relative z-20">
+      <div className="px-5 -mt-10 space-y-4 relative z-20">
         {currentSchedule && currentSchedule.periods.length > 0 ? (
           currentSchedule.periods.map((item, index) => (
-            <div key={index} className="bg-white/5 backdrop-blur-xl p-5 border-l-4 border-l-neon shadow-2xl border-white/5 flex gap-4 animate-in fade-in duration-500 italic group">
-              <div className="flex flex-col items-center justify-center border-r border-white/5 pr-4 min-w-[90px]">
-                <Clock size={16} className="text-neon/40 mb-1 group-hover:animate-pulse" />
-                <span className="text-[10px] font-black text-white text-center uppercase tracking-tighter leading-none">
+            <div key={index} className="bg-white p-5 rounded-[2.5rem] border border-[#DDE3EA] flex gap-5 active:scale-[0.98] transition-all italic shadow-sm group">
+              {/* Time Block */}
+              <div className="flex flex-col items-center justify-center border-r border-[#DDE3EA] pr-5 min-w-[100px]">
+                <Clock size={18} className="text-[#42A5F5] mb-2" />
+                <span className="text-[14px] font-black text-slate-700 text-center leading-none">
                   {item.startTime}
                 </span>
-                <span className="text-[8px] font-black text-white/20 text-center uppercase mt-1">
-                  TO {item.endTime}
+                <span className="text-[11px] font-bold text-slate-400 text-center mt-1 uppercase">
+                  To {item.endTime}
                 </span>
               </div>
 
-              <div className="flex-1">
-                <h3 className="font-black text-white text-sm mb-1 uppercase leading-tight italic group-hover:text-neon transition-colors">{item.subject}</h3>
-                <p className="text-[10px] text-white/30 font-black flex items-center gap-1.5 uppercase italic">
-                  <span className="w-1.5 h-1.5 bg-neon rounded-full shadow-[0_0_8px_rgba(61,242,224,1)]"></span>
-                  {/* AB YAHAN NAAM DIKHEGA EMP ID NAHI */}
-                  TEACHER: {item.teacherName || "NOT ASSIGNED"}
+              <div className="flex-1 py-1">
+                <h3 className="font-black text-slate-800 text-[18px] mb-1 capitalize leading-tight group-hover:text-[#42A5F5] transition-colors">
+                  {item.subject.toLowerCase()}
+                </h3>
+                <p className="text-[13px] text-slate-500 font-bold flex items-center gap-2 capitalize">
+                  <span className="w-2 h-2 bg-[#42A5F5] rounded-full"></span>
+                  Teacher: {item.teacherName?.toLowerCase() || "not assigned"}
                 </p>
-                <div className="flex items-center gap-1.5 mt-3 text-neon bg-neon/10 w-fit px-3 py-1 rounded-lg border border-neon/20 shadow-inner">
-                  <MapPin size={10} />
-                  {/* UPDATE: Yahan ab asli Room No dikhega */}
-                  <span className="text-[8px] font-black uppercase tracking-widest">ROOM: {item.room || "N/A"}</span>
+                <div className="flex items-center gap-2 mt-4 text-[#42A5F5] bg-blue-50 w-fit px-4 py-1.5 rounded-full border border-blue-100 shadow-sm">
+                  <MapPin size={12} />
+                  <span className="text-[11px] font-black tracking-widest uppercase">Room: {item.room || "N/A"}</span>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <div className="text-center py-20 bg-void rounded-[3rem] border border-dashed border-white/5 shadow-inner">
-            <BookOpen className="mx-auto text-neon/10 mb-4 animate-pulse" size={48} />
-            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic text-center">Free from today's classes! ⚡</p>
+          <div className="text-center py-24 bg-white rounded-[3.5rem] border border-dashed border-[#DDE3EA] mx-1">
+            <BookOpen className="mx-auto text-slate-200 mb-4" size={56} />
+            <p className="text-slate-400 font-bold text-[20px] italic text-center capitalize">Free from today's classes! ⚡</p>
           </div>
         )}
       </div>
