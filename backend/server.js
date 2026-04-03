@@ -27,6 +27,7 @@ dotenv.config();
 // Database Connection
 connectDB();
 require('./utils/paymentCron');
+require('./utils/penaltyCron');
 
 const app = express();
 
