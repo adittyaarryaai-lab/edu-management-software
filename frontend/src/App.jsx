@@ -449,7 +449,7 @@ function App() {
         user={user}
       />
       {/* SuperAdmin, Admin aur Finance ke liye BottomNav nahi dikhega */}
-      <div className="print:hidden fixed bottom-0 left-0 w-full z-[100]">
+      <div className="print:hidden fixed bottom-0 left-0 w-full z-40">
         {(user.role !== 'admin' && user.role !== 'superadmin' && user.role !== 'finance') && <BottomNav />}
       </div>
     </div>
