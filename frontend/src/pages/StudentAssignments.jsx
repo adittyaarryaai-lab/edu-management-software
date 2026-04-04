@@ -14,6 +14,7 @@ const StudentAssignments = ({ user }) => {
     useEffect(() => {
         const fetchAssignments = async () => {
             try {
+                setLoading(true);
                 const { data } = await API.get(`/assignments/${user.grade}`);
                 setAssignments(data);
             } catch (err) {
@@ -52,60 +53,62 @@ const StudentAssignments = ({ user }) => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-void text-white font-sans italic overflow-hidden relative flex flex-col justify-center items-center p-6">
-            {/* Background Glow Effect */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-neon/10 blur-[120px] rounded-full pointer-events-none"></div>
-
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans italic overflow-hidden relative flex flex-col justify-center items-center p-6 text-[15px]">
+            
             {/* Top Navigation */}
             <div className="absolute top-10 left-6 z-30">
                 <button
                     onClick={() => navigate(-1)}
-                    className="bg-white/5 p-3 rounded-2xl active:scale-90 border border-white/10 text-neon hover:bg-neon/10 transition-all shadow-lg"
+                    className="bg-white p-3 rounded-2xl active:scale-90 border border-[#DDE3EA] text-[#42A5F5] shadow-md hover:bg-blue-50 transition-all"
                 >
                     <ArrowLeft size={24} />
                 </button>
             </div>
 
             {/* Main Content */}
-            <div className="relative z-10 flex flex-col items-center text-center">
-                {/* Animated Icon */}
-                <div className="mb-8 relative">
-                    <div className="absolute inset-0 bg-neon/20 blur-2xl rounded-full animate-pulse"></div>
-                    <div className="bg-slate-900 border border-neon/30 p-8 rounded-[2.5rem] relative">
-                        <Construction size={60} className="text-neon animate-bounce" strokeWidth={1.5} />
+            <div className="relative z-10 flex flex-col items-center text-center max-w-md">
+                
+                {/* Animated Icon Container */}
+                <div className="mb-10 relative">
+                    {/* Soft Blue Glow */}
+                    <div className="absolute inset-0 bg-[#42A5F5]/10 blur-3xl rounded-full animate-pulse"></div>
+                    
+                    <div className="bg-white border-2 border-dashed border-[#DDE3EA] p-10 rounded-[3.5rem] shadow-sm relative">
+                        <Construction size={80} className="text-[#42A5F5] animate-bounce" strokeWidth={1.5} />
                     </div>
-                    <Zap size={24} className="absolute -top-2 -right-2 text-neon fill-neon animate-pulse" />
+                    <div className="absolute -top-2 -right-2 bg-white p-2 rounded-full shadow-lg border border-blue-50">
+                        <Zap size={24} className="text-amber-400 fill-amber-400 animate-pulse" />
+                    </div>
                 </div>
 
                 {/* Text Section */}
-                <h1 className="text-4xl font-black uppercase tracking-[0.2em] mb-4 italic leading-none">
-                    Module <span className="text-neon">Under</span> <br /> Construction
+                <h1 className="text-4xl font-black italic tracking-tight text-slate-800 leading-tight mb-4">
+                    Module under <br /> <span className="text-[#42A5F5]">construction</span>
                 </h1>
 
-                <div className="h-[2px] w-24 bg-gradient-to-r from-transparent via-neon to-transparent mb-6"></div>
+                <div className="h-[3px] w-20 bg-[#42A5F5] mx-auto rounded-full mb-8 shadow-sm"></div>
 
-                <p className="text-[11px] text-white/40 font-bold uppercase tracking-[0.4em] max-w-[300px] leading-relaxed">
-                    Neural network for central inbox is being synchronized. <br />
-                    <span className="text-neon/60">Estimated deploy: Coming Soon</span>
+                <p className="text-[16px] text-slate-400 font-bold italic max-w-[320px] leading-relaxed capitalize">
+                    Your assignments neural network is being synchronized. <br />
+                    <span className="text-[#42A5F5] block mt-2">Estimated deploy: Coming soon</span>
                 </p>
 
                 {/* Status Indicator */}
-                <div className="mt-12 flex items-center gap-3 bg-white/5 px-6 py-3 rounded-full border border-white/10">
-                    <div className="w-2 h-2 bg-neon rounded-full animate-ping"></div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-white/60">
-                        System Protocol 119: Active
+                <div className="mt-12 flex items-center gap-3 bg-white px-8 py-4 rounded-full border border-[#DDE3EA] shadow-sm">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                    <span className="text-[12px] font-black uppercase tracking-widest text-slate-400">
+                        System protocol 119: Active
                     </span>
                 </div>
             </div>
 
             {/* Footer Tag */}
-            <div className="absolute bottom-10 flex items-center gap-2 opacity-20">
-                <ShieldAlert size={12} />
-                <p className="text-[8px] font-black uppercase tracking-[0.5em]">EduFlowAI Security Mesh</p>
+            <div className="absolute bottom-10 flex items-center gap-2 opacity-30 text-slate-400">
+                <ShieldAlert size={16} />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em]">EduFlowAI security mesh</p>
             </div>
         </div>
     );
 };
-
 
 export default StudentAssignments;
