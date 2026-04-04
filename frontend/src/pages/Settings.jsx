@@ -6,81 +6,109 @@ import { useTheme } from '../context/ThemeContext';
 const Settings = () => {
     const navigate = useNavigate();
     const { isDarkMode, toggleTheme } = useTheme();
-    const [notifEnabled, setNotifEnabled] = React.useState(true);
 
     const appSettings = [
-        { title: 'Change Password', icon: <Lock size={20}/>, color: 'text-red-400', bg: 'bg-red-500/10', path: '/change-password' },
-        // { title: 'Neural Alerts', icon: <Bell size={20}/>, color: 'text-orange-400', bg: 'bg-orange-500/10', isNotif: true },
-        { title: 'Animated Background Pattern', icon: isDarkMode ? <Moon size={20}/> : <Sun size={20}/>, color: 'text-neon', bg: 'bg-neon/10', isTheme: true },
-        // { title: 'Language Pack', icon: <Languages size={20}/>, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-        // { title: 'Privacy Cipher', icon: <ShieldAlert size={20}/>, color: 'text-green-400', bg: 'bg-green-500/10' },
+        { 
+            title: 'Change password', 
+            subtitle: 'Security configurations',
+            icon: <Lock size={22}/>, 
+            color: 'text-rose-500', 
+            bg: 'bg-rose-50', 
+            path: '/change-password' 
+        },
+        { 
+            title: 'Notifications',
+            subtitle: 'Manage alerts and updates',
+            icon: <Bell size={22}/>, 
+            color: 'text-yellow-500', 
+            bg: 'bg-yellow-50',
+        },
+        { 
+            title: 'Appearance',
+            subtitle: 'Dark and light mode settings',
+            icon: isDarkMode ? <Sun size={22}/> : <Moon size={22}/>, 
+            color: isDarkMode ? 'text-yellow-500' : 'text-slate-700', 
+            bg: isDarkMode ? 'bg-yellow-50' : 'bg-slate-50',
+            isTheme: true
+        },
+        { 
+            title: 'Language',
+            subtitle: 'Select your preferred language',
+            icon: <Languages size={22}/>,
+            color: 'text-blue-500',
+            bg: 'bg-blue-50',   
+            },
     ];
 
     return (
-        <div className={`min-h-screen pb-24 font-sans italic transition-colors duration-500 bg-void text-white`}>
-            {/* Header Area */}
-            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3.5rem] shadow-2xl border-b border-neon/20 flex items-center gap-4 relative z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-neon/10 to-transparent pointer-events-none"></div>
-                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-90 border border-white/10 text-neon transition-all relative z-10">
-                    <ArrowLeft size={20} />
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* Header Section */}
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] shadow-lg flex items-center gap-4 relative z-10 overflow-hidden">
+                <div className="absolute inset-0 bg-white/5 pointer-events-none"></div>
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="bg-white/20 p-2.5 rounded-xl active:scale-90 border border-white/30 text-white transition-all relative z-10"
+                >
+                    <ArrowLeft size={24} />
                 </button>
                 <div className="relative z-10">
-                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Settings</h1>
-                    <p className="text-[9px] font-black text-neon/40 uppercase tracking-[0.4em] mt-0.5 italic">System Configuration</p>
+                    <h1 className="text-3xl font-black italic tracking-tight capitalize">Settings</h1>
+                    <p className="text-[15px] font-bold text-white/80 tracking-widest mt-1 capitalize">System configuration</p>
                 </div>
-                <div className="absolute right-8 text-neon/10 animate-pulse"><ShieldCheck size={60}/></div>
+                <div className="absolute right-8 text-white/50"><ShieldCheck size={80}/></div>
             </div>
 
             {/* Settings List */}
-            <div className="px-5 -mt-8 relative z-20 space-y-4">
+            <div className="px-5 -mt-12 relative z-20 space-y-4">
                 {appSettings.map((s, i) => (
                     <div 
                         key={i} 
                         onClick={() => s.path && navigate(s.path)}
-                        className="bg-white/5 backdrop-blur-xl p-4 sm:p-5 rounded-[2.5rem] shadow-2xl border border-white/5 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group hover:border-neon/30 italic"
+                        className="bg-white p-5 rounded-[2.5rem] shadow-md border border-[#DDE3EA] flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group hover:border-[#42A5F5]/30 italic"
                     >
-                        <div className="flex items-center gap-3 sm:gap-4 flex-1">
-                            <div className={`${s.bg} ${s.color} p-3 sm:p-4 rounded-[1.5rem] border border-white/5 shadow-inner group-hover:scale-110 transition-all duration-500 shrink-0`}>
+                        <div className="flex items-center gap-4 flex-1">
+                            {/* Icon Wrapper */}
+                            <div className={`${s.bg} ${s.color} p-4 rounded-[1.5rem] border border-transparent group-hover:scale-105 transition-all duration-500 shrink-0`}>
                                 {s.icon}
                             </div>
+                            
                             <div className="min-w-0">
-                                <span className="font-black text-[13px] sm:text-sm uppercase tracking-tight block truncate text-white group-hover:text-neon transition-colors">{s.title}</span>
-                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest truncate italic">Security Settings</p>
+                                <span className="font-black text-[16px] text-slate-700 capitalize tracking-tight block truncate group-hover:text-[#42A5F5] transition-colors">
+                                    {s.title}
+                                </span>
+                                <p className="text-[11px] font-bold text-slate-400 capitalize tracking-wide truncate mt-0.5">
+                                    {s.subtitle}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="flex shrink-0">
+                        <div className="flex shrink-0 ml-4">
                             {s.isTheme ? (
                                 <div 
                                     onClick={(e) => { e.stopPropagation(); toggleTheme(); }}
-                                    className="w-12 h-6 rounded-full transition-all duration-500 relative cursor-pointer shadow-inner border border-white/10"
-                                    style={{ backgroundColor: isDarkMode ? '#3DF2E0' : '#1e293b' }}
+                                    className="w-14 h-7 rounded-full transition-all duration-500 relative cursor-pointer shadow-inner border border-slate-200"
+                                    style={{ backgroundColor: isDarkMode ? '#42A5F5' : '#E2E8F0' }}
                                 >
                                     <div 
-                                        className="absolute top-1 w-4 h-4 bg-void rounded-full shadow-md transition-all duration-500" 
-                                        style={{ left: isDarkMode ? '28px' : '4px' }}
-                                    />
-                                </div>
-                            ) : s.isNotif ? (
-                                <div 
-                                    onClick={(e) => { e.stopPropagation(); setNotifEnabled(!notifEnabled); }}
-                                    className="w-12 h-6 rounded-full transition-all duration-500 relative cursor-pointer shadow-inner border border-white/10"
-                                    style={{ backgroundColor: notifEnabled ? '#f97316' : '#1e293b' }}
-                                >
-                                    <div 
-                                        className="absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-500" 
-                                        style={{ left: notifEnabled ? '28px' : '4px' }}
-                                    />
+                                        className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg transition-all duration-500 flex items-center justify-center" 
+                                        style={{ left: isDarkMode ? '32px' : '4px' }}
+                                    >
+                                        <div className={`w-2 h-2 rounded-full ${isDarkMode ? 'bg-[#42A5F5]' : 'bg-slate-300'}`}></div>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="bg-void p-2 rounded-xl border border-white/5">
-                                    <ChevronRight size={18} className="text-neon/20 group-hover:text-neon transition-colors" />
+                                <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 group-hover:bg-blue-50 transition-colors">
+                                    <ChevronRight size={20} className="text-slate-300 group-hover:text-[#42A5F5]" />
                                 </div>
                             )}
                         </div>
                     </div>
                 ))}
+            </div>
 
+            {/* Version Badge */}
+            <div className="mt-12 text-center opacity-30">
+                <p className="text-[13px] font-black text-black uppercase tracking-[0.4em]">Protocol v2 • Secure link</p>
             </div>
         </div>
     );

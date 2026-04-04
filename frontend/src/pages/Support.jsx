@@ -54,108 +54,132 @@ const Support = () => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
-            {/* Header */}
-            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-neon/10 to-transparent pointer-events-none"></div>
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* Header Section */}
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-20 rounded-b-[3.5rem] shadow-lg relative z-10 overflow-hidden">
                 <div className="flex justify-between items-center mb-6 relative z-10">
-                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-90 border border-white/10 text-neon transition-all">
-                        <ArrowLeft size={20} />
+                    <button onClick={() => navigate(-1)} className="bg-white/20 p-2.5 rounded-xl active:scale-90 border border-white/30 text-white transition-all">
+                        <ArrowLeft size={24} />
                     </button>
-                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Student Support</h1>
-                    <button onClick={() => setIsFormOpen(!isFormOpen)} className={`p-2 rounded-xl shadow-lg transition-all active:scale-90 border ${isFormOpen ? 'bg-void border-neon text-neon' : 'bg-neon border-neon text-void'}`}>
-                        <MessageSquarePlus size={20} />
+                    <h1 className="text-3xl font-black italic tracking-tight capitalize">Student support</h1>
+                    <button
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                        className={`p-2.5 rounded-xl shadow-md transition-all active:scale-90 border ${isFormOpen ? 'bg-white text-[#42A5F5] border-white' : 'bg-white/20 border-white/30 text-white'}`}
+                    >
+                        <MessageSquarePlus size={24} />
                     </button>
                 </div>
-                <div className="flex items-center gap-3 bg-white/5 p-4 rounded-2xl backdrop-blur-md border border-white/10 relative z-10">
-                    <div className="p-2 bg-neon/10 rounded-lg">
-                        <Cpu className="text-neon animate-pulse" size={20} />
+                <div className="flex items-center gap-3 bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/20 relative z-10">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                        <Cpu className="text-white animate-pulse" size={25} />
                     </div>
-                    <p className="text-[10px] font-black leading-relaxed uppercase tracking-[0.2em] text-neon/60 italic">Connected to Class Teacher.</p>
+                    <p className="text-[15px] font-bold leading-relaxed capitalize tracking-wide text-white/90">Connected to class teacher</p>
                 </div>
             </div>
 
             <div className="px-5 -mt-8 relative z-20 space-y-6">
+                {/* New Query Form */}
                 {isFormOpen && (
-                    <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-2xl border border-neon/20 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <h3 className="text-[10px] font-black text-neon uppercase tracking-[0.4em] mb-4 italic flex items-center gap-2">
-                            <Send size={12} /> Your Query
+                    <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-[#DDE3EA] animate-in fade-in slide-in-from-top-4 duration-500">
+                        <h3 className="text-[16px] font-bold text-[#42A5F5] uppercase tracking-widest mb-6 italic flex items-center gap-2">
+                            <Send size={20} /> Raise a new query
                         </h3>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <input
-                                type="text"
-                                placeholder="Subject (e.g. class Doubt)"
-                                className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-xs font-black outline-none focus:border-neon text-white italic"
-                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                required
-                            />
-                            <textarea
-                                placeholder="Details for your Query..."
-                                rows="3"
-                                className="w-full bg-void border border-white/5 py-4 px-4 rounded-2xl text-xs font-black outline-none focus:border-neon text-white italic placeholder:text-white/20"
-                                onChange={(e) => setFormData({ ...formData, query: e.target.value })}
-                                required
-                            ></textarea>
-                            <div className="flex items-center gap-3 ml-2">
-                                <input type="checkbox" id="urgent" className="w-4 h-4 accent-neon" onChange={(e) => setFormData({ ...formData, isUrgent: e.target.checked })} />
-                                <label htmlFor="urgent" className="text-[10px] font-black uppercase text-red-500 tracking-[0.3em] italic">Urgent Solution</label>
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="space-y-1">
+                                <label className="text-[15px] font-black text-black uppercase tracking-widest ml-4 italic">• Query subject</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Class doubt, Leave request"
+                                    rows="4"
+                                    className="w-full bg-slate-50 border border-slate-100 py-5 px-6 rounded-3xl text-[19px] font-bold outline-none focus:border-[#42A5F5] focus:bg-white text-slate-700 italic transition-all"
+                                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                    required
+                                />
                             </div>
-                            <button type="submit" className="w-full bg-neon text-void py-4 rounded-full font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 transition-all italic">
-                                Send Query
+                            <div className="space-y-1">
+                                <label className="text-[15px] font-black text-black uppercase tracking-widest ml-4 italic">• Detailed description</label>
+                                <textarea
+                                    placeholder="Brief your teacher about the issue..."
+                                    rows="4"
+                                    className="w-full bg-slate-50 border border-slate-100 py-5 px-6 rounded-3xl text-[19px] font-bold outline-none focus:border-[#42A5F5] focus:bg-white text-slate-700 italic transition-all"
+                                    onChange={(e) => setFormData({ ...formData, query: e.target.value })}
+                                    required
+                                ></textarea>
+                            </div>
+                            <div className="flex items-center gap-3 ml-4">
+                                <input
+                                    type="checkbox"
+                                    id="urgent"
+                                    className="w-5 h-5 accent-rose-500 rounded-md"
+                                    onChange={(e) => setFormData({ ...formData, isUrgent: e.target.checked })}
+                                />
+                                <label htmlFor="urgent" className="text-[15px] font-black text-rose-500 capitalize italic">Request urgent solution</label>
+                            </div>
+                            <button type="submit" className="w-full bg-[#42A5F5] text-white py-5 rounded-[2rem] font-black text-[16px] shadow-lg shadow-blue-100 active:scale-95 transition-all italic capitalize">
+                                Send query now
                             </button>
                         </form>
                     </div>
                 )}
 
-                <div className="space-y-4">
-                    <p className="text-[10px] font-black text-neon/30 uppercase tracking-[0.4em] ml-2 italic">Signal Activated </p>
+                {/* Tickets List */}
+                <div className="space-y-5">
+                    <p className="text-[15px] font-bold text-black/40 uppercase tracking-[0.3em] ml-4 italic">Active Support </p>
+
                     {tickets.length > 0 ? tickets.map((t, i) => (
-                        <div key={i} className="bg-slate-900/60 backdrop-blur-xl rounded-[2rem] p-6 shadow-2xl border border-white/5 group hover:border-neon/30 transition-all italic">
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <span className="text-[8px] font-black text-neon/40 uppercase tracking-widest leading-none">Query ID: #{t._id.slice(-6).toUpperCase()}</span>
-                                    <h4 className="font-black text-white text-sm leading-tight mt-1 uppercase tracking-tight group-hover:text-neon transition-colors">{t.subject}</h4>
-                                </div>
-                                <span className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border italic ${t.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
-                                    {t.status}
+                        <div key={i} className="bg-white rounded-[2.5rem] p-6 shadow-md border border-[#DDE3EA] group hover:border-[#42A5F5]/30 transition-all italic">
+                            <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 mb-4 flex justify-between items-center">
+
+                                <span className="text-[15px] font-black text-slate-600 uppercase tracking-widest">
+                                    Query ID: #{t._id.slice(-6).toUpperCase()}
                                 </span>
+
+                                <span className={`px-4 py-1.5 rounded-full text-[15px] font-black capitalize border italic ${t.status === 'Resolved'
+                                        ? 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                        : 'bg-amber-50 text-amber-600 border-amber-100'
+                                    }`}>
+                                    {t.status.toLowerCase()}
+                                </span>
+
                             </div>
+                            <h4 className="font-black text-slate-800 text-[17px] leading-tight mt-1 capitalize group-hover:text-[#42A5F5] transition-colors">
+                                • {t.subject.toLowerCase()}
+                            </h4>
 
-                            {/* Query Content */}
-                            <p className="text-[11px] text-white/40 mb-4 px-1 leading-relaxed">"{t.query}"</p>
+                            <p className="text-[17px] text-slate-900 mb-5 px-1 leading-relaxed opacity-90">"{t.query}"</p>
 
-                            {/* DAY 136: FACULTY RESOLUTION UI */}
+                            {/* Faculty Resolution UI */}
                             {t.answer && (
-                                <div className="mb-4 p-4 bg-void/80 rounded-2xl border border-emerald-500/20 shadow-inner relative overflow-hidden group-hover:border-emerald-500/40 transition-all">
-                                    <div className="absolute top-0 right-0 p-2 opacity-5">
-                                        <CheckCircle2 size={48} className="text-emerald-500" />
+                                <div className="mb-5 p-5 bg-blue-50/50 rounded-[2rem] border border-blue-100 shadow-inner relative overflow-hidden group-hover:bg-blue-50 transition-all">
+                                    <div className="absolute top-0 right-0 p-3 opacity-5">
+                                        <CheckCircle2 size={50} className="text-[#42A5F5]" />
                                     </div>
-                                    <p className="text-[8px] font-black text-emerald-400 uppercase mb-1.5 tracking-widest flex items-center gap-1.5">
-                                        <ShieldCheck size={10} /> Faculty Solution:
+                                    <p className="text-[15px] font-black text-[#42A5F5] uppercase mb-2 tracking-widest flex items-center gap-2">
+                                        <ShieldCheck size={14} /> Faculty solution:
                                     </p>
-                                    <p className="text-[11px] font-black text-white/80 italic leading-relaxed relative z-10">
+                                    <p className="text-[15px] font-bold text-slate-700 italic leading-relaxed relative z-10">
                                         "{t.answer}"
                                     </p>
                                 </div>
                             )}
 
-                            <div className="flex justify-between items-center border-t border-white/5 pt-4">
-                                <div className="flex items-center gap-1.5 text-white/20">
-                                    <Clock size={12} />
-                                    <span className="text-[10px] font-black uppercase tracking-tighter">{new Date(t.createdAt).toLocaleDateString()}</span>
+                            <div className="flex justify-between items-center border-t border-slate-50 pt-4 px-1">
+                                <div className="flex items-center gap-2 text-slate-900">
+                                    <Clock size={14} />
+                                    <span className="text-[15px] font-bold italic">{new Date(t.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                                 </div>
-                                <div className="flex items-center gap-1.5">
-                                    <AlertCircle size={12} className={t.isUrgent ? 'text-red-500 animate-pulse' : 'text-neon/30'} />
-                                    <span className={`text-[9px] font-black uppercase tracking-widest ${t.isUrgent ? 'text-red-500' : 'text-white/20'}`}>
-                                        {t.isUrgent ? 'Urgent Query' : 'Normal Query'}
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle size={14} className={t.isUrgent ? 'text-rose-500 animate-pulse' : 'text-yellow-500'} />
+                                    <span className={`text-[15px] font-bold capitalize ${t.isUrgent ? 'text-rose-500' : 'text-yellow-500'}`}>
+                                        {t.isUrgent ? 'Urgent query' : 'Standard priority'}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     )) : (
-                        <div className="text-center py-20 bg-void/50 rounded-[3rem] border border-dashed border-white/10 shadow-inner">
-                            <LifeBuoy className="mx-auto text-white/5 mb-4 animate-pulse" size={48} />
-                            <p className="text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">No Support Signals Found</p>
+                        <div className="text-center py-24 bg-white rounded-[3.5rem] border border-dashed border-[#DDE3EA] mx-1">
+                            <LifeBuoy className="mx-auto text-slate-200 mb-4" size={60} />
+                            <p className="text-slate-400 font-bold text-[16px] italic text-center capitalize">No support signals found</p>
                         </div>
                     )}
                 </div>

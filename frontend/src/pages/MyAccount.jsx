@@ -61,52 +61,63 @@ const MyAccount = ({ user }) => {
     };
 
     return (
-        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
-            {/* Top Header */}
-            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] border-b border-neon/20 relative shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-neon/10 to-transparent pointer-events-none"></div>
-                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-4 active:scale-90 border border-white/10 text-neon transition-all relative z-10">
-                    <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-xl font-black uppercase tracking-tighter italic relative z-10">
-                    {user?.role === 'admin' ? 'Institutional Information' : 'Personal Information'}
-                </h1>
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* Top Header: Blue Theme */}
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[3.5rem] shadow-lg relative overflow-hidden">
+
+                <div className="flex items-center gap-4 mb-4 relative z-10">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-white/20 p-2.5 rounded-xl active:scale-90 border border-white/30 text-white transition-all"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+
+                    <h1 className="text-3xl font-black italic tracking-tight capitalize">
+                        {user?.role === 'admin' ? 'Institutional information' : 'Personal information'}
+                    </h1>
+                </div>
             </div>
+            <br />
 
             <div className="px-6 -mt-16 relative z-20">
-                <div className="bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] p-6 border border-white/5">
+                <div className="bg-white rounded-[3rem] shadow-xl p-8 border border-[#DDE3EA]">
 
                     {/* --- PROFILE PIC & PRIMARY INFO --- */}
-                    <div className="flex flex-col items-center -mt-16 mb-8">
+                    <div className="flex flex-col items-center -mt-20 mb-8">
                         <div className="relative group">
-                            <div className="w-28 h-28 bg-void rounded-full border-4 border-slate-900 shadow-[0_0_30px_rgba(61,242,224,0.3)] flex items-center justify-center overflow-hidden">
+                            <div className="w-32 h-32 bg-white rounded-full border-[6px] border-white shadow-2xl flex items-center justify-center overflow-hidden">
                                 {preview ? (
-                                    <img src={preview} alt="profile" className="w-full h-full object-cover transition-all duration-500" />) : (
-                                    <UserCircle size={70} className="text-neon/20" />
+                                    <img src={preview} alt="profile" className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110" />
+                                ) : (
+                                    <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                                        <UserCircle size={80} />
+                                    </div>
                                 )}
                             </div>
 
-                            <label className="absolute bottom-1 right-1 bg-neon text-void p-2 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(61,242,224,0.4)] active:scale-90 transition-all border-2 border-slate-900">
-                                <Camera size={16} />
+                            <label className="absolute bottom-1 right-1 bg-[#42A5F5] text-white p-2.5 rounded-2xl cursor-pointer shadow-lg active:scale-90 transition-all border-4 border-white">
+                                <Camera size={18} />
                                 <input type="file" className="hidden" onChange={handleFileChange} accept="image/*" />
                             </label>
 
                             {uploading && (
-                                <div className="absolute inset-0 bg-void/60 rounded-full flex items-center justify-center border border-neon">
-                                    <div className="w-6 h-6 border-2 border-neon border-t-transparent rounded-full animate-spin"></div>
+                                <div className="absolute inset-0 bg-white/60 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <div className="w-8 h-8 border-4 border-[#42A5F5] border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             )}
                         </div>
 
-                        <h2 className="text-2xl font-black text-white mt-4 uppercase tracking-tighter italic text-center">
-                            {user?.role === 'admin' ? (schoolData?.schoolName || user?.name) : user?.name}
+                        <h2 className="text-2xl font-black text-slate-800 mt-5 italic tracking-tight text-center capitalize">
+                            {user?.role === 'admin' ? (schoolData?.schoolName?.toLowerCase() || user?.name?.toLowerCase()) : user?.name?.toLowerCase()}
                         </h2>
-                        <div className="flex gap-2 mt-2">
-                            <span className="bg-neon/10 text-neon border border-neon/30 px-4 py-1 rounded-full text-[9px] font-black uppercase italic tracking-widest">
-                                {user?.role === 'admin' ? 'Master Node: Authorized' : user?.role === 'student' ? `Class: ${user.grade}` : 'Faculty Member'}
+
+                        <div className="flex flex-wrap justify-center gap-2 mt-3">
+                            <span className="bg-blue-50 text-[#42A5F5] border border-blue-100 px-4 py-1.5 rounded-full text-[15px] font-black italic capitalize tracking-wide">
+                                {user?.role === 'admin' ? 'Master node authorized' : user?.role === 'student' ? `Class: ${user.grade}` : 'Faculty member'}
                             </span>
                             {user?.role !== 'admin' && (
-                                <span className="bg-white/5 text-white/40 border border-white/10 px-4 py-1 rounded-full text-[9px] font-black uppercase italic tracking-widest">
+                                <span className="bg-slate-50 text-slate-400 border border-slate-100 px-4 py-1.5 rounded-full text-[15px] font-black italic tracking-widest uppercase">
                                     {user?.role === 'student' ? user.enrollmentNo : user.employeeId}
                                 </span>
                             )}
@@ -114,146 +125,143 @@ const MyAccount = ({ user }) => {
                     </div>
 
                     {/* --- DETAILS GRID --- */}
-                    <div className="space-y-6">
-                        <p className="text-[10px] font-black text-neon/30 uppercase tracking-[0.4em] border-b border-white/5 pb-2 italic">
-                            {user?.role === 'admin' ? 'Account Details' : 'Details'}
+                    <div className="space-y-8">
+                        <p className="text-[15px] font-bold text-black uppercase tracking-[0.3em] border-b border-slate-50 pb-3 italic ml-2">
+                            {user?.role === 'admin' ? 'Account credentials' : 'Profile details'}
                         </p>
 
-                        <div className="grid grid-cols-1 gap-6">
+                        <div className="grid grid-cols-1 gap-7">
                             {user?.role === 'admin' ? (
-                                // Step 3: Admin specific fields (School Details)
                                 <>
-                                    <div className="flex items-center gap-4 group">
-                                        <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Hash size={20} /></div>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><Hash size={22} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-white/20 uppercase italic">Affiliation Cipher</p>
-                                            {/* FIXED: schoolData se direct access */}
-                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.affiliationNo || user?.schoolData?.affiliationNo || "N/A"}</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Affiliation cipher</p>
+                                            <p className="text-[16px] font-black text-slate-700 uppercase">{schoolData?.affiliationNo || user?.schoolData?.affiliationNo || "N/A"}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 group">
-                                        <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><UserCheck size={20} /></div>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><UserCheck size={22} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-white/20 uppercase italic">Primary Operator</p>
-                                            {/* FIXED: Admin Name from schoolData */}
-                                            <p className="text-sm font-black text-white/80 uppercase">{schoolData?.adminDetails?.fullName || user?.schoolData?.adminDetails?.fullName || user?.name}</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Primary operator</p>
+                                            <p className="text-[16px] font-black text-slate-700 capitalize">{schoolData?.adminDetails?.fullName?.toLowerCase() || user?.name?.toLowerCase()}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 group">
-                                        <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Phone size={20} /></div>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><Phone size={22} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-white/20 uppercase italic">Signal Link</p>
-                                            {/* FIXED: Admin Mobile */}
-                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.mobile || user?.schoolData?.adminDetails?.mobile || user?.phone || "N/A"}</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Signal link</p>
+                                            <p className="text-[16px] font-black text-slate-700">{schoolData?.adminDetails?.mobile || user?.phone || "N/A"}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4 group">
-                                        <div className="bg-void p-3 rounded-2xl border border-white/5 text-neon/40"><Mail size={20} /></div>
+                                    <div className="flex items-center gap-5 group">
+                                        <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><Mail size={22} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-white/20 uppercase italic">Network Email</p>
-                                            {/* FIXED: Admin Email */}
-                                            <p className="text-sm font-black text-white/80">{schoolData?.adminDetails?.email || user?.schoolData?.adminDetails?.email || user?.email}</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Network email</p>
+                                            <p className="text-[16px] font-black text-slate-700 lowercase">{schoolData?.adminDetails?.email || user?.email}</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-4 group bg-void/40 p-4 rounded-2xl border border-white/5">
-                                        <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40 mt-1"><MapPin size={20} /></div>
+                                    <div className="flex items-start gap-5 bg-slate-50 p-5 rounded-[2rem] border border-slate-100 shadow-inner">
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 text-[#42A5F5] mt-1"><MapPin size={22} /></div>
                                         <div>
-                                            <p className="text-[8px] font-black text-neon/40 uppercase italic">Deployment Address</p>
-                                            <p className="text-[11px] font-black text-white/60 uppercase leading-relaxed mt-1">{schoolData?.address || "Location Data Encrypted"}</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Deployment address</p>
+                                            <p className="text-[14px] font-bold text-slate-600 capitalize leading-relaxed">{schoolData?.address?.toLowerCase() || "location data encrypted"}</p>
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 mt-2">
-                                        <div className="bg-void p-4 rounded-3xl border border-white/5">
-                                            <p className="text-[8px] font-black text-white/20 uppercase mb-1 italic tracking-widest">Monthly Quota</p>
-                                            <p className="text-lg font-black text-neon tracking-tighter">₹{schoolData?.subscription?.monthlyFee || 0}</p>
+                                        <div className="bg-[#42A5F5] p-5 rounded-[2rem] shadow-lg shadow-blue-100">
+                                            <p className="text-[10px] font-black text-white/70 uppercase mb-1 italic tracking-widest">Monthly quota</p>
+                                            <p className="text-xl font-black text-white tracking-tighter">₹{schoolData?.subscription?.monthlyFee || 0}</p>
                                         </div>
-                                        <div className="bg-void p-4 rounded-3xl border border-white/5">
-                                            <p className="text-[8px] font-black text-white/20 uppercase mb-1 italic tracking-widest">Session Cycle</p>
-                                            <p className="text-lg font-black text-white italic tracking-tighter">{schoolData?.sessionYear || "2026-27"}</p>
+                                        <div className="bg-slate-800 p-5 rounded-[2rem] shadow-lg">
+                                            <p className="text-[10px] font-black text-white/50 uppercase mb-1 italic tracking-widest">Session cycle</p>
+                                            <p className="text-xl font-black text-white italic tracking-tighter">{schoolData?.sessionYear || "2026-27"}</p>
                                         </div>
                                     </div>
                                 </>
                             ) : (
-                                // Student & Teacher fields (Already existing)
                                 <>
-                                    <div className="grid grid-cols-2 gap-4">
-
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         {user?.role === 'student' && (
-                                            <div className="col-span-2 flex items-center gap-3 group bg-void/40 p-4 rounded-2xl border border-white/5">
-                                                <div className="bg-void p-2.5 rounded-xl border border-white/5 text-cyan-400/40"><Hash size={18} /></div>
+                                            <div className="col-span-1 md:col-span-2 flex items-center gap-4 bg-blue-50 p-5 rounded-[2rem] border border-blue-100">
+                                                <div className="bg-white p-3 rounded-xl text-[#42A5F5] shadow-sm"><Hash size={20} /></div>
                                                 <div>
-                                                    <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Admission Number</p>
-                                                    <p className="text-xs font-black text-cyan-400 uppercase mt-1 tracking-widest">{user?.admissionNo || "NOT_LOGGED"}</p>
+                                                    <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Admission number</p>
+                                                    <p className="text-[15px] font-black text-[#42A5F5] uppercase tracking-widest">{user?.admissionNo || "not_logged"}</p>
                                                 </div>
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><User size={18} /></div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><User size={22} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Father's Name</p>
-                                                <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.fatherName || "UNSPECIFIED"}</p>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Father's name</p>
+                                                <p className="text-[15px] font-black text-slate-700 capitalize">{user?.fatherName?.toLowerCase() || "unspecified"}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Heart size={18} /></div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><Heart size={22} /></div>
                                             <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Mother's Name</p>
-                                                <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.motherName || "UNSPECIFIED"}</p>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Mother's name</p>
+                                                <p className="text-[15px] font-black text-slate-700 capitalize">{user?.motherName?.toLowerCase() || "unspecified"}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><Calendar size={22} /></div>
+                                            <div>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Date of birth</p>
+                                                <p className="text-[15px] font-black text-slate-700 uppercase">{formatDate(user?.dob)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><Users size={22} /></div>
+                                            <div>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Gender</p>
+                                                <p className="text-[15px] font-black text-slate-700 capitalize">{user?.gender?.toLowerCase() || "n/a"}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><Phone size={22} /></div>
+                                            <div>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Contact signal</p>
+                                                <p className="text-[15px] font-black text-slate-700">{user?.phone || "n/a"}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-5">
+                                            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><ShieldCheck size={22} /></div>
+                                            <div>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Religion</p>
+                                                <p className="text-[15px] font-black text-slate-700 capitalize">{user?.religion?.toLowerCase() || "n/a"}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Calendar size={18} /></div>
-                                            <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Date of Birth</p>
-                                                <p className="text-xs font-black text-white/80 uppercase mt-1">{formatDate(user?.dob)}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Users size={18} /></div>
-                                            <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Gender</p>
-                                                <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.gender || "N/A"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><Phone size={18} /></div>
-                                            <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Contact</p>
-                                                <p className="text-xs font-black text-white/80 mt-1">{user?.phone || "N/A"}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-3 group">
-                                            <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40"><ShieldCheck size={18} /></div>
-                                            <div>
-                                                <p className="text-[8px] font-black text-white/20 uppercase italic leading-none">Religion</p>
-                                                <p className="text-xs font-black text-white/80 uppercase mt-1">{user?.religion || "N/A"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 group bg-void/40 p-4 rounded-2xl border border-white/5">
-                                        <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40">
-                                            {user?.role === 'teacher' ? <Fingerprint size={18} /> : <Mail size={18} />}
+
+                                    <div className="flex items-center gap-5 bg-blue-50/50 p-5 rounded-[2rem] border border-blue-100">
+                                        <div className="bg-white p-3 rounded-xl text-[#42A5F5] shadow-sm">
+                                            {user?.role === 'teacher' ? <Fingerprint size={22} /> : <Mail size={22} />}
                                         </div>
                                         <div>
-                                            <p className="text-[8px] font-black text-neon/40 uppercase italic leading-none">
-                                                {user?.role === 'teacher' ? 'Assigned Subjects' : 'Registered Email'}
+                                            <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                                {user?.role === 'teacher' ? 'Assigned subjects' : 'Registered email'}
                                             </p>
-                                            <p className="text-xs font-black text-white/90 mt-1">
+                                            <p className="text-[15px] font-black text-slate-700 lowercase italic">
                                                 {user?.role === 'teacher' ? user.subjects?.join(', ') : user?.email}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-3 group bg-void/40 p-4 rounded-2xl border border-white/5">
-                                        <div className="bg-void p-2.5 rounded-xl border border-white/5 text-neon/40 mt-1"><MapPin size={18} /></div>
-                                        <div>
-                                            <p className="text-[8px] font-black text-neon/40 uppercase italic leading-none">Address Details</p>
-                                            <p className="text-[11px] font-black text-white/70 mt-2 uppercase leading-relaxed">
-                                                {user?.address?.fullAddress}<br />
-                                                {user?.address?.district}, {user?.address?.state} - {user?.address?.pincode}
+
+                                    <div className="flex items-start gap-5 bg-slate-50 p-5 rounded-[2rem] border border-slate-100">
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 text-slate-400 mt-1"><MapPin size={22} /></div>
+                                        <div className="flex-1">
+                                            <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest mb-2">Home Address</p>
+                                            <p className="text-[15px] font-bold text-slate-600 capitalize leading-relaxed">
+                                                {user?.address?.fullAddress?.toLowerCase()}<br />
+                                                {user?.address?.district?.toLowerCase()}, {user?.address?.state?.toLowerCase()} - {user?.address?.pincode}
                                             </p>
                                         </div>
                                     </div>
@@ -263,9 +271,11 @@ const MyAccount = ({ user }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Neural Toast */}
             {toast.show && (
-                <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl animate-bounce flex items-center gap-3 ${toast.type === 'success' ? 'bg-cyan-500 text-void' : 'bg-red-500 text-white'}`}>
-                    {toast.type === 'success' ? '✓' : '⚠️'} {toast.message}
+                <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black italic text-[13px] shadow-2xl animate-bounce flex items-center gap-3 ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                    {toast.type === 'success' ? <Check size={18} /> : <ShieldCheck size={18} />} {toast.message}
                 </div>
             )}
         </div>

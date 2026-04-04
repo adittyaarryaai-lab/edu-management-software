@@ -82,7 +82,7 @@ const NoticeFeed = ({ user }) => {
                 </div>
                 {user?.role === 'admin' && (
                     <p className="text-[15px] text-white font-black text-center uppercase tracking-[0.2em] mt-2 opacity-90">
-                        <ShieldAlert size={12} className="inline mr-2 mb-0.5" /> Admin control active
+                        <ShieldAlert size={12} className="inline mr-2 mb-0.5" /> Admin control
                     </p>
                 )}
             </div>
@@ -120,7 +120,7 @@ const NoticeFeed = ({ user }) => {
                                             {n.authorRole || 'Root'}
                                         </span>
 
-                                        <span className="inline-block bg-blue-50 text-[#42A5F5] border border-blue-100 text-[13px] font-black uppercase px-2 py-1 rounded-lg">
+                                        <span className="inline-block bg-blue-50 text-[#42A5F5] border border-blue-100 text-[12px] font-black uppercase px-2 py-1 rounded-lg">
                                             To: {targetLabel}
                                         </span>
                                     </div>
@@ -177,27 +177,27 @@ const NoticeFeed = ({ user }) => {
                             </div>
                             <form onSubmit={handleUpdate} className="space-y-4">
                                 <div className="space-y-1">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Notice title</label>
+                                    <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Notice title</label>
                                     <input
-                                        className="w-full bg-slate-50 p-5 rounded-3xl border border-slate-100 text-slate-700 font-bold italic outline-none focus:border-[#42A5F5] transition-all"
+                                        className="text-[19px] w-full bg-slate-50 p-7 rounded-3xl border border-slate-100 text-slate-700 font-bold italic outline-none focus:border-[#42A5F5] transition-all"
                                         value={editModal.data.title}
                                         onChange={(e) => setEditModal({ ...editModal, data: { ...editModal.data, title: e.target.value } })}
                                         placeholder="Enter title"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Message content</label>
+                                    <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Message content</label>
                                     <textarea
                                         rows="5"
-                                        className="w-full bg-slate-50 p-5 rounded-3xl border border-slate-100 text-slate-600 font-medium italic outline-none focus:border-[#42A5F5] transition-all"
+                                        className=" text-[19px] w-full bg-slate-50 p-7 rounded-3xl border border-slate-100 text-slate-600 font-medium italic outline-none focus:border-[#42A5F5] transition-all"
                                         value={editModal.data.content}
                                         onChange={(e) => setEditModal({ ...editModal, data: { ...editModal.data, content: e.target.value } })}
                                         placeholder="Enter content"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 pt-4">
-                                    <button type="button" onClick={() => setEditModal({ isOpen: false, data: null })} className="py-4 bg-slate-100 rounded-2xl font-black text-[14px] text-slate-400 capitalize">Cancel</button>
-                                    <button disabled={isUpdating} className="py-4 bg-[#42A5F5] text-white rounded-2xl font-black text-[14px] shadow-lg shadow-blue-200 capitalize">
+                                    <button type="button" onClick={() => setEditModal({ isOpen: false, data: null })} className="py-4 bg-slate-100 rounded-2xl font-black text-[18px] text-slate-400 capitalize">Cancel</button>
+                                    <button disabled={isUpdating} className="py-4 bg-[#42A5F5] text-white rounded-2xl font-black text-[18px] shadow-lg shadow-blue-200 capitalize">
                                         {isUpdating ? 'Syncing...' : 'Update notice'}
                                     </button>
                                 </div>
@@ -216,11 +216,11 @@ const NoticeFeed = ({ user }) => {
                             <div className="bg-rose-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border border-rose-100 shadow-inner">
                                 <AlertTriangle size={48} className="text-rose-500 animate-pulse" />
                             </div>
-                            <h3 className="text-2xl font-black italic text-slate-800 tracking-tight capitalize">End notice?</h3>
-                            <p className="text-[14px] text-slate-400 font-bold mt-2 leading-relaxed italic">This action will permanently delete this broadcast notice.</p>
+                            <h3 className="text-4xl font-black italic text-slate-800 tracking-tight capitalize">Delete Notice?</h3>
+                            <p className="text-[16px] text-slate-400 font-bold mt-2 leading-relaxed italic">This action will permanently delete this notice.</p>
                             <div className="grid grid-cols-2 gap-4 mt-10">
-                                <button onClick={() => setDeleteModal({ isOpen: false, id: null })} className="py-5 bg-slate-50 border border-slate-200 rounded-3xl font-black text-[14px] text-slate-500 capitalize">No</button>
-                                <button onClick={confirmDelete} className="py-5 bg-rose-500 text-white rounded-3xl font-black text-[14px] shadow-xl shadow-rose-200 capitalize">Yes</button>
+                                <button onClick={() => setDeleteModal({ isOpen: false, id: null })} className="py-5 bg-slate-50 border border-slate-200 rounded-3xl font-black text-[16px] text-slate-500 capitalize">No</button>
+                                <button onClick={confirmDelete} className="py-5 bg-rose-500 text-white rounded-3xl font-black text-[16px] shadow-xl shadow-rose-200 capitalize">Yes</button>
                             </div>
                         </motion.div>
                     </div>

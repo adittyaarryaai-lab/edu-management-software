@@ -76,26 +76,26 @@ const Timetable = ({ user }) => {
             <div key={index} className="bg-white p-5 rounded-[2.5rem] border border-[#DDE3EA] flex gap-5 active:scale-[0.98] transition-all italic shadow-sm group">
               {/* Time Block */}
               <div className="flex flex-col items-center justify-center border-r border-[#DDE3EA] pr-5 min-w-[100px]">
-                <Clock size={18} className="text-[#42A5F5] mb-2" />
-                <span className="text-[14px] font-black text-slate-700 text-center leading-none">
+                <Clock size={20} className="text-[#42A5F5] mb-2" />
+                <span className="text-[16px] font-black text-black/40 text-center leading-none">
                   {item.startTime}
                 </span>
-                <span className="text-[11px] font-bold text-slate-400 text-center mt-1 uppercase">
-                  To {item.endTime}
+                <span className="text-[16px] font-black text-black/40 text-center mt-1 uppercase">
+                  To <br />{item.endTime}
                 </span>
               </div>
 
               <div className="flex-1 py-1">
-                <h3 className="font-black text-slate-800 text-[18px] mb-1 capitalize leading-tight group-hover:text-[#42A5F5] transition-colors">
+                <h3 className="font-black text-slate-800 text-[20px] mb-1 capitalize leading-tight group-hover:text-[#42A5F5] transition-colors">
                   {item.subject.toLowerCase()}
                 </h3>
-                <p className="text-[13px] text-slate-500 font-bold flex items-center gap-2 capitalize">
+                <p className="text-[16px] text-slate-500 font-bold flex items-center gap-2 capitalize">
                   <span className="w-2 h-2 bg-[#42A5F5] rounded-full"></span>
                   Teacher: {item.teacherName?.toLowerCase() || "not assigned"}
                 </p>
                 <div className="flex items-center gap-2 mt-4 text-[#42A5F5] bg-blue-50 w-fit px-4 py-1.5 rounded-full border border-blue-100 shadow-sm">
                   <MapPin size={12} />
-                  <span className="text-[11px] font-black tracking-widest uppercase">Room: {item.room || "N/A"}</span>
+                  <span className="text-[16px] font-black tracking-widest uppercase">Room: {item.room || "N/A"}</span>
                 </div>
               </div>
             </div>

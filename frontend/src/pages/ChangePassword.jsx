@@ -6,21 +6,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ChangePassword = () => {
     const navigate = useNavigate();
-    // STEP 1: Passwords state mein 'confirm' add kiya
     const [passwords, setPasswords] = useState({ old: '', new: '', confirm: '' });
-    
-    // STEP 2: Har field ke liye alag visibility state
+
     const [showOld, setShowOld] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-    
+
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
     const handleUpdate = async (e) => {
         e.preventDefault();
 
-        // STEP 3: Strict Validation Logic
         if (passwords.new !== passwords.confirm) {
             setToast({ show: true, message: "Passwords do not match! 🛡️", type: 'error' });
             setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
@@ -34,19 +31,16 @@ const ChangePassword = () => {
                 newPassword: passwords.new
             });
 
-            // SUCCESS TOAST
-            setToast({ show: true, message: "Password Changed Successfully! 🛡️", type: 'success' });
+            setToast({ show: true, message: "Password changed successfully! 🛡️", type: 'success' });
 
-            // 2 sec delay taaki user message dekh sake
             setTimeout(() => {
                 navigate('/settings');
             }, 2000);
 
         } catch (err) {
-            // ERROR TOAST
             setToast({
                 show: true,
-                message: err.response?.data?.message || "Rotation Failed",
+                message: err.response?.data?.message || "Rotation failed",
                 type: 'error'
             });
             setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
@@ -56,92 +50,116 @@ const ChangePassword = () => {
     };
 
     return (
-        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {/* Top Header Section */}
-            <div className="bg-void text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-2xl border-b border-neon/20 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-neon/10 to-transparent pointer-events-none"></div>
-                <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl mb-4 relative z-10 border border-white/10 text-neon active:scale-90 transition-all">
-                    <ArrowLeft size={20} />
-                </button>
-                <h1 className="text-2xl font-black uppercase tracking-tighter relative z-10 italic">Security</h1>
-                <p className="text-[10px] font-black text-neon/40 uppercase tracking-[0.4em] mt-1 relative z-10 italic">Change Security Password</p>
-                <ShieldCheck className="absolute -right-10 top-10 text-neon/5 opacity-40" size={200} />
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-lg relative overflow-hidden">
+
+                <div className="absolute inset-0 bg-white/5 pointer-events-none"></div>
+
+                {/* 👇 YAHI MAIN CHANGE HAI */}
+                <div className="flex items-start gap-4 relative z-10">
+
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-white/20 p-2.5 rounded-xl border border-white/30 text-white active:scale-90 transition-all"
+                    >
+                        <ArrowLeft size={24} />
+                    </button>
+
+                    <div>
+                        <h1 className="text-3xl font-black italic tracking-tight capitalize">
+                            Security
+                        </h1>
+                        <p className="text-[15px] font-bold text-white/80 tracking-widest mt-1 capitalize">
+                            Change security password
+                        </p>
+                    </div>
+
+                </div>
+
+                <ShieldCheck className="absolute -right-10 top-10 text-white/10" size={200} />
             </div>
 
-            <div className="px-5 -mt-10 relative z-20">
-                <form onSubmit={handleUpdate} className="bg-slate-900/80 backdrop-blur-xl p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-neon/20 space-y-6">
-                    
+            <div className="px-5 -mt-12 relative z-20">
+                <form onSubmit={handleUpdate} className="bg-white p-8 rounded-[3rem] shadow-xl border border-[#DDE3EA] space-y-6">
+
                     {/* CURRENT PASSWORD */}
-                    <div>
-                        <label className="text-[9px] font-black text-neon/40 uppercase ml-2 mb-2 block tracking-widest italic">Current Password</label>
+                    <div className="space-y-1">
+                        <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Current password</label>
                         <div className="relative group">
-                            <Lock className="absolute left-4 top-4 text-neon/60" size={18} />
-                            <input 
-                                type={showOld ? "text" : "password"} 
-                                placeholder="type...." 
-                                className="w-full bg-void py-4 pl-12 pr-12 rounded-2xl border border-neon/10 font-black text-white outline-none focus:border-neon transition-all"
+                            <div className="absolute left-5 top-5 text-slate-400">
+                                <Lock size={20} />
+                            </div>
+                            <input
+                                type={showOld ? "text" : "password"}
+                                placeholder="Enter current password"
+                                className="w-full bg-slate-50 py-5 pl-14 pr-14 rounded-3xl border border-slate-100 font-bold text-[15px] text-slate-700 outline-none focus:border-[#42A5F5] focus:bg-white transition-all italic"
                                 value={passwords.old}
-                                onChange={(e) => setPasswords({ ...passwords, old: e.target.value })} 
-                                required 
+                                onChange={(e) => setPasswords({ ...passwords, old: e.target.value })}
+                                required
                             />
-                            <button 
-                                type="button" 
-                                onClick={() => setShowOld(!showOld)} 
-                                className="absolute right-4 top-4 text-neon/40 hover:text-neon transition-colors"
+                            <button
+                                type="button"
+                                onClick={() => setShowOld(!showOld)}
+                                className="absolute right-5 top-5 text-black/40 hover:text-[#42A5F5] transition-colors"
                             >
-                                {showOld ? <EyeOff size={18}/> : <Eye size={18}/>}
+                                {showOld ? <EyeOff size={22} /> : <Eye size={22} />}
                             </button>
                         </div>
                     </div>
 
                     {/* NEW PASSWORD */}
-                    <div>
-                        <label className="text-[9px] font-black text-neon/40 uppercase ml-2 mb-2 block tracking-widest italic">New Password</label>
+                    <div className="space-y-1">
+                        <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">New password</label>
                         <div className="relative group">
-                            <Zap className="absolute left-4 top-4 text-neon/60" size={18} />
-                            <input 
-                                type={showNew ? "text" : "password"} 
-                                placeholder="type...." 
-                                className="w-full bg-void py-4 pl-12 pr-12 rounded-2xl border border-neon/10 font-black text-white outline-none focus:border-neon transition-all"
+                            <div className="absolute left-5 top-5 text-slate-400">
+                                <Zap size={20} />
+                            </div>
+                            <input
+                                type={showNew ? "text" : "password"}
+                                placeholder="Enter new password"
+                                className="w-full bg-slate-50 py-5 pl-14 pr-14 rounded-3xl border border-slate-100 font-bold text-[15px] text-slate-700 outline-none focus:border-[#42A5F5] focus:bg-white transition-all italic"
                                 value={passwords.new}
-                                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })} 
-                                required 
+                                onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                                required
                             />
-                            <button 
-                                type="button" 
-                                onClick={() => setShowNew(!showNew)} 
-                                className="absolute right-4 top-4 text-neon/40 hover:text-neon transition-colors"
+                            <button
+                                type="button"
+                                onClick={() => setShowNew(!showNew)}
+                                className="absolute right-5 top-5 text-black/40 hover:text-[#42A5F5] transition-colors"
                             >
-                                {showNew ? <EyeOff size={18}/> : <Eye size={18}/>}
+                                {showNew ? <EyeOff size={22} /> : <Eye size={22} />}
                             </button>
                         </div>
                     </div>
 
                     {/* CONFIRM NEW PASSWORD */}
-                    <div>
-                        <label className="text-[9px] font-black text-neon/40 uppercase ml-2 mb-2 block tracking-widest italic">Confirm New Password</label>
+                    <div className="space-y-1">
+                        <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Confirm new password</label>
                         <div className="relative group">
-                            <ShieldCheck className="absolute left-4 top-4 text-neon/60" size={18} />
-                            <input 
-                                type={showConfirm ? "text" : "password"} 
-                                placeholder="type...." 
-                                className="w-full bg-void py-4 pl-12 pr-12 rounded-2xl border border-neon/10 font-black text-white outline-none focus:border-neon transition-all"
+                            <div className="absolute left-5 top-5 text-slate-400">
+                                <ShieldCheck size={22} />
+                            </div>
+                            <input
+                                type={showConfirm ? "text" : "password"}
+                                placeholder="Confirm new password"
+                                className="w-full bg-slate-50 py-5 pl-14 pr-14 rounded-3xl border border-slate-100 font-bold text-[15px] text-slate-700 outline-none focus:border-[#42A5F5] focus:bg-white transition-all italic"
                                 value={passwords.confirm}
-                                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })} 
-                                required 
+                                onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                                required
                             />
-                            <button 
-                                type="button" 
-                                onClick={() => setShowConfirm(!showConfirm)} 
-                                className="absolute right-4 top-4 text-neon/40 hover:text-neon transition-colors"
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirm(!showConfirm)}
+                                className="absolute right-5 top-5 text-black/40 hover:text-[#42A5F5] transition-colors"
                             >
-                                {showConfirm ? <EyeOff size={18}/> : <Eye size={18}/>}
+                                {showConfirm ? <EyeOff size={22} /> : <Eye size={22} />}
                             </button>
                         </div>
                     </div>
 
-                    <button type="submit" disabled={loading} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-3 active:scale-95 transition-all disabled:bg-slate-800 italic">
-                        {loading ? "Transmitting..." : "Update Security Cipher..."}
+                    <button type="submit" disabled={loading} className="w-full bg-[#42A5F5] text-white py-6 rounded-[2rem] font-black text-[18px] shadow-lg shadow-blue-100 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:bg-slate-200 italic capitalize">
+                        {loading ? "Transmitting..." : "Update password"}
                     </button>
                 </form>
             </div>
@@ -153,9 +171,9 @@ const ChangePassword = () => {
                         initial={{ y: -100, opacity: 0 }}
                         animate={{ y: 40, opacity: 1 }}
                         exit={{ y: -100, opacity: 0 }}
-                        className={`fixed top-0 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl flex items-center gap-3 italic ${toast.type === 'success' ? 'bg-neon text-void' : 'bg-red-500 text-white'}`}
+                        className={`fixed top-0 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black text-[13px] shadow-2xl flex items-center gap-3 italic ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}
                     >
-                        {toast.type === 'success' ? <ShieldCheck size={16} /> : <Zap size={16} />}
+                        {toast.type === 'success' ? <ShieldCheck size={18} /> : <Zap size={18} />}
                         {toast.message}
                     </motion.div>
                 )}
