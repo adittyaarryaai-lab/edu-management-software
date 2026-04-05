@@ -34,7 +34,7 @@ const ChangePassword = () => {
             setToast({ show: true, message: "Password changed successfully! 🛡️", type: 'success' });
 
             setTimeout(() => {
-                navigate('/settings');
+                navigate('/settings', { replace: true });
             }, 2000);
 
         } catch (err) {

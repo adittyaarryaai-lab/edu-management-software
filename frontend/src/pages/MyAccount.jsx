@@ -150,14 +150,14 @@ const MyAccount = ({ user }) => {
                                     <div className="flex items-center gap-5 group">
                                         <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><Phone size={22} /></div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Signal link</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Contact No.</p>
                                             <p className="text-[16px] font-black text-slate-700">{schoolData?.adminDetails?.mobile || user?.phone || "N/A"}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-5 group">
                                         <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-100 text-[#42A5F5]"><Mail size={22} /></div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Network email</p>
+                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Email</p>
                                             <p className="text-[16px] font-black text-slate-700 lowercase">{schoolData?.adminDetails?.email || user?.email}</p>
                                         </div>
                                     </div>
@@ -227,7 +227,7 @@ const MyAccount = ({ user }) => {
                                         <div className="flex items-center gap-5">
                                             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-slate-400"><Phone size={22} /></div>
                                             <div>
-                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Contact signal</p>
+                                                <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Contact No.</p>
                                                 <p className="text-[15px] font-black text-slate-700">{user?.phone || "n/a"}</p>
                                             </div>
                                         </div>
@@ -246,7 +246,7 @@ const MyAccount = ({ user }) => {
                                             {user?.role === 'teacher' ? <Fingerprint size={22} /> : <Mail size={22} />}
                                         </div>
                                         <div>
-                                            <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                            <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
                                                 {user?.role === 'teacher' ? 'Assigned subjects' : 'Registered email'}
                                             </p>
                                             <p className="text-[15px] font-black text-slate-700 lowercase italic">
