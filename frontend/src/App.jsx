@@ -152,16 +152,16 @@ function App() {
       setBypassStep(2);
       setBypassMsg({ text: "OTP sent to your registered email", type: 'success' });
     } catch (err) {
-     const errorResponse = err.response?.data?.message || "";
-      
+      const errorResponse = err.response?.data?.message || "";
+
       // Agar backend se 'identity not found' jaisa kuch aaye toh 'Invalid email' dikhao
-      const customMessage = errorResponse.toLowerCase().includes("identity") 
-        ? "Invalid email id! ⚠️" 
+      const customMessage = errorResponse.toLowerCase().includes("identity")
+        ? "Invalid email id! ⚠️"
         : errorResponse || "Transmission failed";
 
-      setBypassMsg({ 
-        text: customMessage, 
-        type: 'error' 
+      setBypassMsg({
+        text: customMessage,
+        type: 'error'
       });
     }
   };
@@ -251,7 +251,11 @@ function App() {
                   size={36}
                 />
               </div>
-              <div className="h-1 w-20 bg-[#42A5F5] mx-auto rounded-full mb-4 shadow-sm"></div>
+              <motion.div
+                animate={{ scaleX: [1, 1.5, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                className="h-1 w-20 bg-[#42A5F5] mx-auto rounded-full mb-4 shadow-sm origin-center"
+              />
               <p className="text-slate-700 font-bold uppercase text-[19px]  italic">Login Required</p>
             </div>
 
@@ -362,8 +366,8 @@ function App() {
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 ${bypassMsg.type === 'success'
-                          ? 'bg-blue-50 border-blue-200 text-[#42A5F5]'
-                          : 'bg-red-50 border-red-200 text-red-500'
+                        ? 'bg-blue-50 border-blue-200 text-[#42A5F5]'
+                        : 'bg-red-50 border-red-200 text-red-500'
                         }`}
                     >
                       <Zap size={16} className={bypassMsg.type === 'success' ? 'animate-pulse' : ''} />
@@ -381,56 +385,56 @@ function App() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-  <p className="text-[13px] text-emerald-500 font-bold italic ml-2">OTP transmitted • Verify identity</p>
-  
-  {/* OTP Input */}
-  <input 
-    type="text" 
-    placeholder="6-digit OTP" 
-    className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-    value={bypassData.otp} 
-    onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })} 
-  />
+                    <p className="text-[13px] text-emerald-500 font-bold italic ml-2">OTP transmitted • Verify identity</p>
 
-  {/* NEW PASSWORD WITH EYE */}
-  <div className="relative group">
-    <input 
-      type={showPass ? "text" : "password"} 
-      placeholder="New Password" 
-      className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-      value={bypassData.newPassword} 
-      onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })} 
-    />
-    <button
-      type="button"
-      onClick={() => setShowPass(!showPass)}
-      className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
-    >
-      {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
-    </button>
-  </div>
+                    {/* OTP Input */}
+                    <input
+                      type="text"
+                      placeholder="6-digit OTP"
+                      className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
+                      value={bypassData.otp}
+                      onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })}
+                    />
 
-  {/* CONFIRM PASSWORD WITH EYE */}
-  <div className="relative group">
-    <input 
-      type={showConfirm ? "text" : "password"} 
-      placeholder="Confirm Password" 
-      className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-      onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })} 
-    />
-    <button
-      type="button"
-      onClick={() => setShowConfirm(!showConfirm)}
-      className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
-    >
-      {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-    </button>
-  </div>
+                    {/* NEW PASSWORD WITH EYE */}
+                    <div className="relative group">
+                      <input
+                        type={showPass ? "text" : "password"}
+                        placeholder="New Password"
+                        className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
+                        value={bypassData.newPassword}
+                        onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPass(!showPass)}
+                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
+                      >
+                        {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
 
-  <button onClick={handleResetFinal} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">
-    Reset Password
-  </button>
-</div>
+                    {/* CONFIRM PASSWORD WITH EYE */}
+                    <div className="relative group">
+                      <input
+                        type={showConfirm ? "text" : "password"}
+                        placeholder="Confirm Password"
+                        className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
+                        onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm(!showConfirm)}
+                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
+                      >
+                        {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+
+                    <button onClick={handleResetFinal} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">
+                      Reset Password
+                    </button>
+                  </div>
                 )}
               </motion.div>
             </motion.div>

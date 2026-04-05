@@ -149,10 +149,24 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                         <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all"><User size={18} /></div>
                                         <span className="text-[15px] font-bold text-white">My Account</span>
                                     </button>
-                                    <button onClick={() => handleNavigation('/support')} className="flex flex-col items-center gap-1 group">
-                                        <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all"><HelpCircle size={18} /></div>
+                                    {user?.role === 'student' && (
+                                        <button onClick={() => handleNavigation('/support')} className="flex flex-col items-center gap-1 group">
+                                            <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
+                                                <HelpCircle size={18} />
+                                            </div>
+                                            <span className="text-[15px] font-bold text-white">Support</span>
+                                        </button>
+                                    )}
+                                    {user?.role === 'finance' && (
+                                    <>
+                                    <button onClick={() => handleNavigation('/teacher/support')} className="flex flex-col items-center gap-1 group">
+                                        <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
+                                            <HelpCircle size={18} />
+                                        </div>
                                         <span className="text-[15px] font-bold text-white">Support</span>
                                     </button>
+                                    </>
+                                )}
                                     <button onClick={() => handleNavigation('/settings')} className="flex flex-col items-center gap-1 group">
                                         <div className="bg-white text-red-500 p-2.5 rounded-full shadow-md active:scale-90 transition-all"><Settings size={18} /></div>
                                         <span className="text-[15px] font-bold text-white">Settings</span>
@@ -162,232 +176,372 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
 
                             {/* --- SCROLLABLE CONTENT AREA --- */}
                             <div className="flex-1 overflow-y-auto pb-12 custom-scrollbar">
+                                {user?.role === 'student' && (
+                                    <>
+                                        {/* --- STEP 2: DAILY ROUTINE WITH SNAKE BORDER --- */}
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
 
-                                {/* --- STEP 2: DAILY ROUTINE WITH SNAKE BORDER --- */}
-                                <div className="mt-8 px-4">
-                                    <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
 
-                                        {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                        <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
-                                            {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                            <div
-                                                className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                style={{
-                                                    background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                }}
-                                            />
-                                            {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                            <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Daily Routine</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* ATTENDANCE MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/attendance')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Calendar size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Attendance</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* TIMETABLE MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/timetable')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Clock size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">TimeTable</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Updates</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* Notice Module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/notice-feed')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Megaphone size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Notice Board</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* Support MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/support')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <HelpCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Support</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleNavigation('/live-class')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Video size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Live Class</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Finance</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* Fees MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/student/fees')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <CreditCard size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">My Fees</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Academics</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* Assignment MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/Assignments')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <FileText size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Assignments</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* Performance MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/performance')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <TrendingUp size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Performance</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Exam module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/exams')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <GraduationCap size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Exams</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Library module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/library')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Book size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Library</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                                {user?.role === 'finance' && (
+                                    <>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">💰 Payments</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/*Payments module*/}
+                                                    <button
+                                                        onClick={() => handleNavigation('/finance/add-payment')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <PlusCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Add Payment</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* Payment Gateway */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/finance/gateway')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <ShieldCheck size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Payment Gateway</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Daily Routine</p>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
 
-                                        <div className="space-y-6 relative z-10">
-                                            {/* ATTENDANCE MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/attendance')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                        <Calendar size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Attendance</span>
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
 
-                                            {/* TIMETABLE MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/timetable')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <Clock size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">TimeTable</span>
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">📊 Reports & Tracking</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/*Payments module*/}
+                                                    <button
+                                                        onClick={() => handleNavigation('/finance/reports')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <FileText size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Finance Reports</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* Payment Gateway */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/finance/fees-tracker')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Users size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Fees Tracker</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
                                                 </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-8 px-4">
-                                    <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
-
-                                        {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                        <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
-                                            {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                            <div
-                                                className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                style={{
-                                                    background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                }}
-                                            />
-                                            {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                            <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
-                                        </div>
-
-                                        <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Updates</p>
-
-                                        <div className="space-y-6 relative z-10">
-                                            {/* Notice Module */}
-                                            <button
-                                                onClick={() => handleNavigation('/notice-feed')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                        <Megaphone size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Notice Board</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-
-                                            {/* Support MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/support')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <HelpCircle size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Support</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleNavigation('/live-class')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <Video size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Live Class</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-8 px-4">
-                                    <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
-
-                                        {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                        <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
-                                            {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                            <div
-                                                className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                style={{
-                                                    background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                }}
-                                            />
-                                            {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                            <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                            </div>
                                         </div>
 
-                                        <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Finance</p>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
 
-                                        <div className="space-y-6 relative z-10">
-                                            {/* Fees MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/student/fees')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                        <CreditCard size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">My Fees</span>
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">⚙️ Setup / Configuration</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/*fee setup*/}
+                                                    <button
+                                                        onClick={() => handleNavigation('/finance/reports')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <ShieldCheck size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Fee Setup</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div className="mt-8 px-4">
-                                    <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
-
-                                        {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                        <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
-                                            {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                            <div
-                                                className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                style={{
-                                                    background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                }}
-                                            />
-                                            {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                            <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
-                                        </div>
-
-
-                                        <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Academics</p>
-
-                                        <div className="space-y-6 relative z-10">
-                                            {/* Assignment MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/Assignments')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                        <FileText size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Assignments</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-
-                                            {/* Performance MODULE */}
-                                            <button
-                                                onClick={() => handleNavigation('/performance')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <TrendingUp size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Performance</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-                                            {/* Exam module */}
-                                            <button
-                                                onClick={() => handleNavigation('/exams')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <GraduationCap size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Exams</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-                                            {/* Library module */}
-                                            <button
-                                                onClick={() => handleNavigation('/library')}
-                                                className="w-full flex items-center justify-between group/item"
-                                            >
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                        <Book size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-700 text-[15px] italic">Library</span>
-                                                </div>
-                                                <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Yahan tu aage aur bhi boxes (Campus, Assessment) add kar sakta hai */}
+                                    </>
+                                )}
                             </div>
                             <div className="p-6 border-t border-neon/10">
                                 <button
