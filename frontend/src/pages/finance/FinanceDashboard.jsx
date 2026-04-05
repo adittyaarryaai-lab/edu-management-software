@@ -58,7 +58,7 @@ const FinanceDashboard = ({ searchQuery }) => {
         { label: "Students fees", value: "Track records", icon: <Users className="text-orange-400" />, color: "border-[#DDE3EA]", path: '/finance/fees-tracker' },
         { label: "Fees details", value: "Class setup", icon: <Layers className="text-blue-500" />, color: "border-[#DDE3EA]", path: '/finance/fee-setup' },
         {
-            label: "Payment gateway",
+            label: "Payments",
             value: "Configure UPI/QR",
             icon: <ShieldCheck className="text-emerald-400" />,
             color: "border-[#DDE3EA]",
