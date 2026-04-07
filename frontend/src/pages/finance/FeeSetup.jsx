@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Layers, CheckCircle2, Edit3, Trash2, Eye, Lock } from 'lucide-react';
+import { ArrowLeft, Save, Layers, CheckCircle2, Edit3, Trash2, Eye, Lock, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
+import { motion, AnimatePresence } from 'framer-motion';
+
 
 const FeeSetup = () => {
     const navigate = useNavigate();
@@ -9,32 +11,31 @@ const FeeSetup = () => {
     const [loading, setLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState('');
     const [configuredList, setConfiguredList] = useState([]);
-    const [isEditMode, setIsEditMode] = useState(true); // Control Edit vs View
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(true);
+    const [openCycleId, setOpenCycleId] = useState(null);
 
-    // --- FEE TYPES LIST ---
     const feeCategories = [
-        { key: 'admissionFees', label: '1. Admission Fees', desc: 'One-time fee at joining' },
-        { key: 'registrationFees', label: '2. Registration Fees', desc: 'Paid while applying admission' },
-        { key: 'securityFees', label: '3. Security Fees', desc: 'Refundable deposit' },
-        { key: 'tuitionFees', label: '4. Tuition Fees', desc: 'Main academic fee (monthly)' },
-        { key: 'examinationFees', label: '6. Examination Fees', desc: 'Charged during exams' },
-        { key: 'libraryFees', label: '7. Library Fees', desc: 'Library resources' },
-        { key: 'laboratoryFees', label: '8. Laboratory Fees', desc: 'Science/Computer labs' },
-        { key: 'activityFees', label: '9. Activity Fees', desc: 'Sports, events, etc.' },
-        { key: 'developmentFees', label: '10. Development Fees', desc: 'Infrastructure' },
-        { key: 'annualCharges', label: '11. Annual Charges', desc: 'Yearly maintenance' },
-        { key: 'smartClassFees', label: '12. Smart Class Fees', desc: 'Digital learning' },
-        { key: 'uniformFees', label: '13. Uniform Fees', desc: 'School uniform' },
-        { key: 'booksStationeryFees', label: '14. Books & Stationery', desc: 'Study material' },
-        { key: 'idCardFees', label: '15. ID Card Fees', desc: 'Student identification' },
-        { key: 'lateFees', label: '16. Late Fees / Fine', desc: 'Delayed payment charge' },
-        { key: 'readmissionFees', label: '17. Re-admission Fees', desc: 'Rejoining student' },
-        { key: 'miscellaneousCharges', label: '18. Misc Charges', desc: 'Extra trips, etc.' }
+        { key: 'admissionFees', label: '1. Admission fees', desc: 'One-time fee at joining' },
+        { key: 'registrationFees', label: '2. Registration fees', desc: 'Paid while applying admission' },
+        { key: 'securityFees', label: '3. Security fees', desc: 'Refundable deposit' },
+        { key: 'tuitionFees', label: '4. Tuition fees', desc: 'Main academic fee (monthly)' },
+        { key: 'examinationFees', label: '6. Examination fees', desc: 'Charged during exams' },
+        { key: 'libraryFees', label: '7. Library fees', desc: 'Library resources' },
+        { key: 'laboratoryFees', label: '8. Laboratory fees', desc: 'Science/Computer labs' },
+        { key: 'activityFees', label: '9. Activity fees', desc: 'Sports, events, etc.' },
+        { key: 'developmentFees', label: '10. Development fees', desc: 'Infrastructure' },
+        { key: 'annualCharges', label: '11. Annual charges', desc: 'Yearly maintenance' },
+        { key: 'smartClassFees', label: '12. Smart class fees', desc: 'Digital learning' },
+        { key: 'uniformFees', label: '13. Uniform fees', desc: 'School uniform' },
+        { key: 'booksStationeryFees', label: '14. Books & stationery', desc: 'Study material' },
+        { key: 'idCardFees', label: '15. Id card fees', desc: 'Student identification' },
+        { key: 'lateFees', label: '16. Late fees / Fine', desc: 'Delayed payment charge' },
+        { key: 'readmissionFees', label: '17. Re-admission fees', desc: 'Rejoining student' },
+        { key: 'miscellaneousCharges', label: '18. Miscellaneous charges', desc: 'Extra trips, etc.' }
     ];
 
-    // Update initial state logic
     const initialFeesState = feeCategories.reduce((acc, cat) => {
-        // Default logic: Tuition/Library/Lab/Activity/SmartClass ko monthly baaki ko one-time
         const isDefaultMonthly = ['tuitionFees', 'libraryFees', 'laboratoryFees', 'activityFees', 'smartClassFees'].includes(cat.key);
         acc[cat.key] = { amount: 0, isNone: false, billingCycle: isDefaultMonthly ? 'monthly' : 'one-time' };
         return acc;
@@ -46,7 +47,7 @@ const FeeSetup = () => {
         try {
             const { data } = await API.get('/fees/structure/list/all');
             setConfiguredList(data);
-        } catch (err) { console.error("List Fetch Error"); }
+        } catch (err) { console.error("List fetch error"); }
     };
 
     useEffect(() => { fetchConfiguredList(); }, []);
@@ -60,131 +61,202 @@ const FeeSetup = () => {
                     setFeeData(data.fees);
                 } else {
                     setFeeData(initialFeesState);
-                    setIsEditMode(true); // Nayi class ke liye hamesha edit mode
+                    setIsEditMode(true);
                 }
-            } catch (err) { console.error("Fetch Error"); }
+            } catch (err) { console.error("Fetch error"); }
         };
         fetchStructure();
     }, [selectedClass]);
 
     const handleSave = async () => {
-        if (!selectedClass) return alert("Select Class first!");
+        if (!selectedClass) return alert("Select class first!");
         setLoading(true);
         try {
             await API.post('/fees/structure/update', {
                 className: selectedClass,
                 fees: feeData
             });
-            setSuccessMsg(`${selectedClass} Structure Locked! ⚡`);
+            setSuccessMsg(`${selectedClass} Structure locked! ⚡`);
             setSelectedClass('');
             setFeeData(initialFeesState);
             fetchConfiguredList();
             setTimeout(() => setSuccessMsg(''), 3000);
-        } catch (err) { alert("Sync Failed."); } finally { setLoading(false); }
+        } catch (err) { alert("Sync failed."); } finally { setLoading(false); }
     };
 
     return (
-        <div className="min-h-screen bg-void text-white p-5 pb-32 italic font-sans">
-            <div className="flex items-center gap-4 mb-10 border-l-4 border-neon pl-4">
-                <button onClick={() => navigate(-1)} className="p-2 bg-white/5 rounded-xl border border-white/10 active:scale-90 transition-all">
-                    <ArrowLeft size={20} className="text-neon" />
+        <div className="min-h-screen bg-[#F1F5F9] text-slate-800 p-5 pb-32 italic font-sans text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center gap-5 mb-10 border-l-4 border-[#42A5F5] pl-4">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="p-3 bg-white rounded-2xl border border-blue-100 shadow-md text-[#42A5F5] active:scale-90 transition-all"
+                >
+                    <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-xl font-black uppercase tracking-tighter">Fees Details Setup</h1>
+                <h1 className="text-3xl font-black italic tracking-tight text-slate-800">Set Fee Structure</h1>
             </div>
 
-            {/* --- CONFIGURED CLASSES INVENTORY --- */}
+            {/* --- CONFIGURED NODES SECTION (Blue Cards) --- */}
             <div className="mb-10 space-y-4">
-                <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-2 italic">Configured Nodes</h3>
-                <div className="grid grid-cols-1 gap-3">
+                <h3 className="text-[12px] font-black text-blue-400 uppercase tracking-widest ml-4 italic">Active configured Classes</h3>
+                <div className="grid grid-cols-1 gap-4">
                     {configuredList.length > 0 ? configuredList.map((item, idx) => (
-                        <div key={idx} className="bg-slate-900/40 p-5 rounded-[2rem] border border-white/5 flex justify-between items-center group hover:border-neon/30 transition-all">
-                            {/* View Action (List Click) */}
-                            <div className="flex items-center gap-4 cursor-pointer flex-1" onClick={() => { setSelectedClass(item.className); setIsEditMode(false); }}>
-                                <div className="bg-neon/10 p-3 rounded-xl text-neon"><Layers size={16} /></div>
+                        <div key={idx} className="bg-gradient-to-r from-white to-blue-50 p-6 rounded-[2.5rem] border border-blue-100 flex justify-between items-center group hover:shadow-lg hover:border-[#42A5F5] transition-all shadow-sm">
+                            <div className="flex items-center gap-5 cursor-pointer flex-1" onClick={() => { setSelectedClass(item.className); setIsEditMode(false); }}>
+                                <div className="bg-[#42A5F5] p-4 rounded-2xl text-white shadow-md shadow-blue-200">
+                                    <Layers size={22} />
+                                </div>
                                 <div>
-                                    <p className="text-xs font-black uppercase italic text-white group-hover:text-neon transition-colors">{item.className}</p>
-                                    <p className="text-[7px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
-                                        <Eye size={8} /> View Record
+                                    <p className="text-[17px] font-black text-slate-700 italic capitalize">{item.className}</p>
+                                    <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1.5 mt-1">
+                                        <Eye size={12} /> View live structure
                                     </p>
                                 </div>
                             </div>
-                            {/* Edit Action (Button Click) */}
-                            <button onClick={() => { setSelectedClass(item.className); setIsEditMode(true); }} className="p-3 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-neon hover:border-neon transition-all">
-                                <Edit3 size={14} />
+                            <button onClick={() => { setSelectedClass(item.className); setIsEditMode(true); }} className="p-4 bg-white rounded-2xl border border-blue-100 text-[#42A5F5] hover:bg-[#42A5F5] hover:text-white transition-all shadow-sm">
+                                <Edit3 size={18} />
                             </button>
                         </div>
                     )) : (
-                        <p className="text-[8px] font-black text-white/10 uppercase text-center py-4 italic">No Classes Defined Yet</p>
+                        <p className="text-[12px] font-bold text-slate-300 uppercase text-center py-8 italic border-2 border-dashed border-blue-100 rounded-[2.5rem] bg-white/50">No classes defined yet</p>
                     )}
                 </div>
             </div>
 
-            {/* Class Selector Dropdown */}
-            <div className="bg-slate-900/60 p-6 rounded-[2.5rem] border border-white/5 mb-8 shadow-2xl">
-                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-4 italic">Initialize New Class Structure</p>
-                <select
-                    value={selectedClass}
-                    onChange={(e) => { setSelectedClass(e.target.value); setIsEditMode(true); }}
-                    className="w-full bg-void border border-neon/20 p-5 rounded-3xl text-sm font-black text-neon uppercase outline-none focus:border-neon transition-all appearance-none cursor-pointer"
-                >
-                    <option value="">-- CHOOSE CLASS --</option>
-                    {[
-                        'Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5',
-                        'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10',
-                        'Class 11 (Science)', 'Class 11 (Commerce)', 'Class 11 (Arts)',
-                        'Class 12 (Science)', 'Class 12 (Commerce)', 'Class 12 (Arts)'
-                    ].map(cls => <option key={cls} value={cls}>{cls}</option>)}
-                </select>
+            {/* --- NEW CLASS SELECTOR (Deep Blue Accent) --- */}
+            <div className="bg-[#42A5F5] p-8 rounded-[3rem] mb-10 shadow-xl shadow-blue-100 relative overflow-visible">
+                <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12 pointer-events-none"><Layers size={100} className="text-white" /></div>
+                <p className="text-[12px] font-black text-blue-100 uppercase tracking-widest mb-4 ml-2 italic relative z-10">Create Fee Structure(Class) </p>
+                <div className="relative z-[60]"> {/* Higher Z-index taaki menu upar dikhe */}
+                    {/* Trigger Button */}
+                    <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full bg-white p-5 rounded-3xl text-[16px] font-black text-slate-700 flex justify-between items-center transition-all italic shadow-md active:scale-95"
+                    >
+                        <span>{selectedClass || "Choose class"}</span>
+                        <ChevronDown size={22} className={`text-[#42A5F5] transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {/* Animated Dropdown Menu */}
+                    <AnimatePresence>
+                        {isDropdownOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                                className="absolute z-[70] w-full mt-3 bg-white border border-blue-100 rounded-[2rem] shadow-2xl max-h-72 overflow-y-auto p-3 custom-scrollbar"
+                            >
+                                {[
+                                    'Nursery', 'LKG', 'UKG', 'Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5',
+                                    'Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10',
+                                    'Class 11 (Science)', 'Class 11 (Commerce)', 'Class 11 (Arts)',
+                                    'Class 12 (Science)', 'Class 12 (Commerce)', 'Class 12 (Arts)'
+                                ].map(cls => (
+                                    <div
+                                        key={cls}
+                                        onClick={() => {
+                                            setSelectedClass(cls);
+                                            setIsEditMode(true);
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className={`p-4 mb-1 rounded-2xl cursor-pointer font-bold italic transition-all border-b border-slate-50 last:border-none ${selectedClass === cls ? 'bg-blue-50 text-[#42A5F5]' : 'text-slate-600 hover:bg-slate-50'}`}
+                                    >
+                                        {cls}
+                                    </div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {selectedClass && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-500">
-                    <div className={`p-6 rounded-[2.5rem] border flex items-center justify-between ${isEditMode ? 'bg-neon/5 border-neon/20' : 'bg-slate-900/80 border-white/10'}`}>
-                        <div className="flex items-center gap-4">
-                            {isEditMode ? <Edit3 size={24} className="text-neon" /> : <Lock size={24} className="text-white/40" />}
+                <div className="space-y-8">
+                    {/* MODE STATUS BOX */}
+                    <div className={`p-7 rounded-[3rem] border shadow-md flex items-center justify-between transition-all ${isEditMode ? 'bg-blue-600 border-blue-700 text-white' : 'bg-slate-800 border-slate-900 text-white'}`}>
+                        <div className="flex items-center gap-5">
+                            {isEditMode ? <Edit3 size={28} className="text-blue-100" /> : <Lock size={28} className="text-slate-400" />}
                             <div>
-                                <h2 className="text-lg font-black uppercase italic tracking-tighter text-white">{selectedClass}</h2>
-                                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest italic">
-                                    {isEditMode ? 'Edit Mode: Neural Modification Active' : 'View Mode: Read-Only Access'}
+                                <h2 className="text-2xl font-black italic tracking-tight capitalize">{selectedClass}</h2>
+                                <p className={`text-[11px] font-bold uppercase tracking-widest mt-1 ${isEditMode ? 'text-blue-200' : 'text-slate-400'}`}>
+                                    {isEditMode ? 'Edit mode: Neural modification active' : 'View mode: Read-only access'}
                                 </p>
                             </div>
                         </div>
-                        <button onClick={() => { setSelectedClass(''); setFeeData(initialFeesState); }} className="p-2 text-white/20 hover:text-rose-500 transition-colors"><Trash2 size={20} /></button>
+                        <button onClick={() => { setSelectedClass(''); setFeeData(initialFeesState); }} className="p-4 text-white/50 hover:text-white transition-colors bg-white/10 rounded-2xl border border-white/10"><Trash2 size={22} /></button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4">
+                    {/* FEE CARDS GRID */}
+                    <div className="grid grid-cols-1 gap-6">
                         {feeCategories.map((cat) => (
-                            <div key={cat.key} className={`p-6 rounded-[2.5rem] border transition-all ${feeData[cat.key].isNone ? 'bg-white/5 border-white/5 opacity-40' : 'bg-slate-900/40 border-white/10 shadow-xl'}`}>
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h4 className="text-xs font-black uppercase tracking-tight text-white/80 italic">{cat.label}</h4>
-                                        <p className="text-[8px] font-bold text-white/20 uppercase mt-0.5 italic">{cat.desc}</p>
+                            <div key={cat.key} className={`p-8 rounded-[3.5rem] border-2 transition-all ${feeData[cat.key].isNone ? 'bg-slate-50 border-slate-200 opacity-40' : 'bg-white border-blue-50 shadow-sm hover:border-[#42A5F5]'}`}>
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex-1">
+                                        <h4 className={`text-[17px] font-black italic capitalize ${feeData[cat.key].isNone ? 'text-slate-400' : 'text-slate-700'}`}>{cat.label}</h4>
+                                        <p className="text-[12px] font-bold text-slate-600 mt-1 italic">{cat.desc}</p>
                                     </div>
-                                    <div className="flex items-center gap-3 bg-void/50 p-2 rounded-xl border border-white/5">
-                                    <select
-                                        disabled={!isEditMode || feeData[cat.key].isNone}
-                                        value={feeData[cat.key].billingCycle || 'one-time'}
-                                        onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], billingCycle: e.target.value } })}
-                                        className="bg-transparent text-[8px] font-black uppercase text-neon outline-none cursor-pointer border-r border-white/10 pr-2"
-                                    >
-                                        <option value="one-time">One Time</option>
-                                        <option value="monthly">Per Month</option>
-                                    </select>
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            disabled={!isEditMode}
-                                            checked={feeData[cat.key].isNone}
-                                            onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], isNone: e.target.checked, amount: e.target.checked ? 0 : feeData[cat.key].amount } })}
-                                            className="accent-neon w-3 h-3 cursor-pointer disabled:opacity-20"
-                                        />
-                                        <label className="text-[8px] font-black text-white/40 uppercase cursor-pointer italic">None</label>
-                                    </div>
+                                    <div className="flex items-center gap-3 bg-blue-50/50 p-2.5 rounded-[1.5rem] border border-blue-100">
+                                        {/* --- CUSTOM BILLING CYCLE DROPDOWN --- */}
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                disabled={!isEditMode || feeData[cat.key].isNone}
+                                                onClick={() => {
+                                                    // Hum state mein us category ki key save karenge jo khuli hai
+                                                    setOpenCycleId(openCycleId === cat.key ? null : cat.key);
+                                                }}
+                                                className="flex items-center gap-1 bg-transparent text-[11px] font-black uppercase text-[#42A5F5] outline-none cursor-pointer border-r border-blue-200 pr-3 disabled:opacity-30"
+                                            >
+                                                <span>{feeData[cat.key].billingCycle === 'monthly' ? 'Per month' : 'One time'}</span>
+                                                <ChevronDown size={10} className={`transition-transform ${openCycleId === cat.key ? 'rotate-180' : ''}`} />
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {openCycleId === cat.key && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                                                        className="absolute right-0 mt-2 w-32 bg-white border border-blue-100 rounded-2xl shadow-xl z-[100] p-1 overflow-hidden"
+                                                    >
+                                                        <div
+                                                            onClick={() => {
+                                                                setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], billingCycle: 'one-time' } });
+                                                                setOpenCycleId(null);
+                                                            }}
+                                                            className={`p-3 text-[10px] font-black uppercase rounded-xl cursor-pointer transition-all ${feeData[cat.key].billingCycle === 'one-time' ? 'bg-blue-50 text-[#42A5F5]' : 'text-slate-500 hover:bg-slate-50'}`}
+                                                        >
+                                                            One time
+                                                        </div>
+                                                        <div
+                                                            onClick={() => {
+                                                                setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], billingCycle: 'monthly' } });
+                                                                setOpenCycleId(null);
+                                                            }}
+                                                            className={`p-3 text-[10px] font-black uppercase rounded-xl cursor-pointer transition-all ${feeData[cat.key].billingCycle === 'monthly' ? 'bg-blue-50 text-[#42A5F5]' : 'text-slate-500 hover:bg-slate-50'}`}
+                                                        >
+                                                            Per month
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                        <div className="flex items-center gap-2 px-1">
+                                            <input
+                                                type="checkbox"
+                                                disabled={!isEditMode}
+                                                checked={feeData[cat.key].isNone}
+                                                onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], isNone: e.target.checked, amount: e.target.checked ? 0 : feeData[cat.key].amount } })}
+                                                className="accent-[#42A5F5] w-5 h-5 cursor-pointer disabled:opacity-20"
+                                            />
+                                            <label className="text-[11px] font-black text-slate-500 uppercase italic">None</label>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/40 font-black italic text-lg">₹</span>
+                                <div className={`relative rounded-[2rem] overflow-hidden transition-all ${feeData[cat.key].isNone ? 'bg-slate-100' : 'bg-slate-50 shadow-inner border border-slate-100'}`}>
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#42A5F5] font-black italic text-2xl">₹</span>
                                     <input
                                         type="number"
                                         disabled={!isEditMode || feeData[cat.key].isNone}
@@ -192,30 +264,31 @@ const FeeSetup = () => {
                                         onFocus={(e) => { if (isEditMode && feeData[cat.key].amount === 0) setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: '' } }) }}
                                         onBlur={(e) => { if (isEditMode && e.target.value === '') setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: 0 } }) }}
                                         onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: e.target.value === '' ? 0 : Number(e.target.value) } })}
-                                        className="w-full bg-void/80 border border-white/5 p-4 pl-10 rounded-2xl outline-none text-sm font-black italic focus:border-neon transition-all disabled:opacity-50"
-                                        placeholder={isEditMode ? "ENTER AMOUNT" : "NOT SET"}
+                                        className="w-full bg-transparent p-7 pl-16 outline-none text-3xl font-black italic text-slate-700 placeholder:text-slate-300"
+                                        placeholder={isEditMode ? "0000" : "N/A"}
                                     />
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* Commit Button - Only shows in Edit Mode */}
+                    {/* COMMIT BUTTON */}
                     {isEditMode && (
                         <button
                             onClick={handleSave}
                             disabled={loading}
-                            className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[90%] bg-neon text-void py-6 rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] shadow-[0_0_50px_rgba(34,211,238,0.4)] z-50 flex items-center justify-center gap-3 active:scale-95 transition-all italic"
+                            className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] bg-gradient-to-r from-[#42A5F5] to-blue-600 text-white py-7 rounded-[2.5rem] font-black uppercase text-[16px] tracking-widest shadow-[0_20px_50px_rgba(66,165,245,0.4)] z-50 flex items-center justify-center gap-4 active:scale-95 transition-all italic border-t border-white/20"
                         >
-                            {loading ? "Transmitting Protocol..." : <><Save size={20} strokeWidth={3} /> Commit Structure</>}
+                            {loading ? "Transmitting structure..." : <><Save size={26} /> Commit structure</>}
                         </button>
                     )}
                 </div>
             )}
 
+            {/* Success Toast */}
             {successMsg && (
-                <div className="fixed top-10 left-1/2 -translate-x-1/2 bg-emerald-500 text-void px-8 py-4 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl z-[100] flex items-center gap-3 animate-bounce italic">
-                    <CheckCircle2 size={16} /> {successMsg}
+                <div className="fixed top-10 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-12 py-5 rounded-full font-black text-[14px] uppercase tracking-widest shadow-2xl z-[100] flex items-center gap-4 animate-bounce italic border-2 border-white/20">
+                    <CheckCircle2 size={24} /> {successMsg}
                 </div>
             )}
         </div>

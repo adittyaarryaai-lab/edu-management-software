@@ -421,7 +421,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                     <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
 
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">💰 Payments</p>
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Payments</p>
 
                                                 <div className="space-y-6 relative z-10">
                                                     {/*Payments module*/}
@@ -471,7 +471,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                     <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
 
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">📊 Reports & Tracking</p>
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Reports & Tracking</p>
 
                                                 <div className="space-y-6 relative z-10">
                                                     {/*Payments module*/}
@@ -521,7 +521,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                     <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
 
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">⚙️ Setup / Configuration</p>
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Setup / Configuration</p>
 
                                                 <div className="space-y-6 relative z-10">
                                                     {/*fee setup*/}
