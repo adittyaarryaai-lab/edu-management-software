@@ -58,7 +58,7 @@ const AddPayment = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans pb-32 px-5 pt-10 italic text-[15px]">
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans pb-32 px-5 pt-10 italic text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             <div className="flex items-center gap-5 mb-10 border-l-4 border-[#42A5F5] pl-4">
                 <button
                     onClick={() => navigate(-1)}

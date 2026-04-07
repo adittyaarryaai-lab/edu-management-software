@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronRight, Users, GraduationCap, ArrowLeft, Layers } from 'lucide-react';
+import { Search, ChevronRight, Users, GraduationCap, ArrowLeft, Layers, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 
@@ -9,6 +9,7 @@ const FeesTracker = () => {
     const [selectedClass, setSelectedClass] = useState('');
     const [students, setStudents] = useState([]);
     const [search, setSearch] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
         const fetchClasses = async () => {
@@ -20,67 +21,95 @@ const FeesTracker = () => {
 
     const handleClassSelect = async (grade) => {
         setSelectedClass(grade);
+        setIsDropdownOpen(false);
         const { data } = await API.get(`/fees/tracker/students/${grade}`);
         setStudents(data);
     };
 
     return (
-        <div className="min-h-screen bg-void text-white p-6 font-sans italic">
-            <div className="flex items-center gap-4 mb-10 border-l-4 border-orange-500 pl-4">
-                <button onClick={() => navigate(-1)} className="p-2 bg-white/5 rounded-xl"><ArrowLeft size={20} /></button>
-                <h1 className="text-xl font-black uppercase tracking-tighter">Fees Tracker Node</h1>
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 p-6 font-sans italic pb-24 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* HEADER SECTION */}
+            <div className="flex items-center gap-5 mb-10 border-l-4 border-[#42A5F5] pl-4">
+                <button 
+                    onClick={() => navigate(-1)} 
+                    className="p-3 bg-white rounded-2xl border border-[#DDE3EA] shadow-md hover:bg-blue-50 transition-all active:scale-90 group"
+                >
+                    <ArrowLeft className="text-[#42A5F5]" size={24} />
+                </button>
+                <div>
+                    <h1 className="text-3xl font-black italic tracking-tight capitalize">Fees tracker</h1>
+                    <p className="text-[14px] text-slate-400 font-bold uppercase tracking-widest mt-1">Student Payment Records</p>
+                </div>
             </div>
 
-            {/* Class Selector Dropdown */}
-            <div className="bg-slate-900/60 p-6 rounded-[2.5rem] border border-white/5 mb-8">
-                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-4">Select Target Class</p>
-                <select
-                    value={selectedClass}
-                    onChange={(e) => handleClassSelect(e.target.value)}
-                    className="w-full bg-void border border-orange-500/20 p-5 rounded-3xl text-sm font-black text-orange-400 uppercase outline-none appearance-none cursor-pointer"
-                >
-                    <option value="">-- CHOOSE ACTIVE CLASS --</option>
-                    {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
-                </select>
+            {/* CUSTOM CLASS SELECTOR */}
+            <div className="bg-white p-6 rounded-[2.5rem] border border-[#DDE3EA] mb-8 shadow-sm">
+                <p className="text-[14px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-4 italic">Select class</p>
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full bg-slate-50 border border-slate-100 p-5 rounded-3xl text-[16px] font-bold text-slate-700 flex justify-between items-center transition-all italic"
+                    >
+                        <span>{selectedClass || "Choose active class"}</span>
+                        <ChevronDown size={20} className={`text-[#42A5F5] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isDropdownOpen && (
+                        <div className="absolute z-50 w-full mt-2 bg-white border border-[#DDE3EA] rounded-3xl shadow-2xl max-h-60 overflow-y-auto p-2">
+                            {classes.map(cls => (
+                                <div
+                                    key={cls}
+                                    onClick={() => handleClassSelect(cls)}
+                                    className="p-4 hover:bg-blue-50 rounded-2xl cursor-pointer text-slate-700 font-bold transition-colors border-b border-slate-50 last:border-none"
+                                >
+                                    Class {cls}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {selectedClass && (
                 <>
-                    <div className="bg-slate-900/60 p-5 rounded-3xl border border-white/5 flex items-center gap-4 mb-8">
-                        <Search size={18} className="text-white/20" />
+                    {/* SEARCH INTERFACE */}
+                    <div className="bg-white p-5 rounded-3xl border border-[#DDE3EA] flex items-center gap-4 mb-8 shadow-sm">
+                        <Search size={22} className="text-[#42A5F5] ml-2" />
                         <input
                             type="text"
-                            placeholder="SEARCH BY NAME OR ENROLLMENT..."
-                            className="bg-transparent outline-none text-xs w-full uppercase font-black"
+                            placeholder="Search by name or enrollment..."
+                            className="bg-transparent outline-none text-[15px] w-full italic font-bold text-slate-700 placeholder:text-slate-300"
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
 
-                    <div className="space-y-4">
+                    {/* STUDENT LISTING */}
+                    <div className="space-y-5">
                         {students
                             .filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.enrollmentNo.includes(search))
                             .map((s, i) => (
                                 <div
                                     key={i}
                                     onClick={() => navigate(`/finance/student-ledger/${s._id}`)}
-                                    className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 flex items-center justify-between group hover:border-orange-500/40 transition-all cursor-pointer shadow-xl active:scale-[0.98]"
+                                    className="bg-white p-6 rounded-[2.5rem] border border-[#DDE3EA] flex items-center justify-between group hover:border-[#42A5F5] transition-all cursor-pointer shadow-md active:scale-[0.98]"
                                 >
                                     <div className="flex items-center gap-5">
-                                        <div className="bg-orange-500/10 p-4 rounded-2xl text-orange-400 group-hover:bg-orange-500 group-hover:text-black transition-all">
-                                            <GraduationCap size={24} />
+                                        <div className="bg-blue-50 p-4 rounded-2xl text-[#42A5F5] group-hover:bg-[#42A5F5] group-hover:text-white transition-all">
+                                            <GraduationCap size={28} />
                                         </div>
-                                        <div>
-                                            <h3 className="text-sm font-black uppercase text-white group-hover:text-orange-400 transition-colors">
+                                        <div className="overflow-hidden">
+                                            <h3 className="text-[17px] font-black text-slate-700 group-hover:text-[#42A5F5] transition-colors truncate capitalize italic">
                                                 {s.name}
                                             </h3>
-                                            <p className="text-[8px] font-bold text-white/20 uppercase mt-1 tracking-widest flex items-center gap-2">
-                                                <span className="text-orange-500/50">ADMISSION NO:</span> {s.admissionNo || 'N/A'}
-                                                <span className="text-white/10">•</span>
-                                                <span className="text-orange-500/50">ENROLLMENT:</span> {s.enrollmentNo}
+                                            <p className="text-[12px] font-bold text-slate-400 uppercase mt-1 tracking-widest flex flex-wrap items-center gap-2">
+                                                <span className="text-[#42A5F5]">Admission no:</span> {s.admissionNo || 'N/A'}
+                                                <span className="text-slate-200">•</span>
+                                                <span className="text-[#42A5F5]">Enrollment:</span> {s.enrollmentNo}
                                             </p>
                                         </div>
                                     </div>
-                                    <ChevronRight size={18} className="text-white/10 group-hover:text-orange-400" />
+                                    <ChevronRight size={22} className="text-slate-200 group-hover:text-[#42A5F5] shrink-0" />
                                 </div>
                             ))}
                     </div>
