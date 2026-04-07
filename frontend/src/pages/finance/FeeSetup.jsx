@@ -279,7 +279,7 @@ const FeeSetup = () => {
                             disabled={loading}
                             className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[92%] bg-gradient-to-r from-[#42A5F5] to-blue-600 text-white py-7 rounded-[2.5rem] font-black uppercase text-[16px] tracking-widest shadow-[0_20px_50px_rgba(66,165,245,0.4)] z-50 flex items-center justify-center gap-4 active:scale-95 transition-all italic border-t border-white/20"
                         >
-                            {loading ? "Transmitting structure..." : <><Save size={26} /> Commit structure</>}
+                            {loading ? "Transmitting structure..." : <><Save size={26} />Confirm Setup</>}
                         </button>
                     )}
                 </div>

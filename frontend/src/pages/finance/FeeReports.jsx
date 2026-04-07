@@ -40,7 +40,7 @@ const FeeReports = () => {
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 p-5 pb-24 italic print:bg-white print:text-black print:p-0 text-[15px]">
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 p-5 pb-24 italic print:bg-white print:text-black print:p-0 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
 
             {/* CSS TO REMOVE BROWSER HEADERS */}
             <style dangerouslySetInnerHTML={{
