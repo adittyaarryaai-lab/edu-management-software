@@ -111,13 +111,13 @@ const TeacherAttendance = ({ user }) => {
         <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center text-center p-10 italic">
             <p className="text-slate-300 font-black text-[18px] uppercase italic tracking-widest leading-relaxed">
                 No class assigned to you! <br />
-                <span className="text-[#42A5F5] text-[12px]">Contact admin to initialize your neural node.</span>
+                <span className="text-[#42A5F5] text-[12px]">Contact admin to assign you a class.</span>
             </p>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-10 font-sans italic text-slate-800 text-[15px] relative">
+        <div className="min-h-screen bg-[#F8FAFC] pb-10 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {showToast && (
                 <Toast
                     message={isUpdateMode ? "Records updated successfully!" : "Attendance saved!"}

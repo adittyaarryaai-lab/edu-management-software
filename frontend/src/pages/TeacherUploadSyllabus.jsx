@@ -1,37 +1,67 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Layers } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, Layers, Construction, ShieldAlert, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import API from '../api';
 
 const TeacherUploadSyllabus = () => {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ grade: '', subject: '', title: '', description: '' });
-
-    const handleUpload = async (e) => {
-        e.preventDefault();
-        try {
-            await API.post('/syllabus/upload', formData);
-            alert("Neural Mapping Uploaded! 🚀");
-            navigate(-1);
-        } catch (err) { alert("Upload Failed!"); }
-    };
 
     return (
-        <div className="min-h-screen bg-void p-6 font-sans italic text-white">
-             <button onClick={() => navigate(-1)} className="bg-white/5 p-3 rounded-2xl shadow-lg mb-8 border border-white/10 text-neon transition-all active:scale-90"><ArrowLeft /></button>
-             <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-10 flex items-center gap-3">
-                 <Layers className="text-neon animate-pulse" /> Upload Syllabus Matrix
-             </h2>
-             <form onSubmit={handleUpload} className="space-y-5 bg-slate-900/50 backdrop-blur-xl p-8 rounded-[3rem] border border-neon/20 shadow-2xl">
-                 <input type="text" placeholder="SECTOR (e.g. 10-A)" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black text-white italic outline-none focus:border-neon uppercase" onChange={(e) => setFormData({...formData, grade: e.target.value})} />
-                 <input type="text" placeholder="SUBJECT NODE" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black text-white italic outline-none focus:border-neon uppercase" onChange={(e) => setFormData({...formData, subject: e.target.value})} />
-                 <input type="text" placeholder="MODULE TITLE" className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black text-white italic outline-none focus:border-neon uppercase" onChange={(e) => setFormData({...formData, title: e.target.value})} />
-                 <textarea placeholder="DETAILED SYLLABUS DESCRIPTION..." className="w-full bg-void p-4 rounded-2xl border border-white/5 font-black text-white italic h-32 outline-none focus:border-neon" onChange={(e) => setFormData({...formData, description: e.target.value})} />
-                 <button className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[11px] tracking-[0.4em] shadow-[0_0_30px_rgba(61,242,224,0.4)] active:scale-95 transition-all italic">
-                     Broadcast Syllabus Protocol
-                 </button>
-             </form>
+        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans italic overflow-hidden relative flex flex-col justify-center items-center p-6 text-[15px] ">
+            
+            {/* Top Navigation */}
+            <div className="absolute top-10 left-6 z-30">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="bg-white p-3 rounded-2xl active:scale-90 border border-[#DDE3EA] text-[#42A5F5] shadow-md hover:bg-blue-50 transition-all"
+                >
+                    <ArrowLeft size={24} />
+                </button>
+            </div>
+
+            {/* Main Content */}
+            <div className="relative z-10 flex flex-col items-center text-center max-w-md">
+                
+                {/* Animated Icon Container */}
+                <div className="mb-10 relative">
+                    {/* Soft Blue Glow */}
+                    <div className="absolute inset-0 bg-[#42A5F5]/10 blur-3xl rounded-full animate-pulse"></div>
+                    
+                    <div className="bg-white border-2 border-dashed border-[#DDE3EA] p-10 rounded-[3.5rem] shadow-sm relative">
+                        <Construction size={80} className="text-[#42A5F5] animate-bounce" strokeWidth={1.5} />
+                    </div>
+                    <div className="absolute -top-2 -right-2 bg-white p-2 rounded-full shadow-lg border border-blue-50">
+                        <Layers size={24} className="text-amber-400 animate-pulse" />
+                    </div>
+                </div>
+
+                {/* Text Section */}
+                <h1 className="text-4xl font-black italic tracking-tight text-slate-800 leading-tight mb-4 capitalize">
+                    Syllabus matrix <br /> <span className="text-[#42A5F5]">under development</span>
+                </h1>
+
+                <div className="h-[3px] w-20 bg-[#42A5F5] mx-auto rounded-full mb-8 shadow-sm"></div>
+
+                <p className="text-[16px] text-slate-400 font-bold italic max-w-[320px] leading-relaxed capitalize">
+                    We are engineering a robust neural mapping for your academic syllabus deployment. <br />
+                    <span className="text-[#42A5F5] block mt-2 italic">Syncing curriculum database...</span>
+                </p>
+
+                {/* Status Indicator */}
+                <div className="mt-12 flex items-center gap-3 bg-white px-8 py-4 rounded-full border border-[#DDE3EA] shadow-sm">
+                    <div className="w-3 h-3 bg-[#42A5F5] rounded-full animate-ping"></div>
+                    <span className="text-[12px] font-black uppercase tracking-widest text-slate-400">
+                        Data Protocol 77: Initializing
+                    </span>
+                </div>
+            </div>
+
+            {/* Footer Tag */}
+            <div className="absolute bottom-10 flex items-center gap-2 opacity-30 text-slate-400">
+                <ShieldAlert size={16} />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em]">EduFlowAI security mesh</p>
+            </div>
         </div>
     );
 };
+
 export default TeacherUploadSyllabus;

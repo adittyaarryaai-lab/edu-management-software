@@ -10,3 +10,26 @@
   background: linear-gradient(90deg, transparent, #ef4444); /* Red line */
   animation: snake-border 4s linear infinite;
 }
+
+/* --- DAY 172: CUSTOM SCROLLBAR REFINEMENT --- */
+
+/* 1. Isse wo kaali moti line gayab ho jayegi aur interface clean lagega */
+.no-scrollbar::-webkit-scrollbar {
+    display: none; 
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* 2. Agar tujhe chahiye ki halki si blue line dikhe (Premium Look), toh ye use kar: */
+/* .no-scrollbar::-webkit-scrollbar {
+    height: 2px; 
+    display: block;
+}
+.no-scrollbar::-webkit-scrollbar-thumb {
+    background: #42A5F5;
+    border-radius: 10px;
+}
+*/
