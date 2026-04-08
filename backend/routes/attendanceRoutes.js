@@ -3,6 +3,7 @@ const router = express.Router();
 const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const { protect, teacherOnly, adminOnly } = require('../middleware/authMiddleware');
+const { getMyClassList } = require('../controllers/attendanceController');
 
 router.get('/my-students', protect, teacherOnly, async (req, res) => {
     try {
@@ -196,5 +197,7 @@ router.get('/student-report/:studentId', protect, adminOnly, async (req, res) =>
         res.status(500).json({ message: 'Neural Link Error: ' + error.message });
     }
 });
+
+router.get('/my-class-list', protect, teacherOnly, getMyClassList);
 
 module.exports = router;

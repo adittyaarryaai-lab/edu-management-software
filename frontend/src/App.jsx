@@ -523,7 +523,7 @@ function App() {
 
           {/* Teacher Specific Routes */}
           <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
-          <Route path="/teacher/students" element={<TeacherStudentList />} />
+          <Route path="/teacher/students" element={<TeacherStudentList user={user} />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments />} />
           <Route path="/teacher/grade/:assignmentId" element={<TeacherGrading />} />
           <Route path="/teacher/notices" element={<TeacherNotices />} />

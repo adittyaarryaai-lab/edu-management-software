@@ -1,92 +1,162 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Search, User, Phone, MessageSquare, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Search, User, Phone, MessageCircle, ShieldAlert, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api';
+import Loader from '../components/Loader';
 
-const TeacherStudentList = () => {
+const TeacherStudentList = ({ user }) => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [assignedClass, setAssignedClass] = useState("");
 
-    const students = [
-        { name: "Rahul Kumar", roll: "10", class: "GRADE 10", parent: "9876543210" },
-        { name: "New Test Student", roll: "105", class: "GRADE 10", parent: "0000000000" },
-        { name: "Ravi sharma", roll: "55", class: "GRADE 10", parent: "9817167474" },
-    ];
+    // TeacherStudentList.jsx ke useEffect ke andar change karo
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                // Path hamesha backend routes se match karna chahiye
+                const { data } = await API.get('/attendance/my-class-list');
+                setStudents(data.students);
+                setAssignedClass(data.className);
+            } catch (err) {
+                console.error("Error fetching class list", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStudents();
+    }, []);
 
-    const filteredStudents = students.filter(s => 
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.roll.includes(searchTerm)
+    const filteredStudents = students.filter(s =>
+        s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.enrollmentNo?.includes(searchTerm)
     );
 
+    // Call Handler
     const handleCall = (number) => {
         window.location.href = `tel:${number}`;
     };
 
+    const handleWhatsApp = (number) => {
+        // Ab yahan console.log karoge toh data dikhega!
+        // console.log("Full User Context:", user);
+
+        // Ye logic ab kaam karega kyunki 'user' ab undefined nahi hai
+        const schoolName =
+            user?.schoolName ||
+            user?.schoolId?.schoolName ||
+            user?.schoolData?.schoolName ||
+            "the school";
+
+        const msg = encodeURIComponent(`Hello, I am your child's class teacher from ${schoolName}. I would like to discuss something important regarding your child. Please connect with me when convenient.`);
+
+
+        window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
+    };
+
+    if (loading) return <Loader />;
+
+    if (!assignedClass) return (
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-10 text-center italic">
+            <ShieldAlert size={80} className="text-slate-200 mb-4" />
+            <p className="text-slate-900 font-black text-[20px] uppercase tracking-widest leading-relaxed">
+                No class assigned! <br />
+                <span className="text-[#42A5F5] text-[15px]">Initialize class mapping via admin.</span>
+            </p>
+            <button onClick={() => navigate(-1)} className="mt-8 text-[#42A5F5] font-black uppercase text-[12px] tracking-widest border-b-2 border-[#42A5F5]">Return to hub</button>
+        </div>
+    );
+
     return (
-        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
-            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative z-10 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-neon/10 to-transparent pointer-events-none"></div>
-                <div className="flex justify-between items-center mb-6 relative z-10">
-                    <button onClick={() => navigate(-1)} className="bg-white/5 p-2 rounded-xl active:scale-95 border border-white/10 text-neon transition-all">
-                        <ArrowLeft size={20} />
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+            {/* --- PREMIUM BLUE HEADER --- */}
+            <div className="bg-[#42A5F5] px-6 pt-12 pb-24 rounded-b-[4rem] shadow-xl relative z-10 overflow-visible">
+                <div className="flex justify-between items-center mb-8 relative z-10">
+                    <button onClick={() => navigate(-1)} className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-md active:scale-95 transition-all">
+                        <ArrowLeft size={24} />
                     </button>
-                    <h1 className="text-xl font-black uppercase tracking-tighter italic">Student Directory</h1>
-                    <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 text-neon"><User size={20}/></div>
+                    <div className="text-center">
+                        <h1 className="text-4xl font-black italic tracking-tight text-white capitalize">Class list</h1>
+                        <p className="text-[15px] font-black uppercase tracking-widest text-blue-90 opacity-60 mt-1">Class: {assignedClass}</p>
+                    </div>
+                    <div className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-sm"><Users size={24} /></div>
                 </div>
-                
+
+                {/* Search Box */}
                 <div className="relative mt-4 z-10">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neon/40" size={18} />
-                    <input 
-                        type="text" 
-                        placeholder="Search personnel sequence..." 
-                        className="w-full bg-slate-900/50 text-white placeholder:text-white/10 py-3.5 pl-12 pr-4 rounded-2xl border border-neon/10 outline-none backdrop-blur-md font-black text-xs uppercase italic focus:border-neon transition-all"
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search student or roll no..."
+                        className="w-full bg-white text-slate-700 placeholder:text-slate-700 py-5 pl-14 pr-6 rounded-[2rem] shadow-lg outline-none font-bold text-[16px] italic focus:ring-4 focus:ring-blue-400/20 transition-all border-none"
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
             </div>
 
-            <div className="px-5 -mt-8 space-y-4 relative z-20">
-                <p className="text-[9px] font-black text-neon/30 uppercase tracking-[0.4em] ml-2 italic">Active Nodes ({filteredStudents.length})</p>
-                
+            {/* List Content */}
+            <div className="px-5 -mt-10 space-y-5 relative z-20">
+                <div className="flex justify-between items-center px-4 mb-2">
+                    <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest italic">Total Students: {filteredStudents.length}</p>
+                    {/* <span className="text-[10px] font-black bg-blue-50 text-[#42A5F5] px-4 py-1.5 rounded-full border border-blue-100 uppercase tracking-widest">Active session</span> */}
+                </div>
+
                 {filteredStudents.map((s, i) => (
-                    <div key={i} className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-5 border border-white/5 shadow-2xl group hover:border-neon/30 transition-all italic">
-                        <div className="flex justify-between items-start border-b border-white/5 pb-4 mb-4">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-void text-neon border border-neon/20 rounded-2xl flex items-center justify-center font-black text-sm shadow-inner group-hover:bg-neon group-hover:text-void transition-all duration-300">
-                                    {s.name.charAt(0)}
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-white text-sm leading-tight uppercase group-hover:text-neon transition-colors">{s.name}</h3>
-                                    <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Seq: {s.roll} • {s.class}</p>
+                    <div key={i} className="bg-white p-6 rounded-[3rem] shadow-md border border-[#DDE3EA] group hover:border-[#42A5F5] transition-all italic relative overflow-hidden">
+
+                        {/* Student Info Top */}
+                        <div className="flex items-center gap-5 mb-6 border-b border-slate-50 pb-5">
+                            <div className="w-16 h-16 bg-slate-50 text-[#42A5F5] border border-slate-100 rounded-[1.8rem] flex items-center justify-center font-black text-[22px] shadow-inner group-hover:bg-[#42A5F5] group-hover:text-white transition-all">
+                                {s.name?.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-black text-slate-800 text-[21px] capitalize italic tracking-tight group-hover:text-[#42A5F5] transition-colors leading-tight">{s.name}</h3>
+                                <div className="flex flex-col gap-1 mt-2">
+                                    <span className="text-[14px] font-black text-slate-900 uppercase tracking-widest">
+                                        Roll: {s.enrollmentNo}
+                                    </span>
+
+                                    <span className="text-[14px] font-black text-[#42A5F5] uppercase tracking-widest">
+                                        Father: {s.fatherName || "Not set"}
+                                    </span>
                                 </div>
                             </div>
-                            <button className="text-neon bg-neon/10 p-2.5 rounded-xl border border-neon/20 active:scale-90 transition-all">
-                                <Info size={18} />
-                            </button>
                         </div>
 
-                        <div className="flex justify-between items-center">
+                        {/* Action Buttons */}
+                        <div className="flex justify-between items-center bg-slate-50 p-2 rounded-[2rem] border border-slate-400">
                             <div>
-                                <p className="text-[8px] font-black text-white/20 uppercase mb-1 tracking-widest leading-none">Emergency Node</p>
-                                <p className="text-xs font-black text-white/60 tracking-tighter">{s.parent}</p>
+                                <p className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em] mb-1 italic">Contact parent</p>
+                                <p className="text-[19px] font-black text-slate-700 tracking-tighter">{s.phone || "No signal"}</p>
                             </div>
-                            <div className="flex gap-2">
-                                <a 
-                                    href={`tel:${s.parent}`} 
-                                    onClick={(e) => { e.preventDefault(); handleCall(s.parent); }}
-                                    className="flex items-center justify-center w-12 h-12 bg-neon/10 text-neon border border-neon/20 rounded-2xl active:scale-90 transition-all shadow-lg cursor-pointer hover:bg-neon hover:text-void"
-                                >
-                                    <Phone size={20} />
-                                </a>
 
-                                <a 
-                                    href={`sms:${s.parent}`}
-                                    className="flex items-center justify-center w-12 h-12 bg-white/5 text-white/40 border border-white/10 rounded-2xl active:scale-90 transition-all shadow-lg cursor-pointer hover:bg-neon hover:text-void hover:border-neon"
+                            <div className="flex gap-3">
+                                {/* CALL BUTTON */}
+                                <button
+                                    onClick={() => handleCall(s.phone)}
+                                    className="flex items-center justify-center w-14 h-14 bg-white text-emerald-500 border border-slate-200 rounded-2xl active:scale-90 transition-all shadow-md hover:bg-emerald-500 hover:text-white"
                                 >
-                                    <MessageSquare size={20} />
-                                </a>
+                                    <Phone size={24} />
+                                </button>
+
+                                {/* WHATSAPP BUTTON */}
+                                <button
+                                    onClick={() => handleWhatsApp(s.phone)}
+                                    className="flex items-center justify-center w-14 h-14 bg-white text-[#42A5F5] border border-slate-200 rounded-2xl active:scale-90 transition-all shadow-md hover:bg-[#42A5F5] hover:text-white"
+                                >
+                                    <MessageCircle size={24} />
+                                </button>
                             </div>
                         </div>
                     </div>
                 ))}
+
+                {filteredStudents.length === 0 && (
+                    <div className="text-center py-20 opacity-20 italic font-black uppercase text-[12px] tracking-widest">
+                        No matching student records found
+                    </div>
+                )}
             </div>
         </div>
     );

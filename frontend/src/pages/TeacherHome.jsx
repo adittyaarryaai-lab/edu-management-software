@@ -30,8 +30,8 @@ const TeacherHome = ({ user, searchQuery }) => {
     { title: 'Broadcast', icon: <Bot size={32} />, path: '/teacher/notices' },
     { title: 'Support center', icon: <MessageCircle size={32} />, path: '/teacher/support' },
     { title: 'Notice feed', icon: <Megaphone size={32} />, path: '/notice-feed' },
-    { title: 'Assignments', icon: <FilePlus size={32} />, path: '/teacher/assignments' },
     { title: 'Class list', icon: <Users size={32} />, path: '/teacher/students' },
+    { title: 'Assignments', icon: <FilePlus size={32} />, path: '/teacher/assignments' },
     { title: 'Live class', icon: <Video size={32} />, path: '/teacher/live-class' },
     { title: 'Syllabus', icon: <Layers size={32} />, path: '/teacher/upload-syllabus' },
   ];
