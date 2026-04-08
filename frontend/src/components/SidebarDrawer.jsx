@@ -157,16 +157,14 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                             <span className="text-[15px] font-bold text-white">Support</span>
                                         </button>
                                     )}
-                                    {user?.role === 'finance' && (
-                                    <>
-                                    <button onClick={() => handleNavigation('/teacher/support')} className="flex flex-col items-center gap-1 group">
-                                        <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
-                                            <HelpCircle size={18} />
-                                        </div>
-                                        <span className="text-[15px] font-bold text-white">Support</span>
-                                    </button>
-                                    </>
-                                )}
+                                    {user?.role === 'teacher' && (
+                                        <button onClick={() => handleNavigation('/teacher/support')} className="flex flex-col items-center gap-1 group">
+                                            <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
+                                                <MessageCircle size={18} />
+                                            </div>
+                                            <span className="text-[15px] font-bold text-white italic">Help desk</span>
+                                        </button>
+                                    )}
                                     <button onClick={() => handleNavigation('/settings')} className="flex flex-col items-center gap-1 group">
                                         <div className="bg-white text-red-500 p-2.5 rounded-full shadow-md active:scale-90 transition-all"><Settings size={18} /></div>
                                         <span className="text-[15px] font-bold text-white">Settings</span>
