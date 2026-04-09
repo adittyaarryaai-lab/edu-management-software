@@ -165,6 +165,17 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                             <span className="text-[15px] font-bold text-white italic">Help desk</span>
                                         </button>
                                     )}
+                                    {user?.role === 'finance' && (
+                                        <>
+                                            <button onClick={() => handleNavigation('/finance/add-payment')} className="flex flex-col items-center gap-1 group">
+                                                <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
+                                                    <PlusCircle size={18} />
+                                                </div>
+                                                <span className="text-[15px] font-bold text-white italic">Add Payment</span>
+                                            </button>
+                                        </>
+                                    )}
+
                                     <button onClick={() => handleNavigation('/settings')} className="flex flex-col items-center gap-1 group">
                                         <div className="bg-white text-red-500 p-2.5 rounded-full shadow-md active:scale-90 transition-all"><Settings size={18} /></div>
                                         <span className="text-[15px] font-bold text-white">Settings</span>
@@ -393,6 +404,200 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                                 <Book size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Library</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {user?.role === 'teacher' && (
+                                    <>
+                                        {/* Academic Management */}
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Academic Management</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* CLASS ATTENDANCE MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/attendance')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <CheckSquare size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Class Attendance</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* TEACHER ASSIGNMENT MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/assignments')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <PlusCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Assignments</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* CLASS SYLLABUS UPLOAD */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/upload-syllabus')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Layers size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Syllabus</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Class Management */}
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Class Management</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* CLASS LIST MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/students')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Users size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Class list</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* TEACHER TIMETABLE MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/timetable')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <CalendarDays size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Schedule</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* LIVE CLASS MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/live-class')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Video size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Live class</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* Communication with students */}
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Communication</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* BROADCAST MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/notices')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Bot size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Broadcast</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* NOTICE-FEED MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/notice-feed')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Megaphone size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Notice feed</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/support')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <MessageCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Support center</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>

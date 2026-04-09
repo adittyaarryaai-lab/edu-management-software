@@ -117,9 +117,19 @@ const MyAccount = ({ user }) => {
                                 {user?.role === 'admin' ? 'Master node authorized' : user?.role === 'student' ? `Class: ${user.grade}` : 'Faculty member'}
                             </span>
                             {user?.role !== 'admin' && (
-                                <span className="bg-slate-50 text-slate-400 border border-slate-100 px-4 py-1.5 rounded-full text-[15px] font-black italic tracking-widest uppercase">
+                                <span className="bg-blue-50 text-[#42A5F5] border border-blue-100 px-5 py-2 rounded-full text-[15px] font-black italic tracking-widest uppercase shadow-sm">
                                     {user?.role === 'student' ? user.enrollmentNo : user.employeeId}
                                 </span>
+                            )}
+
+                            {user?.role === 'teacher' && (
+                                <div className="bg-emerald-50 text-emerald-500 border border-emerald-100 px-6 py-2 rounded-2xl text-[15px] font-black italic shadow-sm ">
+                                    {user?.assignedClass ? (
+                                        <span>Assigned class: {user.assignedClass}</span>
+                                    ) : (
+                                        <span className="text-rose-400">Not assigned any class</span>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -241,17 +251,41 @@ const MyAccount = ({ user }) => {
                                         </div>
                                     </div>
 
+                                    {/* --- SUBJECTS & EMAIL NODE --- */}
                                     <div className="flex items-center gap-5 bg-blue-50/50 p-5 rounded-[2rem] border border-blue-100">
                                         <div className="bg-white p-3 rounded-xl text-[#42A5F5] shadow-sm">
                                             {user?.role === 'teacher' ? <Fingerprint size={22} /> : <Mail size={22} />}
                                         </div>
-                                        <div>
-                                            <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
-                                                {user?.role === 'teacher' ? 'Assigned subjects' : 'Registered email'}
-                                            </p>
-                                            <p className="text-[15px] font-black text-slate-700 lowercase italic">
-                                                {user?.role === 'teacher' ? user.subjects?.join(', ') : user?.email}
-                                            </p>
+                                        <div className="flex-1">
+                                            {/* Agar teacher hai toh subjects dikhao */}
+                                            {user?.role === 'teacher' ? (
+                                                <>
+                                                    <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                                        Assigned subjects
+                                                    </p>
+                                                    <p className="text-[15px] font-black text-slate-700 capitalize italic mb-3">
+                                                        {user.subjects?.length > 0 ? user.subjects.join(', ') : 'No subjects assigned'}
+                                                    </p>
+
+                                                    {/* Teacher ke liye email yahan niche add kar di */}
+                                                    <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                                        Registered email
+                                                    </p>
+                                                    <p className="text-[15px] font-black text-[#42A5F5] lowercase italic">
+                                                        {user?.email}
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                /* Student ke liye sirf email */
+                                                <>
+                                                    <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                                        Registered email
+                                                    </p>
+                                                    <p className="text-[15px] font-black text-slate-700 lowercase italic">
+                                                        {user?.email}
+                                                    </p>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
 
