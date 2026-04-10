@@ -11,7 +11,7 @@ const sendResetOTP = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.resetOTP = otp;
-    user.otpExpires = Date.now() + 600000; 
+    user.otpExpires = Date.now() + 600000;
     await user.save();
 
     console.log(`
@@ -44,7 +44,7 @@ const resetPassword = async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid or Expired OTP!" });
 
     user.password = newPassword;
-    user.resetOTP = undefined; 
+    user.resetOTP = undefined;
     user.otpExpires = undefined;
     await user.save();
 
@@ -56,7 +56,7 @@ const registerUser = async (req, res) => {
     const {
         name, email, password, role, grade, subjects, schoolId,
         fatherName, motherName, dob, gender, religion, admissionNo,
-        phone, address, assignedClass 
+        phone, address, assignedClass
     } = req.body;
 
     try {
@@ -83,6 +83,14 @@ const registerUser = async (req, res) => {
             }
         }
 
+        // authController.js ke registerUser logic mein:
+        if (role === 'finance') {
+            const existingFinance = await User.findOne({ schoolId, role: 'finance' });
+            if (existingFinance) {
+                return res.status(400).json({ message: "CRITICAL: Finance operator already exists!" });
+            }
+        }
+
         if (role === 'student') {
             const classCode = grade ? grade.replace(/[^a-zA-Z0-9]/g, "").toUpperCase() : "GEN";
             const lastStudent = await User.findOne({
@@ -98,10 +106,10 @@ const registerUser = async (req, res) => {
             }
             generatedId = `STU${classCode}${String(lastNum + 1).padStart(3, '0')}`;
 
-        } else if (role === 'teacher' || role === 'finance') { 
+        } else if (role === 'teacher' || role === 'finance') {
             // FIX 1: Using lastEmployee variable correctly
             const lastEmployee = await User.findOne({
-                role: { $in: ['teacher', 'finance'] }, 
+                role: { $in: ['teacher', 'finance'] },
                 schoolId: currentSchoolId
             }).sort({ createdAt: -1 });
 
@@ -121,7 +129,7 @@ const registerUser = async (req, res) => {
             grade,
             enrollmentNo: role === 'student' ? generatedId : undefined,
             employeeId: (role === 'teacher' || role === 'finance') ? generatedId : undefined,
-            assignedClass: role === 'teacher' ? assignedClass : undefined, 
+            assignedClass: role === 'teacher' ? assignedClass : undefined,
             subjects,
             schoolId: currentSchoolId,
             fatherName,
@@ -160,8 +168,8 @@ const authUser = async (req, res) => {
             email: user.email,
             role: user.role,
             grade: user.grade,
-            assignedClass: user.assignedClass, 
-            schoolData: user.schoolId, 
+            assignedClass: user.assignedClass,
+            schoolData: user.schoolId,
             schoolId: user.schoolId?._id,
             avatar: user.avatar,
             fatherName: user.fatherName,
@@ -172,8 +180,8 @@ const authUser = async (req, res) => {
             admissionNo: user.admissionNo,
             phone: user.phone,
             address: user.address,
-            enrollmentNo: user.enrollmentNo, 
-            employeeId: user.employeeId,     
+            enrollmentNo: user.enrollmentNo,
+            employeeId: user.employeeId,
             subjects: user.subjects,
             token: generateToken(user._id),
         });

@@ -45,14 +45,14 @@ router.post('/settings/penalty', protect, async (req, res) => {
         // --- AGAR BUTTON ON SE OFF HO RAHA HAI (SAVE PENALTY FOREVER) ---
         if (oldStatus === true && isActive === false) {
             console.log("System Signal: Freezing existing penalties...");
-            
+
             // 1. Iss school ke saare students pakdo
             const students = await User.find({ schoolId: req.user.schoolId, role: 'student' });
 
             for (let student of students) {
                 // 2. Is bache ka current balance nikalo (Logic strictly same as summary)
                 const verifiedPayments = await Fee.find({ student: student._id, status: 'Verified' });
-                
+
                 // Class matching for structure
                 const numericPart = student.grade?.match(/\d+/);
                 const classMatch = numericPart ? `Class ${numericPart[0]}` : student.grade;
@@ -75,7 +75,7 @@ router.post('/settings/penalty', protect, async (req, res) => {
                     const start = new Date(school.penaltySettings.activatedAt);
                     const today = new Date();
                     const diffDays = Math.floor(Math.abs(today - new Date(start.getFullYear(), start.getMonth(), start.getDate())) / (1000 * 60 * 60 * 24)) + 1;
-                    
+
                     let daysToCharge = diffDays;
                     if (diffDays > 0 && today.getHours() < 11) daysToCharge -= 1;
 
@@ -142,7 +142,7 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
 
         // BUG 2 FIX: Tune 'User.findById' likha hai lekin 'User' model require nahi kiya hoga upar
         // Aur sach bolun toh yahan User fetch karne ki zaroorat hi nahi hai, kyunki tere pass studentId pehle se hai.
-        
+
         await Fee.create({
             schoolId,
             student: studentId,
@@ -159,10 +159,10 @@ router.post('/capture-with-screenshot', protect, upload.single('screenshot'), as
 
         res.json({ success: true, message: "Neural Signal Captured! 📡" });
 
-    } catch (error) { 
+    } catch (error) {
         // Terminal mein error dekhne ke liye (debugging)
         console.error("CAPTURE_ERROR:", error);
-        res.status(500).json({ message: 'Signal Interrupted: ' + error.message }); 
+        res.status(500).json({ message: 'Signal Interrupted: ' + error.message });
     }
 });
 
@@ -266,6 +266,7 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
 });
 
 // --- DAY 123: ULTIMATE STUDENT SUMMARY (CARRY-FORWARD PENALTY) ---
+// --- DAY 123: ULTIMATE STUDENT SUMMARY (SYNCED WITH AUDIT LOGIC) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
@@ -275,15 +276,19 @@ router.get('/student-summary', protect, async (req, res) => {
         const currentYear = today.getFullYear();
 
         const User = require('../models/User');
+        const School = require('../models/School'); // Define School model
+
         const student = await User.findById(studentId).populate('schoolId');
         if (!student) return res.status(404).json({ message: 'Identity missing' });
-        const schoolAdmin = await User.findOne({ schoolId: schoolId, role: 'admin' }).select('name email phone');
+
+        const schoolData = await School.findById(schoolId);
+        const pSettings = schoolData?.penaltySettings;
 
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        // Fix: Rejected payments ko calculation aur history se bahar rakho
+        
         const verifiedPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
@@ -311,49 +316,41 @@ router.get('/student-summary', protect, async (req, res) => {
             });
         }
 
-        // FIX 2: Monthly Total strictly for Verified
-        const paidThisMonth = verifiedPayments.filter(p => {
-            const isCurrent = p.month === currentMonthName && p.year === currentYear;
-            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return isCurrent && !isOneTime;
-        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
-
+        // Logic: Naya bacha isi mahine add hua hai ya nahi
         const joinDate = new Date(student.createdAt);
-        const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-        const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
+        const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
 
-        // FIX 3: Total Paid calculation strictly for Verified
+        // Months calculation
+        let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
+
+        const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
         const totalMonthlyPaidSoFar = verifiedPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        const balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
+        let balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
 
-        // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
-        const School = require('../models/School');
-        const schoolData = await School.findById(schoolId);
-        const pSettings = schoolData.penaltySettings;
+        // --- PENALTY LOGIC FIX (STUDENT SIDE) ---
         let livePenalty = 0;
-
-        if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+        // Sirf purane bacho pe penalty lagegi (Same as Audit)
+        if (!isNewStudent && pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
-            const today = new Date();
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
             let totalDaysToCharge = diffDays + 1;
-            if (diffDays > 0 && today.getHours() < 11) {totalDaysToCharge -= 1;}
+            if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
             livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
-        // 2. Frozen Penalty (Sum of all penaltyAmount saved in database entries)
         const frozenPenalty = verifiedPayments.reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
-        
-        // 3. Combined Penalty for Display
         const totalPenaltyToDisplay = livePenalty + frozenPenalty;
-        // --- SNAPSHOT PENALTY LOGIC END ---
+
+        // Total Outstanding logic
+        const totalOutstanding = (balance > 0 ? balance : 0) + totalPenaltyToDisplay;
 
         const pendingPayment = await Fee.findOne({
             student: studentId,
@@ -366,10 +363,6 @@ router.get('/student-summary', protect, async (req, res) => {
             const rawRemarks = pay.remarks || "";
             let displayCategory = pay.feeCategory || "GENERAL FEE";
             if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
-            else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
-            else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }
-            else { displayCategory = rawRemarks || "GENERAL FEE"; }
-
             acc[key].push({
                 id: pay._id, amount: pay.amountPaid,
                 category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode
@@ -377,31 +370,27 @@ router.get('/student-summary', protect, async (req, res) => {
             return acc;
         }, {});
 
-        // Final Debt Calculation
-        const totalOutstanding = (balance > 0 ? balance : 0) + totalPenaltyToDisplay;
-
         res.json({
             studentName: student.name,
-            enrollmentNo: student.enrollmentNo, // <--- YE ADD KIYA
-            fatherName: student.fatherName,     // <--- YE ADD KIYA
-            mobile: student.phone,              // <--- YE ADD KIYA
-            grade: student.grade,               // <--- YE ADD KIYA
+            enrollmentNo: student.enrollmentNo,
+            fatherName: student.fatherName,
+            mobile: student.phone,
+            grade: student.grade,
             schoolName: student.schoolId?.schoolName || "N/A",
             schoolPhone: schoolData?.paymentSettings?.upiId || "N/A",
             schoolQR: schoolData?.paymentSettings?.qrCode || null,
             adminName: schoolData?.adminDetails?.fullName || "N/A",
             adminEmail: schoolData?.adminDetails?.email || "N/A",
             currentMonth: currentMonthName,
-            totalPaidThisMonth: paidThisMonth,
+            totalPaidThisMonth: verifiedPayments.filter(p => p.month === currentMonthName && p.year === currentYear).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0),
             lastActivity: verifiedPayments.length > 0 ? verifiedPayments[0].date : null,
             totalPenalty: totalPenaltyToDisplay,
-            remainingFees: totalOutstanding > 0 ? totalOutstanding : 0, 
-            grandTotal: totalOutstanding > 0 ? totalOutstanding : 0,
+            remainingFees: (balance > 0 ? balance : 0), // Base fees without penalty
+            grandTotal: totalOutstanding > 0 ? totalOutstanding : 0, // With penalty
             advanceBalance: totalOutstanding < 0 ? Math.abs(totalOutstanding) : 0,
             totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
             paymentHistory: groupedHistory,
-            // --- DAY 132: PENDING DATA FOR FRONTEND ---
             pendingSignal: pendingPayment ? {
                 id: pendingPayment._id,
                 amount: pendingPayment.amountPaid,
@@ -413,7 +402,7 @@ router.get('/student-summary', protect, async (req, res) => {
 
     } catch (error) {
         console.error("SUMMARY_CRITICAL_ERROR:", error);
-        res.status(500).json({ message: 'Neural Link Failure' });
+        res.status(500).json({ message: 'Neural Link Failure: ' + error.message });
     }
 });
 
@@ -628,6 +617,7 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
 });
 
 // --- DAY 123: STRICT AUDIT ROUTE (CARRY-FORWARD PENALTY) ---
+// --- DAY 123: STRICT AUDIT ROUTE (FINAL STABLE VERSION) ---
 router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     try {
         const studentId = req.params.studentId;
@@ -637,13 +627,19 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const currentYear = today.getFullYear();
 
         const User = require('../models/User');
+        const School = require('../models/School'); // Define School model
+
         const student = await User.findOne({ _id: studentId, schoolId: schoolId });
         if (!student) return res.status(404).json({ message: 'Identity missing' });
+
+        const schoolData = await School.findById(schoolId);
+        const pSettings = schoolData?.penaltySettings;
 
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
+        
         const allPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
@@ -672,41 +668,33 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             });
         }
 
-        const collectedThisMonth = allPayments.filter(p => {
-            const isCurrentMonth = p.month === currentMonthName && p.year === currentYear;
-            const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return isCurrentMonth && !isOneTime && p.status === 'Verified';
-        }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
-
+        // Logic: Naya bacha isi mahine add hua hai ya nahi
         const joinDate = new Date(student.createdAt);
-        const monthsElapsed = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-        const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
+        const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
 
+        // Months calculation
+        let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
+
+        const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
         const totalMonthlyPaidAllTime = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return !isOneTime && p.status === 'Verified'; // Sirf Verified count karo
+            return !isOneTime && p.status === 'Verified';
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        const balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
+        let balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
 
-        // --- DAY 126: CALENDAR-BASED 11:00 AM PENALTY LOGIC ---
-        const School = require('../models/School');
-        const schoolData = await School.findById(schoolId);
-        const pSettings = schoolData.penaltySettings;
+        // --- PENALTY LOGIC FIX ---
         let livePenalty = 0;
-        if (pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+        // Sirf purane bacho pe penalty lagegi
+        if (!isNewStudent && pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
-            const today = new Date();
-            // 1. Calculate base days (pure calendar days difference)
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-            // 2. Rule: Activation day ka fine turant (+1)
+            
             let totalDaysToCharge = diffDays + 1;
-            if (diffDays > 0 && today.getHours() < 11) {totalDaysToCharge -= 1;}
-
+            if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
             livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
@@ -714,9 +702,10 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const totalPenaltySum = livePenalty + frozenPenalty;
 
         const finalRemainingWithPenalty = (balance > 0 ? balance : 0) + totalPenaltySum;
+
         res.json({
             student,
-            totalPaidThisMonth: collectedThisMonth,
+            totalPaidThisMonth: allPayments.filter(p => p.month === currentMonthName && p.year === currentYear && p.status === 'Verified').reduce((sum, p) => sum + p.amountPaid, 0),
             totalExpected: monthlyOnlyStructureTotal,
             totalPenalty: totalPenaltySum,
             remaining: finalRemainingWithPenalty > 0 ? finalRemainingWithPenalty : 0,
@@ -729,9 +718,6 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
                 const rawRemarks = pay.remarks || "";
                 let displayCategory = pay.feeCategory || "GENERAL FEE";
                 if (rawRemarks.toUpperCase().includes("PURPOSE:")) { displayCategory = rawRemarks.split(":")[1].trim(); }
-                else if (rawRemarks.includes(":")) { displayCategory = rawRemarks.split(":").pop().trim(); }
-                else if (pay.feeCategory && pay.feeCategory !== 'General') { displayCategory = pay.feeCategory; }
-                else { displayCategory = rawRemarks || "GENERAL FEE"; }
                 acc[key].push({ id: pay._id, amount: pay.amountPaid, category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode });
                 return acc;
             }, {}),
@@ -740,7 +726,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
 
     } catch (error) {
         console.error("STRICT_AUDIT_ERROR:", error);
-        res.status(500).json({ message: 'Neural Ledger Mismatch' });
+        res.status(500).json({ message: 'Neural Ledger Server Error: ' + error.message });
     }
 });
 

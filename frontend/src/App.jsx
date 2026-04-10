@@ -33,6 +33,8 @@ import Mentorship from './pages/Mentorship';
 import Syllabus from './pages/Syllabus';
 import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
+import AddStudent from './pages/AddStudent';
+import AddTeacher from './pages/AddTeacher';
 // import AdminFees from './pages/AdminFees';
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
@@ -497,6 +499,8 @@ function App() {
           <Route path="/admin/attendance-report" element={<AdminAttendance />} />
           <Route path="/admin/global-notice" element={<AdminGlobalNotice />} />
           <Route path="/admin/manage-users" element={<ManageUsers />} />
+          <Route path="/admin/add-student" element={<AddStudent />} />
+          <Route path="/admin/add-teacher" element={<AddTeacher />} />
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />

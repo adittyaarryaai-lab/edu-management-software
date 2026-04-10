@@ -216,8 +216,8 @@ const AdminHome = ({ searchQuery }) => {
                     .map((m, i) => (
                         <div key={i} onClick={() => {
                             if (m.id === 'manage-users') navigate('/admin/manage-users');
-                            if (m.id === 'add-staff') setShowTeacherForm(true);
-                            if (m.id === 'add-student') setShowStudentForm(true);
+                            if (m.id === 'add-student') navigate('/admin/add-student'); // Link to New Page
+                            if (m.id === 'add-staff') navigate('/admin/add-teacher');
                             if (m.id === 'timetable') navigate('/admin/timetable');
                             if (m.id === 'fees') navigate('/admin/fees');
                             if (m.id === 'attendance-report') navigate('/admin/attendance-report');

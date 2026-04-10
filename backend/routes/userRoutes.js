@@ -355,4 +355,46 @@ router.get('/finance/receipt/:feeId', protect, async (req, res) => {
     }
 });
 
+// --- userRoutes.js ---
+// Check if finance teacher already exists in THIS school
+router.get('/check-finance-exists', protect, adminOnly, async (req, res) => {
+    try {
+        const financeTeacher = await User.findOne({ 
+            schoolId: req.user.schoolId, 
+            role: 'finance' 
+        });
+        
+        // Agar mil gaya toh true, warna false
+        res.json({ exists: !!financeTeacher });
+    } catch (error) {
+        res.status(500).json({ message: 'Error checking finance record' });
+    }
+});
+
+router.get('/available-classes', protect, adminOnly, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+
+        // 1. School mein jitni total classes (grades) hain wo nikalo
+        const totalClasses = await User.distinct('grade', { 
+            schoolId, 
+            role: 'student' 
+        });
+
+        // 2. Un classes ko nikalo jo already kisi teacher ko mil chuki hain
+        const assignedClasses = await User.distinct('assignedClass', { 
+            schoolId, 
+            role: 'teacher',
+            assignedClass: { $ne: null } 
+        });
+
+        // 3. Filter: Sirf wo classes jo assigned nahi hain
+        const availableClasses = totalClasses.filter(c => !assignedClasses.includes(c));
+
+        res.json(availableClasses.sort());
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching available classes' });
+    }
+});
+
 module.exports = router;

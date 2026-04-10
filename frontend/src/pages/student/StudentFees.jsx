@@ -185,7 +185,8 @@ const StudentFees = () => {
                     {/* Main Balance Heading badal do */}
                     <h2 className={`text-5xl font-black tracking-tighter mb-4 ${!isFeesDone ? 'text-rose-500' : 'text-emerald-500'}`}>
                         {/* backend se aane wala grandTotal use karo jo balance + penalty hai */}
-                        ₹{(summary?.grandTotal || finalBalance).toLocaleString()}
+                        {/* // 'finalOutstanding' use karo jo tune upar define kiya hai */}
+                        ₹{(summary?.grandTotal || finalOutstanding).toLocaleString()}
                         {isFeesDone && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
                     </h2>
 
