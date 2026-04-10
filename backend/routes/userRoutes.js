@@ -397,4 +397,33 @@ router.get('/available-classes', protect, adminOnly, async (req, res) => {
     }
 });
 
+// --- GET LIVE ADMIN DASHBOARD STATS ---
+router.get('/admin/live-stats', protect, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+
+        // 1. Total Students counting
+        const totalStudents = await User.countDocuments({ schoolId, role: 'student' });
+
+        // 2. Total Teachers counting (Teacher + Finance dono ko jod kar)
+        const totalTeachers = await User.countDocuments({ 
+            schoolId, 
+            role: { $in: ['teacher', 'finance'] } 
+        });
+
+        // 3. Total Fees Collected (Verified payments only)
+        const Fee = require('../models/Fee');
+        const feesData = await Fee.find({ schoolId, status: 'Verified' });
+        const totalCollected = feesData.reduce((sum, f) => sum + (f.amountPaid || 0), 0);
+
+        res.json({
+            totalStudents,
+            totalTeachers,
+            totalFees: totalCollected
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching live stats' });
+    }
+});
+
 module.exports = router;

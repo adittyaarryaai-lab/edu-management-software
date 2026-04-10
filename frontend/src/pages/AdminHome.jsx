@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -11,6 +11,21 @@ const AdminHome = ({ searchQuery }) => {
     const [loading, setLoading] = useState(false);
     const [isFinance, setIsFinance] = useState(false);
     const [msg, setMsg] = useState('');
+    const [liveStats, setLiveStats] = useState({ students: 0, teachers: 0, fees: 0 });
+
+    useEffect(() => {
+        const fetchLiveStats = async () => {
+            try {
+                const { data } = await API.get('/users/admin/live-stats');
+                setLiveStats({
+                    students: data.totalStudents,
+                    teachers: data.totalTeachers,
+                    fees: data.totalFees
+                });
+            } catch (err) { console.error("Stats Fetch Error", err); }
+        };
+        fetchLiveStats();
+    }, []);
 
     const [subData, setSubData] = useState(null);
     const [transactions, setTransactions] = useState([]);
@@ -74,16 +89,14 @@ const AdminHome = ({ searchQuery }) => {
                 ...teacherData,
                 role: isFinance ? 'finance' : 'teacher',
                 schoolId: sId,
-                // Finance teacher ke liye class aur subject blank jayenge
                 assignedClass: isFinance ? null : (teacherData.assignedClass?.trim().toUpperCase() || null),
                 subjects: isFinance ? [] : (teacherData.subjects ? teacherData.subjects.split(',').map(s => s.trim()) : [])
             };
 
             const { data } = await API.post('/auth/register', processedData);
-            setMsg(`${isFinance ? 'Finance Personnel' : 'Faculty Node'} Active: EMP ID ${data.generatedId} ⚡`);
+            setMsg(`${isFinance ? 'Finance personnel' : 'Faculty node'} active: Emp id ${data.generatedId} ⚡`);
             setShowTeacherForm(false);
-            setIsFinance(false); // Reset toggle
-            // Reset form
+            setIsFinance(false);
             setTeacherData({
                 name: '', email: '', password: '', subjects: '', assignedClass: '',
                 fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '',
@@ -96,14 +109,13 @@ const AdminHome = ({ searchQuery }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            // Logged in admin ki details nikalna
             const currentUser = JSON.parse(localStorage.getItem('user'));
             const sId = currentUser?.schoolId;
 
             const processedData = {
                 ...studentData,
                 role: 'student',
-                schoolId: sId, // STRICTLY SENDING SCHOOL ID
+                schoolId: sId,
                 address: {
                     pincode: studentData.address.pincode,
                     district: studentData.address.district,
@@ -113,9 +125,8 @@ const AdminHome = ({ searchQuery }) => {
             };
 
             const { data } = await API.post('/auth/register', processedData);
-            setMsg(`Student Enrolled: ID ${data.generatedId} ⚡`);
+            setMsg(`Student enrolled: Id ${data.generatedId} ⚡`);
             setShowStudentForm(false);
-            // Reset form
             setStudentData({
                 name: '', email: '', password: '', grade: '',
                 fatherName: '', motherName: '', dob: '', gender: 'Male', religion: '', admissionNo: '',
@@ -125,98 +136,124 @@ const AdminHome = ({ searchQuery }) => {
     };
 
     const adminStats = [
-        { label: 'Total Students', value: '1,240', icon: <Users size={14} /> },
-        { label: 'Total Teachers', value: '85', icon: <Bot size={14} /> },
-        { label: 'Fees Collected', value: '₹12.5L', icon: <Activity size={14} /> },
-    ];
+    { 
+        label: 'Total students', 
+        value: liveStats.students.toLocaleString(), 
+        icon: <Users size={20} /> 
+    },
+    { 
+        label: 'Total teachers', 
+        value: liveStats.teachers.toLocaleString(), 
+        icon: <Bot size={20} /> 
+    },
+    { 
+        label: 'Fees collected', 
+        value: `₹${liveStats.fees >= 100000 
+            ? (liveStats.fees / 100000).toFixed(1) + 'L' 
+            : liveStats.fees.toLocaleString()}`, 
+        icon: <Activity size={20} /> 
+    },
+];
 
     const managementModules = [
-        { id: 'add-student', title: 'Add Student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-neon/10 text-neon border-neon/20' },
-        { id: 'add-staff', title: 'Manage Staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-        { id: 'attendance-report', title: 'Student Performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
-        // { id: 'fees', title: 'Fee Manager', icon: <CreditCard size={24} />, desc: 'Track pending payments', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
-        { id: 'notice', title: 'Publish Notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-        { id: 'notice-feed', title: 'Notice Archive', icon: <ClipboardList size={24} />, desc: 'Manage & Delete Notices', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-        { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-        { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
-        { id: 'manage-users', title: 'Manage Student and Teacher', icon: <Users size={24} />, desc: 'Edit or Purge Personnel', color: 'bg-neon/10 text-neon border-neon/20' },
-        // { id: 'edit-timetable', title: 'Edit Timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+        { id: 'add-student', title: 'Add student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+        { id: 'add-staff', title: 'Manage staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-indigo-50 text-indigo-500 border-indigo-100' },
+        { id: 'attendance-report', title: 'Student performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-50 text-cyan-500 border-cyan-100' },
+        { id: 'notice', title: 'Publish notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-50 text-orange-500 border-orange-100' },
+        { id: 'notice-feed', title: 'Notice archive', icon: <ClipboardList size={24} />, desc: 'Manage & delete notices', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+        { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+        { id: 'edit-timetable', title: 'Edit timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+        { id: 'manage-users', title: 'Manage student and teacher', icon: <Users size={24} />, desc: 'Edit or purge personnel', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
     ];
 
     return (
-        <div className="px-5 -mt-10 space-y-6 pb-24 relative z-10 font-sans italic">
+        <div className="px-5 -mt-24 space-y-6 pb-24 relative z-10 font-sans italic">
+
             {/* Subscription Card */}
-            <div className={`p-6 rounded-[2.5rem] border backdrop-blur-xl shadow-2xl transition-all ${subData?.hasPaidAdvance ? 'bg-neon/10 border-neon/30' : 'bg-slate-900/80 border-neon/20'}`}>
-                <div className="flex justify-between items-start">
+            {/* <div className={`p-8 rounded-[3rem] border shadow-xl transition-all ${subData?.hasPaidAdvance ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100'}`}>
+                <div className="flex justify-between items-center">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <Zap size={16} className={subData?.hasPaidAdvance ? 'text-neon' : 'text-neon/60'} />
-                            <h3 className="font-black text-white text-xs uppercase tracking-widest italic underline decoration-neon/30">Service Subscription</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Zap size={18} className={subData?.hasPaidAdvance ? 'text-emerald-500' : 'text-[#42A5F5]'} />
+                            <h3 className="font-black text-slate-700 text-[14px] uppercase tracking-widest italic">Service subscription</h3>
                         </div>
-                        <p className="text-neon font-black text-xl italic tracking-tighter">₹{subData?.monthlyFee || '0'} <span className="text-[10px] text-white/40 uppercase">/ Month</span></p>
-                        <p className="text-[10px] font-bold text-white/30 mt-1 italic uppercase tracking-widest">Next Billing: {subData?.nextPaymentDate ? new Date(subData.nextPaymentDate).toLocaleDateString() : 'N/A'}</p>
+                        <p className={`text-3xl font-black italic tracking-tighter ${subData?.hasPaidAdvance ? 'text-emerald-600' : 'text-[#42A5F5]'}`}>
+                            ₹{subData?.monthlyFee || '0'} <span className="text-[12px] text-slate-400 uppercase">/ Month</span>
+                        </p>
+                        <p className="text-[12px] font-bold text-slate-400 mt-2 italic uppercase tracking-widest">Next billing: {subData?.nextPaymentDate ? new Date(subData.nextPaymentDate).toLocaleDateString('en-GB') : 'N/A'}</p>
                     </div>
-                    <button onClick={handleAdvancePayment} disabled={loading || subData?.hasPaidAdvance} className={`px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${subData?.hasPaidAdvance ? 'bg-neon text-void' : 'bg-void border border-neon text-neon shadow-[0_0_15px_rgba(61,242,224,0.2)] active:scale-95'}`}>
-                        {subData?.hasPaidAdvance ? "Month Secured" : "Pay Advance"}
+                    <button 
+                        onClick={handleAdvancePayment} 
+                        disabled={loading || subData?.hasPaidAdvance} 
+                        className={`px-8 py-4 rounded-2xl font-black text-[12px] uppercase tracking-widest transition-all shadow-md ${subData?.hasPaidAdvance ? 'bg-emerald-500 text-white shadow-emerald-100' : 'bg-[#42A5F5] text-white shadow-blue-100 active:scale-95'}`}
+                    >
+                        {subData?.hasPaidAdvance ? "Month secured" : "Pay advance"}
                     </button>
                 </div>
                 {subData?.hasPaidAdvance && (
-                    <p className="text-[9px] font-black text-neon uppercase mt-4 tracking-tighter italic">Automatic debit paused. System synchronized. ✅</p>
+                    <div className="mt-4 flex items-center gap-2 text-emerald-600">
+                        <ShieldCheck size={14} />
+                        <p className="text-[11px] font-black uppercase tracking-tighter italic">Automatic debit paused. System synchronized. ✅</p>
+                    </div>
                 )}
-            </div>
+            </div> */}
 
             {/* Billing History */}
-            <div className="bg-slate-900/50 backdrop-blur-xl border border-neon/10 rounded-[2.5rem] p-6 shadow-2xl overflow-hidden">
-                <div className="flex items-center gap-2 mb-6 ml-2">
-                    <FileText size={16} className="text-neon animate-pulse" />
-                    <h3 className="text-[10px] font-black text-neon/40 uppercase tracking-[0.3em] italic">Billing History</h3>
+            {/* <div className="bg-white border border-slate-100 rounded-[3rem] p-8 shadow-xl overflow-hidden">
+                <div className="flex items-center gap-2 mb-8 ml-2">
+                    <FileText size={20} className="text-[#42A5F5]" />
+                    <h3 className="text-[15px] font-black text-slate-400 uppercase tracking-[0.3em] italic">Billing history</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {transactions.length > 0 ? (
                         transactions.map((tx, idx) => (
-                            <div key={idx} className="bg-void/60 p-4 rounded-3xl border border-neon/5 flex items-center justify-between group hover:border-neon/30 transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-neon/10 p-3 rounded-2xl text-neon border border-neon/10"><CreditCard size={18} /></div>
+                            <div key={idx} className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 flex items-center justify-between group hover:border-[#42A5F5] transition-all">
+                                <div className="flex items-center gap-5">
+                                    <div className="bg-white p-4 rounded-2xl text-[#42A5F5] border border-slate-100 shadow-sm"><CreditCard size={22} /></div>
                                     <div>
-                                        <p className="text-white font-black text-xs uppercase italic tracking-tighter">{tx.month}</p>
-                                        <p className="text-[8px] text-neon/30 font-bold uppercase mt-0.5 tracking-widest">{tx.transactionId}</p>
+                                        <p className="text-slate-700 font-black text-[16px] uppercase italic tracking-tighter">{tx.month}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">{tx.transactionId}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 text-right">
+                                <div className="flex items-center gap-6 text-right">
                                     <div>
-                                        <p className="text-neon font-black text-xs italic">₹{tx.amount}</p>
-                                        <span className="text-[7px] font-black text-white/30 uppercase tracking-widest">Secured</span>
+                                        <p className="text-[#42A5F5] font-black text-[18px] italic">₹{tx.amount}</p>
+                                        <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Secured</span>
                                     </div>
-                                    <button onClick={() => downloadInvoice(tx._id, tx.transactionId)} className="bg-neon/10 p-2 rounded-xl text-neon hover:bg-neon hover:text-void transition-all"><Download size={14} /></button>
+                                    <button onClick={() => downloadInvoice(tx._id, tx.transactionId)} className="bg-white p-3 rounded-xl text-slate-400 hover:text-[#42A5F5] border border-slate-100 transition-all shadow-sm"><Download size={18} /></button>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-6 opacity-20 italic font-black text-[10px] uppercase tracking-widest text-white">No transactions archived.</div>
+                        <div className="text-center py-10 opacity-30 italic font-black text-[14px] uppercase tracking-widest text-slate-400">No transactions archived.</div>
                     )}
                 </div>
-            </div>
+            </div> */}
 
             {/* Stats */}
-            <div className="bg-void border border-neon/10 rounded-[2.5rem] p-6 shadow-2xl grid grid-cols-3 gap-2">
-                {adminStats.map((stat, i) => (
-                    <div key={i} className="text-center border-r last:border-0 border-neon/5 px-1">
-                        <div className="flex justify-center text-neon mb-1">{stat.icon}</div>
-                        <p className="text-[18px] font-black text-white leading-none tracking-tighter">{stat.value}</p>
-                        <p className="text-[7px] font-black text-neon/40 uppercase mt-1 tracking-widest leading-none">{stat.label}</p>
-                    </div>
-                ))}
+            <div className="bg-white border border-slate-100 rounded-[3rem] p-8 shadow-2xl grid grid-cols-3 gap-4 ring-1 ring-slate-100">
+        {adminStats.map((stat, i) => (
+            <div key={i} className="text-center border-r last:border-0 border-slate-100 px-2">
+                <div className="flex justify-center text-[#42A5F5] mb-2">{stat.icon}</div>
+                <p className="text-[26px] font-black text-slate-800 leading-none tracking-tighter">
+                    {stat.value}
+                </p>
+                <p className="text-[15px] font-black text-slate-400 uppercase mt-2 tracking-widest leading-none">
+                    {stat.label}
+                </p>
             </div>
+        ))}
+    </div>
 
             {/* Modules */}
-            <div className="grid grid-cols-1 gap-4">
-                <h3 className="text-[10px] font-black text-neon/30 uppercase tracking-[0.3em] ml-2 italic">Administrative Core</h3>
+            <div className="space-y-4">
+                <h3 className="text-[20px] font-black text-slate-900 uppercase tracking-[0.1em] ml-4 italic">Administrative panel</h3>
                 {managementModules
                     .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
                     .map((m, i) => (
                         <div key={i} onClick={() => {
                             if (m.id === 'manage-users') navigate('/admin/manage-users');
-                            if (m.id === 'add-student') navigate('/admin/add-student'); // Link to New Page
+                            if (m.id === 'add-student') navigate('/admin/add-student');
                             if (m.id === 'add-staff') navigate('/admin/add-teacher');
                             if (m.id === 'timetable') navigate('/admin/timetable');
                             if (m.id === 'fees') navigate('/admin/fees');
@@ -224,127 +261,32 @@ const AdminHome = ({ searchQuery }) => {
                             if (m.id === 'notice') navigate('/admin/global-notice');
                             if (m.id === 'notice-feed') navigate('/notice-feed');
                             if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
-                        }} className="bg-slate-900/40 backdrop-blur-xl p-5 rounded-[2.2rem] border border-white/5 flex items-center justify-between active:scale-95 transition-all cursor-pointer group hover:border-neon/20">
-                            <div className="flex items-center gap-4">
-                                <div className={`${m.color} p-3 rounded-2xl border`}>{m.icon}</div>
+                        }} className="bg-white p-6 rounded-[2.5rem] border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group shadow-sm hover:shadow-md hover:border-blue-100">
+                            <div className="flex items-center gap-5">
+                                <div className={`${m.color} p-4 rounded-2xl border transition-all`}>{m.icon}</div>
                                 <div>
-                                    <h4 className="font-black text-white/80 text-sm leading-none uppercase italic tracking-tighter">{m.title}</h4>
-                                    <p className="text-[10px] text-white/30 mt-1 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
+                                    <h4 className="font-black text-slate-700 text-[21px] leading-none uppercase italic tracking-tighter">{m.title}</h4>
+                                    <p className="text-[16px] text-slate-400 mt-2 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
                                 </div>
                             </div>
-                            <div className="bg-void p-2 rounded-full border border-white/5"><PlusCircle size={14} className="text-white/20 group-hover:text-neon" /></div>
+                            <div className="bg-slate-50 p-3 rounded-full border border-slate-100 text-slate-300 group-hover:text-[#42A5F5] group-hover:bg-blue-50 transition-all"><PlusCircle size={20} /></div>
                         </div>
                     ))}
             </div>
 
-            {/* MODALS WITH ALL DAY 78 FIELDS */}
-            {(showTeacherForm || showStudentForm) && (
-                <div className="fixed inset-0 bg-slate-950/90 z-[100] flex items-center justify-center p-4 backdrop-blur-md overflow-y-auto">
-                    <div className="bg-slate-900 border border-neon/20 w-full max-w-2xl rounded-[3rem] p-8 shadow-2xl relative my-8 italic">
-                        <button onClick={() => { setShowTeacherForm(false); setShowStudentForm(false) }} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-neon/40"><X size={20} /></button>
-                        <h3 className="font-black text-2xl text-white mb-6 uppercase italic text-center underline decoration-neon/20">{showTeacherForm ? 'Deploy Faculty Node' : 'Initialize Student Link'}</h3>
-
-                        <form onSubmit={showTeacherForm ? handleAddTeacher : handleAddStudent} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* DAY 88: Finance Role Toggle */}
-                            {showTeacherForm && (
-                                <div className="md:col-span-2 flex items-center gap-3 mb-2 bg-white/5 p-4 rounded-2xl border border-white/10 cursor-pointer"
-                                    onClick={() => setIsFinance(!isFinance)}>
-                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${isFinance ? 'bg-neon border-neon' : 'border-white/20'}`}>
-                                        {isFinance && <PlusCircle size={12} className="text-void" />}
-                                    </div>
-                                    <label className="text-[10px] font-black uppercase italic text-white/60 cursor-pointer">Assign as Finance Teacher (Accountant Role)</label>
-                                </div>
-                            )}
-                            {/* Common Fields */}
-                            <input type="text" placeholder="FULL NAME" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, name: e.target.value }) : setStudentData({ ...studentData, name: e.target.value })} required />
-
-                            <input type="email" placeholder="Institutional Email" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, email: e.target.value }) : setStudentData({ ...studentData, email: e.target.value })} required />
-
-                            <input type="password" placeholder="Access Cipher (Password)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, password: e.target.value }) : setStudentData({ ...studentData, password: e.target.value })} required />
-
-                            <input type="text" placeholder="Mobile Signal" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, phone: e.target.value }) : setStudentData({ ...studentData, phone: e.target.value })} required />
-
-                            {/* Specific Fields */}
-                            {showStudentForm && <input type="text" placeholder="Grade Sector (e.g. 10-A)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => setStudentData({ ...studentData, grade: e.target.value })} required />}
-
-                            {/* Agar Finance teacher hai toh ye fields hide ho jayengi */}
-                            {!isFinance && showTeacherForm && (
-                                <>
-                                    <input type="text" placeholder="Assigned Subjects (Comma Sep)" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                        onChange={(e) => setTeacherData({ ...teacherData, subjects: e.target.value })} />
-
-                                    <div className="md:col-span-2">
-                                        <label className="text-[8px] text-neon/40 ml-4 font-black uppercase">Assign Primary Attendance Class (Optional)</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. 10-A (Leave blank if no class assigned)"
-                                            className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase mt-1"
-                                            value={teacherData.assignedClass}
-                                            onChange={(e) => setTeacherData({ ...teacherData, assignedClass: e.target.value })}
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            <input type="text" placeholder="Father's Name" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, fatherName: e.target.value }) : setStudentData({ ...studentData, fatherName: e.target.value })} />
-
-                            <input type="text" placeholder="Mother's Name" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, motherName: e.target.value }) : setStudentData({ ...studentData, motherName: e.target.value })} />
-
-                            <div className="flex flex-col gap-1">
-                                <label className="text-[8px] text-neon/40 ml-4 font-black uppercase">Birth Date</label>
-                                <input type="date" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon"
-                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, dob: e.target.value }) : setStudentData({ ...studentData, dob: e.target.value })} />
-                            </div>
-
-                            <select className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, gender: e.target.value }) : setStudentData({ ...studentData, gender: e.target.value })}>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-
-                            <input type="text" placeholder="Religion" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, religion: e.target.value }) : setStudentData({ ...studentData, religion: e.target.value })} />
-
-                            {showStudentForm && <input type="text" placeholder="Admission Number" className="w-full p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => setStudentData({ ...studentData, admissionNo: e.target.value })} />}
-
-                            {/* Address Object Fields */}
-                            <div className="md:col-span-2 grid grid-cols-3 gap-2">
-                                <input type="text" placeholder="Pincode" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon"
-                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, pincode: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, pincode: e.target.value } })} />
-                                <input type="text" placeholder="District" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon uppercase"
-                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, district: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, district: e.target.value } })} />
-                                <input type="text" placeholder="State" className="p-4 bg-void rounded-2xl border border-white/5 outline-none text-[10px] text-white focus:border-neon uppercase"
-                                    onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, state: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, state: e.target.value } })} />
-                            </div>
-
-                            <textarea placeholder="FULL PERMANENT ADDRESS..." className="md:col-span-2 p-4 bg-void rounded-2xl border border-white/5 outline-none text-xs text-white focus:border-neon uppercase"
-                                onChange={(e) => showTeacherForm ? setTeacherData({ ...teacherData, address: { ...teacherData.address, fullAddress: e.target.value } }) : setStudentData({ ...studentData, address: { ...studentData.address, fullAddress: e.target.value } })}></textarea>
-
-                            <button type="submit" disabled={loading} className="md:col-span-2 w-full bg-neon text-void py-5 rounded-[2rem] font-black text-xs uppercase shadow-[0_0_30px_rgba(61,242,224,0.3)] active:scale-95 transition-all mt-4">
-                                {loading ? "TRANSMITTING DATA..." : (showTeacherForm ? "AUTHORIZE FACULTY" : "SYNC STUDENT LINK")}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            <div className="bg-void border border-neon/20 rounded-[2.5rem] p-6 text-white shadow-2xl relative overflow-hidden">
+            {/* System Status Footer */}
+            <div className="bg-slate-800 rounded-[3.5rem] p-8 text-white shadow-2xl relative overflow-hidden ">
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <Bot size={18} className="text-neon" />
-                            <h3 className="font-black text-sm uppercase italic tracking-tighter">System: Sovereign</h3>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                            <h3 className="font-black text-[16px] uppercase italic tracking-tighter">System: Sovereign</h3>
                         </div>
-                        <p className="text-[10px] text-neon/30 font-black uppercase tracking-widest italic">ENCRYPTED ADMIN SESSION ACTIVE</p>
+                        <p className="text-[12px] text-white/40 font-black uppercase tracking-widest italic">Encrypted admin session active</p>
                     </div>
-                    <Activity className="text-neon/20 animate-pulse" size={40} />
+                    <div className="p-4 bg-white/5 rounded-3xl backdrop-blur-md border border-white/10">
+                        <Activity className="text-[#42A5F5] animate-pulse" size={32} />
+                    </div>
                 </div>
             </div>
 
