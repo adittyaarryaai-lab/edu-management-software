@@ -273,13 +273,13 @@ const ManageUsers = () => {
                                         <Database size={25} />
                                     </div>
                                     {/* ID Section Fix */}
-<div>
-    <p className="text-[15px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">Sequence ID</p>
-    <p className="text-[20px] font-black text-[#42A5F5] uppercase italic">
-        {/* Yahan 'finance' role ko bhi add kar diya hai */}
-        {['teacher', 'finance'].includes(editingUser.role) ? editingUser.employeeId : editingUser.enrollmentNo}
-    </p>
-</div>
+                                    <div>
+                                        <p className="text-[15px] font-black text-slate-600 uppercase tracking-widest leading-none mb-1">Sequence ID</p>
+                                        <p className="text-[20px] font-black text-[#42A5F5] uppercase italic">
+                                            {/* Yahan 'finance' role ko bhi add kar diya hai */}
+                                            {['teacher', 'finance'].includes(editingUser.role) ? editingUser.employeeId : editingUser.enrollmentNo}
+                                        </p>
+                                    </div>
                                     {/* Student ke liye Admission No yahan dikhega */}
                                     {editingUser.role === 'student' && (
                                         <div>

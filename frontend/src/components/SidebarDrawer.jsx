@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book, Database, ClipboardList, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../App.css';
@@ -54,6 +54,19 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <Layers size={20} />, label: 'Fee Setup', color: 'text-neon', path: '/finance/fee-setup' },
         { icon: <ShieldCheck size={20} />, label: 'Payment Gateway', color: 'text-emerald-400', path: '/finance/gateway' },
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
+    ] : user?.role === 'admin' ? [
+        { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },
+        // { icon: <LayoutDashboard size={20} />, label: 'Admin Hub', color: 'text-[#42A5F5]', path: '/admin/dashboard' },
+        { icon: <PlusCircle size={20} />, label: 'Add Student', color: 'text-[#42A5F5]', path: '/admin/add-student' },
+        { icon: <Users size={20} />, label: 'Manage Staff', color: 'text-indigo-500', path: '/admin/add-teacher' },
+        { icon: <Database size={20} />, label: 'Timetable', color: 'text-[#42A5F5]', path: '/admin/timetable' },
+        { icon: <Database size={20} />, label: 'Edit Timetable', color: 'text-rose-500', path: '/admin/edit-timetable' },
+        { icon: <Users size={20} />, label: 'User Control', color: 'text-[#42A5F5]', path: '/admin/manage-users' },
+        { icon: <Megaphone size={20} />, label: 'Publish Notice', color: 'text-orange-500', path: '/admin/global-notice' },
+        { icon: <ClipboardList size={20} />, label: 'Notice Archive', color: 'text-rose-500', path: '/notice-feed' },
+        { icon: <BarChart3 size={20} />, label: 'Performance', color: 'text-cyan-500', path: '/admin/attendance-report' },
+        { icon: <ShieldCheck size={20} />, label: 'Settings', color: 'text-[#42A5F5]', path: '/settings' },
+
     ] : user?.role === 'teacher' ? [
         // --- DAY 136: SYNCED TEACHER MODULES ---
         { icon: <User size={20} />, label: 'My Account', color: 'text-white/40', path: '/my-account' },
@@ -174,6 +187,15 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                 <span className="text-[15px] font-bold text-white italic">Add Payment</span>
                                             </button>
                                         </>
+                                    )}
+
+                                    {user?.role === 'admin' && (
+                                        <button onClick={() => handleNavigation('/notice-feed')} className="flex flex-col items-center gap-1 group">
+                                            <div className="bg-white text-[#42A5F5] p-2.5 rounded-full shadow-md active:scale-90 transition-all">
+                                                <ClipboardList size={18} />
+                                            </div>
+                                            <span className="text-[15px] font-bold text-white italic">Notices</span>
+                                        </button>
                                     )}
 
                                     <button onClick={() => handleNavigation('/settings')} className="flex flex-col items-center gap-1 group">
@@ -606,6 +628,207 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                         </div>
                                     </>
                                 )}
+
+                                {user?.role === 'admin' && (
+                                    <>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Personnel Management</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/*add student module*/}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/add-student')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <PlusCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Add Student</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* add staff module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/add-teacher')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <PlusCircle size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Manage Staff</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* users module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/manage-users')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Users size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">User Control</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Scheduling System</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* timetable MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/timetable')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Database size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Timetable</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* edit timetable MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/edit-timetable')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <Database size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Edit Timetable</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Communication Hub</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* publish notice MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/global-notice')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Megaphone size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Publish Notice</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* notice view MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/notice-feed')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <ClipboardList size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Notice Archive</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-8 px-4">
+                                            <div className="relative bg-white rounded-[2.5rem] p-6 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.5rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-6 ml-2 italic text-left relative z-10">Analytics & Reports</p>
+
+                                                <div className="space-y-6 relative z-10">
+                                                    {/* performance MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/attendance-report')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <BarChart3 size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Performance</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
                                 {user?.role === 'finance' && (
                                     <>
                                         <div className="mt-8 px-4">
