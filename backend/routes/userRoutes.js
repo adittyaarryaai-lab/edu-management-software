@@ -102,14 +102,15 @@ router.post('/add-student', protect, adminOnly, async (req, res) => {
     }
 });
 
-// Admin fetching students by grade (Added select for new fields if needed)
+
 router.get('/students/:grade', protect, async (req, res) => {
     try {
         const students = await User.find({
             role: 'student',
             grade: req.params.grade,
             schoolId: req.user.schoolId
-        }).select('name enrollmentNo grade fatherName motherName dob gender religion admissionNo phone address avatar');
+        }).select('name email enrollmentNo grade fatherName motherName dob gender religion admissionNo phone address avatar'); 
+      
 
         res.json(students);
     } catch (error) {
