@@ -37,7 +37,12 @@ router.get('/my-notices', protect, async (req, res) => {
             const studentGrade = req.user.grade ? req.user.grade.trim().toUpperCase() : '';
             baseQuery.$or = [
                 { audience: 'all' },
-                { audience: 'specific_grade', targetGrade: studentGrade }
+                // ✅ FIX: Ab bache ko wo notice bhi dikhega jisme 'All' likha ho 
+                // ya phir specifically uski apni class likhi ho
+                { 
+                    audience: 'specific_grade', 
+                    targetGrade: { $in: [studentGrade, 'All'] } 
+                }
             ];
         } 
         // FIX: Finance Teacher ke liye alag logic

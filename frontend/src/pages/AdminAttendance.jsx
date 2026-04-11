@@ -3,6 +3,7 @@ import { ArrowLeft, Search, GraduationCap, ChevronRight, Filter } from 'lucide-r
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminAttendance = () => {
     const navigate = useNavigate();
@@ -10,14 +11,14 @@ const AdminAttendance = () => {
     const [selectedGrade, setSelectedGrade] = useState('');
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
         const fetchGrades = async () => {
             try {
-                // FIXED: Now fetching from Student Grade List instead of Timetable
                 const { data } = await API.get('/users/grades/all');
                 setGrades(data);
-            } catch (err) { console.error("Grade Fetch Error"); }
+            } catch (err) { console.error("Grade fetch error"); }
         };
         fetchGrades();
     }, []);
@@ -28,63 +29,94 @@ const AdminAttendance = () => {
         try {
             const { data } = await API.get(`/users/students/${grade}`);
             setStudents(data);
-        } catch (err) { console.error("Fetch Error"); }
+        } catch (err) { console.error("Fetch error"); }
         finally { setLoading(false); }
     };
 
     return (
-        <div className="min-h-screen bg-void pb-24 font-sans italic text-white">
-            <div className="bg-void text-white px-6 pt-12 pb-20 rounded-b-[3rem] shadow-2xl border-b border-neon/20 relative overflow-hidden text-center">
-                <div className="absolute inset-0 bg-gradient-to-b from-neon/10 to-transparent pointer-events-none"></div>
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800  overscroll-none fixed inset-0 overflow-y-auto">
+            {/* Header Area */}
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-xl relative overflow-visible text-center">
                 <button
                     onClick={() => navigate(-1)}
-                    className="absolute top-12 left-6 z-[100] bg-white/5 p-2 rounded-xl border border-white/10 text-neon transition-all active:scale-90 hover:bg-white/10"
+                    className="absolute top-12 left-6 z-[110] bg-white/20 p-3 rounded-2xl border border-white/30 text-white transition-all active:scale-90"
                 >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={24} />
                 </button>
 
-                <h1 className="text-xl font-black uppercase tracking-tighter italic mb-8">Personnel Information</h1>
+                <h1 className="text-4xl font-black uppercase tracking-tighter italic mb-8 px-16 relative z-[100]">
+                    Student records
+                </h1>
 
-                {/* Styled Dropdown in Center */}
-                <div className="relative max-w-xs mx-auto z-10">
-                    <select
-                        value={selectedGrade}
-                        onChange={(e) => { setSelectedGrade(e.target.value); fetchStudents(e.target.value); }}
-                        className="w-full bg-slate-900/80 border border-neon/30 p-4 rounded-2xl outline-none font-black text-xs text-white uppercase italic appearance-none cursor-pointer text-center"
+                {/* Custom Manual Dropdown in Center */}
+                <div className="relative max-w-xs mx-auto z-[110]">
+                    <div
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full bg-white border border-blue-100 p-5 rounded-3xl shadow-lg flex items-center justify-between cursor-pointer active:scale-95 transition-all"
                     >
-                        <option value="">SELECT CLASS SECTOR</option>
-                        {grades.map(g => <option key={g} value={g} className="bg-void">{g}</option>)}
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neon"><Filter size={14} /></div>
+                        <span className="font-black text-[16px] text-[#42A5F5] uppercase italic">
+                            {selectedGrade || "Select class to view students"}
+                        </span>
+                        <Filter size={18} className="text-[#42A5F5]" />
+                    </div>
+
+                    <AnimatePresence>
+                        {isDropdownOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute left-0 right-0 mt-3 bg-white border border-blue-50 rounded-[2rem] shadow-2xl overflow-hidden z-20"
+                                >
+                                    {grades.map(g => (
+                                        <div
+                                            key={g}
+                                            onClick={() => {
+                                                setSelectedGrade(g);
+                                                fetchStudents(g);
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="p-5 text-[16px] font-black text-slate-600 uppercase italic hover:bg-blue-50 hover:text-[#42A5F5] transition-all border-b border-slate-50 last:border-none cursor-pointer"
+                                        >
+                                            {g}
+                                        </div>
+                                    ))}
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
 
-            <div className="px-5 -mt-8 space-y-4 relative z-20">
+            {/* Students List Container */}
+            <div className="px-5 -mt-10 space-y-4 relative z-20">
                 {loading ? <Loader /> : (
                     students.length > 0 ? (
                         students.map((stu) => (
                             <div
                                 key={stu._id}
                                 onClick={() => navigate(`/admin/student-report/${stu._id}`)}
-                                className="bg-white/5 backdrop-blur-xl p-4 rounded-[2.5rem] border border-white/5 flex items-center justify-between group hover:border-neon/30 transition-all active:scale-95 cursor-pointer"
+                                className="bg-white p-5 rounded-[2.5rem] border border-slate-100 flex items-center justify-between group shadow-lg ring-1 ring-slate-50 hover:border-blue-200 transition-all active:scale-95 cursor-pointer"
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-void text-neon border border-neon/20 rounded-2xl flex items-center justify-center font-black text-xs shadow-inner group-hover:bg-neon group-hover:text-void transition-all duration-300">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 bg-blue-50 text-[#42A5F5] border border-blue-100 rounded-2xl flex items-center justify-center font-black text-[16px] shadow-sm group-hover:bg-[#42A5F5] group-hover:text-white transition-all duration-300">
                                         {stu.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-white text-sm uppercase tracking-tighter italic">{stu.name}</h4>
-                                        <p className="text-[9px] font-black text-neon/40 uppercase tracking-widest italic">{stu.enrollmentNo}</p>
+                                        <h4 className="font-black text-slate-800 text-[19px] uppercase tracking-tighter italic">{stu.name}</h4>
+                                        <p className="text-[15px] font-black text-slate-400 uppercase tracking-widest italic">{stu.enrollmentNo}</p>
                                     </div>
                                 </div>
-                                <div className="bg-white/5 p-2 rounded-xl text-white/20 group-hover:text-neon transition-all">
-                                    <ChevronRight size={18} />
+                                <div className="bg-slate-50 p-3 rounded-xl text-slate-300 group-hover:text-[#42A5F5] transition-all border border-slate-100">
+                                    <ChevronRight size={22} />
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-20 opacity-20 italic font-black text-[10px] uppercase tracking-[0.4em]">
-                            Initialize Sector Selection
+                        <div className="text-center py-24 opacity-30 italic font-black text-[15px] uppercase tracking-[0.3em] text-slate-900">
+                            Initialize class selection 
                         </div>
                     )
                 )}

@@ -98,16 +98,22 @@ const NoticeFeed = ({ user }) => {
                     // --- TARGET LABEL LOGIC (FIXED) ---
                     <br />
                     let targetLabel = "";
+
                     if (n.audience === 'all') {
-                        targetLabel = "ALL TEACHERS AND STUDENTS";
+                        targetLabel = "All teachers and students";
                     } else if (n.audience === 'teachers') {
-                        targetLabel = "ALL TEACHERS";
+                        targetLabel = "All teachers";
                     } else if (n.audience === 'specific_grade') {
-                        // Check karo agar array hai (multi-selection) ya string (single)
-                        if (Array.isArray(n.targetGrade)) {
-                            targetLabel = n.targetGrade.length > 1 ? `MULTI: ${n.targetGrade.join(', ')}` : `SEC: ${n.targetGrade[0]}`;
+                        if (n.targetGrade === 'All' || (Array.isArray(n.targetGrade) && n.targetGrade.includes('All'))) {
+                            targetLabel = "All classes";
+                        } else if (Array.isArray(n.targetGrade)) {
+                            if (n.targetGrade.length > 1) {
+                                targetLabel = `Multi: ${n.targetGrade.join(', ')}`;
+                            } else {
+                                targetLabel = `Sec: ${n.targetGrade[0]}`;
+                            }
                         } else {
-                            targetLabel = `SEC: ${n.targetGrade || 'N/A'}`;
+                            targetLabel = `Sec: ${n.targetGrade || 'N/A'}`;
                         }
                     }
 
@@ -140,7 +146,7 @@ const NoticeFeed = ({ user }) => {
                             </p>
                             <div className="mt-5 pt-4 border-t border-slate-50 flex justify-between items-center">
                                 <span className="text-[18px] font-bold text-slate-400 italic capitalize">
-                                     By: {n.postedBy?.name?.toLowerCase() || n.authorRole?.toLowerCase()}
+                                    By: {n.postedBy?.name?.toLowerCase() || n.authorRole?.toLowerCase()}
                                 </span>
                                 <div className="flex gap-2">
                                     {hasControl && (
