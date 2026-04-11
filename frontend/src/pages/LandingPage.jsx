@@ -40,7 +40,7 @@ const LandingPage = () => {
             onClick={() => navigate('/login')}
             className="bg-slate-900 text-white px-6 py-2.5 rounded-2xl font-bold text-[13px] shadow-xl hover:bg-[#42A5F5] transition-all active:scale-95 flex items-center gap-2"
           >
-            Portal Login <ArrowRight size={16} />
+           Login 
           </button>
         </div>
       </nav>
