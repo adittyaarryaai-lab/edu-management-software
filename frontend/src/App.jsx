@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; // Animation ke liye
-import { Bot, Cpu, Zap, ShieldCheck, X, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Bot, Cpu, Zap, ShieldCheck, X, Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
 import API from './api';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -71,6 +71,8 @@ import SuperAdminTechnical from './pages/SuperAdminTechnical'; // <--- YE ADD KA
 
 import StudentCheckout from './pages/student/StudentCheckout'; // Day 109: New Invoice Page
 import PaymentMethods from './pages/student/PaymentMethods'; // Day 110: New Payment Methods Page
+
+import LandingPage from './pages/LandingPage';
 
 // DAY 76: Theme Integration
 import { useTheme } from './context/ThemeContext';
@@ -189,264 +191,183 @@ function App() {
 
   if (!user) {
     return (
-      <div className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-[#F8FAFC]">
-        {isMatrixActive && <VisualMatrix />}
+      <Routes>
+        {/* Step 2.1: Default Route par Landing Page dikhega */}
+        <Route path="/" element={<LandingPage />} />
 
-        {/* LIGHT THEME BACKGROUND IMAGE */}
-        {/* 👇 DAY 163: LIQUID & VISIBLE BACKGROUND FIXED 👇 */}
-        <div className="absolute inset-0 z-0 text-center flex items-center justify-center overscroll-none overflow-hidden fixed inset-0 overflow-y-auto overflow-x-hidden">
-          {/* Image ki opacity 0.08 se badha kar 0.4 kar di aur grayscale hata diya taaki liquid feel aaye */}
-          <img
-            src="/image.png.jpeg"
-            alt="AI background"
-            className="w-full h-full object-cover opacity-40 scale-110 motion-safe:animate-pulse-slow"
-            style={{ filter: 'hue-rotate(10deg) saturate(150%)' }} // Subtle liquid color shift
-          />
-          {/* Gradient overlay ko halka kiya (via-white/60) taaki niche se image dikhe */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#F8FAFC] via-white/60 to-[#42A5F5]/20 backdrop-blur-[2px]"></div>
+        {/* Step 2.2: Login Route par tera Pura UI jo tune bheja hai */}
+        <Route path="/login" element={
 
-          {/* Extra liquid waves effect (Optional, premium look ke liye) */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute -inset-[100%] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iMCIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjNDJBNUY1IiBzdG9wLW9wYWNpdHk9IjAuMSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+')] animate-wave-slow"></div>
-          </div>
-        </div>
-        {/* 👆 LIQUID BACKGROUND END 👆 */}
+          <div className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden bg-[#F8FAFC]">
+            {isMatrixActive && <VisualMatrix />}
 
-        {/* --- ROBOT ANIMATION SECTION (STAYS THE SAME LOGIC) --- */}
-        <motion.div
-          initial={{ x: "-100%" }}
-          animate={{ x: ["-100%", "0%", "-100%"] }}
-          transition={{ duration: 4, times: [0, 0.5, 1], ease: "easeInOut" }}
-          className="absolute left-0 z-30 flex items-center pointer-events-none"
-        >
-          <div className="bg-gradient-to-r from-[#42A5F5] to-blue-600 p-4 rounded-r-full shadow-xl border-y-4 border-r-4 border-white">
-            <Bot size={80} className="text-white animate-pulse" />
-          </div>
-          <div className="w-20 h-2 bg-slate-200 shadow-sm border-y border-slate-300"></div>
-        </motion.div>
-
-        {/* --- LOGIN CARD (STAYS THE SAME ANIMATION) --- */}
-        <motion.div
-          initial={{ x: "-120%", opacity: 0, rotate: -10 }}
-          animate={{ x: 0, opacity: 1, rotate: 0 }}
-          transition={{ duration: 2, delay: 0.5, type: "spring", stiffness: 50 }}
-          className="relative z-10 w-full max-w-lg px-6"
-        >
-          <div className="bg-white/80 backdrop-blur-3xl border border-[#DDE3EA] rounded-[4rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group italic">
-
-            {/* Scanning line effect updated to Blue */}
-            <motion.div
-              animate={{ top: ["0%", "100%", "0%"] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#42A5F5] to-transparent opacity-30 z-0"
-            />
-
-            <div className="text-center mb-10 relative z-10">
-              <div className="flex justify-center gap-4 mb-4 items-center">
-                <Cpu
-                  className="text-[#42A5F5] animate-[spin_10s_linear_infinite]"
-                  size={36}
-                />
-                <h2 className="text-4xl font-black text-slate-800 tracking-tighter sentencecase italic">EduFlowAI</h2>
-                <Zap
-                  className="text-amber-400 fill-amber-400 animate-[pulse_1.5s_ease-in-out_infinite] drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]"
-                  size={36}
-                />
-              </div>
-              <motion.div
-                animate={{ scaleX: [1, 1.5, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-                className="h-1 w-20 bg-[#42A5F5] mx-auto rounded-full mb-4 shadow-sm origin-center"
-              />
-              <p className="text-slate-700 font-bold uppercase text-[19px]  italic">Login Required</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-6 relative z-10">
-              <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#42A5F5] transition-colors">
-                  <Mail size={20} />
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email ID"
-                  className="w-full bg-slate-50 border border-slate-400 py-5 pl-14 pr-8 rounded-[2.5rem] outline-none text-slate-700 placeholder:text-slate-400 focus:border-[#42A5F5] focus:bg-white transition-all font-bold text-[16px] italic"
-                  required
-                />
-              </div>
-
-              <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#42A5F5] transition-colors">
-                  <Lock size={20} />
-                </div>
-                <input
-                  type={showPass ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter Password"
-                  className="w-full bg-slate-50 border border-slate-400 py-5 pl-14 pr-16 rounded-[2.5rem] outline-none text-slate-700 placeholder:text-slate-400 focus:border-[#42A5F5] focus:bg-white transition-all font-bold text-[16px] italic"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#42A5F5] transition-colors"
-                >
-                  {showPass ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
-              </div>
-              <AnimatePresence>
-                {loginError && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-red-500 text-[13px] font-bold italic ml-6 mt-2"
-                  >
-                    {loginError}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-
-              <div className="flex items-center justify-between px-4">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <ShieldCheck size={16} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest italic">Secure <br /> Login</span>
-                </div>
-                <button type="button" onClick={() => setShowBypass(true)} className="text-[11px] font-black text-[#42A5F5] uppercase tracking-widest hover:underline italic">Forgot Password?</button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#42A5F5] text-white py-6 rounded-[2.5rem] font-black shadow-lg shadow-blue-100 active:scale-95 transition-all uppercase text-[17px] mt-6 flex items-center justify-center gap-4 italic"
-              >
-                {loading ? (
-                  <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></span>
-                ) : (
-                  <>
-                    <span>Login</span>
-                    <Zap size={20} className="fill-white" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-12 text-center opacity-30">
-              <p className="text-[12px] font-bold text-slate-900 uppercase tracking-[0.1em] italic">
-                PROTOCOL v2.0 • VERIFIED BY EDUFLOWAI INTELLIGENCE
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* --- BYPASS MODAL (LIGHT THEME) --- */}
-        <AnimatePresence>
-          {showBypass && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-6 italic"
+            <button
+              onClick={() => navigate('/')}
+              className="absolute top-10 left-10 z-50 bg-white/20 hover:bg-white/40 p-3 rounded-2xl border border-white/30 text-slate-600 transition-all active:scale-90 flex items-center gap-2 font-black uppercase text-[12px] italic tracking-widest shadow-xl backdrop-blur-md"
             >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-                className="bg-white border border-[#DDE3EA] p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl relative overflow-hidden"
-              >
-                <button onClick={() => { setShowBypass(false); setBypassStep(1) }} className="absolute top-8 right-8 text-slate-900 hover:text-slate-600 transition-all p-2 bg-slate-50 rounded-full">
-                  <X size={20} />
-                </button>
+              <ArrowLeft size={20} /> Back
+            </button>
 
-                <div className="flex items-center gap-3 mb-8">
-                  <ShieldCheck className="text-[#42A5F5]" size={24} />
-                  <h3 className="text-3xl font-black text-slate-800 tracking-tighter italic capitalize">Password Reset</h3>
+            {/* LIGHT THEME BACKGROUND IMAGE (Tera Day 163 wala exact code) */}
+            <div className="absolute inset-0 z-0 text-center flex items-center justify-center overscroll-none overflow-hidden fixed inset-0 overflow-y-auto overflow-x-hidden">
+              <img
+                src="/image.png.jpeg"
+                alt="AI background"
+                className="w-full h-full object-cover opacity-40 scale-110 motion-safe:animate-pulse-slow"
+                style={{ filter: 'hue-rotate(10deg) saturate(150%)' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#F8FAFC] via-white/60 to-[#42A5F5]/20 backdrop-blur-[2px]"></div>
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute -inset-[100%] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iMCIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjNDJBNUY1IiBzdG9wLW9wYWNpdHk9IjAuMSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+')] animate-wave-slow"></div>
+              </div>
+            </div>
+
+            {/* ROBOT ANIMATION */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: ["-100%", "0%", "-100%"] }}
+              transition={{ duration: 4, times: [0, 0.5, 1], ease: "easeInOut" }}
+              className="absolute left-0 z-30 flex items-center pointer-events-none"
+            >
+              <div className="bg-gradient-to-r from-[#42A5F5] to-blue-600 p-4 rounded-r-full shadow-xl border-y-4 border-r-4 border-white">
+                <Bot size={80} className="text-white animate-pulse" />
+              </div>
+              <div className="w-20 h-2 bg-slate-200 shadow-sm border-y border-slate-300"></div>
+            </motion.div>
+
+            {/* LOGIN CARD */}
+            <motion.div
+              initial={{ x: "-120%", opacity: 0, rotate: -10 }}
+              animate={{ x: 0, opacity: 1, rotate: 0 }}
+              transition={{ duration: 2, delay: 0.5, type: "spring", stiffness: 50 }}
+              className="relative z-10 w-full max-w-lg px-6"
+            >
+              <div className="bg-white/80 backdrop-blur-3xl border border-[#DDE3EA] rounded-[4rem] p-10 md:p-14 shadow-2xl relative overflow-hidden group italic">
+                <motion.div
+                  animate={{ top: ["0%", "100%", "0%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-[#42A5F5] to-transparent opacity-30 z-0"
+                />
+
+                <div className="text-center mb-10 relative z-10">
+                  <div className="flex justify-center gap-4 mb-4 items-center">
+                    <Cpu className="text-[#42A5F5] animate-[spin_10s_linear_infinite]" size={36} />
+                    <h2 className="text-4xl font-black text-slate-800 tracking-tighter italic">EduFlowAI</h2>
+                    <Zap className="text-amber-400 fill-amber-400 animate-[pulse_1.5s_ease-in-out_infinite]" size={36} />
+                  </div>
+                  <motion.div
+                    animate={{ scaleX: [1, 1.5, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                    className="h-1 w-20 bg-[#42A5F5] mx-auto rounded-full mb-4 shadow-sm"
+                  />
+                  <p className="text-slate-700 font-bold uppercase text-[19px] italic">Login Required</p>
                 </div>
 
-                {/* 👇 PREMIUM MESSAGE BOX 👇 */}
-                <AnimatePresence mode="wait">
-                  {bypassMsg.text && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 ${bypassMsg.type === 'success'
-                        ? 'bg-blue-50 border-blue-200 text-[#42A5F5]'
-                        : 'bg-red-50 border-red-200 text-red-500'
-                        }`}
-                    >
-                      <Zap size={16} className={bypassMsg.type === 'success' ? 'animate-pulse' : ''} />
-                      <p className="text-[13px] font-bold italic">{bypassMsg.text}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {bypassStep === 1 ? (
-                  <div className="space-y-5">
-                    <p className="text-[15px] text-slate-700 font-bold italic ml-2">Enter Your Linked Email ID</p>
-                    <input type="email" placeholder="Registered Email ID" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-500 text-[15px] text-slate-700 outline-none focus:border-[#42A5F5] italic font-bold"
-                      onChange={(e) => setBypassData({ ...bypassData, email: e.target.value })} />
-                    <button onClick={handleSendOTP} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">Request OTP</button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-[13px] text-emerald-500 font-bold italic ml-2">OTP transmitted • Verify identity</p>
-
-                    {/* OTP Input */}
+                <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+                  <div className="relative group">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#42A5F5]">
+                      <Mail size={20} />
+                    </div>
                     <input
-                      type="text"
-                      placeholder="6-digit OTP"
-                      className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-                      value={bypassData.otp}
-                      onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })}
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email ID"
+                      className="w-full bg-slate-50 border border-slate-400 py-5 pl-14 pr-8 rounded-[2.5rem] outline-none text-slate-700 font-bold text-[16px] italic focus:border-[#42A5F5] focus:bg-white transition-all"
+                      required
                     />
+                  </div>
 
-                    {/* NEW PASSWORD WITH EYE */}
-                    <div className="relative group">
-                      <input
-                        type={showPass ? "text" : "password"}
-                        placeholder="New Password"
-                        className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-                        value={bypassData.newPassword}
-                        onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPass(!showPass)}
-                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
-                      >
-                        {showPass ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
+                  <div className="relative group">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#42A5F5]">
+                      <Lock size={20} />
                     </div>
-
-                    {/* CONFIRM PASSWORD WITH EYE */}
-                    <div className="relative group">
-                      <input
-                        type={showConfirm ? "text" : "password"}
-                        placeholder="Confirm Password"
-                        className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]"
-                        onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm(!showConfirm)}
-                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5] transition-colors"
-                      >
-                        {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                    </div>
-
-                    <button onClick={handleResetFinal} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">
-                      Reset Password
+                    <input
+                      type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter Password"
+                      className="w-full bg-slate-50 border border-slate-400 py-5 pl-14 pr-16 rounded-[2.5rem] outline-none text-slate-700 font-bold text-[16px] italic focus:border-[#42A5F5] focus:bg-white transition-all"
+                      required
+                    />
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#42A5F5]">
+                      {showPass ? <EyeOff size={22} /> : <Eye size={22} />}
                     </button>
                   </div>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Ambient Neural Network Particles updated to Blue */}
-        <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-[#42A5F5] rounded-full animate-ping opacity-20"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-1 h-1 bg-cyan-400 rounded-full animate-ping delay-1000 opacity-20"></div>
-      </div>
+                  {loginError && (
+                    <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-red-500 text-[13px] font-bold italic ml-6 mt-2">
+                      {loginError}
+                    </motion.p>
+                  )}
+
+                  <div className="flex items-center justify-between px-4">
+                    <div className="flex items-center gap-2 text-slate-400">
+                      <ShieldCheck size={16} />
+                      <span className="text-[10px] font-bold uppercase tracking-widest italic">Secure <br /> Login</span>
+                    </div>
+                    <button type="button" onClick={() => setShowBypass(true)} className="text-[11px] font-black text-[#42A5F5] uppercase tracking-widest hover:underline italic">Forgot Password?</button>
+                  </div>
+
+                  <button type="submit" disabled={loading} className="w-full bg-[#42A5F5] text-white py-6 rounded-[2.5rem] font-black shadow-lg shadow-blue-100 active:scale-95 transition-all uppercase text-[17px] mt-6 flex items-center justify-center gap-4 italic">
+                    {loading ? <span className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></span> : <><span>Login</span><Zap size={20} className="fill-white" /></>}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+
+            {/* BYPASS MODAL (FORGOT PASSWORD) - Tera Pura Code */}
+            <AnimatePresence>
+              {showBypass && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-6 italic">
+                  <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-white border border-[#DDE3EA] p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl relative overflow-hidden">
+                    <button onClick={() => { setShowBypass(false); setBypassStep(1) }} className="absolute top-8 right-8 text-slate-900 hover:text-slate-600 transition-all p-2 bg-slate-50 rounded-full"><X size={20} /></button>
+                    <div className="flex items-center gap-3 mb-8">
+                      <ShieldCheck className="text-[#42A5F5]" size={24} />
+                      <h3 className="text-3xl font-black text-slate-800 tracking-tighter italic capitalize">Password Reset</h3>
+                    </div>
+
+                    {bypassMsg.text && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className={`mb-6 p-4 rounded-2xl border flex items-center gap-3 ${bypassMsg.type === 'success' ? 'bg-blue-50 border-blue-200 text-[#42A5F5]' : 'bg-red-50 border-red-200 text-red-500'}`}>
+                        <Zap size={16} className={bypassMsg.type === 'success' ? 'animate-pulse' : ''} />
+                        <p className="text-[13px] font-bold italic">{bypassMsg.text}</p>
+                      </motion.div>
+                    )}
+
+                    {bypassStep === 1 ? (
+                      <div className="space-y-5">
+                        <p className="text-[15px] text-slate-700 font-bold italic ml-2">Enter Your Linked Email ID</p>
+                        <input type="email" placeholder="Registered Email ID" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-500 text-[15px] text-slate-700 outline-none focus:border-[#42A5F5] italic font-bold" onChange={(e) => setBypassData({ ...bypassData, email: e.target.value })} />
+                        <button onClick={handleSendOTP} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">Request OTP</button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-[13px] text-emerald-500 font-bold italic ml-2">OTP transmitted • Verify identity</p>
+                        <input type="text" placeholder="6-digit OTP" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]" value={bypassData.otp} onChange={(e) => setBypassData({ ...bypassData, otp: e.target.value })} />
+                        <div className="relative group">
+                          <input type={showPass ? "text" : "password"} placeholder="New Password" className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]" value={bypassData.newPassword} onChange={(e) => setBypassData({ ...bypassData, newPassword: e.target.value })} />
+                          <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5]">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+                        </div>
+                        <div className="relative group">
+                          <input type={showConfirm ? "text" : "password"} placeholder="Confirm Password" className="w-full bg-slate-50 p-5 pr-14 rounded-2xl border border-slate-900 text-[15px] font-bold text-slate-900 outline-none focus:border-[#42A5F5]" onChange={(e) => setBypassData({ ...bypassData, confirmPassword: e.target.value })} />
+                          <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-900 hover:text-[#42A5F5]">{showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}</button>
+                        </div>
+                        <button onClick={handleResetFinal} className="w-full bg-[#42A5F5] text-white py-5 rounded-2xl font-black text-[15px] shadow-lg shadow-blue-50 active:scale-95 transition-all italic">Reset Password</button>
+                      </div>
+                    )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-[#42A5F5] rounded-full animate-ping opacity-20"></div>
+            <div className="absolute bottom-1/4 right-1/3 w-1 h-1 bg-cyan-400 rounded-full animate-ping delay-1000 opacity-20"></div>
+          </div>
+        } />
+
+        {/* Catch-all route to redirect back to Landing Page */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     );
   }
 

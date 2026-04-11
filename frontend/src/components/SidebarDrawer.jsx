@@ -31,8 +31,11 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
             localStorage.removeItem('superadmin_backup');
             window.location.href = '/superadmin/dashboard';
         } else {
+            // Normal Logout Logic
             localStorage.removeItem('user');
-            window.location.reload();
+
+            // --- FIX: Redirect directly to /login ---
+            window.location.href = "/login";
         }
     };
 
