@@ -230,7 +230,12 @@ router.get('/finance/stats', protect, async (req, res) => {
             .limit(10)
             .populate('student', 'name grade enrollmentNo');
 
-        // NOTE: Pending Installments logic removed as per Day 118 plan
+            // --- ADDED FOR NOTIFICATION BADGE START ---
+        const pendingOnlineCount = await Fee.countDocuments({
+            schoolId,
+            status: 'Pending',
+            paymentMode: 'Online'
+        });
 
         res.json({
             schoolName: schoolDetails?.schoolName || "EduFlowAI School",
@@ -238,6 +243,7 @@ router.get('/finance/stats', protect, async (req, res) => {
             collectedToday,
             collectedMonth,
             onlineToday,
+            pendingCount: pendingOnlineCount,
             totalPending: 0, // Dashboard crash na ho isliye temporary 0 bhej rahe hain
             pendingStudentsCount: 0,
             recentPayments: recentPayments.map(p => ({

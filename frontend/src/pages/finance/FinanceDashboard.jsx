@@ -9,6 +9,7 @@ const FinanceDashboard = ({ searchQuery }) => {
         collectedToday: 0,
         collectedMonth: 0,
         recentPayments: [],
+        pendingCount: 0,
         penaltySettings: { dailyRate: 0, isActive: false }
     });
 
@@ -94,7 +95,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                         </div>
                     </motion.div>
                 )}
-                
+
                 {penaltyUpdateMsg && (
                     <motion.div
                         initial={{ y: -100, opacity: 0 }}
@@ -165,6 +166,16 @@ const FinanceDashboard = ({ searchQuery }) => {
                                 onClick={() => navigate(card.path)}
                                 className={`p-6 bg-white rounded-[2.5rem] border border-[#DDE3EA] shadow-md active:scale-95 transition-all cursor-pointer relative overflow-hidden group`}
                             >
+                                {/* --- RED NOTIFICATION BADGE --- */}
+                                {card.label === "Payments" && stats.pendingCount > 0 && (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="absolute top-5 right-5 bg-rose-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shadow-lg border-2 border-white z-20"
+                                    >
+                                        {stats.pendingCount}
+                                    </motion.div>
+                                )}
                                 <div className="mb-3 opacity-80 group-hover:scale-110 transition-transform">{card.icon}</div>
                                 <h3 className="text-[18px] font-black text-slate-700">
                                     {typeof card.value === 'number' ? `₹${card.value.toLocaleString()}` : card.value}
@@ -242,7 +253,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                                         </span>
                                     </div>
                                     <p className="text-[13px] text-slate-400 font-bold capitalize">
-                                        {p.grade} • {p.date} <br /> {p.time ?  ` at ${p.time}` : ''}
+                                        {p.grade} • {p.date} <br /> {p.time ? ` at ${p.time}` : ''}
                                     </p>
                                 </div>
                                 <span className="text-[16px] font-black text-[#42A5F5] italic ml-4">₹{p.amount.toLocaleString()}</span>

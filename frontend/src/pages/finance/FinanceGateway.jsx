@@ -3,6 +3,7 @@ import { ShieldCheck, Save, Eye, CheckCircle, Smartphone, User, Hash, Edit3, X, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
+import Loader from '../../components/Loader';
 
 const FinanceGateway = () => {
     const [settings, setSettings] = useState({ upiId: '', merchantName: '' });
@@ -14,6 +15,7 @@ const FinanceGateway = () => {
     const [toastMsg, setToastMsg] = useState("");
     const [resolvedSignals, setResolvedSignals] = useState([]);
     const [selectedSignal, setSelectedSignal] = useState(null);
+    const [isZoomed, setIsZoomed] = useState(false); // Screenshot bada karke dekhne ke liye
 
     const formRef = useRef(null);
 
@@ -65,12 +67,7 @@ const FinanceGateway = () => {
         }
     };
 
-    if (loading) return (
-        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-4 italic font-bold text-[15px] text-[#42A5F5] animate-pulse">
-            <div className="w-12 h-12 border-4 border-slate-200 border-t-[#42A5F5] rounded-full animate-spin"></div>
-            Loading finance gateway...
-        </div>
-    );
+    if (loading) return <Loader />;
 
     return (
         <div className="min-h-screen bg-[#F1F5F9] text-slate-800 p-5 pb-32 italic font-sans text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
@@ -92,8 +89,9 @@ const FinanceGateway = () => {
                             <div className="w-full md:w-2/3 bg-slate-50 flex items-center justify-center p-6">
                                 <img
                                     src={`http://localhost:5000${selectedSignal.paymentScreenshot}`}
-                                    className="max-w-full max-h-full object-contain rounded-3xl shadow-lg border border-slate-200"
+                                    className="max-w-full max-h-full object-contain rounded-3xl shadow-lg border border-slate-200 cursor-zoom-in hover:scale-[1.02] transition-transform"
                                     alt="Payment evidence"
+                                    onClick={() => setIsZoomed(true)}
                                 />
                             </div>
 
@@ -362,6 +360,38 @@ const FinanceGateway = () => {
                     </div>
                 </div>
             </div>
+            {/* --- FULL SCREEN ZOOM OVERLAY --- */}
+            <AnimatePresence>
+                {isZoomed && selectedSignal && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[2000] bg-slate-900/95 flex items-center justify-center p-4 cursor-zoom-out"
+                        onClick={() => setIsZoomed(false)} // Kahin bhi click karo band ho jayega
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}
+                            className="relative max-w-full max-h-full"
+                        >
+                            {/* Close Button */}
+                            <button
+                                className="absolute -top-12 right-0 text-white flex items-center gap-2 font-black uppercase text-[12px] tracking-widest"
+                                onClick={() => setIsZoomed(false)}
+                            >
+                                <X size={29} className="bg-white/10 p-1 rounded-full" />
+                            </button>
+
+                            <img
+                                src={`http://localhost:5000${selectedSignal.paymentScreenshot}`}
+                                className="max-w-[95vw] max-h-[85vh] object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border-4 border-white/10"
+                                alt="Full View"
+                            />
+                            <p className="text-center text-white/40 font-bold italic mt-4 uppercase text-[11px] tracking-[0.3em]">
+                                Neural View Protocol Active
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
