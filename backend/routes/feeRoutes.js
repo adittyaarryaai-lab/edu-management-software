@@ -190,12 +190,18 @@ router.get('/audit/pending-verifications', protect, financeOnly, async (req, res
         res.status(500).json({ message: 'Audit Feed Failure' });
     }
 });
-// --- DAY 131: APPROVE ONLINE SIGNAL (STATUS UPDATE) ---
+// --- DAY 182: VERIFY PAYMENT SIGNAL ---
 router.post('/audit/verify-payment', protect, financeOnly, async (req, res) => {
     try {
         const { feeId } = req.body;
-        // Status Verified karo - Ab ye bache ke balance mein count hone lagega
-        await Fee.findByIdAndUpdate(feeId, { status: 'Verified' });
+        const feeRecord = await Fee.findById(feeId);
+
+        if (!feeRecord) return res.status(404).json({ message: 'Neural record missing! ❌' });
+
+        // Status Verified update karo
+        feeRecord.status = 'Verified';
+        await feeRecord.save();
+
         res.json({ success: true, message: 'Signal Verified. Ledger Updated! ⚡' });
     } catch (error) {
         res.status(500).json({ message: 'Verification Failed' });
@@ -265,8 +271,6 @@ router.get('/reports/summary', protect, financeOnly, async (req, res) => {
     }
 });
 
-// --- DAY 123: ULTIMATE STUDENT SUMMARY (CARRY-FORWARD PENALTY) ---
-// --- DAY 123: ULTIMATE STUDENT SUMMARY (SYNCED WITH AUDIT LOGIC) ---
 router.get('/student-summary', protect, async (req, res) => {
     try {
         const studentId = req.user._id;
@@ -276,7 +280,7 @@ router.get('/student-summary', protect, async (req, res) => {
         const currentYear = today.getFullYear();
 
         const User = require('../models/User');
-        const School = require('../models/School'); // Define School model
+        const School = require('../models/School');
 
         const student = await User.findById(studentId).populate('schoolId');
         if (!student) return res.status(404).json({ message: 'Identity missing' });
@@ -288,7 +292,7 @@ router.get('/student-summary', protect, async (req, res) => {
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        
+
         const verifiedPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
@@ -316,46 +320,46 @@ router.get('/student-summary', protect, async (req, res) => {
             });
         }
 
-        // Logic: Naya bacha isi mahine add hua hai ya nahi
         const joinDate = new Date(student.createdAt);
         const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
-
-        // Months calculation
         let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
 
         const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
+
+        // 2. Ab check karo bache ne verified kitna pay kiya hai (Penalty entries ko chhod kar)
         const totalMonthlyPaidSoFar = verifiedPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        let balance = totalMonthlyExpected - totalMonthlyPaidSoFar;
+        // --- NEURAL MATH ADJUSTMENT ---
+        let baseFeesBalance = totalMonthlyExpected - totalMonthlyPaidSoFar;
+        let extraPaidAmount = baseFeesBalance < 0 ? Math.abs(baseFeesBalance) : 0;
 
-        // --- PENALTY LOGIC FIX (STUDENT SIDE) ---
         let livePenalty = 0;
-        // Sirf purane bacho pe penalty lagegi (Same as Audit)
-        if (!isNewStudent && pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+        if (!isNewStudent && pSettings?.isActive && baseFeesBalance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
+
             let totalDaysToCharge = diffDays + 1;
             if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
             livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
+        // Penalty Adjustment: Extra paise pehle penalty clear karenge
+        const adjustedLivePenalty = Math.max(0, livePenalty - extraPaidAmount);
+        const remainingExtra = Math.max(0, extraPaidAmount - livePenalty);
+
         const frozenPenalty = verifiedPayments.reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
         const totalPenaltyToDisplay = livePenalty + frozenPenalty;
+        const netBalanceWithPenalty = baseFeesBalance + totalPenaltyToDisplay;
 
-        // Total Outstanding logic
-        const totalOutstanding = (balance > 0 ? balance : 0) + totalPenaltyToDisplay;
+        const totalOutstanding = Math.max(0, baseFeesBalance + adjustedLivePenalty);
 
-        const pendingPayment = await Fee.findOne({
-            student: studentId,
-            status: 'Pending'
-        }).sort({ createdAt: -1 });
+        const pendingPayment = await Fee.findOne({ student: studentId, status: 'Pending' }).sort({ createdAt: -1 });
 
         const groupedHistory = verifiedPayments.reduce((acc, pay) => {
             const key = `${pay.month} ${pay.year}`;
@@ -385,9 +389,9 @@ router.get('/student-summary', protect, async (req, res) => {
             totalPaidThisMonth: verifiedPayments.filter(p => p.month === currentMonthName && p.year === currentYear).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0),
             lastActivity: verifiedPayments.length > 0 ? verifiedPayments[0].date : null,
             totalPenalty: totalPenaltyToDisplay,
-            remainingFees: (balance > 0 ? balance : 0), // Base fees without penalty
-            grandTotal: totalOutstanding > 0 ? totalOutstanding : 0, // With penalty
-            advanceBalance: totalOutstanding < 0 ? Math.abs(totalOutstanding) : 0,
+            grandTotal: Math.max(0, netBalanceWithPenalty),
+            remainingFees: Math.max(0, baseFeesBalance),
+            advanceBalance: netBalanceWithPenalty < 0 ? Math.abs(netBalanceWithPenalty) : 0,
             totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
             paymentHistory: groupedHistory,
@@ -406,8 +410,6 @@ router.get('/student-summary', protect, async (req, res) => {
     }
 });
 
-// --- DAY 104: GET RECEIPT DATA (Point 6) ---
-// Is route ka kaam hai payment ki details + student info + school details nikalna
 router.get('/receipt/:paymentId', protect, async (req, res) => {
     try {
         const payment = await Fee.findById(req.params.paymentId)
@@ -616,8 +618,6 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
     }
 });
 
-// --- DAY 123: STRICT AUDIT ROUTE (CARRY-FORWARD PENALTY) ---
-// --- DAY 123: STRICT AUDIT ROUTE (FINAL STABLE VERSION) ---
 router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     try {
         const studentId = req.params.studentId;
@@ -627,7 +627,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const currentYear = today.getFullYear();
 
         const User = require('../models/User');
-        const School = require('../models/School'); // Define School model
+        const School = require('../models/School');
 
         const student = await User.findOne({ _id: studentId, schoolId: schoolId });
         if (!student) return res.status(404).json({ message: 'Identity missing' });
@@ -639,7 +639,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const numericPart = rawGrade.match(/\d+/);
         const classMatch = numericPart ? `Class ${numericPart[0]}` : rawGrade;
         const structure = await FeeStructure.findOne({ schoolId, className: classMatch });
-        
+
         const allPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
@@ -668,11 +668,8 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             });
         }
 
-        // Logic: Naya bacha isi mahine add hua hai ya nahi
         const joinDate = new Date(student.createdAt);
         const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
-
-        // Months calculation
         let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
 
         const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
@@ -681,35 +678,34 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             return !isOneTime && p.status === 'Verified';
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        let balance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
+        // --- PENALTY ADJUSTMENT LOGIC ---
+        let baseBalance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
+        let extraPaid = baseBalance < 0 ? Math.abs(baseBalance) : 0;
 
-        // --- PENALTY LOGIC FIX ---
         let livePenalty = 0;
-        // Sirf purane bacho pe penalty lagegi
-        if (!isNewStudent && pSettings?.isActive && balance > 0 && pSettings.activatedAt) {
+        if (!isNewStudent && pSettings?.isActive && baseBalance > 0 && pSettings.activatedAt) {
             const activationDate = new Date(pSettings.activatedAt);
             const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
             const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const diffTime = Math.abs(end - start);
             let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
+
             let totalDaysToCharge = diffDays + 1;
             if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
             livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
         }
 
         const frozenPenalty = allPayments.filter(p => p.status === 'Verified').reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
-        const totalPenaltySum = livePenalty + frozenPenalty;
-
-        const finalRemainingWithPenalty = (balance > 0 ? balance : 0) + totalPenaltySum;
+        const totalPenaltySum = Math.max(0, (livePenalty + frozenPenalty) - extraPaid);
+        const finalRemaining = Math.max(0, baseBalance) + totalPenaltySum;
 
         res.json({
             student,
             totalPaidThisMonth: allPayments.filter(p => p.month === currentMonthName && p.year === currentYear && p.status === 'Verified').reduce((sum, p) => sum + p.amountPaid, 0),
             totalExpected: monthlyOnlyStructureTotal,
             totalPenalty: totalPenaltySum,
-            remaining: finalRemainingWithPenalty > 0 ? finalRemainingWithPenalty : 0,
-            advance: finalRemainingWithPenalty < 0 ? Math.abs(finalRemainingWithPenalty) : 0,
+            remaining: finalRemaining,
+            advance: (baseBalance < 0 && (Math.abs(baseBalance) > (livePenalty + frozenPenalty))) ? (Math.abs(baseBalance) - (livePenalty + frozenPenalty)) : 0,
             currentMonth: currentMonthName,
             structureDetails,
             history: allPayments.filter(p => p.status === 'Verified').reduce((acc, pay) => {
@@ -721,7 +717,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
                 acc[key].push({ id: pay._id, amount: pay.amountPaid, category: displayCategory.toUpperCase(), date: pay.date, mode: pay.paymentMode });
                 return acc;
             }, {}),
-            status: finalRemainingWithPenalty <= 0 ? 'COMPLETED' : 'PENDING'
+            status: finalRemaining <= 0 ? 'COMPLETED' : 'PENDING'
         });
 
     } catch (error) {

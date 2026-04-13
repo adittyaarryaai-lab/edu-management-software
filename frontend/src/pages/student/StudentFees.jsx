@@ -89,30 +89,25 @@ const StudentFees = () => {
             alert("Bypass Error: System could not generate PDF. Please check network.");
         }
     };
-
+    // --- StudentFees.jsx variables fix ---
     if (!summary) return <Loader />;
-    // --- DAY 142: MASTER MATH LOGIC (SYNCED WITH BACKEND SNAPSHOT) ---
-    const currentMonthPaid = summary?.totalPaidThisMonth || 0;
 
-    // Backend ab grandTotal mein (Live Penalty + Frozen Penalty + Fees) jod kar bhej raha hai
-    const finalOutstanding = summary?.grandTotal || 0;
+    const currentMonthPaid = summary?.totalPaidThisMonth || 0;
+    const finalOutstanding = summary?.grandTotal || 0; // Backend (26000) seedha yahan aayega
     const advanceMoney = summary?.advanceBalance || 0;
     const totalPenalty = summary?.totalPenalty || 0;
-
     const totalExpectedAll = summary?.totalFeesStructure || 0;
+    const structureTotal = summary?.totalFeesStructure || 0;
 
-    // Status Logic
     const isFeesDone = finalOutstanding <= 0;
     const statusText = isFeesDone ? "FEES COMPLETED" : "PAYMENT REQUIRED";
-
-    // Activity & Dates
     const lastDate = summary?.lastActivity ? new Date(summary.lastActivity).toLocaleDateString('en-GB') : "NO ACTIVITY";
     const today = new Date();
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const deadlineStr = nextMonth.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-    const structureTotal = summary?.totalFeesStructure || 0;
     return (
+        // ... tera UI code
         <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
 
             {/* --- DAY 132: MODAL FOR PENDING SCREENSHOT PREVIEW --- */}
@@ -172,7 +167,7 @@ const StudentFees = () => {
                     {/* --- StudentFees.jsx Update --- */}
 
                     {/* Surplus Adjusted Badge ke upar ya niche ye Penalty Alert daldo */}
-                    {summary?.totalPenalty > 0 && (
+                    {summary?.totalPenalty > 0 && finalOutstanding > 0 && (
                         <div className="flex items-center justify-center gap-2 mb-4 bg-rose-50 p-4 rounded-3xl border border-rose-100 text-left">
                             <AlertCircle size={20} className="text-rose-500" />
                             <div>
@@ -184,17 +179,18 @@ const StudentFees = () => {
 
                     {/* Main Balance Heading badal do */}
                     <h2 className={`text-5xl font-black tracking-tighter mb-4 ${!isFeesDone ? 'text-rose-500' : 'text-emerald-500'}`}>
-                        {/* backend se aane wala grandTotal use karo jo balance + penalty hai */}
-                        {/* // 'finalOutstanding' use karo jo tune upar define kiya hai */}
-                        ₹{(summary?.grandTotal || finalOutstanding).toLocaleString()}
+                        {/* Manual logic hatao, seedha finalOutstanding dikhao jo backend ne calculate kiya hai */}
+                        ₹{finalOutstanding.toLocaleString()}
                         {isFeesDone && <span className="text-xs ml-3 opacity-50 italic tracking-widest">ALL CLEAR</span>}
                     </h2>
 
                     {/* Surplus Adjusted Badge */}
-                    {advanceMoney > 0 && (
+                    {advanceMoney > 0 && finalOutstanding <= 0 && (
                         <div className="inline-flex items-center gap-2 mb-4 bg-emerald-50 px-5 py-2 rounded-full border border-emerald-100">
                             <CheckCircle size={14} className="text-emerald-500" />
-                            <span className="text-[15px] font-bold text-emerald-600 capitalize">Surplus adjusted: ₹{advanceMoney.toLocaleString()} Secured</span>
+                            <span className="text-[15px] font-bold text-emerald-600 capitalize">
+                                Surplus Adjusted: ₹{advanceMoney.toLocaleString()} Secured
+                            </span>
                         </div>
                     )}
 
@@ -230,33 +226,33 @@ const StudentFees = () => {
                         <p className="text-[14px] font-black">{lastDate}</p>
                     </div>
                 </div>
-                {/* --- POINT 8: PENDING FEES ALERT SECTION --- */}
-                {(summary.remainingFees > 0 || summary.totalPenalty > 0) && (
-                    <div className="bg-white border-2 border-rose-100 p-8 rounded-[3rem] shadow-lg space-y-6 relative overflow-hidden group">
+                {finalOutstanding > 0 && (
+                    <div className="bg-white border-2 border-rose-100 p-8 rounded-[3rem] shadow-lg space-y-6 relative overflow-hidden group mt-6">
                         <div className="flex items-start gap-4">
                             <div className="absolute -right-4 -bottom-4 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-700">
                                 <CreditCard size={120} />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 text-left">
                                 <h4 className="text-[17px] font-black text-slate-800 capitalize italic mb-1">
-                                    Balance adjustment required
+                                    Balance Adjustment Required
                                 </h4>
                                 <div className="space-y-1">
                                     <p className="text-[15px] font-bold text-slate-500 leading-relaxed italic">
                                         Current monthly fees: <span className="text-slate-800 font-black">₹{summary.remainingFees.toLocaleString()}</span>
                                     </p>
-                                    {summary.totalPenalty > 0 && (
+                                    {totalPenalty > 0 && (
                                         <p className="text-[15px] font-bold text-rose-400 italic">
-                                            Late fee penalty: <span className="font-black">₹{summary.totalPenalty.toLocaleString()}</span>
+                                            Late fee penalty: <span className="font-black">₹{totalPenalty.toLocaleString()}</span>
                                         </p>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        {/* --- DAY 132: SMART BUTTON LOGIC --- */}
+
+                        {/* --- SMART BUTTON LOGIC --- */}
                         <div className="relative z-10 pt-2">
                             {summary.pendingSignal ? (
-                                /* PENDING BUTTON */
+                                /* PENDING BUTTON (Jab screenshot bhej diya ho) */
                                 <button
                                     onClick={() => setShowPendingModal(true)}
                                     className="w-full py-5 bg-amber-500 text-white rounded-[2rem] text-[15px] font-black flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all"
@@ -265,16 +261,16 @@ const StudentFees = () => {
                                     Verification pending: ₹{summary.pendingSignal.amount.toLocaleString()} 📡
                                 </button>
                             ) : (
-                                /* RESOLVE BUTTON */
+                                /* RESOLVE BUTTON (Pay karne ke liye) */
                                 <button
                                     onClick={() => navigate('/student/checkout')}
                                     className="w-full py-5 bg-rose-600 text-white rounded-[2rem] text-[15px] font-black shadow-xl hover:bg-rose-700 active:scale-95 transition-all capitalize"
                                 >
-                                    Resolve Total Balance Now⚡: ₹{(summary.grandTotal || summary.remainingFees).toLocaleString()} ⚡
+                                    Resolve Total Balance Now⚡: ₹{finalOutstanding.toLocaleString()} ⚡
                                 </button>
                             )}
                         </div>
-                        <p className="text-center text-[12px] font-bold text-black uppercase tracking-[0.2em] relative z-10">
+                        <p className="text-center text-[12px] font-bold text-slate-300 uppercase tracking-[0.2em] relative z-10">
                             Secure Connection⚡
                         </p>
                     </div>
