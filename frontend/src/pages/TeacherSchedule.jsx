@@ -3,36 +3,139 @@ import { ArrowLeft, Clock, MapPin, Users, Calendar, BookOpen } from 'lucide-reac
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
+import { motion, AnimatePresence } from 'framer-motion'; // Upar add kar
+import { X, Send, CheckCircle2 } from 'lucide-react'; // Inhe bhi icons mein add kar lo
+
+const formatLocalDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const TeacherSchedule = () => {
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState('Monday');
+  const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
+  const [activeDay, setActiveDay] = useState(todayName === 'Sunday' ? 'Monday' : todayName);
   const [personalSchedule, setPersonalSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDiary, setShowDiary] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [diaryContent, setDiaryContent] = useState("");
+  const today = new Date();
+  const [diaryDate, setDiaryDate] = useState(formatLocalDate(today));
+  const [isSaving, setIsSaving] = useState(false);
+  const [submittedDiaries, setSubmittedDiaries] = useState([]);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const { data } = await API.get('/timetable/teacher/personal-schedule');
+        setPersonalSchedule(data.schedule);
+
+        // Aaj ki check-in: Dekho aaj kitni diaries bhar di hain
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data: todayData } = await API.get(`/homework/view?date=${todayStr}`);
+        setSubmittedDiaries(todayData.map(d => `${d.className}-${d.subject}`));
+      } catch (err) { console.error("Initial load failed"); }
+      finally { setLoading(false); }
+    };
+    fetchInitialData();
+  }, []);
 
   const daysMap = [
     { short: 'Mon', full: 'Monday' }, { short: 'Tue', full: 'Tuesday' },
     { short: 'Wed', full: 'Wednesday' }, { short: 'Thu', full: 'Thursday' },
     { short: 'Fri', full: 'Friday' }, { short: 'Sat', full: 'Saturday' }
   ];
+  const openDiaryModal = async (period) => {
+    setSelectedPeriod(period);
+    setDiaryContent("");
+    // Auto-set today's date
+    const todayStr = new Date().toISOString().split('T')[0];
+    setDiaryDate(todayStr);
+    setShowDiary(true);
 
+    try {
+      // Latest check logic
+      const { data: latest } = await API.get(`/homework/latest?className=${period.grade}&subject=${period.subject}`);
+      if (latest) {
+        setDiaryContent(latest.content);
+        // Agar teacher ne purani date ki diary edit karni hai toh date wahi rehne do
+        // Warna aaj ki date default hai
+      }
+    } catch (err) { console.error("History fetch error"); }
+  };
+
+  const handleSaveDiary = async () => {
+    if (!diaryContent) {
+      setToast({ show: true, message: "Diary content is empty! ✍️", type: 'error' });
+      setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await API.post('/homework/assign', {
+        className: selectedPeriod.grade,
+        subject: selectedPeriod.subject,
+        date: diaryDate,
+        content: diaryContent
+      });
+
+      setSubmittedDiaries(prev => [...prev, `${selectedPeriod.grade}-${selectedPeriod.subject}`]);
+
+      // Success Toast 📡
+      setToast({ show: true, message: "Diary Submitted Successfully! 📡", type: 'success' });
+      setShowDiary(false);
+
+      // Auto-hide toast after 3 seconds
+      setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
+
+    } catch (err) {
+      setToast({ show: true, message: "Uplink failed! Check connection. 🛡️", type: 'error' });
+      setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   useEffect(() => {
-    const fetchPersonalData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const { data } = await API.get('/timetable/teacher/personal-schedule');
-        setPersonalSchedule(data.schedule);
-      } catch (err) { console.error("Faculty sync failed"); }
+        const { data: scheduleData } = await API.get('/timetable/teacher/personal-schedule');
+        setPersonalSchedule(scheduleData.schedule);
+
+        // --- NAYA LOGIC: Saare subjects ki latest diary check karo ---
+        const activeDiaries = [];
+
+        // Har period ke liye check karo ki kya koi active diary hai (within 6 days)
+        for (const day of scheduleData.schedule) {
+          for (const period of day.periods) {
+            const key = `${period.grade}-${period.subject}`;
+            if (!activeDiaries.includes(key)) {
+              const { data: latest } = await API.get(`/homework/latest?className=${period.grade}&subject=${period.subject}`);
+              if (latest) {
+                activeDiaries.push(key);
+              }
+            }
+          }
+        }
+        setSubmittedDiaries(activeDiaries);
+      } catch (err) { console.error("Initial load failed"); }
       finally { setLoading(false); }
     };
-    fetchPersonalData();
+    fetchInitialData();
   }, []);
+  // const isDoneToday = submittedDiaries.includes(`${item.grade}-${item.subject}`);
 
   const currentDayData = personalSchedule?.find(d => d.day === activeDay);
 
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-overscroll-none fixed inset-0 overflow-y-auto">
       {/* Header Section */}
       <div className="bg-white text-slate-800 px-6 pt-12 pb-20 rounded-b-[4rem] border-b border-slate-100 shadow-md relative overflow-hidden">
         <div className="flex justify-between items-center mb-8 relative z-10 px-2">
@@ -55,8 +158,8 @@ const TeacherSchedule = () => {
               key={day.full}
               onClick={() => setActiveDay(day.full)}
               className={`flex flex-col items-center min-w-[60px] py-4 rounded-2xl border transition-all ${activeDay === day.full
-                  ? 'bg-[#42A5F5] text-white border-[#42A5F5] shadow-lg shadow-blue-100'
-                  : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-white'
+                ? 'bg-[#42A5F5] text-white border-[#42A5F5] shadow-lg shadow-blue-100'
+                : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-white'
                 }`}
             >
               <span className="text-[12px] font-black uppercase italic tracking-wider">{day.short}</span>
@@ -74,32 +177,53 @@ const TeacherSchedule = () => {
               const timeB = new Date(`1970/01/01 ${b.startTime}`);
               return timeA - timeB;
             })
-            .map((item, index) => (
-              <div key={index} className="bg-white rounded-[3rem] p-6 border-l-[8px] border-l-[#42A5F5] shadow-xl border border-slate-100 flex gap-5 relative italic group hover:scale-[1.02] transition-transform">
-                <span className="absolute top-0 right-10 bg-blue-50 text-[#42A5F5] text-[15px] font-black px-5 py-1.5 rounded-b-2xl uppercase tracking-widest border-x border-b border-blue-100">
-                  Class: {item.grade}
-                </span>
+            .map((item, index) => {
+              // --- FIXED: isDoneToday ko map ke ANDAR hona chahiye ---
+              const isDoneToday = submittedDiaries.includes(`${item.grade}-${item.subject}`);
+              const hasActiveDiary = submittedDiaries.includes(`${item.grade}-${item.subject}`);
 
-                {/* Time Slot */}
-                <div className="flex flex-col items-center justify-center border-r border-slate-100 pr-5 min-w-[100px]">
-                  <Clock size={20} className="text-[#42A5F5] mb-2 animate-pulse" />
-                  <span className="text-[15px] font-bold text-slate-700 leading-tight uppercase">{item.startTime}</span>
-                  <span className="text-[15px] font-bold text-slate-700 uppercase mt-1 italic">To</span>
-                  <span className="text-[15px] font-bold text-slate-700 uppercase mt-1 italic">{item.endTime}</span>
-                </div>
+              return (
+                <div key={index} className="bg-white rounded-[3rem] p-6 border-l-[8px] border-l-[#42A5F5] shadow-xl border border-slate-100 flex gap-5 relative italic group hover:scale-[1.02] transition-transform">
+                  <span className="absolute top-0 right-10 bg-blue-50 text-[#42A5F5] text-[15px] font-black px-5 py-1.5 rounded-b-2xl uppercase tracking-widest border-x border-b border-blue-100">
+                    Class: {item.grade}
+                  </span>
 
-                {/* Subject Info */}
-                <div className="flex-1 pt-4">
-                  <h3 className="font-black text-slate-800 text-[20px] leading-tight mb-2 capitalize italic group-hover:text-[#42A5F5] transition-colors">
-                   💠 {item.subject}
-                  </h3>
-                  <div className="flex items-center gap-2 text-slate-400 mt-3 bg-slate-50 w-fit px-4 py-1.5 rounded-full border border-slate-100">
-                    <MapPin size={18} className="text-[#42A5F5]/60" />
-                    <span className="text-[15px] font-black uppercase tracking-wider italic">Room no: {item.room}</span>
+                  {/* Time Slot */}
+                  <div className="flex flex-col items-center justify-center border-r border-slate-100 pr-5 min-w-[100px]">
+                    <Clock size={20} className="text-[#42A5F5] mb-2 animate-pulse" />
+                    <span className="text-[15px] font-bold text-slate-700 leading-tight uppercase">{item.startTime}</span>
+                    <span className="text-[15px] font-bold text-slate-700 uppercase mt-1 italic">To</span>
+                    <span className="text-[15px] font-bold text-slate-700 uppercase mt-1 italic">{item.endTime}</span>
+                  </div>
+
+                  {/* Subject Info */}
+                  <div className="flex-1 pt-4">
+                    <h3 className="font-black text-slate-800 text-[20px] leading-tight mb-2 capitalize italic group-hover:text-[#42A5F5] transition-colors">
+                      💠 {item.subject}
+                    </h3>
+                    <div className="flex items-center gap-2 text-slate-400 mt-3 bg-slate-50 w-fit px-4 py-1.5 rounded-full border border-slate-100">
+                      <MapPin size={18} className="text-[#42A5F5]/60" />
+                      <span className="text-[15px] font-black uppercase tracking-wider italic">Room no: {item.room}</span>
+                    </div>
+
+                    {/* Assign Homework Button */}
+                    <button
+                      onClick={() => openDiaryModal(item)}
+                      className={`mt-5 flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-black text-[13px] uppercase tracking-widest active:scale-95 transition-all shadow-lg ${hasActiveDiary
+                        ? 'bg-emerald-500 text-white shadow-emerald-100' // Green if diary exists within 6 days
+                        : 'bg-[#42A5F5] text-white shadow-blue-100'    // Blue if reset or no entry
+                        }`}
+                    >
+                      {hasActiveDiary ? (
+                        <><CheckCircle2 size={16} /> Update Diary (Done)</>
+                      ) : (
+                        <><BookOpen size={16} />Homework</>
+                      )}
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            }) // map ends here
         ) : (
           <div className="text-center py-24 bg-white rounded-[4rem] border-2 border-dashed border-slate-100 shadow-sm mx-2">
             <BookOpen className="mx-auto text-slate-200 mb-6 animate-bounce" size={80} />
@@ -107,6 +231,168 @@ const TeacherSchedule = () => {
           </div>
         )}
       </div>
+      <AnimatePresence>
+        {showDiary && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowDiary(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl"
+            />
+
+            <motion.div
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              className="relative w-full max-w-md bg-white rounded-[3rem] p-8 shadow-2xl border border-slate-100 overflow-visible"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-3xl font-black text-slate-800 italic leading-none">Class Diary</h2>
+                  <p className="text-[16px] font-bold text-[#42A5F5] uppercase tracking-widest mt-2">
+                    {selectedPeriod?.subject} • Class {selectedPeriod?.grade}
+                  </p>
+                </div>
+                <button onClick={() => setShowDiary(false)} className="p-2 bg-slate-50 rounded-full text-slate-400"><X size={25} /></button>
+              </div>
+
+              {/* Form */}
+              <div className="space-y-5 relative">
+                <div className="flex flex-col gap-2 relative">
+                  <label className="text-[16px] font-black uppercase text-slate-400 ml-4 tracking-widest italic">
+                    Date
+                  </label>
+
+                  <button
+                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                    className="w-full text-[19px] bg-slate-50 p-4 rounded-2xl font-bold text-slate-700 flex justify-between items-center"
+                  >
+                    <span>
+                      {new Date(diaryDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                    <Calendar size={18} className="opacity-60" />
+                  </button>
+                  <AnimatePresence>
+                    {isCalendarOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute top-full left-0 mt-3 w-full bg-white border border-blue-100 rounded-[2rem] shadow-2xl p-4 z-[2000]"
+                      >
+                        {/* Month Control */}
+                        <div className="flex justify-between items-center mb-3">
+                          <button
+                            onClick={() => {
+                              const d = new Date(diaryDate);
+                              d.setMonth(d.getMonth() - 1);
+                              setDiaryDate(formatLocalDate(d));
+                            }}
+                            className="text-[#42A5F5] font-bold"
+                          >
+                            ←
+                          </button>
+
+                          <span className="font-black text-[#42A5F5]">
+                            {new Date(diaryDate).toLocaleDateString('en-GB', {
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </span>
+
+                          <button
+                            onClick={() => {
+                              const d = new Date(diaryDate);
+                              d.setMonth(d.getMonth() + 1);
+                              setDiaryDate(formatLocalDate(d));
+                            }}
+                            className="text-[#42A5F5] font-bold"
+                          >
+                            →
+                          </button>
+                        </div>
+
+                        {/* Days */}
+                        <div className="grid grid-cols-7 gap-2 text-center text-[12px] font-bold text-slate-400 mb-2">
+                          {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => <span key={d}>{d}</span>)}
+                        </div>
+
+                        <div className="grid grid-cols-7 gap-2">
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map(day => {
+                            const current = new Date(diaryDate);
+                            const tempDate = new Date(
+                              current.getFullYear(),
+                              current.getMonth(),
+                              day,
+                              12 // 👈 IMPORTANT (no timezone shift)
+                            );
+
+                            const formatted = formatLocalDate(tempDate);
+                            const isSelected = formatted === diaryDate;
+
+                            return (
+                              <button
+                                key={day}
+                                onClick={() => {
+                                  setDiaryDate(formatLocalDate(tempDate));
+                                  setIsCalendarOpen(false);
+                                }}
+                                className={`
+                p-2 rounded-xl text-[13px] font-black
+                ${isSelected ? 'bg-[#42A5F5] text-white' : 'text-slate-600 hover:bg-blue-100'}
+              `}
+                              >
+                                {day}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-[16px] font-black uppercase text-slate-400 ml-4 tracking-widest italic">Homework</label>
+                  <textarea
+                    rows="5"
+                    placeholder="e.g. Complete Exercise 4.2 from textbook..."
+                    value={diaryContent}
+                    onChange={(e) => setDiaryContent(e.target.value)}
+                    className="w-full text-[19px] bg-slate-50 border-none p-5 rounded-[2rem] font-bold text-slate-700 outline-none focus:ring-2 ring-blue-100 transition-all resize-none italic"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSaveDiary}
+                  disabled={isSaving}
+                  className="w-full py-5 bg-[#42A5F5] text-white rounded-[2rem] font-black text-[15px] uppercase tracking-widest shadow-xl shadow-blue-100 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isSaving ? "Syncing..." : <><Send size={18} /> Submit Diary</>}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        {toast.show && (
+          <motion.div
+            initial={{ y: -100, opacity: 0, x: "-50%" }} // Upar se shuru hoga
+            animate={{ y: 50, opacity: 1, x: "-50%" }}   // Niche slide hoke aayega (50px top se)
+            exit={{ y: -100, opacity: 0, x: "-50%" }}    // Wapas upar jayega
+            className={`fixed left-1/2 top-0 z-[9999] px-8 py-4 rounded-[2rem] font-black text-[14px] italic shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center gap-3 border whitespace-nowrap ${toast.type === 'success'
+              ? 'bg-emerald-500 text-white border-emerald-400'
+              : 'bg-rose-500 text-white border-rose-400'
+              }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

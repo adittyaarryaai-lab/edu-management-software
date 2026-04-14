@@ -35,6 +35,7 @@ import AdminHome from './pages/AdminHome';
 import AdminTimetable from './pages/AdminTimetable';
 import AddStudent from './pages/AddStudent';
 import AddTeacher from './pages/AddTeacher';
+import ClassDiary from './pages/ClassDiary';
 // import AdminFees from './pages/AdminFees';
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
@@ -439,6 +440,7 @@ function App() {
           <Route path="/library" element={<Library />} />
           <Route path="/library/digital" element={<DigitalMaterial />} />
           <Route path="/live-class" element={<LiveClass user={user} />} />
+          <Route path="/class-diary" element={<ClassDiary />} />
 
           <Route path="/feedback" element={<Feedback />} />
 

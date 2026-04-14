@@ -13,11 +13,16 @@ const StudentHome = ({ user, searchQuery }) => {
   // --- NEW STATE: Arrow toggle ke liye ---
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const mainModules = [
-    { title: 'Attendance', icon: <Calendar size={32} />, path: '/attendance', bgColor: 'bg-[#FFEBEE]', iconColor: 'bg-[#FFCDD2] text-[#E53935]' },
-    { title: 'TimeTable', icon: <Clock size={32} />, path: '/timetable', bgColor: 'bg-[#E8EAF6]', iconColor: 'bg-[#C5CAE9] text-[#3F51B5]' },
-    { title: 'Fees', icon: <CreditCard size={32} />, path: '/student/fees', bgColor: 'bg-[#E0F2F1]', iconColor: 'bg-[#B2DFDB] text-[#00897B]' },
-    { title: 'Notice Board', icon: <Megaphone size={32} />, path: '/notice-feed', bgColor: 'bg-[#FFF3E0]', iconColor: 'bg-[#FFE0B2] text-[#FB8C00]' },
+  const topRowModules = [
+    { title: 'Attendance', icon: <Calendar size={36} />, path: '/attendance', bgColor: 'bg-[#FFEBEE]', iconColor: 'bg-[#FFCDD2] text-[#E53935]' },
+    { title: 'TimeTable', icon: <Clock size={36} />, path: '/timetable', bgColor: 'bg-[#E8EAF6]', iconColor: 'bg-[#C5CAE9] text-[#3F51B5]' },
+  ];
+
+  // Niche wale 3 chote modules
+  const bottomRowModules = [
+    { title: 'Fees', icon: <CreditCard size={28} />, path: '/student/fees', bgColor: 'bg-[#E0F2F1]', iconColor: 'bg-[#B2DFDB] text-[#00897B]' },
+    { title: 'Class Diary', icon: <BookOpen size={28} />, path: '/class-diary', bgColor: 'bg-[#E3F2FD]', iconColor: 'bg-[#BBDEFB] text-[#1E88E5]' },
+    { title: 'Notices', icon: <Megaphone size={28} />, path: '/notice-feed', bgColor: 'bg-[#FFF3E0]', iconColor: 'bg-[#FFE0B2] text-[#FB8C00]' },
   ];
 
   const subModules = [
@@ -53,23 +58,43 @@ const StudentHome = ({ user, searchQuery }) => {
     <div className="px-5 -mt-19 space-y-5 relative z-10 pb-24 font-sans bg-[#F8FAFC]">
 
       {/* --- MAIN MODULES (Optimized for Laptop & Mobile) --- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
-        {mainModules.map((m, i) => (
-          <Link
-            to={m.path}
-            key={i}
-            className={`${m.bgColor} rounded-[2.5rem] p-6 flex flex-col items-start justify-between min-h-[160px] lg:min-h-[180px] shadow-sm border border-white/50 active:scale-95 transition-all relative overflow-hidden`}
-          >
-            {/* Font Size Bada Kiya yahan */}
-            <span className="font-extrabold text-slate-800 text-lg lg:text-xl z-10">{m.title}</span>
-            <div className={`self-end p-4 rounded-[1.8rem] ${m.iconColor} shadow-inner`}>
-              {m.icon}
-            </div>
-          </Link>
-        ))}
+      <div className="space-y-4 pt-4">
+        
+        {/* TOP ROW: 2 BIG MODULES */}
+        <div className="grid grid-cols-2 gap-4">
+          {topRowModules.map((m, i) => (
+            <Link
+              to={m.path}
+              key={i}
+              className={`${m.bgColor} rounded-[2.5rem] p-6 flex flex-col items-start justify-between min-h-[170px] shadow-sm border border-white/60 active:scale-95 transition-all relative overflow-hidden group`}
+            >
+              <span className="font-black text-slate-800 text-xl z-10 italic leading-tight">{m.title}</span>
+              <div className={`self-end p-5 rounded-[2rem] ${m.iconColor} shadow-inner group-hover:scale-110 transition-transform`}>
+                {m.icon}
+              </div>
+              {/* Soft background shape for detail */}
+              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
+            </Link>
+          ))}
+        </div>
+
+        {/* BOTTOM ROW: 3 SMALLER MODULES */}
+        <div className="grid grid-cols-3 gap-4">
+          {bottomRowModules.map((m, i) => (
+            <Link
+              to={m.path}
+              key={i}
+              className={`${m.bgColor} rounded-[2rem] p-4 flex flex-col items-start justify-between min-h-[140px] shadow-sm border border-white/50 active:scale-95 transition-all relative overflow-hidden group`}
+            >
+              <span className="font-black text-slate-800 text-[13px] z-10 italic leading-tight">{m.title}</span>
+              <div className={`self-end p-3 rounded-[1.5rem] ${m.iconColor} shadow-inner group-hover:rotate-12 transition-transform`}>
+                {m.icon}
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
 
-      {/* --- SUB-MODULES CONTAINER --- */}
       {/* --- SUB-MODULES CONTAINER --- */}
       <div className="bg-white rounded-[3.5rem] p-8 lg:p-12 shadow-sm border border-slate-100 relative min-h-[200px] flex flex-col justify-center">
 

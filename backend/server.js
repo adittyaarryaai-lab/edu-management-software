@@ -20,6 +20,7 @@ const liveClassRoutes = require('./routes/liveClassRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const technicalRoutes = require('./routes/technicalRoutes');
+const homeworkRoutes = require('./routes/homeworkRoutes');
 
 
 dotenv.config();
@@ -68,6 +69,7 @@ app.use('/api/live-classes', liveClassRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/school', schoolRoutes);
 app.use('/api/technical', technicalRoutes);
+app.use('/api/homework', homeworkRoutes);
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
 });

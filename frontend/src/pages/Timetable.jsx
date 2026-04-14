@@ -6,7 +6,13 @@ import Loader from '../components/Loader';
 
 const Timetable = ({ user }) => {
   const navigate = useNavigate();
-  const [activeDay, setActiveDay] = useState('Monday');
+
+  // --- NAYA LOGIC: LIVE DAY DETECTION ---
+  const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
+  
+  // Sunday ho toh Monday dikhao, warna jo din hai wahi active rakho
+  const [activeDay, setActiveDay] = useState(todayName === 'Sunday' ? 'Monday' : todayName);
+  
   const [timetable, setTimetable] = useState(null);
   const [loading, setLoading] = useState(true);
 
