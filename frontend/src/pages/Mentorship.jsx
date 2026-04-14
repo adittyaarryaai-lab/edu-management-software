@@ -1,77 +1,118 @@
-import React from 'react';
-import { ArrowLeft, Users, MessageCircle, Phone, Calendar, Star, Info, Construction, ShieldAlert, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Phone, User, GraduationCap, ShieldCheck, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API from '../api';
+import Loader from '../components/Loader';
+import { motion } from 'framer-motion';
 
 const Mentorship = () => {
     const navigate = useNavigate();
+    const [mentor, setMentor] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const mentor = {
-        name: "Dr. Vikram Singh",
-        designation: "Associate Professor (CSE)",
-        email: "vikram.singh@university.edu",
-        phone: "+91 98123 45678",
-        cabin: "Block C, Room 405",
-        specialization: "AI & Machine Learning"
-    };
+    useEffect(() => {
+        const fetchMentor = async () => {
+            try {
+                const { data } = await API.get('/users/my-mentor');
+                setMentor(data);
+            } catch (err) {
+                setError(err.response?.data?.message || "Mentor connection failed");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMentor();
+    }, []);
 
-    const upcomingMeetings = [
-        { date: "18 Feb 2026", time: "03:00 PM", topic: "Monthly Progress Review", type: "In-Person" },
-    ];
+    if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans italic overflow-hidden relative flex flex-col justify-center items-center p-6 text-[15px]">
-            
-            {/* Top Navigation */}
-            <div className="absolute top-10 left-6 z-30">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="bg-white p-3 rounded-2xl active:scale-90 border border-[#DDE3EA] text-[#42A5F5] shadow-md hover:bg-blue-50 transition-all"
-                >
-                    <ArrowLeft size={24} />
-                </button>
-            </div>
-
-            {/* Main Content */}
-            <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-                
-                {/* Animated Icon Container */}
-                <div className="mb-10 relative">
-                    {/* Soft Blue Glow */}
-                    <div className="absolute inset-0 bg-[#42A5F5]/10 blur-3xl rounded-full animate-pulse"></div>
-                    
-                    <div className="bg-white border-2 border-dashed border-[#DDE3EA] p-10 rounded-[3.5rem] shadow-sm relative">
-                        <Construction size={80} className="text-[#42A5F5] animate-bounce" strokeWidth={1.5} />
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-white p-2 rounded-full shadow-lg border border-blue-50">
-                        <Zap size={24} className="text-amber-400 fill-amber-400 animate-pulse" />
-                    </div>
-                </div>
-
-                {/* Text Section */}
-                <h1 className="text-4xl font-black italic tracking-tight text-slate-800 leading-tight mb-4">
-                    Module under <br /> <span className="text-[#42A5F5]">construction</span>
-                </h1>
-
-                <div className="h-[3px] w-20 bg-[#42A5F5] mx-auto rounded-full mb-8 shadow-sm"></div>
-
-                <p className="text-[16px] text-slate-400 font-bold italic max-w-[320px] leading-relaxed capitalize">
-                    Our neural network for mentorship tracking is being synchronized. <br />
-                    <span className="text-[#42A5F5] block mt-2">Estimated deploy: Coming soon</span>
-                </p>
-
-                {/* Status Indicator */}
-                <div className="mt-12 flex items-center gap-3 bg-white px-8 py-4 rounded-full border border-[#DDE3EA] shadow-sm">
-                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                    <span className="text-[12px] font-black uppercase tracking-widest text-slate-400">
-                        System protocol 119: Active
-                    </span>
+        <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden fixed inset-0 overflow-y-auto">
+            {/* Header */}
+            <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-lg relative overflow-hidden">
+                <div className="flex items-center gap-4 relative z-10">
+                    <button onClick={() => navigate(-1)} className="p-3 bg-white/20 rounded-2xl border border-white/30 text-white active:scale-90 transition-all">
+                        <ArrowLeft size={24} />
+                    </button>
+                    <h1 className="text-4xl font-black italic tracking-tight capitalize">Mentorship</h1>
                 </div>
             </div>
 
-            {/* Footer Tag */}
-            <div className="absolute bottom-10 flex items-center gap-2 opacity-30 text-slate-400">
-                <ShieldAlert size={16} />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em]">EduFlowAI security mesh</p>
+            <div className="px-6 -mt-10 relative z-20">
+                {error ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-[3rem] p-12 text-center shadow-xl border border-slate-100">
+                         <ShieldCheck size={60} className="mx-auto text-slate-200 mb-4" />
+                         <p className="text-slate-400 font-bold italic uppercase tracking-widest">{error}</p>
+                    </motion.div>
+                ) : (
+                    <motion.div 
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="bg-white rounded-[3.5rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center"
+                    >
+                        {/* Avatar Node */}
+                        <div className="relative mb-6">
+                            <div className="w-40 h-40 bg-blue-50 rounded-[4rem] flex items-center justify-center overflow-hidden border-4 border-white shadow-2xl shadow-blue-100">
+                                {mentor?.avatar ? (
+                                    <img src={`http://localhost:5000${mentor.avatar}`} alt="Mentor" className="w-full h-full object-cover" />
+                                ) : (
+                                    <User size={80} className="text-[#42A5F5]" />
+                                )}
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-2.5 rounded-2xl border-4 border-white shadow-lg animate-pulse">
+                                <ShieldCheck size={20} />
+                            </div>
+                        </div>
+
+                        {/* Mentor Details */}
+                        <h2 className="text-3xl font-black text-slate-800 italic uppercase tracking-tighter leading-none mb-2">
+                            {mentor?.name?.toLowerCase()}
+                        </h2>
+                        <span className="bg-blue-50 text-[#42A5F5] px-6 py-1.5 rounded-full text-[15px] font-black uppercase tracking-[0.2em] italic mb-8 inline-block border border-blue-100">
+                            Class Teacher
+                        </span>
+
+                        <div className="w-full space-y-4">
+                            {/* Number Box with Call Button */}
+                            <div className="flex items-center justify-between bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 shadow-inner group">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-sm group-hover:scale-110 transition-transform">
+                                        <Phone size={20} />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[13px] font-black uppercase text-slate-400 tracking-widest italic">Contact No.</p>
+                                        <p className="text-[16px] font-black text-slate-700 tracking-widest">{mentor?.phone}</p>
+                                    </div>
+                                </div>
+                                
+                                {/* CALL BUTTON */}
+                                <a 
+                                    href={`tel:${mentor?.phone}`}
+                                    className="bg-emerald-500 text-white p-4 rounded-3xl shadow-lg shadow-emerald-200 active:scale-90 transition-all"
+                                >
+                                    <Phone size={24} fill="currentColor" />
+                                </a>
+                            </div>
+
+                            {/* Assigned Subjects Node */}
+                            <div className="flex items-start gap-4 text-left bg-blue-50/40 p-6 rounded-[2.5rem] border border-blue-100/50">
+                                <div className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-sm"><GraduationCap size={20} /></div>
+                                <div>
+                                    <p className="text-[13px] font-black uppercase text-slate-400 tracking-widest italic">Teaching Expertise</p>
+                                    <p className="text-[14px] font-bold text-slate-600 leading-relaxed italic capitalize">
+                                        {mentor?.subjects?.join(', ') || "Expert Faculty"}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-10 flex flex-col items-center gap-2 opacity-20">
+                             <div className="w-10 h-1 rounded-full bg-slate-400" />
+                             <p className="text-[9px] font-black uppercase tracking-[0.4em]">Official Neural Node Verified</p>
+                        </div>
+                    </motion.div>
+                )}
             </div>
         </div>
     );

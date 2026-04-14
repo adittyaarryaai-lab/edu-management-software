@@ -26,10 +26,10 @@ const StudentHome = ({ user, searchQuery }) => {
   ];
 
   const subModules = [
-    { title: 'ERP Notices', icon: <Bell size={24} />, path: '/notices' },
     { title: 'Assignment', icon: <FileText size={24} />, path: '/assignments' },
+     { title: 'Mentorship', icon: <Users size={24} />, path: '/mentors' },
+    { title: 'ERP Notices', icon: <Bell size={24} />, path: '/notices' },
     { title: 'Performance', icon: <TrendingUp size={24} />, path: '/performance' },
-    { title: 'Mentorship', icon: <Users size={24} />, path: '/mentors' },
     { title: 'Library', icon: <Book size={24} />, path: '/library' },
     { title: 'Live Class', icon: <Video size={24} />, path: '/live-class' },
     { title: 'Syllabus', icon: <BookOpen size={24} />, path: '/syllabus' },
@@ -86,7 +86,7 @@ const StudentHome = ({ user, searchQuery }) => {
               key={i}
               className={`${m.bgColor} rounded-[2rem] p-4 flex flex-col items-start justify-between min-h-[140px] shadow-sm border border-white/50 active:scale-95 transition-all relative overflow-hidden group`}
             >
-              <span className="font-black text-slate-800 text-[13px] z-10 italic leading-tight">{m.title}</span>
+              <span className="font-black text-slate-800 text-[15px] z-10 italic leading-tight">{m.title}</span>
               <div className={`self-end p-3 rounded-[1.5rem] ${m.iconColor} shadow-inner group-hover:rotate-12 transition-transform`}>
                 {m.icon}
               </div>

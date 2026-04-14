@@ -27,7 +27,7 @@ router.post('/create', protect, teacherOnly, async (req, res) => {
 // @desc    Get assignments for a grade
 router.get('/:grade', protect, async (req, res) => {
     try {
-        const assignments = await Assignment.find({ 
+        const assignments = await Assignment.find({
             grade: req.params.grade,
             schoolId: req.user.schoolId // FIXED: Isolated query
         })
@@ -60,11 +60,12 @@ router.post('/submit', protect, async (req, res) => {
 // @desc    Get all submissions for an assignment
 router.get('/submissions/:assignmentId', protect, teacherOnly, async (req, res) => {
     try {
-        const submissions = await Submission.find({ 
+        const submissions = await Submission.find({
             assignment: req.params.assignmentId,
             schoolId: req.user.schoolId // FIXED: Isolated query
         })
-            .populate('student', 'name email grade')
+            .populate('student', 'name email grade enrollmentNo')
+            .populate('assignment', 'totalMarks title')
             .sort({ createdAt: -1 });
         res.json(submissions);
     } catch (error) {
@@ -74,11 +75,11 @@ router.get('/submissions/:assignmentId', protect, teacherOnly, async (req, res) 
 
 // @desc    Grade a submission
 router.put('/grade/:submissionId', protect, teacherOnly, async (req, res) => {
-    const { grade, feedback } = req.body;
+    const { marksObtained, feedback } = req.body;
     try {
         const submission = await Submission.findOneAndUpdate(
-            { _id: req.params.submissionId, schoolId: req.user.schoolId }, // Security Check
-            { grade, feedback, status: 'Graded' },
+            { _id: req.params.submissionId, schoolId: req.user.schoolId },
+            { marksObtained, feedback, status: 'Graded' },
             { new: true }
         );
         if (!submission) return res.status(404).json({ message: 'Submission not found' });
@@ -102,6 +103,46 @@ router.get('/my-results', protect, async (req, res) => {
         res.json(results);
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching results' });
+    }
+});
+
+// --- 4. DELETE ASSIGNMENT ---
+router.delete('/:id', protect, teacherOnly, async (req, res) => {
+    try {
+        const assignment = await Assignment.findOneAndDelete({ _id: req.params.id, teacher: req.user._id });
+        if (!assignment) return res.status(404).json({ message: 'Assignment not found or unauthorized' });
+
+        // Saath mein iske saare submissions bhi delete kar do
+        await Submission.deleteMany({ assignment: req.params.id });
+
+        res.json({ message: 'Task and all submissions purged from node! 🗑️' });
+    } catch (error) { res.status(500).json({ message: 'Delete failed' }); }
+});
+
+// --- 5. GET TEACHER'S OWN ASSIGNMENTS ---
+router.get('/teacher/my-assignments', protect, teacherOnly, async (req, res) => {
+    try {
+        const assignments = await Assignment.find({ teacher: req.user._id, schoolId: req.user.schoolId }).sort({ createdAt: -1 });
+        res.json(assignments);
+    } catch (error) { res.status(500).json({ message: 'Fetch failed' }); }
+});
+
+// --- 6. GET STUDENT'S ALL SUBMISSIONS (With Marks & Feedback) ---
+router.get('/student/my-submissions', protect, async (req, res) => {
+    try {
+        const submissions = await Submission.find({
+            student: req.user._id,
+            schoolId: req.user.schoolId
+        })
+            .populate({
+                path: 'assignment',
+                populate: { path: 'teacher', select: 'name' }
+            })
+            .sort({ submittedAt: -1 });
+
+        res.json(submissions);
+    } catch (error) {
+        res.status(500).json({ message: 'Neural History Fetch Failed' });
     }
 });
 

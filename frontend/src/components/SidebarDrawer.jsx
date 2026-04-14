@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book, Database, ClipboardList, BarChart3 } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book, Database, ClipboardList, BarChart3, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../App.css';
@@ -86,9 +86,9 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
-        // { icon: <LayoutDashboard size={20} />, label: 'Dashboard', color: 'text-neon', path: '/' },
         { icon: <Calendar size={20} />, label: 'Attendance', color: 'text-neon', path: '/attendance' },
         { icon: <Clock size={20} />, label: 'TimeTable', color: 'text-neon', path: '/timetable' },
+        { icon: <BookOpen size={20} />, label: 'Class Diary', color: 'text-neon', path: '/class-diary' },
         { icon: <CreditCard size={20} />, label: 'My Fees', color: 'text-neon', path: '/student/fees' },
         { icon: <Megaphone size={20} />, label: 'Notice Board', color: 'text-neon', path: '/notice-feed' },
         { icon: <FileText size={20} />, label: 'Assignments', color: 'text-white/60', path: '/assignments' },
@@ -256,6 +256,19 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                                 <Clock size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">TimeTable</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => handleNavigation('/class-diary')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                                <BookOpen size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Class Diary</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>

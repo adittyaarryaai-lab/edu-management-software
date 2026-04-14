@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, UserCircle, Mail, Phone, MapPin, Fingerprint, Camera, User, Users, Calendar, ShieldCheck, Heart, Hash, UserCheck } from 'lucide-react';
+import { ArrowLeft, UserCircle, Mail, Phone, MapPin, Fingerprint, Camera, User, Users, Calendar, ShieldCheck, Heart, Hash, UserCheck , Check} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 
@@ -308,10 +308,15 @@ const MyAccount = ({ user }) => {
 
             {/* Neural Toast */}
             {toast.show && (
-                <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-2xl font-black italic text-[13px] shadow-2xl animate-bounce flex items-center gap-3 ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
-                    {toast.type === 'success' ? <Check size={18} /> : <ShieldCheck size={18} />} {toast.message}
-                </div>
-            )}
+    <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[9999] px-8 py-4 rounded-[2rem] font-black italic text-[13px] shadow-[0_20px_50px_rgba(0,0,0,0.2)] animate-bounce flex items-center gap-3 border ${
+        toast.type === 'success' 
+        ? 'bg-emerald-500 text-white border-emerald-400' 
+        : 'bg-rose-500 text-white border-rose-400'
+    }`}>
+        {toast.type === 'success' ? <Check size={18} /> : <ShieldCheck size={18} />} 
+        {toast.message}
+    </div>
+)}
         </div>
     );
 };

@@ -433,4 +433,32 @@ router.get('/admin/live-stats', protect, async (req, res) => {
     }
 });
 
+// routes/userRoutes.js mein ye naya route add karo
+
+router.get('/my-mentor', protect, async (req, res) => {
+    try {
+        const studentGrade = req.user.grade;
+        const schoolId = req.user.schoolId;
+
+        if (!studentGrade) {
+            return res.status(400).json({ message: "No class assigned to you yet!" });
+        }
+
+        // Student ki class se match hone wala teacher dhoondo
+        const mentor = await User.findOne({
+            schoolId: schoolId,
+            role: 'teacher',
+            assignedClass: studentGrade.toUpperCase()
+        }).select('name phone avatar subjects');
+
+        if (!mentor) {
+            return res.status(404).json({ message: "Class Teacher not assigned to this grade yet." });
+        }
+
+        res.json(mentor);
+    } catch (error) {
+        res.status(500).json({ message: "Neural Link Error: Mentor data lost." });
+    }
+});
+
 module.exports = router;
