@@ -120,35 +120,35 @@ const TeacherAssignments = ({ user }) => {
     };
 
     const fetchSubmissions = async (id) => {
-    try {
-        setActiveAssignmentId(id);
-        // Data fetch karte waqt ensure karo ki hum assignment ID bhej rahe hain
-        const { data } = await API.get(`/assignments/submissions/${id}`);
-        setSubmissions(data); // Ye line submissions state ko refresh karegi
-        setView('submissions');
-    } catch (err) {
-        console.error("Submissions load error");
-    }
-};
+        try {
+            setActiveAssignmentId(id);
+            // Data fetch karte waqt ensure karo ki hum assignment ID bhej rahe hain
+            const { data } = await API.get(`/assignments/submissions/${id}`);
+            setSubmissions(data); // Ye line submissions state ko refresh karegi
+            setView('submissions');
+        } catch (err) {
+            console.error("Submissions load error");
+        }
+    };
 
-   const handleGrade = async (subId, marks) => {
-    try {
-        const numericMarks = Number(marks);
-        // 1. Database mein update bhejo
-        await API.put(`/assignments/grade/${subId}`, { marksObtained: numericMarks });
-        
-        // 2. 🔥 Sabse Zaruri: submissions state ko update karo taaki UI sync ho jaye
-        setSubmissions(prev => prev.map(s => 
-            s._id === subId ? { ...s, marksObtained: numericMarks, status: 'Graded' } : s
-        ));
-        
-        return true; 
-    } catch (err) {
-        console.error("Database Uplink Failed");
-        alert("Grading Failed! Check Network.");
-        return false;
-    }
-};
+    const handleGrade = async (subId, marks) => {
+        try {
+            const numericMarks = Number(marks);
+            // 1. Database mein update bhejo
+            await API.put(`/assignments/grade/${subId}`, { marksObtained: numericMarks });
+
+            // 2. 🔥 Sabse Zaruri: submissions state ko update karo taaki UI sync ho jaye
+            setSubmissions(prev => prev.map(s =>
+                s._id === subId ? { ...s, marksObtained: numericMarks, status: 'Graded' } : s
+            ));
+
+            return true;
+        } catch (err) {
+            console.error("Database Uplink Failed");
+            alert("Grading Failed! Check Network.");
+            return false;
+        }
+    };
     return (
         <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {/* Header */}
@@ -537,17 +537,17 @@ const SubmissionCard = ({ sub, handleGrade, setToast }) => {
     const [isEditing, setIsEditing] = useState(sub.status !== 'Graded');
 
     // ⚡ CRITICAL FIX: Jab bhi 'sub' prop change ho (bahar se aane par), state sync karo
-   useEffect(() => {
-  setTempMarks(sub.marksObtained ?? "");
-  setIsEditing(sub.status !== 'Graded');
-}, [sub.marksObtained, sub.status, sub._id]);
+    useEffect(() => {
+        setTempMarks(sub.marksObtained ?? "");
+        setIsEditing(sub.status !== 'Graded');
+    }, [sub.marksObtained, sub.status, sub._id]);
 
     const onUpdate = async () => {
         if (tempMarks === "" || tempMarks === null) return alert("Enter marks first! 🔢");
-        
+
         // handleGrade call ho raha hai jo main state update karega
         const success = await handleGrade(sub._id, tempMarks);
-        
+
         if (success) {
             setIsEditing(false); // Mode change karo
             setToast("Marks Secured! ✅");
@@ -575,12 +575,12 @@ const SubmissionCard = ({ sub, handleGrade, setToast }) => {
 
                 <div className="flex flex-col gap-2 text-left">
                     <div className="flex justify-between px-2">
-                        <label className="text-[17px] font-black uppercase text-slate-400 italic tracking-widest">Marks ({sub.assignment?.totalMarks || 100})</label>
+                        <label className="text-[17px] font-black uppercase text-slate-400 italic tracking-widest">Marks ({sub.assignment?.totalMarks ?? "N/A"})</label>
                         {!isEditing && (
-                            <button onClick={() => setIsEditing(true)} className="text-[#42A5F5] font-black text-[17px] uppercase flex items-center gap-1"><Edit3 size={12}/> Edit</button>
+                            <button onClick={() => setIsEditing(true)} className="text-[#42A5F5] font-black text-[17px] uppercase flex items-center gap-1"><Edit3 size={12} /> Edit</button>
                         )}
                     </div>
-                    
+
                     <div className="relative">
                         <input
                             type="number"

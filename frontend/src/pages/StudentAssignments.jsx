@@ -180,7 +180,7 @@ const StudentAssignments = ({ user }) => {
                                         <div className="flex items-center gap-2 text-slate-400 font-black italic bg-slate-50 p-2 rounded-xl border border-slate-100/50">
                                             <Target size={14} className="text-[#42A5F5]" />
                                             <span className="text-[13px] uppercase">
-                                                {asgn.totalMarks || 100} Marks
+                                                {asgn.totalMarks ?? "—"} Marks
                                             </span>
                                         </div>
                                     </div>
@@ -305,7 +305,7 @@ const StudentAssignments = ({ user }) => {
                                 </div>
                                 <div className="text-right">
                                     {/* <p className="text-[14px] font-black text-slate-800 opacity-60 uppercase italic leading-none">Weightage</p> */}
-                                    <p className="text-[16px] font-black italic">Out of {sub.assignment?.totalMarks || 100}</p>
+                                    <p className="text-[16px] font-black italic"> Out of {sub.assignment?.totalMarks ?? "—"}</p>
                                 </div>
                             </div>
 

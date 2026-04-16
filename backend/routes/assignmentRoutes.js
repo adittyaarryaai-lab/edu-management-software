@@ -6,7 +6,7 @@ const { protect, teacherOnly } = require('../middleware/authMiddleware');
 
 // @desc    Create new assignment
 router.post('/create', protect, teacherOnly, async (req, res) => {
-    const { grade, subject, title, description, dueDate, fileUrl } = req.body;
+    const { grade, subject, title, description, dueDate, fileUrl, totalMarks } = req.body;
     try {
         const assignment = await Assignment.create({
             schoolId: req.user.schoolId, // FIXED: School ID link
@@ -16,7 +16,8 @@ router.post('/create', protect, teacherOnly, async (req, res) => {
             title,
             description,
             dueDate,
-            fileUrl
+            fileUrl,
+            totalMarks
         });
         res.status(201).json(assignment);
     } catch (error) {
@@ -97,7 +98,7 @@ router.get('/my-results', protect, async (req, res) => {
             schoolId: req.user.schoolId, // FIXED: Isolated query
             status: "Graded"
         })
-            .populate('assignment', 'title subject grade')
+            .populate('assignment', 'title subject grade totalMarks')
             .sort({ updatedAt: -1 });
 
         res.json(results);
