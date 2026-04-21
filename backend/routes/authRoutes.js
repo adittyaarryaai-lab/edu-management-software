@@ -5,27 +5,33 @@ const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware'); 
 const multer = require('multer');
 const path = require('path');
+const csv = require('csvtojson');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/avatars/');
+        // Agar file CSV hai toh 'uploads/' mein dalo, warna 'avatars/' mein
+        const folder = file.mimetype.includes('csv') ? 'uploads/' : 'uploads/avatars/';
+        cb(null, folder);
     },
     filename: (req, file, cb) => {
-        cb(null, `${req.user._id}-${Date.now()}${path.extname(file.originalname)}`);
+        cb(null, `${req.user?._id || 'bulk'}-${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 
 const upload = multer({ 
     storage,
-    limits: { fileSize: 2000000 }, 
+    limits: { fileSize: 5000000 }, // Limit badha kar 5MB kar di (Bulk file ke liye)
     fileFilter: (req, file, cb) => {
-        const filetypes = /jpeg|jpg|png|webp/;
+        const filetypes = /jpeg|jpg|png|webp|csv/; // 🔥 NAYA: 'csv' add kiya
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
+        const mimetype = filetypes.test(file.mimetype) || file.mimetype === 'text/csv' || file.mimetype === 'application/vnd.ms-excel';
+        
         if (extname && mimetype) {
             return cb(null, true);
         } else {
-            cb('Error: Only Images (JPG, PNG, WEBP) are allowed!');
+            // Error message ko dynamic kar diya
+            cb(new Error('Neural Error: Only Images or CSV files are allowed! 🛡️'));
         }
     }
 });
@@ -74,6 +80,87 @@ router.get('/student-stats', protect, async (req, res) => {
         res.json({ totalStudents: count });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching stats from database' });
+    }
+});
+
+// @desc    Bulk Register Students via CSV (Day 188)
+router.post('/bulk-register-students', protect, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'Neural File Missing! 🛡️' });
+
+        const schoolId = req.user.schoolId;
+        const jsonArray = await csv().fromFile(req.file.path);
+        const User = require('../models/User');
+
+        let successCount = 0;
+        let errors = [];
+
+        for (const data of jsonArray) {
+            try {
+                // 1. Generate Class Code (e.g., "10-C" -> "10C")
+                const gradeCode = data.grade.replace(/[-\s]/g, "").toUpperCase();
+                
+                // 2. Class-wise ID Logic
+                const lastStudent = await User.findOne({ schoolId, role: 'student', grade: data.grade }).sort({ createdAt: -1 });
+                let nextSerial = 1;
+                if (lastStudent && lastStudent.enrollmentNo) {
+                    const lastSerialStr = lastStudent.enrollmentNo.slice(-3);
+                    nextSerial = parseInt(lastSerialStr) + 1;
+                }
+                const generatedID = `STU${gradeCode}${nextSerial.toString().padStart(3, '0')}`;
+
+                // 3. AUTO-GENERATE EMAIL: bachename + id + @edu.in
+                // Example: rahulstu10c001@edu.in
+                const firstName = data.name.split(" ")[0].toLowerCase();
+                const autoEmail = `${firstName}${generatedID.toLowerCase()}@edu.in`;
+
+                // 4. AUTO-GENERATE PASSWORD: name + birthYear + id
+                // Example: rahul2006stu10c001
+                const birthYear = data.dob.split("-")[0]; // Expecting YYYY-MM-DD from CSV
+                const autoPassword = `${firstName}${birthYear}${generatedID.toLowerCase()}`;
+
+                // Check for duplicate email
+                const emailExists = await User.findOne({ email: autoEmail });
+                if (emailExists) {
+                    errors.push(`${data.name}: System-generated email already exists`);
+                    continue;
+                }
+
+                await User.create({
+                    name: data.name,
+                    email: autoEmail,
+                    password: autoPassword,
+                    role: 'student',
+                    schoolId: schoolId,
+                    enrollmentNo: generatedID,
+                    grade: data.grade,
+                    fatherName: data.fatherName,
+                    motherName: data.motherName,
+                    dob: data.dob,
+                    gender: data.gender || 'Male',
+                    religion: data.religion || 'General',
+                    phone: data.phone,
+                    admissionNo: data.admissionNo,
+                    address: {
+                        fullAddress: data.fullAddress,
+                        district: data.district,
+                        state: data.state,
+                        pincode: data.pincode
+                    }
+                });
+
+                successCount++;
+            } catch (err) {
+                errors.push(`${data.name}: ${err.message}`);
+            }
+        }
+        fs.unlinkSync(req.file.path);
+        res.status(201).json({
+            message: `Neural Link Established! ${successCount} Students Synced. Emails & Passwords Auto-Generated! ⚡`,
+            errors: errors.length > 0 ? errors : null
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Bulk transmission failed' });
     }
 });
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, UserPlus, Zap, Eye, EyeOff, PlusCircle } from 'lucide-react';
+import { ArrowLeft, UserPlus, Zap, Eye, EyeOff, PlusCircle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -52,6 +52,33 @@ const AddStudent = () => {
         }
     };
 
+    const handleBulkUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setLoading(true);
+        try {
+            const { data } = await API.post('/auth/bulk-register-students', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            setMsg(data.message);
+            // Agar errors aaye hain toh alert mein dikhao
+            if (data.errors) {
+                console.log("Bulk partial errors:", data.errors);
+                alert("Some students skipped. Check console for details.");
+            }
+            setTimeout(() => navigate('/admin/manage-users'), 2000);
+        } catch (err) {
+            alert(err.response?.data?.message || "Neural Link Failed during Bulk Sync! 🛡️");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleAddStudent = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -86,6 +113,62 @@ const AddStudent = () => {
             </div>
 
             <div className="px-6 -mt-10 relative z-20">
+                {/* 🔥 NAYA: NEURAL BULK IMPORT SECTION (FORM KE UPAR) */}
+                <div className="bg-[#EEF7FF] p-8 rounded-[3rem] border-2 border-dashed border-[#42A5F5] text-center space-y-4 shadow-inner mb-10">
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="p-4 bg-white rounded-3xl text-[#42A5F5] shadow-sm">
+                            <Zap size={32} fill="#42A5F5" className="animate-pulse" />
+                        </div>
+                        <h3 className="text-xl font-black italic uppercase text-slate-700 tracking-tighter leading-none">Neural bulk import</h3>
+                        <p className="text-[16px] font-bold text-slate-800 px-6 italic">Upload a CSV file to add many students at once.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3 pt-4">
+                        {/* Hidden Input */}
+                        <input
+                            type="file"
+                            id="bulkFile"
+                            hidden
+                            accept=".csv"
+                            onChange={handleBulkUpload} // Iska function maine pichle msg mein diya tha
+                            disabled={loading}
+                        />
+
+                        {/* Action Button */}
+                        <label
+                            htmlFor="bulkFile"
+                            className={`w-full py-5 bg-white text-[#42A5F5] rounded-2xl font-black uppercase text-[15px] tracking-[0.2em] shadow-md border border-blue-100 cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50 pointer-events-none' : ''}`}
+                        >
+                            <PlusCircle size={18} /> Upload Student CSV
+                        </label>
+
+                        {/* Template Download */}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const csvContent = "name,grade,fatherName,motherName,dob,gender,religion,phone,admissionNo,pincode,district,state,fullAddress\n" +
+                                    "Rahul Kumar,10-C,Sunil Kumar,Anita Devi,2010-05-15,Male,Hindu,9876543210,ADM001,110001,Delhi,Delhi,Noida Sec 15";
+                                const blob = new Blob([csvContent], { type: 'text/csv' });
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'EduFlowAI_Student_Template.csv';
+                                a.click();
+                            }}
+                            className="w-full py-5 bg-white text-[#42A5F5] rounded-2xl font-black uppercase text-[15px] tracking-[0.2em] shadow-md border border-blue-100 cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                            {/* Agar Download icon import kiya hai toh theek warna hata dena */}
+                            Download CSV Blueprint (Sample)
+                        </button>
+                    </div>
+                </div>
+
+                {/* --- SEPARATOR --- */}
+                <div className="flex items-center gap-4 mb-8 px-4">
+                    <div className="h-[1px] flex-1 bg-slate-400"></div>
+                    <span className="text-[15px] font-black text-slate-600 uppercase tracking-[0.3em]">Or Manual Entry</span>
+                    <div className="h-[1px] flex-1 bg-slate-400"></div>
+                </div>
                 <form onSubmit={handleAddStudent} className="bg-white p-8 rounded-[3rem] shadow-xl border border-[#DDE3EA] space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1">
