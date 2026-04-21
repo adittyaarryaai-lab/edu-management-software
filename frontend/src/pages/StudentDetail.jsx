@@ -64,7 +64,7 @@ const StudentDetail = () => {
                         { label: 'Absent', value: stats.absentDays, color: 'text-rose-500' }
                     ].map((s, i) => (
                         <div key={i} className="bg-white p-5 rounded-[2rem] border border-slate-100 text-center shadow-xl ring-1 ring-slate-50">
-                            <p className={`text-3xl font-black leading-none mb-2 ${s.color}`}>{s.value}</p>
+                            <p className={`text-2xl font-black leading-none mb-2 ${s.color}`}>{s.value}</p>
                             <p className="text-[12px] font-black uppercase tracking-widest text-slate-400">{s.label}</p>
                         </div>
                     ))}

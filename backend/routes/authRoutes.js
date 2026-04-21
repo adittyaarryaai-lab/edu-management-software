@@ -164,4 +164,89 @@ router.post('/bulk-register-students', protect, upload.single('file'), async (re
     }
 });
 
+// @desc    Bulk Register Teachers via CSV (Day 189)
+// @route   POST /api/auth/bulk-register-teachers
+router.post('/bulk-register-teachers', protect, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'Neural Faculty File Missing! 🛡️' });
+
+        const schoolId = req.user.schoolId;
+        const jsonArray = await csv().fromFile(req.file.path);
+
+        let successCount = 0;
+        let errors = [];
+
+        for (const data of jsonArray) {
+            try {
+                // 1. Duplicate Email Check
+                const userExists = await User.findOne({ email: data.email });
+                if (userExists) {
+                    errors.push(`${data.name}: Email already exists`);
+                    continue;
+                }
+
+                // 2. EMP ID Logic (EMP001 sequence)
+                const lastTeacher = await User.findOne({ 
+                    schoolId, 
+                    role: { $in: ['teacher', 'finance'] } 
+                }).sort({ createdAt: -1 });
+
+                let nextSerial = 1;
+                if (lastTeacher && lastTeacher.employeeId && lastTeacher.employeeId.startsWith('EMP')) {
+                    const lastNo = parseInt(lastTeacher.employeeId.replace('EMP', ''));
+                    nextSerial = lastNo + 1;
+                }
+                const generatedID = `EMP${nextSerial.toString().padStart(3, '0')}`;
+
+                // 3. AUTO-GENERATE EMAIL: name + empid + @edu.in
+                const firstName = data.name.split(" ")[0].toLowerCase();
+                const autoEmail = `${firstName}${generatedID.toLowerCase()}@edu.in`;
+
+                // 4. AUTO-GENERATE PASSWORD: name + fatherInitial + motherInitial + birthYear
+                // Logic: Ravi + (D)eshwal + (N)eeta + 1997 = ravidn1997
+                const fInitial = data.fatherName.trim().charAt(0).toLowerCase();
+                const mInitial = data.motherName.trim().charAt(0).toLowerCase();
+                const birthYear = data.dob.split("-")[data.dob.split("-").length - 1]; // Handles both YYYY-MM-DD and DD-MM-YYYY
+                const autoPassword = `${firstName}${fInitial}${mInitial}${birthYear}`;
+
+                await User.create({
+                    name: data.name,
+                    email: autoEmail,
+                    password: autoPassword,
+                    role: data.role === 'finance' ? 'finance' : 'teacher',
+                    schoolId: schoolId,
+                    employeeId: generatedID,
+                    subjects: data.subjects ? data.subjects.split(',').map(s => s.trim()) : [],
+                    assignedClass: data.assignedClass || null,
+                    fatherName: data.fatherName,
+                    motherName: data.motherName,
+                    dob: data.dob,
+                    gender: data.gender || 'Male',
+                    religion: data.religion || 'General',
+                    phone: data.phone,
+                    address: {
+                        fullAddress: data.fullAddress,
+                        district: data.district,
+                        state: data.state,
+                        pincode: data.pincode
+                    }
+                });
+
+                successCount++;
+            } catch (err) {
+                errors.push(`${data.name}: ${err.message}`);
+            }
+        }
+
+        fs.unlinkSync(req.file.path);
+        res.status(201).json({
+            message: `Neural Faculty Linked! ${successCount} Teachers Synced. ⚡`,
+            errors: errors.length > 0 ? errors : null
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Faculty bulk transmission failed' });
+    }
+});
+
 module.exports = router;

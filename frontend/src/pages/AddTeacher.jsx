@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, UserCheck, Zap, PlusCircle, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, UserCheck, Zap, PlusCircle, Eye, EyeOff, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -35,6 +35,27 @@ const AddTeacher = () => {
             });
         }
     };
+
+    const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setLoading(true);
+    try {
+        const { data } = await API.post('/auth/bulk-register-teachers', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setMsg(data.message);
+        setTimeout(() => navigate('/admin/manage-users'), 2000);
+    } catch (err) {
+        alert("Faculty Sync Failed! 🛡️");
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleAddTeacher = async (e) => {
         e.preventDefault();
@@ -100,6 +121,42 @@ const AddTeacher = () => {
             </div>
 
             <div className="px-6 -mt-10 relative z-20">
+
+                <div className="bg-[#F0F7FF] p-8 rounded-[3rem] border-2 border-dashed border-[#42A5F5] text-center space-y-4 shadow-inner mb-10">
+    <div className="flex flex-col items-center gap-2">
+        <div className="p-4 bg-white rounded-3xl text-[#42A5F5] shadow-sm">
+            <Zap size={32} fill="#42A5F5" className="animate-pulse" />
+        </div>
+        <h3 className="text-xl font-black italic uppercase text-slate-700">Faculty bulk import</h3>
+        <p className="text-[16px] font-bold text-slate-800 px-6 italic">Upload a CSV file to add a whole department in one click.</p>
+    </div>
+
+    <div className="flex flex-col gap-3 pt-4">
+        <input type="file" id="bulkTeacherFile" hidden accept=".csv" onChange={handleBulkUpload} disabled={loading} />
+        <label htmlFor="bulkTeacherFile" className={`w-full py-5 bg-white text-[#42A5F5] rounded-2xl font-black uppercase text-[15px] tracking-[0.2em] shadow-md border border-blue-100 cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2 ${loading ? 'opacity-50' : ''}`}>
+            <UserCheck size={18} /> Upload Faculty CSV
+        </label>
+
+        <button type="button" onClick={() => {
+            const csvContent = "name,role,subjects,assignedClass,fatherName,motherName,dob,gender,religion,phone,pincode,district,state,fullAddress\n" +
+                               "Ravi Kumar,teacher,Math,10-C,Deshwal,Neeta,15-05-1990,Male,Hindu,9876543210,110001,Delhi,Delhi,Noida Sec 15";
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Faculty_Import_Template.csv';
+            a.click();
+        }} className="w-full py-5 bg-white text-[#42A5F5] rounded-2xl font-black uppercase text-[15px] tracking-[0.2em] shadow-md border border-blue-100 cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-2">
+            <Download size={12} /> Download Faculty Blueprint (Sample)
+        </button>
+    </div>
+</div>
+
+<div className="flex items-center gap-4 mb-8 px-4">
+    <div className="h-[1px] flex-1 bg-slate-400"></div>
+    <span className="text-[15px] font-black text-slate-600 uppercase tracking-[0.3em]">Or Manual Entry</span>
+    <div className="h-[1px] flex-1 bg-slate-400"></div>
+</div>
                 <form onSubmit={handleAddTeacher} className="bg-white p-8 rounded-[3rem] shadow-xl border border-[#DDE3EA] space-y-6">
 
                     {/* --- FINANCE TOGGLE (ONLY SHOW IF NOT EXISTS) --- */}
