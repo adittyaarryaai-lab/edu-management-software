@@ -142,26 +142,27 @@ const StudentCheckout = () => {
                 </div>
 
                 {/* --- BILLING SUMMARY --- */}
-                <div className="bg-slate-800 p-8 rounded-[3rem] shadow-2xl border border-slate-700">
-                    <h2 className="text-[18px] font-bold text-rose-400 uppercase tracking-widest mb-6">Settlement summary</h2>
+                {/* --- BILLING SUMMARY --- */}
+<div className="bg-slate-800 p-8 rounded-[3rem] shadow-2xl border border-slate-700">
+    <h2 className="text-[18px] font-bold text-[#42A5F5] uppercase tracking-widest mb-6">Settlement summary</h2>
 
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                            <span className="text-[16px] font-bold text-slate-400 capitalize">Monthly fees to be paid</span>
-                            <span className="text-[16px] font-black italic text-white">₹{(summary.grandTotal - summary.totalPenalty).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-4 border-b border-slate-700">
-                            <span className="text-[16px] font-bold text-rose-400 capitalize">Total penalty applied</span>
-                            <span className="text-[16px] font-black italic text-rose-400">+ ₹{(summary.totalPenalty || 0).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between items-center pt-2">
-                            <span className="text-[16px] font-black text-white capitalize italic">Net payable amount</span>
-                            <span className="text-3xl font-black text-[#42A5F5] tracking-tighter animate-pulse">
-                                ₹{(summary.grandTotal).toLocaleString()}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+    <div className="space-y-4">
+        <div className="flex justify-between items-center pb-4 border-b border-slate-700">
+            <span className="text-[16px] font-bold text-slate-400 capitalize">Outstanding monthly fees</span>
+            {/* Ab direct grandTotal dikhao kyunki backend se wahi asli fees aa rahi hai */}
+            <span className="text-[16px] font-black italic text-white">₹{summary.grandTotal.toLocaleString()}</span>
+        </div>
+        
+        {/* 🔥 PENALTY WALA SECTION DELETE KAR DIYA GAYA HAI */}
+
+        <div className="flex justify-between items-center pt-2">
+            <span className="text-[16px] font-black text-white capitalize italic">Net payable amount</span>
+            <span className="text-3xl font-black text-[#42A5F5] tracking-tighter animate-pulse">
+                ₹{summary.grandTotal.toLocaleString()}
+            </span>
+        </div>
+    </div>
+</div>
 
                 {/* --- PAY NOW ACTION --- */}
                 <button

@@ -27,7 +27,7 @@ const StudentLedger = () => {
 
     if (loading) return <Loader />;
 
-    const totalPenalty = audit?.totalPenalty || 0;
+    // const totalPenalty = audit?.totalPenalty || 0;
     const finalRemaining = audit?.remaining || 0;
 
     const isFeesDone = finalRemaining <= 0;
@@ -76,7 +76,7 @@ const StudentLedger = () => {
 
                 </div>
 
-                {totalPenalty > 0 && (
+                {/* {totalPenalty > 0 && (
                     <div className="mt-6 flex items-center gap-3 bg-white/60 px-5 py-4 rounded-[2rem] border border-rose-100 text-left">
                         <AlertCircle size={18} className="text-rose-500" />
                         <div className="flex flex-col">
@@ -86,7 +86,7 @@ const StudentLedger = () => {
                             </span>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {advanceMoney > 0 && (
                     <div className="mt-4 flex items-center gap-3 bg-emerald-500 px-5 py-2.5 rounded-2xl border border-emerald-100 w-fit shadow-md shadow-emerald-100">

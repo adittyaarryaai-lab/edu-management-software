@@ -95,7 +95,7 @@ const StudentFees = () => {
     const currentMonthPaid = summary?.totalPaidThisMonth || 0;
     const finalOutstanding = summary?.grandTotal || 0; // Backend (26000) seedha yahan aayega
     const advanceMoney = summary?.advanceBalance || 0;
-    const totalPenalty = summary?.totalPenalty || 0;
+    // const totalPenalty = summary?.totalPenalty || 0;
     const totalExpectedAll = summary?.totalFeesStructure || 0;
     const structureTotal = summary?.totalFeesStructure || 0;
 
@@ -167,7 +167,7 @@ const StudentFees = () => {
                     {/* --- StudentFees.jsx Update --- */}
 
                     {/* Surplus Adjusted Badge ke upar ya niche ye Penalty Alert daldo */}
-                    {summary?.totalPenalty > 0 && finalOutstanding > 0 && (
+                    {/* {summary?.totalPenalty > 0 && finalOutstanding > 0 && (
                         <div className="flex items-center justify-center gap-2 mb-4 bg-rose-50 p-4 rounded-3xl border border-rose-100 text-left">
                             <AlertCircle size={20} className="text-rose-500" />
                             <div>
@@ -175,7 +175,7 @@ const StudentFees = () => {
                                 <span className="text-[15px] font-bold text-slate-400 italic">₹{summary?.totalPenalty.toLocaleString()} added to your dues</span>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Main Balance Heading badal do */}
                     <h2 className={`text-5xl font-black tracking-tighter mb-4 ${!isFeesDone ? 'text-rose-500' : 'text-emerald-500'}`}>
@@ -240,11 +240,11 @@ const StudentFees = () => {
                                     <p className="text-[15px] font-bold text-slate-500 leading-relaxed italic">
                                         Current monthly fees: <span className="text-slate-800 font-black">₹{summary.remainingFees.toLocaleString()}</span>
                                     </p>
-                                    {totalPenalty > 0 && (
+                                    {/* {totalPenalty > 0 && (
                                         <p className="text-[15px] font-bold text-rose-400 italic">
                                             Late fee penalty: <span className="font-black">₹{totalPenalty.toLocaleString()}</span>
                                         </p>
-                                    )}
+                                    )} */}
                                 </div>
                             </div>
                         </div>

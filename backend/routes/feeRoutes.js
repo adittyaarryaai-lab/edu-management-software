@@ -286,7 +286,6 @@ router.get('/student-summary', protect, async (req, res) => {
         if (!student) return res.status(404).json({ message: 'Identity missing' });
 
         const schoolData = await School.findById(schoolId);
-        const pSettings = schoolData?.penaltySettings;
 
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
@@ -303,6 +302,7 @@ router.get('/student-summary', protect, async (req, res) => {
         let oneTimeLabels = [];
         let structureDetails = {};
 
+        // 1. Fee Structure logic (Monthly vs One-time)
         if (structure && structure.fees) {
             Object.keys(structure.fees).forEach(key => {
                 const item = structure.fees[key];
@@ -320,44 +320,22 @@ router.get('/student-summary', protect, async (req, res) => {
             });
         }
 
+        // 2. Months Elapsed Calculation
         const joinDate = new Date(student.createdAt);
-        const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
-        let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
-
+        const monthsElapsed = Math.max(1, (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1);
         const totalMonthlyExpected = monthlyStructureTotal * monthsElapsed;
 
-        // 2. Ab check karo bache ne verified kitna pay kiya hai (Penalty entries ko chhod kar)
+        // 3. Total Paid Logic (Including everything that isn't a One-Time fee)
         const totalMonthlyPaidSoFar = verifiedPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
             return !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // --- NEURAL MATH ADJUSTMENT ---
-        let baseFeesBalance = totalMonthlyExpected - totalMonthlyPaidSoFar;
-        let extraPaidAmount = baseFeesBalance < 0 ? Math.abs(baseFeesBalance) : 0;
-
-        let livePenalty = 0;
-        if (!isNewStudent && pSettings?.isActive && baseFeesBalance > 0 && pSettings.activatedAt) {
-            const activationDate = new Date(pSettings.activatedAt);
-            const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
-            const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            const diffTime = Math.abs(end - start);
-            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-            let totalDaysToCharge = diffDays + 1;
-            if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
-            livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
-        }
-
-        // Penalty Adjustment: Extra paise pehle penalty clear karenge
-        const adjustedLivePenalty = Math.max(0, livePenalty - extraPaidAmount);
-        const remainingExtra = Math.max(0, extraPaidAmount - livePenalty);
-
-        const frozenPenalty = verifiedPayments.reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
-        const totalPenaltyToDisplay = livePenalty + frozenPenalty;
-        const netBalanceWithPenalty = baseFeesBalance + totalPenaltyToDisplay;
-
-        const totalOutstanding = Math.max(0, baseFeesBalance + adjustedLivePenalty);
+        // 4. Final Balance & Advance Logic (Clean Ledger)
+        const netBalance = totalMonthlyExpected - totalMonthlyPaidSoFar;
+        
+        const finalOutstanding = netBalance > 0 ? netBalance : 0;
+        const advanceBalance = netBalance < 0 ? Math.abs(netBalance) : 0;
 
         const pendingPayment = await Fee.findOne({ student: studentId, status: 'Pending' }).sort({ createdAt: -1 });
 
@@ -388,10 +366,10 @@ router.get('/student-summary', protect, async (req, res) => {
             currentMonth: currentMonthName,
             totalPaidThisMonth: verifiedPayments.filter(p => p.month === currentMonthName && p.year === currentYear).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0),
             lastActivity: verifiedPayments.length > 0 ? verifiedPayments[0].date : null,
-            totalPenalty: totalPenaltyToDisplay,
-            grandTotal: Math.max(0, netBalanceWithPenalty),
-            remainingFees: Math.max(0, baseFeesBalance),
-            advanceBalance: netBalanceWithPenalty < 0 ? Math.abs(netBalanceWithPenalty) : 0,
+            totalPenalty: 0, // Penalty is now history
+            grandTotal: finalOutstanding,
+            remainingFees: finalOutstanding,
+            advanceBalance: advanceBalance,
             totalFeesStructure: monthlyStructureTotal,
             feeStructure: structureDetails,
             paymentHistory: groupedHistory,
@@ -618,6 +596,7 @@ router.get('/tracker/students/:grade', protect, financeOnly, async (req, res) =>
     }
 });
 
+// --- AUDIT ROUTE: CLEAN LEDGER VERSION (NO PENALTY) ---
 router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
     try {
         const studentId = req.params.studentId;
@@ -627,13 +606,8 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const currentYear = today.getFullYear();
 
         const User = require('../models/User');
-        const School = require('../models/School');
-
-        const student = await User.findOne({ _id: studentId, schoolId: schoolId });
+        const student = await User.findOne({ _id: studentId, schoolId });
         if (!student) return res.status(404).json({ message: 'Identity missing' });
-
-        const schoolData = await School.findById(schoolId);
-        const pSettings = schoolData?.penaltySettings;
 
         const rawGrade = student.grade || "";
         const numericPart = rawGrade.match(/\d+/);
@@ -643,23 +617,24 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         const allPayments = await Fee.find({
             student: studentId,
             schoolId: schoolId,
-            status: { $ne: 'Rejected' }
+            status: 'Verified'
         }).sort({ date: -1 });
 
-        let monthlyOnlyStructureTotal = 0;
+        let monthlyStructureTotal = 0;
         let structureDetails = [];
         let oneTimeLabels = [];
 
+        // 1. Structure Math
         if (structure && structure.fees) {
             Object.keys(structure.fees).forEach(key => {
                 const item = structure.fees[key];
                 if (item && !item.isNone && item.amount > 0) {
                     const labelName = key.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
                     const amount = Number(item.amount);
-                    if (item.billingCycle === 'monthly') { monthlyOnlyStructureTotal += amount; }
+                    if (item.billingCycle === 'monthly') { monthlyStructureTotal += amount; }
                     else { oneTimeLabels.push(labelName); }
 
-                    const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName) && p.status === 'Verified');
+                    const isPaidAlready = allPayments.some(p => p.remarks?.toUpperCase().includes(labelName));
                     structureDetails.push({
                         label: labelName, amount: amount, cycle: item.billingCycle,
                         isPaid: isPaidAlready && item.billingCycle === 'one-time'
@@ -668,47 +643,34 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
             });
         }
 
+        // 2. Duration Math
         const joinDate = new Date(student.createdAt);
-        const isNewStudent = joinDate.getMonth() === today.getMonth() && joinDate.getFullYear() === today.getFullYear();
-        let monthsElapsed = isNewStudent ? 1 : (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1;
+        const monthsElapsed = Math.max(1, (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth()) + 1);
+        const totalExpectedSoFar = monthlyStructureTotal * monthsElapsed;
 
-        const totalMonthlyExpectedSoFar = monthlyOnlyStructureTotal * monthsElapsed;
-        const totalMonthlyPaidAllTime = allPayments.filter(p => {
+        // 3. Paid Math (Strictly Monthly)
+        const totalMonthlyPaidSoFar = allPayments.filter(p => {
             const isOneTime = oneTimeLabels.some(label => p.remarks?.toUpperCase().includes(label));
-            return !isOneTime && p.status === 'Verified';
+            // Penalty check hata diya gaya hai - Penalty ka paisa ab fees mein gina jayega
+            return !isOneTime;
         }).reduce((sum, p) => sum + (Number(p.amountPaid) || 0), 0);
 
-        // --- PENALTY ADJUSTMENT LOGIC ---
-        let baseBalance = totalMonthlyExpectedSoFar - totalMonthlyPaidAllTime;
-        let extraPaid = baseBalance < 0 ? Math.abs(baseBalance) : 0;
-
-        let livePenalty = 0;
-        if (!isNewStudent && pSettings?.isActive && baseBalance > 0 && pSettings.activatedAt) {
-            const activationDate = new Date(pSettings.activatedAt);
-            const start = new Date(activationDate.getFullYear(), activationDate.getMonth(), activationDate.getDate());
-            const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            const diffTime = Math.abs(end - start);
-            let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-            let totalDaysToCharge = diffDays + 1;
-            if (diffDays > 0 && today.getHours() < 11) { totalDaysToCharge -= 1; }
-            livePenalty = totalDaysToCharge * (pSettings.dailyRate || 0);
-        }
-
-        const frozenPenalty = allPayments.filter(p => p.status === 'Verified').reduce((sum, p) => sum + (p.penaltyAmount || 0), 0);
-        const totalPenaltySum = Math.max(0, (livePenalty + frozenPenalty) - extraPaid);
-        const finalRemaining = Math.max(0, baseBalance) + totalPenaltySum;
+        // 4. Final Clean Balance Logic
+        const baseBalance = totalExpectedSoFar - totalMonthlyPaidSoFar;
+        
+        const finalRemaining = baseBalance > 0 ? baseBalance : 0;
+        const advanceMoney = baseBalance < 0 ? Math.abs(baseBalance) : 0;
 
         res.json({
             student,
-            totalPaidThisMonth: allPayments.filter(p => p.month === currentMonthName && p.year === currentYear && p.status === 'Verified').reduce((sum, p) => sum + p.amountPaid, 0),
-            totalExpected: monthlyOnlyStructureTotal,
-            totalPenalty: totalPenaltySum,
+            totalPaidThisMonth: allPayments.filter(p => p.month === currentMonthName && p.year === currentYear).reduce((sum, p) => sum + p.amountPaid, 0),
+            totalExpected: monthlyStructureTotal,
+            totalPenalty: 0, // Hardcoded 0 (Logic removed)
             remaining: finalRemaining,
-            advance: (baseBalance < 0 && (Math.abs(baseBalance) > (livePenalty + frozenPenalty))) ? (Math.abs(baseBalance) - (livePenalty + frozenPenalty)) : 0,
+            advance: advanceMoney,
             currentMonth: currentMonthName,
             structureDetails,
-            history: allPayments.filter(p => p.status === 'Verified').reduce((acc, pay) => {
+            history: allPayments.reduce((acc, pay) => {
                 const key = `${pay.month} ${pay.year}`;
                 if (!acc[key]) acc[key] = [];
                 const rawRemarks = pay.remarks || "";
@@ -721,8 +683,7 @@ router.get('/audit/:studentId', protect, financeOnly, async (req, res) => {
         });
 
     } catch (error) {
-        console.error("STRICT_AUDIT_ERROR:", error);
-        res.status(500).json({ message: 'Neural Ledger Server Error: ' + error.message });
+        res.status(500).json({ message: 'Neural Ledger Reset Failed' });
     }
 });
 

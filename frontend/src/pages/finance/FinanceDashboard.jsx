@@ -10,42 +10,35 @@ const FinanceDashboard = ({ searchQuery }) => {
         collectedMonth: 0,
         recentPayments: [],
         pendingCount: 0,
-        penaltySettings: { dailyRate: 0, isActive: false }
+        // penaltySettings: { dailyRate: 0, isActive: false }
     });
 
     const [newPaymentAlert, setNewPaymentAlert] = useState(null);
-    const [penaltyUpdateMsg, setPenaltyUpdateMsg] = useState(null);
+    // const [penaltyUpdateMsg, setPenaltyUpdateMsg] = useState(null);
 
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
-    const fetchStats = async () => {
-        try {
-            const [statsRes, penaltyRes] = await Promise.all([
-                API.get('/users/finance/stats'),
-                API.get('/fees/settings/penalty')
-            ]);
+   const fetchStats = async () => {
+    try {
+        // Sirf stats mangwao, penaltyRes hata diya
+        const { data } = await API.get('/users/finance/stats');
 
-            const freshData = statsRes.data;
+        if (stats.recentPayments.length > 0 && data.recentPayments.length > 0) {
+            const latestNewId = data.recentPayments[0]._id;
+            const latestOldId = stats.recentPayments[0]._id;
 
-            if (stats.recentPayments.length > 0 && freshData.recentPayments.length > 0) {
-                const latestNewId = freshData.recentPayments[0]._id;
-                const latestOldId = stats.recentPayments[0]._id;
-
-                if (latestNewId !== latestOldId) {
-                    setNewPaymentAlert(freshData.recentPayments[0]);
-                    setTimeout(() => setNewPaymentAlert(null), 7000);
-                }
+            if (latestNewId !== latestOldId) {
+                setNewPaymentAlert(data.recentPayments[0]);
+                setTimeout(() => setNewPaymentAlert(null), 7000);
             }
-
-            setStats({
-                ...freshData,
-                penaltySettings: penaltyRes.data
-            });
-        } catch (err) {
-            console.error("Stats sync error:", err);
         }
-    };
+
+        setStats(data); // Seedha data set karo
+    } catch (err) {
+        console.error("Stats sync error:", err);
+    }
+};
 
     useEffect(() => {
         fetchStats();
@@ -96,7 +89,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                     </motion.div>
                 )}
 
-                {penaltyUpdateMsg && (
+                {/* {penaltyUpdateMsg && (
                     <motion.div
                         initial={{ y: -100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
@@ -112,7 +105,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                         </div>
                         <CheckCircle size={20} className="text-emerald-500" />
                     </motion.div>
-                )}
+                )} */}
             </AnimatePresence>
 
             {/* HEADER SECTION */}
@@ -121,13 +114,13 @@ const FinanceDashboard = ({ searchQuery }) => {
 
                 <div className="relative z-10">
                     {/* <h1 className="text-2xl font-black italic tracking-tight capitalize">Finance dashboard</h1> */}
-                    <p className="text-[16px] font-bold text-white/80 mt-1 capitalize tracking-wide">
+                    <p className="text-[19px] font-bold text-white/80 mt-1 capitalize tracking-wide">
                         Accountant: <br /> {user?.name}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3 relative z-30">
-                    <div className="flex flex-col items-end mr-2">
+                    {/* <div className="flex flex-col items-end mr-2">
                         <span className={`text-[15px] font-black uppercase tracking-widest ${stats.penaltySettings?.isActive ? 'text-rose-200' : 'text-white/40'}`}>
                             {stats.penaltySettings?.isActive ? 'Penalty' : 'Penalty'}
                         </span>
@@ -144,7 +137,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                         >
                             <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all transform ${stats.penaltySettings?.isActive ? 'translate-x-6' : 'translate-x-0'}`} />
                         </button>
-                    </div>
+                    </div> */}
 
                     <button
                         onClick={() => navigate('/finance/add-payment')}
@@ -187,7 +180,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                 </div>
 
                 {/* PENALTY INFO ACTION BAR */}
-                {stats.penaltySettings?.isActive && (
+                {/* {stats.penaltySettings?.isActive && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                         className="p-4 bg-rose-50 border border-rose-100 rounded-3xl flex justify-between items-center px-6"
@@ -229,7 +222,7 @@ const FinanceDashboard = ({ searchQuery }) => {
                             </button>
                         </div>
                     </motion.div>
-                )}
+                )} */}
 
                 {/* Recent Payments Section */}
                 <div className="bg-white rounded-[3rem] border border-[#DDE3EA] p-8 shadow-md relative overflow-hidden">
