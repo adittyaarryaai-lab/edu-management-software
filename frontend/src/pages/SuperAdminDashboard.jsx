@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, IndianRupee, TrendingUp, Trash2, Edit3, X, Save, RotateCcw, Users, Bot, School, Hash, MapPin, Phone } from 'lucide-react';
+import { Globe, Plus, IndianRupee, TrendingUp, Trash2, Edit3, X, Save, RotateCcw, Users, Bot, School, Hash, MapPin, ArrowRight, Phone, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Loader from '../components/Loader';
@@ -8,7 +8,6 @@ const SuperAdminDashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const [editingSchool, setEditingSchool] = useState(null);
     const [editData, setEditData] = useState({});
 
@@ -27,16 +26,17 @@ const SuperAdminDashboard = () => {
     const fetchStats = async () => {
         try {
             setLoading(true);
+            // Backend se stats mangwao
             const { data } = await API.get('/superadmin/stats');
+
+            // Agar bache ne issue dala hai, toh backend se stats.pendingIssues aur stats.issueCount aana chahiye
             setStats(data);
         } catch (err) {
-            console.error(err);
-            if (err.response?.status === 403 || err.response?.status === 401) {
-                localStorage.removeItem('user');
-                window.location.href = '/';
-            }
+            console.error("Stats Fetch Error:", err);
+            // Auth error check...
+        } finally {
+            setLoading(false);
         }
-        finally { setLoading(false); }
     };
 
     const handleUpdate = async () => {
@@ -44,12 +44,14 @@ const SuperAdminDashboard = () => {
             await API.put(`/superadmin/update-school/${editingSchool._id}`, editData);
             setEditingSchool(null);
             fetchStats();
-        } catch (err) { alert("Update Failed"); }
+        } catch (err) {
+            alert("Update failed");
+        }
     };
 
     const handleGhostLogin = async (schoolId) => {
         try {
-            if (!schoolId) return alert("Invalid School Reference");
+            if (!schoolId) return alert("Invalid school reference");
             const currentUser = JSON.parse(localStorage.getItem('user'));
             localStorage.setItem('superadmin_backup', JSON.stringify(currentUser));
             const { data } = await API.get(`/superadmin/login-as-school/${schoolId}`);
@@ -58,97 +60,166 @@ const SuperAdminDashboard = () => {
                 window.location.href = '/dashboard';
             }
         } catch (err) {
-            alert(err.response?.data?.message || "Ghost Login Failed!");
+            alert(err.response?.data?.message || "Access failed!");
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("CAUTION: Deactivate node? Revenue preserved. Proceed?")) {
+        if (window.confirm("Caution: Deactivate this institution? Revenue data will be preserved.")) {
             try {
                 await API.delete(`/superadmin/delete-school/${id}`);
                 fetchStats();
-            } catch (err) { alert("Deletion Failed"); }
+            } catch (err) {
+                alert("Deletion failed");
+            }
         }
     };
+
+    useEffect(() => {
+        if (editingSchool) {
+            document.body.style.overflow = 'hidden'; // Background pause (Scroll disable)
+        } else {
+            document.body.style.overflow = 'unset'; // Background normal
+        }
+        return () => { document.body.style.overflow = 'unset'; }; // Cleanup
+    }, [editingSchool]);
 
     if (loading) return <Loader />;
 
     return (
-        <div className="min-h-screen bg-void p-6 font-sans italic text-white">
-            <div className="flex justify-between items-center mb-8">
+        <div className="min-h-screen bg-[#F1F5F9] p-8 font-sans">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Executive Hub</h1>
-                    <p className="text-[10px] font-black text-neon/40 tracking-[0.3em] uppercase italic">Global Asset Monitoring</p>
+                    <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Executive Hub</h1>
+                    <p className="text-lg font-medium text-slate-500 italic mt-1">Global system monitoring & asset management</p>
                 </div>
-                <button onClick={() => navigate('/superadmin/onboard')} className="bg-neon text-void px-6 py-4 rounded-3xl font-black flex items-center gap-2 shadow-[0_0_20px_rgba(61,242,224,0.3)] active:scale-95 transition-all uppercase text-[10px] tracking-widest italic">
-                    <Plus size={20} /> Onboard New Node
+                <button
+                    onClick={() => navigate('/superadmin/onboard')}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-lg shadow-indigo-200 transition-all active:scale-95 text-lg"
+                >
+                    <Plus size={24} /> Onboard New School
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                 {[
-                    { label: 'Active Nodes', value: stats?.activeSchools, icon: <Globe />, color: 'text-neon', bg: 'bg-neon/10' },
-                    { label: 'Total Revenue', value: `₹${stats?.totalRevenue}`, icon: <IndianRupee />, color: 'text-neon', bg: 'bg-neon/10' },
-                    { label: 'Network Load', value: 'OPTIMAL', icon: <TrendingUp />, color: 'text-neon', bg: 'bg-neon/10' }
+                    { label: 'Active institutions', value: stats?.activeSchools || 0, icon: <Globe />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                    { label: 'Total network revenue', value: `₹${stats?.totalRevenue?.toLocaleString() || 0}`, icon: <IndianRupee />, color: 'text-violet-600', bg: 'bg-violet-50' },
+                    // 🔥 YAHAN ISSUE COUNT: Agar backend se issueCount aa raha hai toh wo dikhega
+                    { label: 'Technical Issues', value: stats?.issueCount || 0, icon: <ShieldAlert />, color: 'text-rose-600', bg: 'bg-rose-50' }
                 ].map((s, i) => (
-                    <div key={i} className="bg-white/5 p-8 rounded-[3rem] shadow-2xl border border-white/10 flex items-center gap-6 group hover:border-neon/30 transition-all">
-                        <div className={`${s.bg} ${s.color} p-5 rounded-3xl border border-neon/20 shadow-inner group-hover:shadow-[0_0_15px_rgba(61,242,224,0.2)] transition-all`}>{s.icon}</div>
+                    <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex items-center gap-6 hover:shadow-md transition-shadow">
+                        <div className={`${s.bg} ${s.color} p-5 rounded-3xl shadow-inner`}>{s.icon}</div>
                         <div>
-                            <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1 italic">{s.label}</p>
-                            <h3 className="text-2xl font-black text-white tracking-tighter italic">{s.value}</h3>
+                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
+                            <h3 className="text-3xl font-black text-slate-800 tracking-tight">{s.value}</h3>
                         </div>
                     </div>
                 ))}
             </div>
+            // 3. Technical Support Terminal Card (Action required badge fix)
+            <div
+                onClick={() => navigate('/superadmin/technical')}
+                className="mb-10 p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm flex flex-col md:flex-row items-center justify-between cursor-pointer hover:shadow-md transition-all group border-l-8 border-l-rose-500"
+            >
+                <div className="flex items-center gap-6">
+                    <div className="p-5 bg-rose-50 rounded-3xl text-rose-500 group-hover:scale-110 transition-transform shadow-inner">
+                        <ShieldAlert size={32} />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-extrabold text-slate-800 tracking-tight">Technical support terminal</h3>
+                        {/* 🔥 YAHAN DYNAMIC COUNT: stats?.pendingIssues backend se aana chahiye */}
+                        <p className="text-lg font-medium text-slate-500 italic">
+                            {stats?.pendingIssues > 0
+                                ? `Detecting ${stats.pendingIssues} unresolved anomalies in the network`
+                                : `No critical issues reported across ${stats?.activeSchools || 0} nodes`}
+                        </p>
+                    </div>
+                </div>
 
-            <div className="bg-slate-900/50 backdrop-blur-xl rounded-[3.5rem] p-10 shadow-2xl border border-white/5">
-                <h2 className="text-xl font-black text-neon/60 mb-8 uppercase tracking-tighter italic flex items-center gap-3">
-                    <Bot size={20} className="animate-pulse" /> Institution Node Inventory
-                </h2>
+                <div className="mt-6 md:mt-0 flex items-center gap-4">
+                    {/* 🔥 ACTION REQUIRED BADGE: Jab tak backend se data 0 se bada nahi hoga, ye nahi dikhega */}
+                    {stats?.pendingIssues > 0 && (
+                        <span className="bg-rose-500 text-white px-4 py-1.5 rounded-full text-xs font-black animate-pulse shadow-lg shadow-rose-200 uppercase">
+                            {stats.pendingIssues} Action required
+                        </span>
+                    )}
+                    <div className="bg-slate-800 text-white px-8 py-3 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center gap-2 group-hover:bg-rose-600 transition-colors">
+                        View Logs <ArrowRight size={18} />
+                    </div>
+                </div>
+            </div>
+            {/* Main Inventory Table */}
+            <div className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-10">
+                    <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                        <ShieldCheck size={24} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-800">Institution Node Inventory</h2>
+                </div>
+
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left">
+                    <table className="w-full text-left border-separate border-spacing-y-4">
                         <thead>
-                            <tr className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] border-b border-white/5">
-                                <th className="pb-4">Sector Details</th>
-                                <th className="pb-4">Admin Node</th>
-                                <th className="pb-4">Strength (S/F)</th>
-                                <th className="pb-4">Revenue Log</th>
-                                <th className="pb-4">Status</th>
-                                <th className="pb-4">Protocol</th>
+                            <tr className="text-sm font-bold text-slate-400 uppercase tracking-widest">
+                                <th className="px-6 pb-4">Sector details</th>
+                                <th className="px-6 pb-4">Admin node</th>
+                                <th className="px-6 pb-4">Active strength</th>
+                                <th className="px-6 pb-4">Revenue log</th>
+                                <th className="px-6 pb-4">Protocol status</th>
+                                <th className="px-6 pb-4 text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody>
                             {stats?.schools.map((school, i) => (
-                                <tr key={i} className="group hover:bg-neon/5 transition-all cursor-pointer">
-                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
-                                        <div className="flex items-center gap-4">
-                                            <img src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/50'} className="w-12 h-12 rounded-2xl object-cover border border-neon/20 shadow-inner transition-all" alt="logo" />
+                                <tr key={i} className="group hover:bg-slate-50 transition-all rounded-3xl shadow-sm cursor-pointer">
+                                    <td className="py-6 px-6 bg-white border-y border-l border-slate-100 first:rounded-l-[2rem]" onClick={() => handleGhostLogin(school._id)}>
+                                        <div className="flex items-center gap-5">
+                                            <img
+                                                src={school.logo ? `http://localhost:5000${school.logo}` : 'https://via.placeholder.com/60'}
+                                                className="w-14 h-14 rounded-2xl object-cover border border-slate-100 shadow-sm"
+                                                alt="logo"
+                                            />
                                             <div>
-                                                <p className="font-black text-white/80 text-sm uppercase italic group-hover:text-neon transition-colors">{school.schoolName}</p>
-                                                <p className="text-[9px] text-white/20 font-black tracking-widest uppercase">{school.affiliationNo}</p>
+                                                <p className="font-extrabold text-slate-700 text-lg group-hover:text-indigo-600 transition-colors">{school.schoolName}</p>
+                                                <p className="text-xs font-bold text-slate-400 tracking-wider">Ref: {school.affiliationNo}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
-                                        <p className="text-xs font-black text-white/70 italic uppercase">{school.adminDetails.fullName}</p>
-                                        <p className="text-[9px] text-white/20 font-black italic">{school.adminDetails.email}</p>
+                                    <td className="py-6 px-6 bg-white border-y border-slate-100" onClick={() => handleGhostLogin(school._id)}>
+                                        <p className="text-sm font-bold text-slate-600">{school.adminDetails?.fullName}</p>
+                                        <p className="text-xs text-slate-400">{school.adminDetails?.email}</p>
                                     </td>
-                                    <td className="py-6" onClick={() => handleGhostLogin(school._id)}>
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="text-[10px] font-black text-neon uppercase italic tracking-widest">{school.studentCount || 0} Nodes</span>
-                                            <span className="text-[8px] font-black text-white/20 uppercase italic">{school.teacherCount || 0} Faculty</span>
+                                    <td className="py-6 px-6 bg-white border-y border-slate-100" onClick={() => handleGhostLogin(school._id)}>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-indigo-500">{school.studentCount || 0} Students</span>
+                                            <span className="text-xs text-slate-400">{school.teacherCount || 0} Faculty</span>
                                         </div>
                                     </td>
-                                    <td className="py-6 font-black text-sm text-neon/80 italic tracking-tighter">₹{school.subscription.totalPaid}</td>
-                                    <td className="py-6">
-                                        <span className={`text-[8px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest italic ${school.subscription.status === 'Active' ? 'bg-neon/10 text-neon border border-neon/30' : 'bg-red-500/10 text-red-500 border border-red-500/30'}`}>
-                                            {school.subscription.status}
+                                    <td className="py-6 px-6 bg-white border-y border-slate-100 font-extrabold text-lg text-slate-700">
+                                        ₹{school.subscription?.totalPaid?.toLocaleString()}
+                                    </td>
+                                    <td className="py-6 px-6 bg-white border-y border-slate-100">
+                                        <span className={`text-xs font-black px-5 py-2 rounded-full tracking-wide ${school.subscription?.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                                            {school.subscription?.status}
                                         </span>
                                     </td>
-                                    <td className="py-6">
-                                        <div className="flex gap-2">
-                                            <button onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }} className="p-3 bg-void border border-white/5 text-neon/40 rounded-xl hover:text-neon hover:border-neon/30 transition-all shadow-lg"><Edit3 size={16} /></button>
-                                            <button onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }} className="p-3 bg-void border border-white/5 text-red-500/40 rounded-xl hover:text-red-500 hover:border-red-500/30 transition-all shadow-lg"><Trash2 size={16} /></button>
+                                    <td className="py-6 px-6 bg-white border-y border-r border-slate-100 last:rounded-r-[2rem]">
+                                        <div className="flex gap-3 justify-center">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setEditingSchool(school); setEditData(school); }}
+                                                className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                                            >
+                                                <Edit3 size={20} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(school._id); }}
+                                                className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:text-rose-600 hover:bg-rose-50 transition-all"
+                                            >
+                                                <Trash2 size={20} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -158,79 +229,93 @@ const SuperAdminDashboard = () => {
                 </div>
             </div>
 
+            {/* Edit Modal */}
             {editingSchool && (
-                <div className="fixed inset-0 bg-void/90 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-slate-900 w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border border-neon/20 animate-in zoom-in-95 duration-200 my-8 italic">
-                        <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
-                            <h3 className="font-black italic uppercase tracking-tighter text-neon/60">Node Re-Configuration Matrix</h3>
-                            <button onClick={() => setEditingSchool(null)} className="p-2 bg-void rounded-full text-white/20 hover:text-white transition-colors"><X size={20} /></button>
+                <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+                    {/* 1. Backdrop (Piche ka kala hissa jo click karne par band nahi hoga, logic fix) */}
+                    <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
+
+                    {/* 2. Modal Container (Center mein lock) */}
+                    <div className="relative bg-white w-full max-w-2xl rounded-[3.5rem] p-10 shadow-2xl animate-in zoom-in-95 duration-200 italic max-h-[90vh] overflow-y-auto custom-scrollbar">
+
+                        {/* Header */}
+                        <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6">
+                            <div>
+                                <h3 className="text-3xl font-extrabold text-slate-800 tracking-tight">Re-configure node</h3>
+                                <p className="text-slate-500 font-medium">Update institutional protocols & settings</p>
+                            </div>
+                            <button
+                                onClick={() => setEditingSchool(null)}
+                                className="p-3 bg-slate-100 rounded-full text-slate-400 hover:text-rose-500 transition-colors shadow-sm"
+                            >
+                                <X size={24} />
+                            </button>
                         </div>
 
-                        <div className="space-y-6">
-                            {/* School Details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Institutional Name</label>
-                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
-                                        <School size={16} className="text-white/20 mr-3" />
-                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.schoolName} onChange={(e) => setEditData({ ...editData, schoolName: e.target.value })} />
+                        {/* Form Fields */}
+                        <div className="space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">School name</label>
+                                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-4 focus-within:border-indigo-400 transition-colors">
+                                        <School size={20} className="text-slate-300 mr-3" />
+                                        <input className="bg-transparent font-bold text-slate-700 outline-none w-full uppercase" value={editData.schoolName} onChange={(e) => setEditData({ ...editData, schoolName: e.target.value })} />
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Registry Cipher (Affiliation)</label>
-                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
-                                        <Hash size={16} className="text-white/20 mr-3" />
-                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.affiliationNo} onChange={(e) => setEditData({ ...editData, affiliationNo: e.target.value })} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Address */}
-                            <div className="space-y-1">
-                                <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Deployment Sector (Address)</label>
-                                <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
-                                    <MapPin size={16} className="text-white/20 mr-3" />
-                                    <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white uppercase w-full" value={editData.address} onChange={(e) => setEditData({ ...editData, address: e.target.value })} />
-                                </div>
-                            </div>
-
-                            {/* Admin Personnel Details */}
-                            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic border-b border-white/5 pb-1">Personnel Node Admin</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Operator Persona</label>
-                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-white uppercase" value={editData.adminDetails?.fullName} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, fullName: e.target.value } })} />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Signal Contact</label>
-                                    <div className="flex items-center bg-void border border-white/5 rounded-2xl p-4">
-                                        <Phone size={14} className="text-white/20 mr-3" />
-                                        <input className="bg-transparent font-black italic text-xs outline-none focus:text-neon text-white w-full" value={editData.adminDetails?.mobile} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, mobile: e.target.value } })} />
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Affiliation number</label>
+                                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-4 focus-within:border-indigo-400 transition-colors">
+                                        <Hash size={20} className="text-slate-300 mr-3" />
+                                        <input className="bg-transparent font-bold text-slate-700 outline-none w-full uppercase" value={editData.affiliationNo} onChange={(e) => setEditData({ ...editData, affiliationNo: e.target.value })} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Subscription & Status */}
-                            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic border-b border-white/5 pb-1">Credit & Protocol Status</p>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Total Paid</label>
-                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-white" value={editData.subscription?.totalPaid} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, totalPaid: Number(e.target.value) } })} />
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-500 ml-2">Deployment address</label>
+                                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-4 focus-within:border-indigo-400 transition-colors">
+                                    <MapPin size={20} className="text-slate-300 mr-3" />
+                                    <input className="bg-transparent font-bold text-slate-700 outline-none w-full uppercase" value={editData.address} onChange={(e) => setEditData({ ...editData, address: e.target.value })} />
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Monthly Quota</label>
-                                    <input className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-xs outline-none focus:border-neon text-neon" value={editData.subscription?.monthlyFee} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, monthlyFee: Number(e.target.value) } })} />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Admin full name</label>
+                                    <input className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 font-bold text-slate-700 outline-none focus:border-indigo-400 uppercase" value={editData.adminDetails?.fullName} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, fullName: e.target.value } })} />
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-[8px] font-black text-neon/40 uppercase ml-2 tracking-widest italic">Node Status</label>
-                                    <select className="w-full p-4 bg-void rounded-2xl border border-white/5 font-black italic text-[10px] outline-none focus:border-neon text-neon/60 appearance-none uppercase" value={editData.subscription?.status} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, status: e.target.value } })}>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Contact number</label>
+                                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-4 focus-within:border-indigo-400 transition-colors">
+                                        <Phone size={18} className="text-slate-300 mr-3" />
+                                        <input className="bg-transparent font-bold text-slate-700 outline-none w-full" value={editData.adminDetails?.mobile} onChange={(e) => setEditData({ ...editData, adminDetails: { ...editData.adminDetails, mobile: e.target.value } })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Total paid</label>
+                                    <input type="number" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 font-bold text-slate-700 outline-none" value={editData.subscription?.totalPaid} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, totalPaid: Number(e.target.value) } })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Monthly fee</label>
+                                    <input type="number" className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 font-bold text-slate-700 outline-none" value={editData.subscription?.monthlyFee} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, monthlyFee: Number(e.target.value) } })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-slate-500 ml-2">Status</label>
+                                    <select className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-200 font-bold text-slate-700 outline-none" value={editData.subscription?.status} onChange={(e) => setEditData({ ...editData, subscription: { ...editData.subscription, status: e.target.value } })}>
                                         <option value="Active">Active</option>
                                         <option value="Terminated">Terminated</option>
                                     </select>
                                 </div>
                             </div>
-                            <button onClick={handleUpdate} className="w-full bg-neon text-void py-5 rounded-[2rem] font-black uppercase text-[10px] tracking-widest shadow-[0_0_20px_rgba(61,242,224,0.3)] flex items-center justify-center gap-2 italic">
-                                <Save size={18} /> Commit Protocol Changes
+
+                            <button
+                                onClick={handleUpdate}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[2rem] font-bold text-lg shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 mt-6 transition-all active:scale-[0.98]"
+                            >
+                                <Save size={24} /> Save changes
                             </button>
                         </div>
                     </div>

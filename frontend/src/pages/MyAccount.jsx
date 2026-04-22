@@ -174,11 +174,14 @@ const MyAccount = ({ user }) => {
                                     <div className="flex items-start gap-5 bg-slate-50 p-5 rounded-[2rem] border border-slate-100 shadow-inner">
                                         <div className="bg-white p-3 rounded-xl border border-slate-200 text-[#42A5F5] mt-1"><MapPin size={22} /></div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Deployment address</p>
-                                            <p className="text-[14px] font-bold text-slate-600 capitalize leading-relaxed">{schoolData?.address?.toLowerCase() || "location data encrypted"}</p>
+                                            <p className="text-[16px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
+                                            <p className="text-[15px] font-bold text-slate-600 capitalize leading-relaxed">
+                                                {user?.address?.fullAddress?.toLowerCase()}<br />
+                                                {user?.address?.district?.toLowerCase()}, {user?.address?.state?.toLowerCase()} - {user?.address?.pincode}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                    {/* <div className="grid grid-cols-2 gap-4 mt-2">
                                         <div className="bg-[#42A5F5] p-5 rounded-[2rem] shadow-lg shadow-blue-100">
                                             <p className="text-[10px] font-black text-white/70 uppercase mb-1 italic tracking-widest">Monthly quota</p>
                                             <p className="text-xl font-black text-white tracking-tighter">₹{schoolData?.subscription?.monthlyFee || 0}</p>
@@ -187,7 +190,7 @@ const MyAccount = ({ user }) => {
                                             <p className="text-[10px] font-black text-white/50 uppercase mb-1 italic tracking-widest">Session cycle</p>
                                             <p className="text-xl font-black text-white italic tracking-tighter">{schoolData?.sessionYear || "2026-27"}</p>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </>
                             ) : (
                                 <>

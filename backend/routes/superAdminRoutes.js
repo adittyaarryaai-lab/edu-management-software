@@ -6,6 +6,7 @@ const User = require('../models/User');
 const { protect, superAdminOnly } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const generateToken = require('../utils/generateToken');
+const TechnicalIssue = require('../models/TechnicalIssue'); // 🔥 YE LINE ADD KARO
 
 // 1. Add New School & Create its Admin
 // 1. Add New School & Create its Admin (FIXED MAP LOGIC)
@@ -174,6 +175,10 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
         const visibleSchools = allSchools.filter(s => !s.isDeleted);
         const activeSchools = visibleSchools.filter(s => s.subscription.status === 'Active').length;
 
+        const issueCount = await TechnicalIssue.countDocuments(); 
+        // Sirf unka count jo abhi tak resolve nahi huye (Action Required)
+        const pendingIssues = await TechnicalIssue.countDocuments({ status: 'Pending' });
+
         // Step 1: Aggregating analytics for each school
         const schoolsWithStats = await Promise.all(visibleSchools.map(async (school) => {
             const studentCount = await User.countDocuments({ schoolId: school._id, role: 'student' });
@@ -186,11 +191,13 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
             };
         }));
 
-        res.json({
+       res.json({
             totalSchools: visibleSchools.length,
             activeSchools,
             totalRevenue,
-            schools: schoolsWithStats // Sending enriched data
+            issueCount,      // 🔥 Dashboard card par dikhega
+            pendingIssues,   // 🔥 Red Alert Badge mein dikhega
+            schools: schoolsWithStats
         });
     } catch (error) {
         res.status(500).json({ message: 'Stats fetch failed' });

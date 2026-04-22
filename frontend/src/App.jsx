@@ -210,16 +210,22 @@ function App() {
             </button>
 
             {/* LIGHT THEME BACKGROUND IMAGE (Tera Day 163 wala exact code) */}
-            <div className="absolute inset-0 z-0 text-center flex items-center justify-center overscroll-none overflow-hidden fixed inset-0 overflow-y-auto overflow-x-hidden">
+            {/* --- STABLE BACKGROUND ENGINE --- */}
+            <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+              {/* Background Image */}
               <img
                 src="/image.png.jpeg"
                 alt="AI background"
-                className="w-full h-full object-cover opacity-40 scale-110 motion-safe:animate-pulse-slow"
+                className="absolute inset-0 w-full h-full object-cover opacity-40 scale-110 motion-safe:animate-pulse-slow select-none"
                 style={{ filter: 'hue-rotate(10deg) saturate(150%)' }}
               />
+
+              {/* Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-tr from-[#F8FAFC] via-white/60 to-[#42A5F5]/20 backdrop-blur-[2px]"></div>
+
+              {/* Animated Wave Layer */}
               <div className="absolute inset-0 opacity-30">
-                <div className="absolute -inset-[100%] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iMCIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjNDJBNUY1IiBzdG9wLW9wYWNpdHk9IjAuMSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+')] animate-wave-slow"></div>
+                <div className="absolute -inset-[100%] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIjMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiLz48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iMCIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjNDJBNUY1IiBzdG9wLW9wYWNpdHk9IjAuMSIvPjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PC9zdmc+')] animate-wave-slow"></div>
               </div>
             </div>
 
@@ -410,7 +416,7 @@ function App() {
           <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
           <Route path="/superadmin/onboard" element={<SuperAdminOnboard />} />
           <Route path="/superadmin/account" element={<SuperAdminAccount user={user} />} />
-          <Route path="/superadmin/technical-logs" element={<SuperAdminTechnical />} /> {/* <--- YE ROUTE ADD KARO */}
+          <Route path="/superadmin/technical" element={<SuperAdminTechnical />} />
 
           {/* Timetable & Admin Management */}
           <Route path="/timetable" element={user.role === 'teacher' ? <TeacherSchedule user={user} /> : <Timetable user={user} />} />
