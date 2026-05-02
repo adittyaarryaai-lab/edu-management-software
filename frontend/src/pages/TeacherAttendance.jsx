@@ -120,7 +120,7 @@ const TeacherAttendance = ({ user }) => {
         <div className="min-h-screen bg-[#F8FAFC] pb-10 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {showToast && (
                 <Toast
-                    message={isUpdateMode ? "Records updated successfully!" : "Attendance saved!"}
+                    message={isUpdateMode ? "Records updated successfully!" : "Attendance marked successfully!"}
                     type="success"
                     onClose={() => setShowToast(false)}
                 />
@@ -325,7 +325,7 @@ const TeacherAttendance = ({ user }) => {
                     <>
                         <div className="flex justify-between items-center px-6 mb-2">
                             <span className="text-[15px] font-black text-[#42A5F5] uppercase tracking-widest italic">
-                                {isUpdateMode ? '📍 Updating Atd.' : '📝 Taking Atd.'}
+                                {isUpdateMode ? '📍 Updating Atd.' : '📝 Mark Atd.'}
                             </span>
                             <span className="text-[15px] font-black text-white uppercase tracking-widest bg-[#42A5F5] px-5 py-2 rounded-full shadow-md italic">
                                 Present: {students.filter(s => s.status === 'Present').length} / {students.length}

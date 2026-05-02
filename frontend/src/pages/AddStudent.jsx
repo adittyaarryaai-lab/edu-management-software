@@ -66,7 +66,6 @@ const AddStudent = () => {
             });
 
             setMsg(data.message);
-            // Agar errors aaye hain toh alert mein dikhao
             if (data.errors) {
                 console.log("Bulk partial errors:", data.errors);
                 alert("Some students skipped. Check console for details.");

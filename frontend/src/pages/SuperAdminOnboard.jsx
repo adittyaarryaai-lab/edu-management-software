@@ -9,6 +9,7 @@ const SuperAdminOnboard = () => {
     const [msg, setMsg] = useState('');
     const [loading, setLoading] = useState(false);
     const [logoFile, setLogoFile] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         schoolInfo: { schoolName: '', address: '', affiliationNo: '', logo: '' },
@@ -126,10 +127,27 @@ const SuperAdminOnboard = () => {
                             onChange={(e) => setFormData({ ...formData, adminInfo: { ...formData.adminInfo, email: e.target.value } })} required />
                     </div>
                     <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-5 focus-within:border-indigo-400 transition-all">
-                        <Lock size={20} className="text-slate-300 mr-4" />
-                        <input type="password" placeholder="Access password" className="bg-transparent font-bold text-lg text-slate-700 outline-none w-full"
-                            onChange={(e) => setFormData({ ...formData, tempPassword: e.target.value })} required />
-                    </div>
+    
+    <Lock size={20} className="text-slate-300 mr-4" />
+
+    <input
+        type={showPassword ? "text" : "password"}
+        placeholder="Access password"
+        className="bg-transparent font-bold text-lg text-slate-700 outline-none w-full"
+        onChange={(e) => setFormData({ ...formData, tempPassword: e.target.value })}
+        required
+    />
+
+    {/* 👁 Toggle Button */}
+    <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="ml-3 text-slate-400 hover:text-indigo-500 transition"
+    >
+        {showPassword ? "🙈" : "👁️"}
+    </button>
+
+</div>
                 </div>
 
                 {/* Subscription Details */}

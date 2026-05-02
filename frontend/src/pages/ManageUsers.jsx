@@ -21,6 +21,8 @@ const ManageUsers = () => {
     const [isAssignClassDropdownOpen, setIsAssignClassDropdownOpen] = useState(false);
 
     const [freeClasses, setFreeClasses] = useState([]);
+    const [deleteUserId, setDeleteUserId] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Jab bhi dropdown khule, tab latest free classes fetch karo
     useEffect(() => {
@@ -70,12 +72,16 @@ const ManageUsers = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Critical: Terminate this identity from system?")) return;
         try {
             await API.delete(`/users/delete/${id}`);
-            setMsg("Identity purged successfully! 🗑️");
+            setMsg("User deleted successfully 🗑️");
             setUsersList(usersList.filter(u => u._id !== id));
-        } catch (err) { alert("Purge failed"); }
+        } catch (err) {
+            setMsg("Delete failed");
+        }
+
+        setShowDeleteConfirm(false);
+        setDeleteUserId(null);
     };
     const handleDobChange = (type, value) => {
         // Pehle existing date uthao ya default setup karo
@@ -226,7 +232,11 @@ const ManageUsers = () => {
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => setEditingUser(u)} className="p-3 bg-blue-50 text-[#42A5F5] rounded-2xl hover:bg-[#42A5F5] hover:text-white transition-all shadow-sm active:scale-90"><Edit3 size={18} /></button>
-                                <button onClick={() => handleDelete(u._id)} className="p-3 bg-rose-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-90"><Trash2 size={18} /></button>
+                                <button
+                                    onClick={() => {
+                                        setDeleteUserId(u._id);
+                                        setShowDeleteConfirm(true);
+                                    }} className="p-3 bg-rose-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all shadow-sm active:scale-90"><Trash2 size={18} /></button>
                             </div>
                         </div>
                     )) : viewMode && (
@@ -563,6 +573,51 @@ const ManageUsers = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            <AnimatePresence>
+{showDeleteConfirm && (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+        <motion.div
+            initial={{ scale: 0.9, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.9, y: 20 }}
+            className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl text-center"
+        >
+            <h3 className="text-xl font-black text-slate-800 mb-2 italic">
+                Are you sure?
+            </h3>
+
+            <p className="text-slate-500 font-bold text-sm mb-6">
+                Do you want to delete this user?
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+                <button
+                    onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteUserId(null);
+                    }}
+                    className="py-4 rounded-2xl bg-slate-100 font-black"
+                >
+                    No
+                </button>
+
+                <button
+                    onClick={() => handleDelete(deleteUserId)}
+                    className="py-4 rounded-2xl bg-rose-500 text-white font-black"
+                >
+                    Yes
+                </button>
+            </div>
+        </motion.div>
+    </motion.div>
+)}
+</AnimatePresence>
 
             {msg && <Toast message={msg} onClose={() => setMsg('')} />}
         </div>

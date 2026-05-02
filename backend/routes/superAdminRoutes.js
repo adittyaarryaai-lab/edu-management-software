@@ -182,7 +182,10 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
         // Step 1: Aggregating analytics for each school
         const schoolsWithStats = await Promise.all(visibleSchools.map(async (school) => {
             const studentCount = await User.countDocuments({ schoolId: school._id, role: 'student' });
-            const teacherCount = await User.countDocuments({ schoolId: school._id, role: 'teacher' });
+            const teacherCount = await User.countDocuments({ 
+    schoolId: school._id, 
+    role: { $in: ['teacher', 'finance'] } 
+});
 
             return {
                 ...school._doc,
