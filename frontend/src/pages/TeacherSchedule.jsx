@@ -29,22 +29,6 @@ const TeacherSchedule = () => {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const { data } = await API.get('/timetable/teacher/personal-schedule');
-        setPersonalSchedule(data.schedule);
-
-        // Aaj ki check-in: Dekho aaj kitni diaries bhar di hain
-        const todayStr = new Date().toISOString().split('T')[0];
-        const { data: todayData } = await API.get(`/homework/view?date=${todayStr}`);
-        setSubmittedDiaries(todayData.map(d => `${d.className}-${d.subject}`));
-      } catch (err) { console.error("Initial load failed"); }
-      finally { setLoading(false); }
-    };
-    fetchInitialData();
-  }, []);
-
   const daysMap = [
     { short: 'Mon', full: 'Monday' }, { short: 'Tue', full: 'Tuesday' },
     { short: 'Wed', full: 'Wednesday' }, { short: 'Thu', full: 'Thursday' },
@@ -102,32 +86,53 @@ const TeacherSchedule = () => {
     }
   };
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const { data: scheduleData } = await API.get('/timetable/teacher/personal-schedule');
-        setPersonalSchedule(scheduleData.schedule);
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
 
-        // --- NAYA LOGIC: Saare subjects ki latest diary check karo ---
-        const activeDiaries = [];
+      // Step 1: Sirf timetable load karo (fast open)
+      const { data: scheduleData } = await API.get(
+        '/timetable/teacher/personal-schedule'
+      );
 
-        // Har period ke liye check karo ki kya koi active diary hai (within 6 days)
-        for (const day of scheduleData.schedule) {
-          for (const period of day.periods) {
+      setPersonalSchedule(scheduleData.schedule);
+
+      // Page open ho jaaye turant
+      setLoading(false);
+
+      // Step 2: Diary status baad me load karo
+      const activeDiaries = [];
+
+      Promise.all(
+        scheduleData.schedule.flatMap(day =>
+          day.periods.map(async (period) => {
             const key = `${period.grade}-${period.subject}`;
+
             if (!activeDiaries.includes(key)) {
-              const { data: latest } = await API.get(`/homework/latest?className=${period.grade}&subject=${period.subject}`);
-              if (latest) {
-                activeDiaries.push(key);
-              }
+              try {
+                const { data: latest } = await API.get(
+                  `/homework/latest?className=${period.grade}&subject=${period.subject}`
+                );
+
+                if (latest) {
+                  activeDiaries.push(key);
+                }
+              } catch (err) {}
             }
-          }
-        }
+          })
+        )
+      ).then(() => {
         setSubmittedDiaries(activeDiaries);
-      } catch (err) { console.error("Initial load failed"); }
-      finally { setLoading(false); }
-    };
-    fetchInitialData();
-  }, []);
+      });
+
+    } catch (err) {
+      console.error("Initial load failed");
+      setLoading(false);
+    }
+  };
+
+  fetchInitialData();
+}, []);
   // const isDoneToday = submittedDiaries.includes(`${item.grade}-${item.subject}`);
 
   const currentDayData = personalSchedule?.find(d => d.day === activeDay);
