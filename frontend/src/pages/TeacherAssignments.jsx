@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Upload, X, CheckCircle, FileText, Calendar, Target, Download, Edit3, Trash2, ChevronDown, Users } from 'lucide-react';
+import { ArrowLeft, Upload, X, CheckCircle,CheckCircle2, FileText, Calendar, Target, Download, Edit3, Trash2, ChevronDown, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
