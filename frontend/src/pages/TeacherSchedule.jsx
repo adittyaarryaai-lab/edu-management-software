@@ -13,20 +13,19 @@ const formatLocalDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-const getNextDateForDay = (targetDay) => {
+const getWeekDate = (targetDay) => {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = new Date();
-  const todayIndex = today.getDay();
-  const targetIndex = days.indexOf(targetDay);
+  const currentDayIndex = today.getDay(); // Aaj ka index (0-6)
+  const targetDayIndex = days.indexOf(targetDay); // Jo day click kiya uska index
 
-  let diff = targetIndex - todayIndex;
-
-  if (diff < 0) diff += 7;
-
+  // Logic: Aaj ki date mein se (aaj ka index - target index) minus kar do
+  // Isse hum hamesha CURRENT WEEK ki hi date nikalenge
   const resultDate = new Date(today);
-  resultDate.setDate(today.getDate() + diff);
+  const diff = currentDayIndex - targetDayIndex;
 
-  // Note: formatLocalDate function wahi hona chahiye jo aapne date format ke liye banaya hai
+  resultDate.setDate(today.getDate() - diff);
+
   return formatLocalDate(resultDate);
 };
 const TeacherSchedule = () => {
@@ -54,8 +53,7 @@ const TeacherSchedule = () => {
     setSelectedPeriod(period);
     setDiaryContent("");
 
-    // 1. Pehle ye dekho ki activeDay (Mon, Tue etc.) ke hisaab se date kya banti hai
-    const selectedDayDate = getNextDateForDay(activeDay);
+    const selectedDayDate = getWeekDate(activeDay);
 
     // 2. State update karo taaki modal mein sahi date dikhe
     setDiaryDate(selectedDayDate);
@@ -97,7 +95,6 @@ const TeacherSchedule = () => {
       });
       const newKey = `${selectedPeriod.grade}-${selectedPeriod.subject}-${diaryDate}`;
       setSubmittedDiaries(prev => {
-        // Duplicate entry na ho isliye check kar rahe hain
         if (prev.includes(newKey)) return prev;
         return [...prev, newKey];
       });
@@ -122,57 +119,42 @@ const TeacherSchedule = () => {
   };
 
   useEffect(() => {
-    const calculatedDate = getNextDateForDay(activeDay);
+    const calculatedDate = getWeekDate(activeDay); // Update function name
     setDiaryDate(calculatedDate);
-  }, [activeDay]); // Jab bhi activeDay badle, date bhi badle
+  }, [activeDay]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-
-        // STEP 1: Timetable Load Karna (Priority)
-        // Sabse pehle backend se teacher ka pura hafte ka schedule mangwaya.
-        const { data: scheduleData } = await API.get(
-          '/timetable/teacher/personal-schedule'
-        );
-
-        // State update ki taaki UI par Periods dikhne lagein
+        const { data: scheduleData } = await API.get('/timetable/teacher/personal-schedule');
         setPersonalSchedule(scheduleData.schedule);
-
-        // Timetable aate hi loading screen hata di (Taki user ko wait na karna pade)
         setLoading(false);
 
-        // STEP 2: Diary Status Check Karna (Background Process)
         const activeDiaries = [];
-        const todayStr = formatLocalDate(new Date()); // Aaj ki date string format mein
 
-        // Hum saare periods par loop chala rahe hain check karne ke liye
-        Promise.all(
+        // Parallel calls for all periods in the schedule
+        await Promise.all(
           scheduleData.schedule.flatMap(day =>
             day.periods.map(async (period) => {
-              const key = `${period.grade}-${period.subject}`;
+              // Current week ki specific date nikal rahe hain us day ke liye
+              const targetDate = getWeekDate(day.day);
+              const key = `${period.grade}-${period.subject}-${targetDate}`;
 
-              if (!activeDiaries.includes(key)) {
-                try {
-                  // Backend se pucha: "Kya is class+subject ki aaj ki diary bhari hai?"
-                  const { data: existingToday } = await API.get(
-                    `/homework/check?className=${period.grade}&subject=${period.subject}&date=${todayStr}`
-                  );
-                  if (existingToday) {
-                    activeDiaries.push(`${period.grade}-${period.subject}-${todayStr}`);
-                  }
-                } catch (err) {
+              try {
+                const { data: existing } = await API.get(
+                  `/homework/check?className=${period.grade}&subject=${period.subject}&date=${targetDate}`
+                );
+                if (existing) {
+                  activeDiaries.push(key);
                 }
+              } catch (err) {
+                // Diary nahi mili, ignore
               }
             })
           )
-        ).then(() => {
-          // Jab saare checks pure ho jayein, tab state update karo
-          // Isse UI par "Green Check" ya "Submitted" status dikhega
-          setSubmittedDiaries(activeDiaries);
-        });
-
+        );
+        setSubmittedDiaries(activeDiaries);
       } catch (err) {
         console.error("Initial load failed", err);
         setLoading(false);
@@ -231,6 +213,7 @@ const TeacherSchedule = () => {
               return timeA - timeB;
             })
             .map((item, index) => {
+              const currentViewDate = getWeekDate(activeDay);
               const diaryKey = `${item.grade}-${item.subject}-${diaryDate}`;
               const hasActiveDiary = submittedDiaries.includes(diaryKey);
 
