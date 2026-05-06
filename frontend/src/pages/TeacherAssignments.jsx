@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Upload, X, CheckCircle,CheckCircle2, FileText, Calendar, Target, Download, Edit3, Trash2, ChevronDown, Users } from 'lucide-react';
+import { ArrowLeft, Upload, X, CheckCircle, CheckCircle2, FileText, Calendar, Target, Download, Edit3, Trash2, ChevronDown, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -567,9 +567,16 @@ const SubmissionCard = ({ sub, handleGrade, setToast }) => {
 
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2 text-left">
-                    <label className="text-[17px] font-black uppercase text-slate-400 ml-2 italic tracking-widest">Solution File</label>
-                    <a href={`http://localhost:5000${sub.fileUrl}`} download className="flex items-center justify-center gap-2 py-4 bg-white rounded-2xl text-blue-500 shadow-sm border border-blue-50 font-black text-xs uppercase active:scale-95 transition-all">
-                        <Download size={18} /> Get PDF/IMG
+                    <label className="text-[17px] font-black uppercase text-slate-400 ml-2 italic tracking-widest">
+                        Solution File
+                    </label>
+                    <a
+                        href={`http://localhost:5000${sub.fileUrl}`}
+                        target="_blank"            // Sabse important: Naye tab mein khulega
+                        rel="noopener noreferrer"  // Security ke liye zaroori
+                        className="flex items-center justify-center gap-2 py-4 bg-white rounded-2xl text-blue-500 shadow-sm border border-blue-50 font-black text-xs uppercase active:scale-95 transition-all"
+                    >
+                        <Download size={18} /> View PDF/IMG
                     </a>
                 </div>
 
