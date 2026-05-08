@@ -10,32 +10,51 @@ const TeacherSupport = () => {
     const [msg, setMsg] = useState('');
     const [queries, setQueries] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [reply, setReply] = useState('');
+    const [reply, setReply] = useState({});
 
+    const fetchQueries = async () => {
+        try {
+            setLoading(true);
+            const { data } = await API.get('/support/all-queries');
+            setQueries(data);
+        } catch (err) {
+            console.error("Neural fetch error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchQueries = async () => {
-            try {
-                setLoading(true);
-                const { data } = await API.get('/support/all-queries');
-                setQueries(data);
-            } catch (err) {
-                console.error("Neural fetch error:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchQueries();
     }, []);
 
     const handleResolve = async (id) => {
-        if (!reply.trim()) {
+        const currentReply = reply[id];
+        if (!currentReply?.trim()) {
             setMsg("Error: Enter resolution protocol! 🛡️");
             return;
         }
+
         try {
-            await API.put(`/support/resolve/${id}`, { answer: reply });
+            await API.put(`/support/resolve/${id}`, { answer: currentReply });
+
             setMsg("Solution sent! Query closed. ✅");
-            setTimeout(() => window.location.reload(), 2000);
+
+            setQueries(prev =>
+                prev.map(q =>
+                    q._id === id
+                        ? {
+                            ...q,
+                            status: 'Resolved',
+                            answer: currentReply
+                        }
+                        : q
+                )
+            );
+
+            setReply(prev => ({
+                ...prev,
+                [id]: ''
+            }));
         } catch (err) {
             setMsg("Transmission failed: Neural link unstable.");
         }
@@ -94,7 +113,7 @@ const TeacherSupport = () => {
                                 </div>
                             </div>
                             {q.isUrgent && (
-                               <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)] inline-block"></span>
+                                <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)] inline-block"></span>
                             )}
                         </div>
 
@@ -113,7 +132,13 @@ const TeacherSupport = () => {
                                     <textarea
                                         placeholder="Type your solution here..."
                                         className="w-full bg-slate-50 p-6 rounded-[2rem] border border-slate-400 text-[16px] font-bold text-slate-700 outline-none focus:border-[#42A5F5] focus:bg-white h-32 italic placeholder:text-slate-300 transition-all shadow-inner"
-                                        onChange={(e) => setReply(e.target.value)}
+                                        value={reply[q._id] || ''}
+                                        onChange={(e) =>
+                                            setReply({
+                                                ...reply,
+                                                [q._id]: e.target.value
+                                            })
+                                        }
                                     />
                                     <ShieldCheck className="absolute bottom-6 right-6 text-[#42A5F5] opacity-20" size={24} />
                                 </div>

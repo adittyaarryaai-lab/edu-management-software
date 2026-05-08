@@ -9,6 +9,7 @@ import API from '../api';
 
 const TeacherHome = ({ user, searchQuery }) => {
   const navigate = useNavigate();
+  const [supportCount, setSupportCount] = useState(0);
   const [studentCount, setStudentCount] = useState(0);
 
   useEffect(() => {
@@ -16,6 +17,9 @@ const TeacherHome = ({ user, searchQuery }) => {
       try {
         const { data } = await API.get('/auth/student-stats');
         setStudentCount(data.totalStudents);
+
+        const { data: supportData } = await API.get('/support/pending-count');
+        setSupportCount(supportData.count);
       } catch (err) {
         console.error("Error fetching student stats:", err);
         setStudentCount(120);
@@ -48,8 +52,13 @@ const TeacherHome = ({ user, searchQuery }) => {
               <Link
                 to={m.path}
                 key={i}
-                className="bg-white rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-4 shadow-md border border-[#DDE3EA] active:scale-95 transition-all group hover:border-[#42A5F5] italic"
+                className="relative bg-white rounded-[2.5rem] p-8 flex flex-col items-center justify-center gap-4 shadow-md border border-[#DDE3EA] active:scale-95 transition-all group hover:border-[#42A5F5] italic"
               >
+                {m.title === 'Support center' && supportCount > 0 && (
+                  <div className="absolute top-3 right-3 min-w-[24px] h-6 px-2 bg-red-500 text-white text-[11px] font-black rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    {supportCount}
+                  </div>
+                )}
                 <div className="p-5 rounded-[2rem] bg-blue-50 text-[#42A5F5] transition-all group-hover:bg-[#42A5F5] group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-100">
                   {m.icon}
                 </div>

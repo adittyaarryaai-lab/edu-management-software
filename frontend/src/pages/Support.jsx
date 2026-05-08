@@ -17,39 +17,46 @@ const Support = () => {
         query: '',
         isUrgent: false
     });
-
+const fetchTickets = async () => {
+    try {
+        setLoading(true);
+        const { data } = await API.get('/support/my-queries');
+        setTickets(data);
+    } catch (err) {
+        console.error("Error fetching tickets:", err);
+    } finally {
+        setLoading(false);
+    }
+};
     useEffect(() => {
-        const fetchTickets = async () => {
-            try {
-                setLoading(true);
-                const { data } = await API.get('/support/my-queries');
-                setTickets(data);
-            } catch (err) {
-                console.error("Error fetching tickets:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchTickets();
     }, []);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await API.post('/support/ask', {
-                subject: formData.subject,
-                query: formData.query,
-                isUrgent: formData.isUrgent
-            });
-            // alert hatao, msg set karo
-            setMsg("Query! Send to your Class Teacher. 🛰️");
-            setIsFormOpen(false);
-            // Page reload ki jagah ticket list refresh karna better hai, par tune reload rakha hai toh wahi rehne diya
-            setTimeout(() => window.location.reload(), 2000);
-        } catch (err) {
-            setMsg("Protocol Failure: Link interrupted. ⚠️");
-        }
-    };
+    e.preventDefault();
+
+    try {
+        await API.post('/support/ask', {
+            subject: formData.subject,
+            query: formData.query,
+            isUrgent: formData.isUrgent
+        });
+
+        setMsg("Query! Send to your Class Teacher. 🛰️");
+        setIsFormOpen(false);
+
+        setFormData({
+            subject: '',
+            query: '',
+            isUrgent: false
+        });
+
+        fetchTickets();
+
+    } catch (err) {
+        setMsg("Protocol Failure: Link interrupted. ⚠️");
+    }
+};
 
     if (loading) return <Loader />;
 

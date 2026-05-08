@@ -79,6 +79,20 @@ router.get('/all-queries', protect, teacherOnly, async (req, res) => {
     }
 });
 
+router.get('/pending-count', protect, teacherOnly, async (req, res) => {
+    try {
+        const count = await Support.countDocuments({
+            schoolId: req.user.schoolId,
+            teacher: req.user._id,
+            status: 'Pending'
+        });
+
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ message: 'Count fetch error' });
+    }
+});
+
 router.put('/resolve/:id', protect, teacherOnly, async (req, res) => {
     try {
         const { answer } = req.body;

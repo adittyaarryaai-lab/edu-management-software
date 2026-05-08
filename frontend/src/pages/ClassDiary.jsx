@@ -9,7 +9,7 @@ const ClassDiary = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [homeworkList, setHomeworkList] = useState([]);
-    
+
     // Aj ki date set karo format: YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
     const [selectedDate, setSelectedDate] = useState(today);
@@ -38,7 +38,7 @@ const ClassDiary = () => {
                 // User info se class nikaal lo (Assume user storage mein hai)
                 const user = JSON.parse(localStorage.getItem('user'));
                 const className = user?.grade;
-                
+
                 const { data } = await API.get(`/homework/view?className=${className}&date=${selectedDate}`);
                 setHomeworkList(data);
             } catch (err) { console.error("Diary Fetch Failed"); }
@@ -70,7 +70,7 @@ const ClassDiary = () => {
                             className={`flex flex-col items-center min-w-[65px] py-4 rounded-3xl border transition-all ${selectedDate === d.full
                                 ? 'bg-[#42A5F5] text-white border-[#42A5F5] shadow-lg shadow-blue-100'
                                 : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-white'
-                            }`}
+                                }`}
                         >
                             <span className="text-[10px] font-black uppercase mb-1 tracking-widest">{d.day}</span>
                             <span className="text-[18px] font-black">{d.date}</span>
@@ -83,70 +83,84 @@ const ClassDiary = () => {
             <div className="px-6 -mt-10 space-y-6 relative z-20">
                 {loading ? <div className="py-20"><Loader /></div> : (
                     <AnimatePresence mode='wait'>
-    {homeworkList.length > 0 ? (
-        /* Sabhi cards ko ek single motion.div mein wrap kiya taaki 'wait' mode sahi chale */
-        <motion.div 
-            key="diary-list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-6"
-        >
-            {homeworkList.map((item, i) => (
-                <motion.div
-                    key={item._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="bg-white rounded-[2.5rem] p-7 border border-slate-100 shadow-xl relative group overflow-hidden"
-                >
-                    {/* Subject Label */}
-                    <div className="absolute top-0 right-0 px-6 py-2 bg-blue-50 text-[#42A5F5] rounded-bl-3xl font-black text-lg uppercase tracking-tighter border-l border-b border-blue-100">
-                        {item.subject}
-                    </div>
+                        {homeworkList.length > 0 ? (
+                            /* Sabhi cards ko ek single motion.div mein wrap kiya */
+                            <motion.div
+                                key="diary-list"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="space-y-6"
+                            >
+                                {/* 🔥 Ek hi baar top heading */}
+                                <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-md text-center">
+                                    <h2 className="text-3xl font-black text-[#42A5F5] italic tracking-tight">
+                                        Homework
+                                    </h2>
+                                    {/* <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                        Daily Class Diary
+                                    </p> */}
+                                </div>
 
-                    <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-[#42A5F5]">
-                                <BookOpen size={26} />
-                            </div>
-                            <div>
-                                <h4 className="font-black text-[23px] text-slate-800 leading-tight">Homework</h4>
-                                <p className="text-lg font-bold text-slate-400 italic">By Prof. {item.teacherId?.name || "Faculty"}</p>
-                            </div>
-                        </div>
+                                {homeworkList.map((item, i) => (
+                                    <motion.div
+                                        key={item._id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className="bg-white rounded-[2.5rem] p-7 border border-slate-100 shadow-xl relative group overflow-hidden"
+                                    >
 
-                        {/* Content Box */}
-                        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-inner">
-                            <p className="text-[19px] font-bold text-slate-600 leading-relaxed italic">
-                                {item.content}
-                            </p>
-                        </div>
+                                        <div className="flex flex-col gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-[#42A5F5]">
+                                                    <BookOpen size={26} />
+                                                </div>
 
-                        <div className="flex items-center justify-between text-[15px] font-black uppercase text-slate-600 tracking-widest px-2">
-                            <span className="flex items-center gap-2">
-                                <Clock size={12}/> Updated at {new Date(item.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
-                        </div>
-                    </div>
-                </motion.div>
-            ))}
-        </motion.div>
-    ) : (
-        /* Empty state ko bhi ek alag key di taaki transiton smooth ho */
-        <motion.div 
-            key="empty-diary"
-            initial={{ opacity: 0, scale: 0.9 }} 
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            className="bg-white rounded-[3.5rem] p-16 text-center border-2 border-dashed border-slate-100"
-        >
-            <Sun size={60} className="mx-auto text-amber-300 mb-6 animate-spin-slow" />
-            <h3 className="text-xl font-black text-slate-800 italic">No Homework Found</h3>
-            <p className="text-sm font-bold text-slate-400 mt-2">Enjoy your day! No diary entries for this date. ❄️</p>
-        </motion.div>
-    )}
-</AnimatePresence>
+                                                {/* 🔥 Yaha Homework ki jagah Subject */}
+                                                <div>
+                                                    <h4 className="font-black text-[25px] text-slate-800 leading-tight capitalize">
+                                                        {item.subject}
+                                                    </h4>
+                                                    <p className="text-lg font-bold text-slate-400 italic">
+                                                        By Prof. {item.teacherId?.name || "Faculty"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Content Box */}
+                                            <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-inner">
+                                                <p className="text-[19px] font-bold text-slate-600 leading-relaxed italic">
+                                                    {item.content}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-[15px] font-black uppercase text-slate-600 tracking-widest px-2">
+                                                <span className="flex items-center gap-2">
+                                                    <Clock size={12} />
+                                                    Updated at {new Date(item.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="empty-diary"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="bg-white rounded-[3.5rem] p-16 text-center border-2 border-dashed border-slate-100"
+                            >
+                                <Sun size={60} className="mx-auto text-amber-300 mb-6 animate-spin-slow" />
+                                <h3 className="text-[21px] font-black text-slate-800 italic">No Homework Found</h3>
+                                <p className="text-[16px] font-bold text-slate-400 mt-2">
+                                    Enjoy your day! No diary entries for this date. ❄️
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 )}
             </div>
         </div>
