@@ -100,6 +100,7 @@ const VisualMatrix = () => {
 
 function App() {
   const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isTechModalOpen, setIsTechModalOpen] = useState(false);
   const [email, setEmail] = useState('');
@@ -117,15 +118,14 @@ function App() {
   const { isDarkMode, isMatrixActive } = useTheme();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    } else {
-      if (location.pathname !== "/") {
-        navigate("/");
-      }
-    }
-  }, []);
+  const savedUser = localStorage.getItem('user');
+
+  if (savedUser) {
+    setUser(JSON.parse(savedUser));
+  }
+
+  setCheckingAuth(false);
+}, []);
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -189,6 +189,14 @@ function App() {
       setBypassMsg({ text: err.response?.data?.message || "Reset Failed", type: 'error' });
     }
   };
+
+  if (checkingAuth) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-xl font-bold">
+      Loading...
+    </div>
+  );
+}
 
   if (!user) {
     return (

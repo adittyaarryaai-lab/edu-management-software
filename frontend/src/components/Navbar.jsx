@@ -79,6 +79,25 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon/60 to-transparent animate-pulse"></div>
         </div>
+        {/* FULL TOP MOVING ORANGE LINE */}
+        <div className="absolute top-0 left-0 w-full h-[4px] overflow-hidden">
+          <div className="w-full h-full bg-red-200/200 relative">
+            <div className="absolute top-0 left-[-100%] w-full h-full bg-gradient-to-r from-transparent via-orange-500 to-transparent animate-[slideLine_2.5s_linear_infinite]"></div>
+          </div>
+        </div>
+
+        <style>
+          {`
+            @keyframes slideLine {
+              0% {
+                left: -100%;
+              }
+              100% {
+                left: 100%;
+              }
+            }
+          `}
+        </style>
 
         <div className="flex justify-between items-center mb-6 relative z-10">
           <div className="flex items-center gap-3">
@@ -132,15 +151,15 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
             {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
           </span>
           <div className="mt-6 relative px-1">
-  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-  <input
-    type="text"
-    placeholder="Search modules..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    className="w-full bg-white border-none text-slate-700 py-4 pl-12 pr-4 rounded-[1.5rem] shadow-lg outline-none placeholder:text-slate-400 transition-all font-bold text-sm"
-  />
-</div>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search modules..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border-none text-slate-700 py-4 pl-12 pr-4 rounded-[1.5rem] shadow-lg outline-none placeholder:text-slate-400 transition-all font-bold text-sm"
+            />
+          </div>
         </div>
       </header>
 

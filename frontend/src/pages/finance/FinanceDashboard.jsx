@@ -12,33 +12,33 @@ const FinanceDashboard = ({ searchQuery }) => {
         pendingCount: 0,
         // penaltySettings: { dailyRate: 0, isActive: false }
     });
-
+    const [showAllSlips, setShowAllSlips] = useState(false);
     const [newPaymentAlert, setNewPaymentAlert] = useState(null);
     // const [penaltyUpdateMsg, setPenaltyUpdateMsg] = useState(null);
 
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
-   const fetchStats = async () => {
-    try {
-        // Sirf stats mangwao, penaltyRes hata diya
-        const { data } = await API.get('/users/finance/stats');
+    const fetchStats = async () => {
+        try {
+            // Sirf stats mangwao, penaltyRes hata diya
+            const { data } = await API.get('/users/finance/stats');
 
-        if (stats.recentPayments.length > 0 && data.recentPayments.length > 0) {
-            const latestNewId = data.recentPayments[0]._id;
-            const latestOldId = stats.recentPayments[0]._id;
+            if (stats.recentPayments.length > 0 && data.recentPayments.length > 0) {
+                const latestNewId = data.recentPayments[0]._id;
+                const latestOldId = stats.recentPayments[0]._id;
 
-            if (latestNewId !== latestOldId) {
-                setNewPaymentAlert(data.recentPayments[0]);
-                setTimeout(() => setNewPaymentAlert(null), 7000);
+                if (latestNewId !== latestOldId) {
+                    setNewPaymentAlert(data.recentPayments[0]);
+                    setTimeout(() => setNewPaymentAlert(null), 7000);
+                }
             }
-        }
 
-        setStats(data); // Seedha data set karo
-    } catch (err) {
-        console.error("Stats sync error:", err);
-    }
-};
+            setStats(data); // Seedha data set karo
+        } catch (err) {
+            console.error("Stats sync error:", err);
+        }
+    };
 
     useEffect(() => {
         fetchStats();
@@ -228,33 +228,61 @@ const FinanceDashboard = ({ searchQuery }) => {
                 <div className="bg-white rounded-[3rem] border border-[#DDE3EA] p-8 shadow-md relative overflow-hidden">
                     <div className="flex items-center gap-3 mb-6">
                         <Clock size={18} className="text-[#42A5F5]" />
-                        <h3 className="text-[15px] font-black text-slate-700 capitalize tracking-widest">Recent Transactions</h3>
+                        <h3 className="text-[15px] font-black text-slate-700 capitalize tracking-widest">
+                            Recent Transactions
+                        </h3>
                     </div>
 
                     <div className="space-y-4">
-                        {stats.recentPayments.length > 0 ? stats.recentPayments.map((p, i) => (
-                            <div
-                                key={i}
-                                onClick={() => navigate(`/finance/receipt/${p._id}`)}
-                                className="bg-slate-50 p-5 rounded-3xl border border-slate-100 flex justify-between items-center group hover:border-[#42A5F5]/30 hover:bg-white transition-all cursor-pointer shadow-sm active:scale-98"
-                            >
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <p className="text-[16px] font-black text-slate-700 truncate capitalize italic">{p.studentName}</p>
-                                        <span className="text-[10px] bg-[#42A5F5]/10 px-2 py-0.5 rounded-full text-[#42A5F5] font-black uppercase">
-                                            {p.paymentMode || 'CASH'}
+                        {stats.recentPayments.length > 0 ? (
+                            <>
+                                {(showAllSlips
+                                    ? stats.recentPayments
+                                    : stats.recentPayments.slice(0, 3)
+                                ).map((p, i) => (
+                                    <div
+                                        key={i}
+                                        onClick={() => navigate(`/finance/receipt/${p._id}`)}
+                                        className="bg-slate-50 p-5 rounded-3xl border border-slate-100 flex justify-between items-center group hover:border-[#42A5F5]/30 hover:bg-white transition-all cursor-pointer shadow-sm active:scale-98"
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <p className="text-[16px] font-black text-slate-700 truncate capitalize italic">
+                                                    {p.studentName}
+                                                </p>
+
+                                                <span className="text-[10px] bg-[#42A5F5]/10 px-2 py-0.5 rounded-full text-[#42A5F5] font-black uppercase">
+                                                    {p.paymentMode || 'CASH'}
+                                                </span>
+                                            </div>
+
+                                            <p className="text-[13px] text-slate-400 font-bold capitalize">
+                                                {p.grade} • {p.date} <br />
+                                                {p.time ? ` at ${p.time}` : ''}
+                                            </p>
+                                        </div>
+
+                                        <span className="text-[16px] font-black text-[#42A5F5] italic ml-4">
+                                            ₹{p.amount.toLocaleString()}
                                         </span>
                                     </div>
-                                    <p className="text-[13px] text-slate-400 font-bold capitalize">
-                                        {p.grade} • {p.date} <br /> {p.time ? ` at ${p.time}` : ''}
-                                    </p>
-                                </div>
-                                <span className="text-[16px] font-black text-[#42A5F5] italic ml-4">₹{p.amount.toLocaleString()}</span>
-                            </div>
-                        )) : (
+                                ))}
+
+                                {stats.recentPayments.length > 3 && (
+                                    <button
+                                        onClick={() => setShowAllSlips(!showAllSlips)}
+                                        className="w-full mt-4 bg-[#42A5F5]/10 text-[#42A5F5] py-3 rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition-all"
+                                    >
+                                        {showAllSlips ? "Show Less ▲" : "Show More ▼"}
+                                    </button>
+                                )}
+                            </>
+                        ) : (
                             <div className="py-12 text-center opacity-30 flex flex-col items-center">
                                 <IndianRupee size={40} className="mb-3 text-slate-400" />
-                                <p className="text-[12px] font-bold text-slate-400 capitalize">No recent inflow detected</p>
+                                <p className="text-[12px] font-bold text-slate-400 capitalize">
+                                    No recent inflow detected
+                                </p>
                             </div>
                         )}
                     </div>

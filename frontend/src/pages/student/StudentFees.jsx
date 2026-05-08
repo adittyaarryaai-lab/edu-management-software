@@ -11,6 +11,8 @@ const StudentFees = () => {
     const [summary, setSummary] = useState(null);
     const [showPendingModal, setShowPendingModal] = useState(false); // Modal control ke liye
     const navigate = useNavigate();
+    // STATE add karo top pe
+    const [showAllFees, setShowAllFees] = useState(false);
     const [selectedYear, setSelectedYear] = useState('All');
 
     useEffect(() => {
@@ -277,6 +279,7 @@ const StudentFees = () => {
                 )}
 
                 {/* --- POINT 2: FEES DETAILS SECTION --- */}
+                {/* --- POINT 2: FEES DETAILS SECTION --- */}
                 <div className="pb-6 space-y-5 bg-white rounded-[2.5rem] border border-[#DDE3EA] shadow-sm">
                     <div className="flex justify-center mb-4">
                         <div className="px-6 py-3 bg-white shadow-md rounded-2xl border border-slate-200">
@@ -286,12 +289,17 @@ const StudentFees = () => {
                         </div>
                     </div>
 
-                    {summary.feeStructure && Object.entries(summary.feeStructure).map(([key, data], index) => (
+                    {(summary.feeStructure
+                        ? (showAllFees
+                            ? Object.entries(summary.feeStructure)
+                            : Object.entries(summary.feeStructure).slice(0, 3)
+                        )
+                        : []
+                    ).map(([key, data], index) => (
                         <div
                             key={index}
                             className="flex justify-between items-center bg-white rounded-2xl px-5 py-5 shadow-sm border border-slate-200"
                         >
-
                             {/* Left Side */}
                             <div className="flex flex-col">
                                 <span className="text-[18px] font-black text-slate-700 capitalize italic tracking-tight">
@@ -299,10 +307,17 @@ const StudentFees = () => {
                                 </span>
 
                                 <div className="flex items-center gap-2 mt-2">
-                                    <div className={`w-2 h-2 rounded-full ${data.billingCycle === 'one-time' ? 'bg-amber-400' : 'bg-[#42A5F5]'}`}></div>
+                                    <div
+                                        className={`w-2 h-2 rounded-full ${data.billingCycle === 'one-time'
+                                                ? 'bg-amber-400'
+                                                : 'bg-[#42A5F5]'
+                                            }`}
+                                    ></div>
 
                                     <span className="text-[14px] font-bold text-slate-400 capitalize">
-                                        {data.billingCycle === 'one-time' ? 'One time payment' : 'Monthly billing'}
+                                        {data.billingCycle === 'one-time'
+                                            ? 'One time payment'
+                                            : 'Monthly billing'}
                                     </span>
                                 </div>
                             </div>
@@ -311,19 +326,27 @@ const StudentFees = () => {
                             <span className="text-[18px] font-black text-slate-800 italic">
                                 ₹{(data.amount || 0).toLocaleString()}
                             </span>
-
                         </div>
                     ))}
+
+                    {/* SHOW MORE / LESS BUTTON */}
+                    {summary.feeStructure &&
+                        Object.entries(summary.feeStructure).length > 3 && (
+                            <button
+                                onClick={() => setShowAllFees(!showAllFees)}
+                                className="w-full mt-2 bg-[#42A5F5]/10 text-[#42A5F5] py-3 rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition-all"
+                            >
+                                {showAllFees ? "Show Less ▲" : "Show More ▼"}
+                            </button>
+                        )}
 
                     <div className="flex justify-between items-center pt-4 px-2 border-t border-slate-100">
                         <div className="flex flex-col">
                             <span className="text-[19px] font-black text-[#42A5F5] capitalize italic tracking-tight">
                                 Net monthly fees
                             </span>
-                            {/* <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                Standard structure total
-                            </span> */}
                         </div>
+
                         <span className="text-2xl font-black text-[#42A5F5] tracking-tighter">
                             ₹{totalExpectedAll.toLocaleString()}
                         </span>

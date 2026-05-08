@@ -124,7 +124,7 @@ const LandingPage = () => {
              <div className="relative p-2 bg-gradient-to-tr from-[#42A5F5] to-indigo-600 rounded-[3rem] shadow-3xl">
                 <div className="bg-white rounded-[2.8rem] p-1 shadow-inner overflow-hidden">
                     <img 
-                      src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1000" 
+                      src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000" 
                       alt="System Dashboard" 
                       className="w-full h-full object-cover rounded-[2.5rem]"
                     />
