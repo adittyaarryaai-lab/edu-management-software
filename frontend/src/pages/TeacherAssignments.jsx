@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Upload, X, CheckCircle, CheckCircle2, FileText, Calendar, Target, Download, Edit3, Trash2, ChevronDown, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
@@ -32,7 +32,9 @@ const TeacherAssignments = ({ user }) => {
     // Submission states
     const [activeAssignmentId, setActiveAssignmentId] = useState(null);
     const [submissions, setSubmissions] = useState([]);
-
+    const gradeRef = useRef(null);
+    const subjectRef = useRef(null);
+    const calendarRef = useRef(null);
     useEffect(() => {
         const fetchGrades = async () => {
             const { data } = await API.get('/users/grades/all');
@@ -56,6 +58,28 @@ const TeacherAssignments = ({ user }) => {
         };
         fetchHistory();
     }, [view]); // Jab bhi view badle data refresh ho
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (gradeRef.current && !gradeRef.current.contains(event.target)) {
+                setIsGradeOpen(false);
+            }
+
+            if (subjectRef.current && !subjectRef.current.contains(event.target)) {
+                setIsSubjectOpen(false);
+            }
+
+            if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+                setIsCalendarOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleFileChange = async (e) => {
         const selectedFile = e.target.files[0];
@@ -183,7 +207,7 @@ const TeacherAssignments = ({ user }) => {
                 {view === 'create' ? (
                     <div className="bg-white rounded-[3rem] p-8 shadow-xl border border-slate-100 space-y-5">
                         {/* --- NEURAL CUSTOM DROPDOWN --- */}
-                        <div className="relative space-y-2 text-left">
+                        <div ref={gradeRef} className="relative space-y-2 text-left">
                             <label className="text-[16px] font-black uppercase text-slate-400 ml-4 tracking-[0.1em] italic">
                                 Select Class
                             </label>
@@ -240,7 +264,7 @@ const TeacherAssignments = ({ user }) => {
                         </div>
 
                         {/* --- SUBJECT CUSTOM DROPDOWN --- */}
-                        <div className="relative space-y-2 text-left">
+                        <div ref={subjectRef} className="relative space-y-2 text-left">
                             <label className="text-[16px] font-black uppercase text-slate-400 ml-4 tracking-[0.1em] italic">
                                 Select Subject
                             </label>
@@ -296,7 +320,7 @@ const TeacherAssignments = ({ user }) => {
                         <div className="flex flex-col gap-5 text-left">
 
                             {/* 1. DEADLINE BLOCK */}
-                            <div className="space-y-2 relative">
+                            <div ref={calendarRef} className="space-y-2 relative">
                                 <label className="text-[16px] font-black uppercase text-slate-400 ml-4 tracking-widest italic">
                                     Submission Deadline
                                 </label>

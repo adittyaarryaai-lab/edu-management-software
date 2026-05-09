@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Save, Calendar, RefreshCcw, ClipboardCheck, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
@@ -13,6 +13,7 @@ const getLocalDate = (date) => {
 
 const TeacherAttendance = ({ user }) => {
     const navigate = useNavigate();
+    const dateRef = useRef(null);
     const [assignedClass, setAssignedClass] = useState(user?.assignedClass || null);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [showToast, setShowToast] = useState(false);
@@ -78,7 +79,19 @@ const TeacherAttendance = ({ user }) => {
             s.id === id ? { ...s, status: s.status === 'Present' ? 'Absent' : 'Present' } : s
         ));
     };
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dateRef.current && !dateRef.current.contains(event.target)) {
+                setIsDateOpen(false);
+            }
+        };
 
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
     const handleSubmit = async () => {
         if (students.length === 0) return;
         setIsSaving(true);
@@ -150,7 +163,7 @@ const TeacherAttendance = ({ user }) => {
                                 Class {assignedClass}
                             </h2>
                         </div>
-                        <div className="text-right relative overflow-visible">
+                        <div ref={dateRef} className="text-right relative overflow-visible">
                             <p className="text-[12px] font-black uppercase text-slate-400 tracking-widest italic mb-1 mr-2">Select date</p>
 
                             {/* Trigger Button */}

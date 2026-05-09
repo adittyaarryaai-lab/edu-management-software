@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { X, Upload, Send, ChevronDown, CheckCircle2, Zap, ShieldAlert, Loader2, MessageSquare, Clock as HistoryIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,7 @@ const TechnicalSupportModal = ({ isOpen, onClose, user }) => {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     // --- DAY 138: NEURAL TOAST STATE ---
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -51,6 +52,22 @@ const TechnicalSupportModal = ({ isOpen, onClose, user }) => {
             setPreview(URL.createObjectURL(selected));
         }
     };
+    useEffect(() => {
+        const handleOutsideClick = (e) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target)
+            ) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick);
+
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
+    }, []);
 
     const showNeuralToast = (msg, type = 'success') => {
         setToast({ show: true, message: msg, type });
@@ -101,7 +118,7 @@ const TechnicalSupportModal = ({ isOpen, onClose, user }) => {
             <motion.div
                 initial={{ scale: 0.85, y: 80, opacity: 0 }}
                 animate={{ scale: 1, y: 0, opacity: 1 }}
-               exit={{ scale: 0.85, y: 80, opacity: 0 }}
+                exit={{ scale: 0.85, y: 80, opacity: 0 }}
                 transition={{
                     type: "spring",
                     stiffness: 120,
@@ -153,7 +170,7 @@ const TechnicalSupportModal = ({ isOpen, onClose, user }) => {
                                 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
                                 onSubmit={handleSubmit} className="space-y-5"
                             >
-                                <div className="relative">
+                                <div className="relative" ref={dropdownRef}>
                                     <label className="text-[15px] font-black text-black uppercase tracking-widest ml-4 mb-2 block italic">Category *</label>
 
                                     <div

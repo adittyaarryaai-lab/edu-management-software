@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar, Clock, CreditCard, Bell, Sun, FileText,
   TrendingUp, FileSearch, ClipboardCheck,
-  Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus, Bot, ChevronDown, ChevronUp
+  Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus, Bot, ChevronDown, ChevronUp, ClipboardList
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'; // Smooth animation ke liye
 import API from '../api';
@@ -27,11 +27,11 @@ const StudentHome = ({ user, searchQuery }) => {
 
   const subModules = [
     { title: 'Assignment', icon: <FileText size={24} />, path: '/assignments' },
-     { title: 'Mentorship', icon: <Users size={24} />, path: '/mentors' },
+    { title: 'Mentorship', icon: <Users size={24} />, path: '/mentors' },
     { title: 'ERP Notices', icon: <Bell size={24} />, path: '/notices' },
     { title: 'Performance', icon: <TrendingUp size={24} />, path: '/performance' },
     { title: 'Library', icon: <Book size={24} />, path: '/library' },
-    { title: 'Live Class', icon: <Video size={24} />, path: '/live-class' },
+    { title: 'Leave Request', icon: <ClipboardList size={24} />, path: '/leave' },
     { title: 'Syllabus', icon: <BookOpen size={24} />, path: '/syllabus' },
     { title: 'Exam', icon: <GraduationCap size={24} />, path: '/exams' },
   ];
@@ -39,7 +39,8 @@ const StudentHome = ({ user, searchQuery }) => {
   // Ye wo modules hain jo sirf arrow click karne par dikhenge
   const extraModules = [
     { title: 'Bus Tracker', icon: <Bus size={24} />, path: '/transport' },
-    { title: 'E-Books', icon: <BookOpen size={24} />, path: '/ebooks' },
+    // { title: 'E-Books', icon: <BookOpen size={24} />, path: '/ebooks' },
+    { title: 'Live Class', icon: <Video size={24} />, path: '/live-class' },
   ];
 
   // Pehle filter karke ek variable mein store karlo
@@ -59,7 +60,7 @@ const StudentHome = ({ user, searchQuery }) => {
 
       {/* --- MAIN MODULES (Optimized for Laptop & Mobile) --- */}
       <div className="space-y-4 pt-4">
-        
+
         {/* TOP ROW: 2 BIG MODULES */}
         <div className="grid grid-cols-2 gap-4">
           {topRowModules.map((m, i) => (
