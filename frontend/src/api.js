@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:5000/api' });
+// 🔥 FIXED: Ab ye dynamic hai. Production mein Vercel se URL uthayega, local par localhost.
+const API = axios.create({ 
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api' 
+});
 
 API.interceptors.request.use((req) => {
     const userData = localStorage.getItem('user');
