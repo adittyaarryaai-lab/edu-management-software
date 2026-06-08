@@ -59,6 +59,7 @@ import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
 import Installments from './pages/finance/Installments';
 import FeesTracker from './pages/finance/FeesTracker';
+import FeesNoticeManager from './pages/finance/FeesNoticeManager'; 
 import StudentLedger from './pages/finance/StudentLedger';
 import FeeReports from './pages/finance/FeeReports'; // Naya import
 import FeeSetup from './pages/finance/FeeSetup'; // Day 114: Class Fee Configuration
@@ -485,6 +486,7 @@ function App() {
           <Route path="/finance/student-ledger/:id" element={<StudentLedger />} />
           <Route path="/student/checkout" element={<StudentCheckout />} />
           <Route path="/student/payment-methods" element={<PaymentMethods />} />
+          <Route path="/finance/fees-notice" element={<FeesNoticeManager />} />
 
           {/* User Profile & Security */}
           <Route path="/my-account" element={user.role === 'superadmin' ? <SuperAdminAccount user={user} /> : <MyAccount user={user} />} />

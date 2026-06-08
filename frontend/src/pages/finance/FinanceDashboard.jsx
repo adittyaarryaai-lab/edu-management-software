@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Users, AlertCircle, Clock, IndianRupee, TrendingUp, Plus, ArrowRight, Bell, Zap, CheckCircle, Layers, ShieldCheck } from 'lucide-react';
+import { Wallet, Users, AlertCircle, Clock, IndianRupee, TrendingUp, Plus, ArrowRight, Bell, Zap, CheckCircle, Layers, ShieldCheck , Megaphone} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
@@ -58,6 +58,7 @@ const FinanceDashboard = ({ searchQuery }) => {
             color: "border-[#DDE3EA]",
             path: '/finance/gateway'
         },
+        { label: "Fees Notice Hub", value: "Publish Notices", icon: <Megaphone className="text-rose-500" />, color: "border-[#DDE3EA]", path: '/finance/fees-notice' }, // 👈 NEW MODULE CONNECTED
     ];
 
     return (

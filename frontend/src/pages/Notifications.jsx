@@ -1,67 +1,160 @@
-import React from 'react';
-import { ArrowLeft, Construction, Zap, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Megaphone, Clock, Sun, AlertTriangle, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import API from '../api';
+import Loader from '../components/Loader';
 
 const Notifications = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [noticeList, setNoticeList] = useState([]);
 
-    return (
-        <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans italic overflow-hidden relative flex flex-col justify-center items-center p-6 text-[15px]">
-            
-            {/* Top Navigation */}
-            <div className="absolute top-10 left-6 z-30">
-                <button 
-                    onClick={() => navigate(-1)} 
-                    className="bg-white p-3 rounded-2xl active:scale-90 border border-[#DDE3EA] text-[#42A5F5] shadow-md hover:bg-blue-50 transition-all"
-                >
-                    <ArrowLeft size={24} />
-                </button>
-            </div>
+  useEffect(() => {
+    const fetchErpNotices = async () => {
+      try {
+        setLoading(true);
+        // Naye clean and fresh route se data pull kiya
+        const { data } = await API.get('/fee-notices/view');
+        setNoticeList(data.notices || []);
+      } catch (err) {
+        console.error("Centralized ERP Notice Feed Link Severed");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-            {/* Main Content */}
-            <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-                
-                {/* Animated Icon Container */}
-                <div className="mb-10 relative">
-                    {/* Soft Blue Glow */}
-                    <div className="absolute inset-0 bg-[#42A5F5]/10 blur-3xl rounded-full animate-pulse"></div>
-                    
-                    <div className="bg-white border-2 border-dashed border-[#DDE3EA] p-10 rounded-[3.5rem] shadow-sm relative">
-                        <Construction size={80} className="text-[#42A5F5] animate-bounce" strokeWidth={1.5} />
-                    </div>
-                    <div className="absolute -top-2 -right-2 bg-white p-2 rounded-full shadow-lg border border-blue-50">
-                        <Zap size={24} className="text-amber-400 fill-amber-400 animate-pulse" />
-                    </div>
-                </div>
+    fetchErpNotices();
+  }, []);
 
-                {/* Text Section */}
-                <h1 className="text-4xl font-black italic tracking-tight text-slate-800 leading-tight mb-4">
-                    Module under <br /> <span className="text-[#42A5F5]">construction</span>
-                </h1>
-                
-                <div className="h-[3px] w-20 bg-[#42A5F5] mx-auto rounded-full mb-8 shadow-sm"></div>
+  const filteredNotices = noticeList;
 
-                <p className="text-[16px] text-slate-400 font-bold italic max-w-[320px] leading-relaxed capitalize">
-                    Our neural network for the central inbox is being synchronized. <br />
-                    <span className="text-[#42A5F5] block mt-2">Estimated deploy: Coming soon</span>
-                </p>
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+      
+      {/* Header Layer */}
+      <div className="bg-[#42A5F5] text-slate-800 px-6 pt-12 pb-24 rounded-b-[4rem] border-b border-slate-100 shadow-md relative overflow-hidden">
+        <div className="flex justify-between items-center mb-8 relative z-10 px-2">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-3 bg-white/20 rounded-2xl border border-white/30 text-white active:scale-90 transition-all"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          
+          <h1 className="text-4xl font-black italic tracking-tight text-white drop-shadow-sm capitalize">
+            ERP Notices
+          </h1>
 
-                {/* Status Indicator */}
-                <div className="mt-12 flex items-center gap-3 bg-white px-8 py-4 rounded-full border border-[#DDE3EA] shadow-sm">
-                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                    <span className="text-[12px] font-black uppercase tracking-widest text-slate-400">
-                        System protocol 119: Active
-                    </span>
-                </div>
-            </div>
-
-            {/* Footer Tag */}
-            <div className="absolute bottom-10 flex items-center gap-2 opacity-30 text-slate-400">
-                <ShieldAlert size={16} />
-                <p className="text-[10px] font-black uppercase tracking-[0.4em]">EduFlowAI security mesh</p>
-            </div>
+          <div className="w-11 h-11 pointer-events-none opacity-0"></div>
         </div>
-    );
+      </div>
+
+      {/* Main Ribbon Indicator */}
+      <div className="px-6 space-y-6 relative z-20 min-h-[70vh]">
+        {loading ? (
+          <div className="py-20"><Loader /></div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="loaded-content"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              <div className="-mt-14 mb-4">
+                <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-3xl border border-slate-200/60 shadow-sm flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#42A5F5] animate-pulse"></span>
+                    <p className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-500 not-italic">
+                      All Fees Notices
+                    </p>
+                  </div>
+                  <span className="text-[10px] bg-slate-100 px-2.5 py-0.5 rounded-full font-black text-slate-400 not-italic">
+                    {filteredNotices.length} Live
+                  </span>
+                </div>
+              </div>
+
+              {filteredNotices.length > 0 ? (
+                <div className="space-y-6 min-h-[420px]">
+                  {filteredNotices.map((notice, idx) => {
+                    {/* 🔥 FIXED: notice.category ki jagah ab naye model ka notice.noticeType check hoga */}
+                    const isFeeAlert = notice.noticeType === 'fee_alert';
+
+                    return (
+                      <motion.div
+                        key={notice._id || idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="bg-white rounded-[2.5rem] p-7 border border-slate-100 shadow-xl relative group overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                              isFeeAlert ? 'bg-rose-50 text-rose-500' : 'bg-amber-50 text-amber-500'
+                            }`}>
+                              {isFeeAlert ? <AlertTriangle size={22} /> : <FileText size={22} />}
+                            </div>
+
+                            <div>
+                              <h4 className={`font-black text-[25px] leading-tight uppercase ${
+                                isFeeAlert ? 'text-rose-500' : 'text-amber-500'
+                              }`}>
+                                {isFeeAlert ? "Fee Alert Notice" : "Financial Notice (Others)"}
+                              </h4>
+                              <p className="text-[15px] font-bold text-slate-400 italic mt-0.5">
+                                Verified & Issued by ERP System
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Message Body Block */}
+                          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-inner">
+                            <p className="text-[19px] font-bold text-slate-600 leading-relaxed italic whitespace-pre-line not-italic">
+                              {/* 🔥 FIXED: notice.mode ki jagah ab asli notice.content render hoga */}
+                              {notice.content} 
+                            </p>
+                          </div>
+
+                          {/* Footer Date Block */}
+                          <div className="flex items-center justify-between text-[12px] font-black uppercase text-slate-800 tracking-widest px-2">
+                            <span className="flex items-center gap-2">
+                              <Clock size={12} />
+                              Published: {new Date(notice.date || notice.createdAt).toLocaleDateString('en-IN', {
+                                day: '2-digit', month: 'short', year: 'numeric'
+                              })} at {new Date(notice.date || notice.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Empty Grid State */
+                <motion.div
+                  key="empty-notices"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-white rounded-[3.5rem] min-h-[420px] flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-100 px-8"
+                >
+                  <Sun size={60} className="mx-auto text-emerald-300 mb-6 animate-spin-slow" />
+                  <h3 className="text-[21px] font-black text-slate-800 italic">Clear Account Status</h3>
+                  <p className="text-[16px] font-bold text-slate-400 mt-2">
+                    No outstanding dues found for this account. Everything is up to date.
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Notifications;
