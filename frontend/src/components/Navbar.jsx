@@ -100,17 +100,17 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
           `}
         </style>
 
-        <div className="flex justify-between items-center mb-6 relative z-10">
+        <div className="flex justify-between items-center mb-1 relative z-10">
           <div className="flex items-center gap-3">
             <Menu
-              size={24}
+              size={18}
               className="cursor-pointer text-white/80 hover:text-neon transition-all active:scale-90"
               onClick={() => setIsDrawerOpen(true)}
             />
             <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 backdrop-blur-md shadow-inner">
-              <Cpu size={18} className="text-white animate-spin-slow" />
+              <Cpu size={13} className="text-white animate-spin-slow" />
             </div>
-            <span className="text-[15px] font-black  titlecase text-white/80">
+            <span className="text-[13px] font-black  titlecase text-white/80">
               EduFlowAI v2.0
             </span>
           </div>
@@ -121,7 +121,7 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
                 onClick={handleBellClick}
                 className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md relative cursor-pointer hover:bg-neon/20 transition-all active:scale-90"
               >
-                <Bell size={18} className="text-white/80" />
+                <Bell size={13} className="text-white/80" />
                 {user?.role !== 'admin' && unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-void animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]">
                     {unreadCount}
@@ -136,49 +136,50 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
                 onClick={onSupportClick}
                 className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-neon/20 transition-all active:scale-90 cursor-pointer"
               >
-                <Headphones size={18} className="text-white/80" />
+                <Headphones size={13} className="text-white/80" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-4 text-left relative z-10 px-2">
-          <h2 className="text-2xl font-bold tracking-tight text-white/90">
-            {greeting.text} {greeting.emoji}{' '} <span className="text-white font-black">
+        <div className="mt-1 text-left relative z-10 px-1">
+          <span className="inline-block mt-0 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[12px] font-bold tracking-wide text-white">
+            {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
+          </span>
+          <h2 className="text-2xl font-bold tracking-tight text-white/90 leading-tight mt-0.5">
+            {greeting.text} {greeting.emoji}{' '} 
+            <span className="text-white font-black">
               {user?.name?.split(' ')[0].charAt(0).toUpperCase() + user?.name?.split(' ')[0].slice(1).toLowerCase()}
             </span>
           </h2>
-          <span className="inline-block mt-2 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[15px] font-bold tracking-wide text-white">
-            {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
-          </span>
           <motion.div
-            className="mt-6 relative px-1"
+            className="mt-2.5 relative"
             whileTap={{
-              y: 4,
-              scale: 0.985
+              y: 2,
+              scale: 0.99
             }}
             transition={{
               type: "spring",
               stiffness: 500,
-              damping: 20
+              damping: 25
             }}
             whileHover={{
-              y: -2,
-              scale: 1.02,
-              boxShadow: "0px 10px 20px rgba(66, 165, 245, 0.3)"
+              y: -1,
+              scale: 1.01,
+              boxShadow: "0px 5px 15px rgba(66, 165, 245, 0.2)"
             }}
           >
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"
-              size={20}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none"
+              size={16}
             />
 
-            <input
+           <input
               type="text"
               placeholder="Search modules..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border-none text-slate-700 py-4 pl-12 pr-4 rounded-[1.5rem] shadow-lg outline-none placeholder:text-slate-400 font-bold text-sm"
+              className="w-full bg-white border-none text-slate-700 py-2.5 pl-10 pr-3 rounded-[1rem] shadow-md outline-none placeholder:text-slate-400 font-bold text-xs"
             />
           </motion.div>
         </div>
