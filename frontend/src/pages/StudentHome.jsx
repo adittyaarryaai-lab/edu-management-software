@@ -90,14 +90,14 @@ const StudentHome = ({ user, searchQuery }) => {
   }, []);
 
   const topRowModules = [
-    { title: 'Attendance', icon: <Calendar size={36} />, path: '/attendance', bgColor: 'bg-[#FFEBEE]', iconColor: 'bg-[#FFCDD2] text-[#E53935]' },
-    { title: 'TimeTable', icon: <Clock size={36} />, path: '/timetable', bgColor: 'bg-[#E8EAF6]', iconColor: 'bg-[#C5CAE9] text-[#3F51B5]' },
+    { title: 'Attendance', icon: <Calendar size={30} />, path: '/attendance', bgColor: 'bg-[#FFEBEE]', iconColor: 'bg-[#FFCDD2] text-[#E53935]' },
+    { title: 'TimeTable', icon: <Clock size={30} />, path: '/timetable', bgColor: 'bg-[#E8EAF6]', iconColor: 'bg-[#C5CAE9] text-[#3F51B5]' },
   ];
 
   const bottomRowModules = [
-    { title: 'Fees', icon: <CreditCard size={28} />, path: '/student/fees', bgColor: 'bg-[#E0F2F1]', iconColor: 'bg-[#B2DFDB] text-[#00897B]' },
-    { title: 'Class Diary', icon: <BookOpen size={28} />, path: '/class-diary', bgColor: 'bg-[#E3F2FD]', iconColor: 'bg-[#BBDEFB] text-[#1E88E5]' },
-    { title: 'Notices', icon: <Megaphone size={28} />, path: '/notice-feed', bgColor: 'bg-[#FFF3E0]', iconColor: 'bg-[#FFE0B2] text-[#FB8C00]' },
+    { title: 'Fees', icon: <CreditCard size={22} />, path: '/student/fees', bgColor: 'bg-[#E0F2F1]', iconColor: 'bg-[#B2DFDB] text-[#00897B]' },
+    { title: 'Class Diary', icon: <BookOpen size={22} />, path: '/class-diary', bgColor: 'bg-[#E3F2FD]', iconColor: 'bg-[#BBDEFB] text-[#1E88E5]' },
+    { title: 'Notices', icon: <Megaphone size={22} />, path: '/notice-feed', bgColor: 'bg-[#FFF3E0]', iconColor: 'bg-[#FFE0B2] text-[#FB8C00]' },
   ];
 
   const subModules = [
@@ -243,13 +243,13 @@ const StudentHome = ({ user, searchQuery }) => {
             <Link
               to={m.path}
               key={i}
-              className={`${m.bgColor} rounded-[2.5rem] p-6 flex flex-col items-start justify-between min-h-[170px] shadow-sm border border-white/60 active:scale-95 transition-all relative overflow-hidden group`}
+              className={`${m.bgColor} rounded-[2.5rem] p-4 flex flex-col items-start justify-between min-h-[120px] shadow-sm border border-white/60 active:scale-95 transition-all relative overflow-hidden group`}
             >
-              <span className="font-black text-slate-800 text-xl z-10 italic leading-tight">
+              <span className="font-black text-slate-800 text-base z-10 italic leading-tight">
                 {m.title}
               </span>
 
-              <div className={`self-end p-5 rounded-[2rem] ${m.iconColor} shadow-inner group-hover:scale-110 transition-transform`}>
+              <div className={`self-end p-3 rounded-[2rem] ${m.iconColor} shadow-inner group-hover:scale-110 transition-transform`}>
                 {m.icon}
               </div>
 
@@ -259,18 +259,18 @@ const StudentHome = ({ user, searchQuery }) => {
         </div>
 
         {/* BOTTOM ROW */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {bottomRowModules.map((m, i) => (
             <Link
               to={m.path}
               key={i}
-              className={`${m.bgColor} rounded-[2rem] p-4 flex flex-col items-start justify-between min-h-[140px] shadow-sm border border-white/50 active:scale-95 transition-all relative overflow-hidden group`}
+              className={`${m.bgColor} rounded-[2rem] p-4 flex flex-col items-start justify-between min-h-[90px] shadow-sm border border-white/50 active:scale-95 transition-all relative overflow-hidden group`}
             >
-              <span className="font-black text-slate-800 text-[15px] z-10 italic leading-tight">
+              <span className="font-black text-slate-800 text-xs z-10 italic leading-tight">
                 {m.title}
               </span>
 
-              <div className={`self-end p-3 rounded-[1.5rem] ${m.iconColor} shadow-inner group-hover:rotate-12 transition-transform`}>
+              <div className={`self-end p-2 rounded-[1.5rem] ${m.iconColor} shadow-inner group-hover:rotate-12 transition-transform`}>
                 {m.icon}
               </div>
             </Link>
