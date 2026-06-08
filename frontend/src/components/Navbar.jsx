@@ -103,14 +103,14 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
         <div className="flex justify-between items-center mb-1 relative z-10">
           <div className="flex items-center gap-3">
             <Menu
-              size={18}
+              size={20}
               className="cursor-pointer text-white/80 hover:text-neon transition-all active:scale-90"
               onClick={() => setIsDrawerOpen(true)}
             />
             <div className="bg-neon/10 p-2 rounded-xl border border-neon/30 backdrop-blur-md shadow-inner">
-              <Cpu size={13} className="text-white animate-spin-slow" />
+              <Cpu size={15} className="text-white animate-spin-slow" />
             </div>
-            <span className="text-[13px] font-black  titlecase text-white/80">
+            <span className="text-[15px] font-black  titlecase text-white/80">
               EduFlowAI v2.0
             </span>
           </div>
@@ -121,7 +121,7 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
                 onClick={handleBellClick}
                 className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md relative cursor-pointer hover:bg-neon/20 transition-all active:scale-90"
               >
-                <Bell size={13} className="text-white/80" />
+                <Bell size={15} className="text-white/80" />
                 {user?.role !== 'admin' && unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-void animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]">
                     {unreadCount}
@@ -136,24 +136,24 @@ const Navbar = ({ user, searchQuery, setSearchQuery, onSupportClick }) => {
                 onClick={onSupportClick}
                 className="bg-white/5 p-2 rounded-xl border border-white/10 backdrop-blur-md hover:bg-neon/20 transition-all active:scale-90 cursor-pointer"
               >
-                <Headphones size={13} className="text-white/80" />
+                <Headphones size={15} className="text-white/80" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-1 text-left relative z-10 px-1">
+        <div className="mt-3 text-left relative z-10 px-1">
           <span className="inline-block mt-0 px-4 py-1 bg-white/20 border border-white/30 rounded-full text-[12px] font-bold tracking-wide text-white">
             {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1).toLowerCase()} Portal
           </span>
-          <h2 className="text-2xl font-bold tracking-tight text-white/90 leading-tight mt-0.5">
+          <h2 className="text-2xl font-bold tracking-tight text-white/90 leading-tight mt-2">
             {greeting.text} {greeting.emoji}{' '} 
             <span className="text-white font-black">
               {user?.name?.split(' ')[0].charAt(0).toUpperCase() + user?.name?.split(' ')[0].slice(1).toLowerCase()}
             </span>
           </h2>
           <motion.div
-            className="mt-2.5 relative"
+            className="mt-4 relative"
             whileTap={{
               y: 2,
               scale: 0.99
