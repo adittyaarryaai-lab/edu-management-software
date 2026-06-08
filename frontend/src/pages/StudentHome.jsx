@@ -101,65 +101,65 @@ const StudentHome = ({ user, searchQuery }) => {
   ];
 
   const subModules = [
-    { title: 'Assignment', icon: <FileText size={24} />, path: '/assignments' },
-    { title: 'Mentorship', icon: <Users size={24} />, path: '/mentors' },
-    { title: 'ERP Notices', icon: <Bell size={24} />, path: '/notices' },
-    { title: 'Performance', icon: <TrendingUp size={24} />, path: '/performance' },
-    { title: 'Library', icon: <Book size={24} />, path: '/library' },
-    { title: 'Leave Request', icon: <ClipboardList size={24} />, path: '/leave' },
-    { title: 'Syllabus', icon: <BookOpen size={24} />, path: '/syllabus' },
-    { title: 'Exam', icon: <GraduationCap size={24} />, path: '/exams' },
+    { title: 'Assignment', icon: <FileText size={17} />, path: '/assignments' },
+    { title: 'ERP Notices', icon: <Bell size={17} />, path: '/notices' },
+    { title: 'Mentorship', icon: <Users size={17} />, path: '/mentors' },
+    { title: 'Library', icon: <Book size={17} />, path: '/library' },
+    { title: 'Performance', icon: <TrendingUp size={17} />, path: '/performance' },
+    { title: 'Leave Request', icon: <ClipboardList size={17} />, path: '/leave' },
+    { title: 'Syllabus', icon: <BookOpen size={17} />, path: '/syllabus' },
+    { title: 'Exam', icon: <GraduationCap size={17} />, path: '/exams' },
   ];
 
   const extraModules = [
-    { title: 'Bus Tracker', icon: <Bus size={24} />, path: '/transport' },
-    { title: 'Live Class', icon: <Video size={24} />, path: '/live-class' },
+    { title: 'Bus Tracker', icon: <Bus size={17} />, path: '/transport' },
+    { title: 'Live Class', icon: <Video size={17} />, path: '/live-class' },
   ];
 
   const examModules = [
     {
       title: 'Date Sheet',
-      icon: <Calendar size={24} />,
+      icon: <Calendar size={17} />,
       path: '/exam-datesheet',
       bgColor: 'bg-[#FFF4E5]',
       iconColor: 'bg-[#FFE0B2] text-[#FB8C00]'
     },
     {
       title: 'Results',
-      icon: <BarChart3 size={24} />,
+      icon: <BarChart3 size={17} />,
       path: '/exam-results',
       bgColor: 'bg-[#E8F5E9]',
       iconColor: 'bg-[#C8E6C9] text-[#43A047]'
     },
     {
       title: 'Admit Card',
-      icon: <ClipboardCheck size={24} />,
+      icon: <ClipboardCheck size={17} />,
       path: '/admit-card',
       bgColor: 'bg-[#E3F2FD]',
       iconColor: 'bg-[#BBDEFB] text-[#1E88E5]'
     },
-    {
-      title: 'Exam Notices',
-      icon: <Megaphone size={24} />,
-      path: '/exam-notices',
-      bgColor: 'bg-[#F3E5F5]',
-      iconColor: 'bg-[#E1BEE7] text-[#8E24AA]'
-    },
+    // {
+    //   title: 'Exam Notices',
+    //   icon: <Megaphone size={24} />,
+    //   path: '/exam-notices',
+    //   bgColor: 'bg-[#F3E5F5]',
+    //   iconColor: 'bg-[#E1BEE7] text-[#8E24AA]'
+    // },
 
     {
       title: 'Syllabus',
-      icon: <BookOpen size={24} />,
+      icon: <BookOpen size={17} />,
       path: '/syllabus',
       bgColor: 'bg-[#E0F7FA]',
       iconColor: 'bg-[#B2EBF2] text-[#0097A7]'
     },
-    {
-      title: 'Exam Registration',
-      icon: <UserPlus size={24} />,
-      path: '/exam-registration',
-      bgColor: 'bg-[#FFF3E0]',
-      iconColor: 'bg-[#FFE0B2] text-[#FB8C00]'
-    },
+    // {
+    //   title: 'Exam Registration',
+    //   icon: <UserPlus size={24} />,
+    //   path: '/exam-registration',
+    //   bgColor: 'bg-[#FFF3E0]',
+    //   iconColor: 'bg-[#FFE0B2] text-[#FB8C00]'
+    // },
   ];
 
   const filteredSub = subModules.filter(sm =>
@@ -173,10 +173,10 @@ const StudentHome = ({ user, searchQuery }) => {
   const noResults = filteredSub.length === 0 && filteredExtra.length === 0;
 
   return (
-    <div className="px-5 -mt-18 space-y-5 relative z-10 pb-24 font-sans bg-[#F8FAFC] overflow-x-hidden">
+    <div className="px-5 -mt-18 space-y-4 relative z-10 pb-10 md:pb-20 font-sans bg-[#F8FAFC] overflow-x-hidden">
 
       {/* ---------------- AI FLOATING BUTTON ---------------- */}
-      <motion.div
+      {/* <motion.div
 
         dragConstraints={{
           left: 0,
@@ -217,22 +217,22 @@ const StudentHome = ({ user, searchQuery }) => {
         <div
           onClick={() => navigate('/ai-chatbot')}
           className="relative w-full h-full rounded-full bg-gradient-to-br from-[#42A5F5] via-[#7E57C2] to-[#EC4899] shadow-[0_10px_40px_rgba(66,165,245,0.45)] flex items-center justify-center border-4 border-white active:scale-95 transition-all overflow-hidden group"
-        >
+        > */}
           {/* Glow */}
-          <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl"></div>
+          {/* <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl"></div> */}
 
           {/* Pulse Ring */}
-          <div className="absolute w-full h-full rounded-full border-2 border-white/30 animate-ping"></div>
+          {/* <div className="absolute w-full h-full rounded-full border-2 border-white/30 animate-ping"></div> */}
 
           {/* Icon */}
-          <div className="relative z-10 flex flex-col items-center">
+          {/* <div className="relative z-10 flex flex-col items-center">
             <Sparkles size={28} className="text-white drop-shadow-lg" />
             <span className="text-[9px] font-black text-white uppercase tracking-widest mt-1">
               AI
             </span>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
 
       {/* --- MAIN MODULES --- */}
       <div className="space-y-4 pt-4">
@@ -279,7 +279,7 @@ const StudentHome = ({ user, searchQuery }) => {
       </div>
 
       {/* --- SUB MODULES --- */}
-      <div className="bg-white rounded-[3.5rem] p-8 lg:p-12 shadow-sm border border-slate-100 relative min-h-[200px] flex flex-col justify-center">
+      <div className="bg-white rounded-[3.5rem] p-5 lg:p-8 shadow-sm border border-slate-100 relative min-h-[200px] flex flex-col justify-center">
 
         {noResults ? (
           <motion.div
@@ -294,12 +294,12 @@ const StudentHome = ({ user, searchQuery }) => {
             </p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-4 lg:grid-cols-6 gap-y-12 gap-x-4">
+          <div className="grid grid-cols-4 lg:grid-cols-6 gap-y-4 gap-x-4">
 
             {filteredSub.map((sm, i) => (
               <Link to={sm.path} key={i} className="flex flex-col items-center gap-4 group">
 
-                <div className="w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center rounded-[2rem] bg-[#E3F2FD] text-[#2196F3] group-hover:bg-[#2196F3] group-hover:text-white transition-all active:scale-90 border border-blue-50">
+                <div className="w-12 h-12 lg:w-20 lg:h-20 flex items-center justify-center rounded-[2rem] bg-[#E3F2FD] text-[#2196F3] group-hover:bg-[#2196F3] group-hover:text-white transition-all active:scale-90 border border-blue-50">
                   {sm.icon}
                 </div>
 
@@ -319,7 +319,7 @@ const StudentHome = ({ user, searchQuery }) => {
                 >
                   <Link to={em.path} className="flex flex-col items-center gap-4 group">
 
-                    <div className="w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center rounded-[2rem] bg-[#E3F2FD] text-[#2196F3] group-hover:bg-[#9C27B0] group-hover:text-white transition-all active:scale-90 border border-purple-50">
+                    <div className="w-12 h-12 lg:w-20 lg:h-20 flex items-center justify-center rounded-[2rem] bg-[#E3F2FD] text-[#2196F3] group-hover:bg-[#9C27B0] group-hover:text-white transition-all active:scale-90 border border-purple-50">
                       {em.icon}
                     </div>
 
@@ -337,52 +337,52 @@ const StudentHome = ({ user, searchQuery }) => {
         {/* TOGGLE BUTTON */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex justify-center w-full mt-8 hover:scale-110 transition-transform cursor-pointer"
+          className="flex justify-center w-full mt-3 hover:scale-110 transition-transform cursor-pointer"
         >
-          <div className="bg-slate-50 p-2 rounded-full border border-slate-100 shadow-sm">
+          <div className="bg-slate-50 p-1 rounded-full border border-slate-100 shadow-sm">
             {isExpanded
-              ? <ChevronUp size={24} className="text-slate-400" />
-              : <ChevronDown size={24} className="text-slate-400" />
+              ? <ChevronUp size={21} className="text-slate-400" />
+              : <ChevronDown size={21} className="text-slate-400" />
             }
           </div>
         </button>
       </div>
       {/* --- EXAM HUB SECTION --- */}
-      <div className="rounded-[3.5rem] p-8 shadow-sm border border-white/60 relative overflow-hidden bg-gradient-to-br from-[#E3F2FD] via-[#F3E5F5] to-[#FFF3E0]">
+      <div className="rounded-[2rem] p-5 shadow-md border border-blue-100 relative overflow-hidden bg-white">
 
         {/* Background Glow */}
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
 
         {/* Heading */}
-        <div className="relative z-10 flex items-center justify-between mb-8">
+        <div className="relative z-10 flex items-center justify-between mb-4">
           <div>
             <h2 className="text-1xl font-black text-slate-800 italic">
               Examination Hub
             </h2>
           </div>
 
-          <div className="bg-white/60 backdrop-blur-md p-4 rounded-[1.8rem] shadow-sm border border-white">
-            <GraduationCap size={30} className="text-[#7E57C2]" />
+          <div className="bg-white/60 backdrop-blur-md p-2.5 rounded-[1.8rem] shadow-sm border border-white">
+            <GraduationCap size={25} className="text-[#7E57C2]" />
           </div>
         </div>
 
         {/* Modules */}
-        <div className="grid grid-cols-2 gap-5 relative z-10">
+        <div className="grid grid-cols-2 gap-3 relative z-10">
 
           {examModules.map((m, i) => (
             <Link
               to={m.path}
               key={i}
-              className={`${m.bgColor} rounded-[2rem] p-5 flex items-center justify-between shadow-sm border border-white/70 active:scale-95 transition-all group`}
+              className={`${m.bgColor} rounded-[2rem] p-2 flex items-center justify-between shadow-sm border border-white/70 active:scale-95 transition-all group`}
             >
               <div>
-                <p className="text-[15px] font-black text-slate-700 italic leading-tight">
+                <p className="text-xs font-black text-slate-700 italic leading-tight">
                   {m.title}
                 </p>
               </div>
 
-              <div className={`p-3 rounded-[1.2rem] ${m.iconColor} group-hover:rotate-12 transition-transform`}>
+              <div className={`p-1.5 rounded-[1.2rem] ${m.iconColor} group-hover:rotate-12 transition-transform`}>
                 {m.icon}
               </div>
             </Link>

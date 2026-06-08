@@ -9,12 +9,12 @@ const BottomNav = () => {
 
   // 1. User data nikaalo (Jisne login kiya hai)
   const user = JSON.parse(localStorage.getItem('user')) || {};
-  
+
   // 2. School ki details (schoolData se hi aayengi)
   const schoolName = user.schoolData?.schoolName || "EduFlowAI Institution";
   const schoolAddress = user.schoolData?.address || "Digital Campus, Sector 42";
   const schoolContact = user.schoolData?.adminDetails?.mobile || "+91 98765-43210";
-  
+
   // 3. BACHE KI PHOTO & NAAM (Logged in user profile)
   const studentPhoto = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`) : null;
   const studentName = user.name || "Student Name";
@@ -22,17 +22,17 @@ const BottomNav = () => {
   return (
     <>
       {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-10 flex justify-between items-center z-40 rounded-t-[2.5rem] shadow-[0_-15px_40px_rgba(0,0,0,0.06)] h-24 pb-2 font-sans italic text-[15px]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-10 flex justify-between items-center z-40 rounded-t-[2.5rem] shadow-[0_-15px_40px_rgba(0,0,0,0.06)] h-20 pb-0 font-sans italic text-[15px]">
         <NavLink to="/dashboard" className={({ isActive }) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-[#42A5F5]' : 'text-slate-400'}`}>
-          <Home size={26} />
-          <span className="text-[11px] font-black uppercase tracking-tighter">Home</span>
+          <Home size={20} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Home</span>
         </NavLink>
 
         {/* Center Node Button */}
-        <div className="relative -top-6 flex flex-col items-center">
+        <div className="relative -top-4 flex flex-col items-center">
           <div onClick={() => setShowSchoolModal(true)} className="relative cursor-pointer group">
             <div className="absolute inset-0 rounded-full bg-[#42A5F5]/40 blur-2xl group-hover:blur-3xl transition-all"></div>
-            <div className="relative bg-[#42A5F5] text-white p-5 rounded-full shadow-[0_15px_30px_rgba(66,165,245,0.4)] border-[6px] border-white active:scale-90 transition-all">
+            <div className="relative bg-[#42A5F5] text-white p-3 rounded-full shadow-[0_15px_30px_rgba(66,165,245,0.4)] border-[4px] border-white active:scale-90 transition-all">
               <School size={28} />
             </div>
           </div>
@@ -40,8 +40,8 @@ const BottomNav = () => {
         </div>
 
         <NavLink to="/notice-feed" className={({ isActive }) => `flex flex-col items-center gap-1 transition-all ${isActive ? 'text-[#42A5F5]' : 'text-slate-400'}`}>
-          <Megaphone size={26} />
-          <span className="text-[11px] font-black uppercase tracking-tighter">Feed</span>
+          <Megaphone size={20} />
+          <span className="text-[10px] font-black uppercase tracking-tighter">Feed</span>
         </NavLink>
       </div>
 
@@ -50,7 +50,7 @@ const BottomNav = () => {
         <AnimatePresence>
           {showSchoolModal && (
             <div className="fixed inset-0 z-[999999] flex items-center justify-center p-6 overflow-hidden">
-              
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1, backdropFilter: "blur(40px)" }}
@@ -62,12 +62,12 @@ const BottomNav = () => {
               {/* Identity Card */}
               <motion.div
                 initial={{ scale: 0.5, opacity: 0, y: 100, borderRadius: "100%" }}
-                animate={{ 
-                    scale: 1, 
-                    opacity: 1, 
-                    y: 0, 
-                    borderRadius: "4.5rem",
-                    transition: { type: "spring", damping: 20, stiffness: 100 }
+                animate={{
+                  scale: 1,
+                  opacity: 1,
+                  y: 0,
+                  borderRadius: "4.5rem",
+                  transition: { type: "spring", damping: 20, stiffness: 100 }
                 }}
                 exit={{ scale: 0.5, opacity: 0, y: 200 }}
                 className="relative w-full max-w-sm bg-white shadow-[0_60px_150px_rgba(0,0,0,0.8)] flex flex-col items-center p-12 text-center border border-white/40"
@@ -88,10 +88,10 @@ const BottomNav = () => {
                 >
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-3xl -z-10" />
                   {studentPhoto ? (
-                    <img 
-                        src={studentPhoto} 
-                        alt="Profile" 
-                        className="w-48 h-48 rounded-[4rem] object-cover drop-shadow-[0_30px_60px_rgba(0,0,0,0.4)]" 
+                    <img
+                      src={studentPhoto}
+                      alt="Profile"
+                      className="w-48 h-48 rounded-[4rem] object-cover drop-shadow-[0_30px_60px_rgba(0,0,0,0.4)]"
                     />
                   ) : (
                     <div className="w-36 h-36 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-[3.5rem] flex items-center justify-center text-[#42A5F5] shadow-inner">
@@ -122,40 +122,40 @@ const BottomNav = () => {
                   <h2 className="text-3xl font-black text-slate-900 italic tracking-tighter leading-none uppercase">
                     {schoolName}
                   </h2>
-                  
+
                   <div className="h-1.5 w-14 bg-gradient-to-r from-[#42A5F5] to-indigo-500 mx-auto rounded-full shadow-md" />
 
                   <div className="space-y-4 pt-2">
-  {/* SCHOOL ADDRESS SECTION */}
-  <div className="flex flex-col gap-1">
-    <span className="text-[19px] font-black uppercase text-slate-400 tracking-[0.1em] ml-6 italic">School Address</span>
-    <div className="flex items-start gap-4 text-left bg-slate-50/60 p-5 rounded-[2.5rem] border border-slate-100 shadow-sm">
-      <div className="p-2.5 bg-white rounded-2xl text-[#42A5F5] shadow-sm shrink-0">
-        <MapPin size={20} />
-      </div>
-      <p className="text-[13px] font-bold text-slate-500 leading-relaxed italic">
-        {schoolAddress}
-      </p>
-    </div>
-  </div>
+                    {/* SCHOOL ADDRESS SECTION */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[19px] font-black uppercase text-slate-400 tracking-[0.1em] ml-6 italic">School Address</span>
+                      <div className="flex items-start gap-4 text-left bg-slate-50/60 p-5 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <div className="p-2.5 bg-white rounded-2xl text-[#42A5F5] shadow-sm shrink-0">
+                          <MapPin size={20} />
+                        </div>
+                        <p className="text-[13px] font-bold text-slate-500 leading-relaxed italic">
+                          {schoolAddress}
+                        </p>
+                      </div>
+                    </div>
 
-  {/* SCHOOL CONTACT SECTION */}
-  <div className="flex flex-col gap-1">
-    <span className="text-[19px] font-black uppercase text-[#42A5F5] tracking-[0.1em] ml-6 italic">Contact No.</span>
-    <div className="flex items-center gap-4 text-left bg-blue-50/40 p-5 rounded-[2.5rem] border border-blue-100/30 shadow-sm">
-      <div className="p-2.5 bg-white rounded-2xl text-[#42A5F5] shadow-sm shrink-0">
-        <Phone size={20} />
-      </div>
-      <p className="text-[16px] font-black text-slate-700 tracking-widest">
-        {schoolContact}
-      </p>
-    </div>
-  </div>
-</div>
+                    {/* SCHOOL CONTACT SECTION */}
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[19px] font-black uppercase text-[#42A5F5] tracking-[0.1em] ml-6 italic">Contact No.</span>
+                      <div className="flex items-center gap-4 text-left bg-blue-50/40 p-5 rounded-[2.5rem] border border-blue-100/30 shadow-sm">
+                        <div className="p-2.5 bg-white rounded-2xl text-[#42A5F5] shadow-sm shrink-0">
+                          <Phone size={20} />
+                        </div>
+                        <p className="text-[16px] font-black text-slate-700 tracking-widest">
+                          {schoolContact}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="pt-8 flex flex-col items-center gap-2 opacity-20">
-                     <ShieldCheck size={22} className="text-slate-800" />
-                     <p className="text-[10px] font-black uppercase tracking-[0.5em] italic">Institutional Ledger Verified</p>
+                    <ShieldCheck size={22} className="text-slate-800" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] italic">Institutional Ledger Verified</p>
                   </div>
                 </motion.div>
               </motion.div>
