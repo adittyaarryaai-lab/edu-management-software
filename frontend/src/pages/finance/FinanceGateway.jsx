@@ -234,11 +234,11 @@ const FinanceGateway = () => {
                                 </div>
                                 <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 shadow-inner">
                                     <p className="text-[12px] uppercase text-slate-400 font-black mb-1 tracking-widest italic">Receiver name</p>
-                                   <p className="text-[17px] font-black text-slate-700 truncate italic">
-  {settings.merchantName
-    ?.toLowerCase()
-    .replace(/\b\w/g, char => char.toUpperCase())}
-</p>
+                                    <p className="text-[17px] font-black text-slate-700 truncate italic">
+                                        {settings.merchantName
+                                            ?.toLowerCase()
+                                            .replace(/\b\w/g, char => char.toUpperCase())}
+                                    </p>
                                 </div>
                             </div>
                         ) : (
