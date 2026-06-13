@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Save, Calendar, RefreshCcw, ClipboardCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Save, Calendar, RefreshCcw, ClipboardCheck, AlertCircle, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -25,6 +25,7 @@ const TeacherAttendance = ({ user }) => {
     const [isDateOpen, setIsDateOpen] = useState(false);
     const [viewDate, setViewDate] = useState(new Date());
     const [searchQuery, setSearchQuery] = useState('');
+    const [pendingCount, setPendingCount] = useState(0);
 
     const today = new Date().toISOString().split('T')[0];
     const isFutureDate = selectedDate > today;
@@ -130,7 +131,7 @@ const TeacherAttendance = ({ user }) => {
     );
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-10 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
+        <div className="min-h-screen bg-[#F8FAFC] pb-25 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
             {showToast && (
                 <Toast
                     message={isUpdateMode ? "Records updated successfully!" : "Attendance marked successfully!"}
@@ -289,9 +290,40 @@ const TeacherAttendance = ({ user }) => {
                             </AnimatePresence>
                         </div>
                     </div>
-                </div>
-            </div>
+                    {/* LEAVE REQUEST BUTTON */}
+                    <div className="mt-2 relative">
+                        <button
+                            onClick={() => navigate('/teacher/leave-requests')} // Ye route hum baad mein set karenge
+                            className="w-full bg-white p-6 rounded-[2.5rem] border border-[#DDE3EA] shadow-lg flex items-center justify-between group transition-all hover:border-[#42A5F5] active:scale-[0.98]"
+                        >
+                            <div className="flex items-center gap-5">
+                                <div className="bg-blue-50 text-[#42A5F5] p-4 rounded-2xl group-hover:bg-[#42A5F5] group-hover:text-white transition-all">
+                                    <FileText size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-[17px] font-black text-slate-700 italic uppercase">Leave Requests</h3>
+                                    {/* <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">Review pending applications</p> */}
+                                </div>
+                            </div>
 
+                            {/* Dynamic Counter Badge */}
+                            {pendingCount > 0 ? (
+                                <motion.div
+                                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                                    className="bg-rose-500 text-white font-black text-[12px] w-10 h-10 rounded-full flex items-center justify-center shadow-lg shadow-rose-200"
+                                >
+                                    {pendingCount}
+                                </motion.div>
+                            ) : (
+                                <div className="bg-slate-100 text-slate-400 font-black text-[15px] w-10 h-10 rounded-full flex items-center justify-center">
+                                    0
+                                </div>
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+            </div>
             {/* Main Area */}
             <div className={`px-5 -mt-10 space-y-6 relative ${isDateOpen ? 'z-0' : 'z-20'}`}>
                 {!showList ? (

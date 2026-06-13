@@ -22,6 +22,7 @@ const schoolRoutes = require('./routes/schoolRoutes');
 const technicalRoutes = require('./routes/technicalRoutes');
 const homeworkRoutes = require('./routes/homeworkRoutes');
 const feeNoticeRoutes = require('./routes/feeNoticeRoutes'); // 👈 Naya Import
+const leaveRoutes = require('./routes/leaveRoutes');
 
 
 dotenv.config();
@@ -73,6 +74,8 @@ app.use('/api/school', schoolRoutes);
 app.use('/api/technical', technicalRoutes);
 app.use('/api/homework', homeworkRoutes);
 app.use('/api/fee-notices', feeNoticeRoutes); // 👈 Naya Mapping Locked!
+// Agar tune server.js mein ye likha hai:
+app.use('/api/leaves', require('./routes/leaveRoutes'));
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
 });

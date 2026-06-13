@@ -36,7 +36,9 @@ import AdminTimetable from './pages/AdminTimetable';
 import AddStudent from './pages/AddStudent';
 import AddTeacher from './pages/AddTeacher';
 import ClassDiary from './pages/ClassDiary';
+import LeaveRequest from './pages/LeaveRequest';
 // import AdminFees from './pages/AdminFees';
+import LeaveReview from './pages/LeaveReview';
 import StudentAssignments from './pages/StudentAssignments';
 import TeacherGrading from './pages/TeacherGrading';
 import TeacherNotices from './pages/TeacherNotices';
@@ -51,6 +53,7 @@ import AdminGlobalNotice from './pages/AdminGlobalNotice';
 import ManageUsers from './pages/ManageUsers';
 import AdminEditTimetable from './pages/AdminEditTimetable';
 import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics Page
+import StudentLeaveHistory from './pages/StudentLeaveHistory';
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -59,7 +62,7 @@ import AddPayment from './pages/finance/AddPayment';
 import FeeReceipt from './pages/finance/FeeReceipt';
 import Installments from './pages/finance/Installments';
 import FeesTracker from './pages/finance/FeesTracker';
-import FeesNoticeManager from './pages/finance/FeesNoticeManager'; 
+import FeesNoticeManager from './pages/finance/FeesNoticeManager';
 import StudentLedger from './pages/finance/StudentLedger';
 import FeeReports from './pages/finance/FeeReports'; // Naya import
 import FeeSetup from './pages/finance/FeeSetup'; // Day 114: Class Fee Configuration
@@ -119,14 +122,14 @@ function App() {
   const { isDarkMode, isMatrixActive } = useTheme();
 
   useEffect(() => {
-  const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('user');
 
-  if (savedUser) {
-    setUser(JSON.parse(savedUser));
-  }
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
 
-  setCheckingAuth(false);
-}, []);
+    setCheckingAuth(false);
+  }, []);
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -192,12 +195,12 @@ function App() {
   };
 
   if (checkingAuth) {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-[#42A5F5]/30 border-t-[#42A5F5] rounded-full animate-spin"></div>
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#42A5F5]/30 border-t-[#42A5F5] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -456,6 +459,8 @@ function App() {
           <Route path="/library/digital" element={<DigitalMaterial />} />
           <Route path="/live-class" element={<LiveClass user={user} />} />
           <Route path="/class-diary" element={<ClassDiary />} />
+          <Route path="/leave" element={<LeaveRequest />} />
+          <Route path="/student/leave-history" element={<StudentLeaveHistory />} />
 
           <Route path="/feedback" element={<Feedback />} />
 
@@ -464,6 +469,7 @@ function App() {
           <Route path="/syllabus" element={<Syllabus user={user} />} />
 
           {/* Teacher Specific Routes */}
+          <Route path="/teacher/leave-requests" element={<LeaveReview />} />
           <Route path="/teacher/attendance" element={<TeacherAttendance user={user} />} />
           <Route path="/teacher/students" element={<TeacherStudentList user={user} />} />
           <Route path="/teacher/assignments" element={<TeacherAssignments user={user} />} />

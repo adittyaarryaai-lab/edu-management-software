@@ -112,7 +112,9 @@ const FinanceGateway = () => {
 
                             {/* Details Section */}
                             <div className="w-full md:w-1/3 p-8 border-t md:border-t-0 md:border-l border-slate-100 space-y-6 overflow-y-auto">
-                                <h3 className="text-[16px] font-black text-[#42A5F5] uppercase tracking-widest border-b border-blue-50 pb-4">Payment verification</h3>
+                                <h3 className="text-[16px] font-black text-[#42A5F5] uppercase tracking-widest border-b border-blue-50 pb-4 pr-16">
+                                    Payment verification
+                                </h3>
 
                                 <div className="space-y-4">
                                     <div className="bg-slate-50 p-5 rounded-[2rem] border border-slate-100">
@@ -171,6 +173,7 @@ const FinanceGateway = () => {
             {/* HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4 relative z-10">
                 <div className="flex items-center gap-5">
+
                     <button
                         onClick={() => navigate(-1)}
                         className="p-3 bg-white rounded-2xl border border-[#DDE3EA] shadow-md hover:bg-blue-50 active:scale-90 transition-all group"

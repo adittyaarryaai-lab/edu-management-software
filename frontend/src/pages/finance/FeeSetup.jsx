@@ -254,17 +254,24 @@ const FeeSetup = () => {
                                     </div>
                                 </div>
 
+                                {/* FEE INPUT FIELD (Clean & Stable) */}
                                 <div className={`relative rounded-[2rem] overflow-hidden transition-all ${feeData[cat.key].isNone ? 'bg-slate-100' : 'bg-slate-50 shadow-inner border border-slate-100'}`}>
                                     <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#42A5F5] font-black italic text-2xl">₹</span>
                                     <input
                                         type="number"
                                         disabled={!isEditMode || feeData[cat.key].isNone}
+                                        // 🔥 FIX: Agar amount 0 hai toh khali string dikhao, warna value
                                         value={feeData[cat.key].amount === 0 ? '' : feeData[cat.key].amount}
-                                        onFocus={(e) => { if (isEditMode && feeData[cat.key].amount === 0) setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: '' } }) }}
-                                        onBlur={(e) => { if (isEditMode && e.target.value === '') setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: 0 } }) }}
-                                        onChange={(e) => setFeeData({ ...feeData, [cat.key]: { ...feeData[cat.key], amount: e.target.value === '' ? 0 : Number(e.target.value) } })}
+                                        onChange={(e) => {
+                                            // Agar khali kiya toh 0 set karo, warna number
+                                            const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                            setFeeData(prev => ({
+                                                ...prev,
+                                                [cat.key]: { ...prev[cat.key], amount: val }
+                                            }));
+                                        }}
                                         className="w-full bg-transparent p-7 pl-16 outline-none text-3xl font-black italic text-slate-700 placeholder:text-slate-300"
-                                        placeholder={isEditMode ? "0000" : "N/A"}
+                                        placeholder="0"
                                     />
                                 </div>
                             </div>

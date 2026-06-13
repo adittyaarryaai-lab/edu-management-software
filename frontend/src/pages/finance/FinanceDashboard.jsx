@@ -90,23 +90,6 @@ const FinanceDashboard = ({ searchQuery }) => {
                     </motion.div>
                 )}
 
-                {/* {penaltyUpdateMsg && (
-                    <motion.div
-                        initial={{ y: -100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -100, opacity: 0 }}
-                        className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm bg-white border-2 border-rose-500 p-4 rounded-[2rem] shadow-2xl flex items-center gap-4"
-                    >
-                        <div className="p-2.5 bg-rose-500 rounded-2xl text-white">
-                            <AlertCircle size={18} />
-                        </div>
-                        <div className="flex-1">
-                            <h4 className="text-[12px] font-black text-rose-500 capitalize">System protocol updated</h4>
-                            <p className="text-[11px] font-bold text-slate-400 italic">Penalty rate updated successfully! ⚡</p>
-                        </div>
-                        <CheckCircle size={20} className="text-emerald-500" />
-                    </motion.div>
-                )} */}
             </AnimatePresence>
 
             {/* HEADER SECTION */}
