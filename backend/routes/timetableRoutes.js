@@ -114,33 +114,6 @@ router.get('/grades/list', protect, adminOnly, async (req, res) => {
     }
 });
 
-// GET: Fetch timetable for a specific grade
-router.get('/:grade', protect, async (req, res) => {
-    try {
-        const timetable = await Timetable.findOne({
-            grade: req.params.grade.toUpperCase(),
-            schoolId: req.user.schoolId
-        }).lean(); // lean() use kiya taki hum object modify kar saken
-
-        if (timetable) {
-            // Saare teachers ki list nikalo unke employeeId ke saath
-            const teachers = await User.find({ schoolId: req.user.schoolId, role: 'teacher' }).select('name employeeId');
-
-            // Schedule ke andar teacherEmpId ko replace karo ya Name add karo
-            timetable.schedule.forEach(day => {
-                day.periods.forEach(period => {
-                    const prof = teachers.find(t => t.employeeId === period.teacherEmpId);
-                    period.teacherName = prof ? prof.name : "Neural Professor";
-                });
-            });
-        }
-
-        res.json(timetable || { schedule: [] });
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
-    }
-});
-
 // GET: Fetch personal schedule for a Teacher (Based on EMP ID)
 router.get('/teacher/personal-schedule', protect, async (req, res) => {
     try {
@@ -168,7 +141,7 @@ router.get('/teacher/personal-schedule', protect, async (req, res) => {
                     myPeriods.forEach(mp => {
                         targetDay.periods.push({
                             ...mp.toObject(),
-                            grade: t.grade // Taki teacher ko pata chale kis class mein jana hai
+                            grade: t.grade 
                         });
                     });
                 }
@@ -181,36 +154,31 @@ router.get('/teacher/personal-schedule', protect, async (req, res) => {
     }
 });
 
-// GET: Fetch all unique classes (grades) from Student records
 router.get('/meta/student-grades', protect, adminOnly, async (req, res) => {
     try {
         const User = require('../models/User');
-        // Students ke records se unique grades nikalo
         const grades = await User.distinct('grade', { 
             schoolId: req.user.schoolId, 
             role: 'student',
-            grade: { $ne: null } // Jo null nahi hain
+            grade: { $ne: null } 
         });
-        res.json(grades.sort()); // Sort karke bhej do
+        res.json(grades.sort()); 
     } catch (error) {
         res.status(500).json({ message: 'Error fetching student grades' });
     }
 });
 
-// --- GET: FETCH AVAILABLE TEACHERS & ROOMS FOR A SLOT ---
 router.post('/meta/available-resources', protect, adminOnly, async (req, res) => {
     try {
         const { day, startTime, excludeGrade } = req.body;
         const schoolId = req.user.schoolId;
 
-        // 1. Pura school ka timetable nikalo us din ka
         const allTimetables = await Timetable.find({ schoolId });
 
         let occupiedTeachers = [];
         let occupiedRooms = [];
 
         allTimetables.forEach(t => {
-            // Agar hum usi class ko edit kar rahe hain toh usey skip karo
             if (t.grade === excludeGrade?.toUpperCase()) return;
 
             const dayMatch = t.schedule.find(s => s.day === day);
@@ -224,7 +192,6 @@ router.post('/meta/available-resources', protect, adminOnly, async (req, res) =>
             }
         });
 
-        // 2. Un Teachers ki list nikalo jo occupied nahi hain
         const availableTeachers = await User.find({
             schoolId,
             role: 'teacher',
@@ -234,6 +201,33 @@ router.post('/meta/available-resources', protect, adminOnly, async (req, res) =>
         res.json({ availableTeachers, occupiedRooms });
     } catch (error) {
         res.status(500).json({ message: 'Resource sync failed' });
+    }
+});
+
+// GET: Fetch timetable for a specific grade
+router.get('/:grade', protect, async (req, res) => {
+    try {
+        const timetable = await Timetable.findOne({
+            grade: req.params.grade.toUpperCase(),
+            schoolId: req.user.schoolId
+        }).lean(); // lean() use kiya taki hum object modify kar saken
+
+        if (timetable) {
+            // Saare teachers ki list nikalo unke employeeId ke saath
+            const teachers = await User.find({ schoolId: req.user.schoolId, role: 'teacher' }).select('name employeeId');
+
+            // Schedule ke andar teacherEmpId ko replace karo ya Name add karo
+            timetable.schedule.forEach(day => {
+                day.periods.forEach(period => {
+                    const prof = teachers.find(t => t.employeeId === period.teacherEmpId);
+                    period.teacherName = prof ? prof.name : "Neural Professor";
+                });
+            });
+        }
+
+        res.json(timetable || { schedule: [] });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
     }
 });
 module.exports = router;

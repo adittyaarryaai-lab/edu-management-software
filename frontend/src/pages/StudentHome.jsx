@@ -107,7 +107,7 @@ const StudentHome = ({ user, searchQuery }) => {
     { title: 'Library', icon: <Book size={17} />, path: '/library' },
     { title: 'Performance', icon: <TrendingUp size={17} />, path: '/performance' },
     { title: 'Leave Request', icon: <ClipboardList size={17} />, path: '/leave' },
-    { title: 'Syllabus', icon: <BookOpen size={17} />, path: '/syllabus' },
+    { title: 'My Subjects', icon: <BookOpen size={17} />, path: '/my-subjects' },
     { title: 'Exam', icon: <GraduationCap size={17} />, path: '/exams' },
   ];
 

@@ -54,6 +54,7 @@ import ManageUsers from './pages/ManageUsers';
 import AdminEditTimetable from './pages/AdminEditTimetable';
 import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics Page
 import StudentLeaveHistory from './pages/StudentLeaveHistory';
+import MySubjects from './pages/student/MySubjects'; // Import karo
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -461,6 +462,7 @@ function App() {
           <Route path="/class-diary" element={<ClassDiary />} />
           <Route path="/leave" element={<LeaveRequest />} />
           <Route path="/student/leave-history" element={<StudentLeaveHistory />} />
+          <Route path="/my-subjects" element={<MySubjects user={user} />} />
 
           <Route path="/feedback" element={<Feedback />} />
 

@@ -34,38 +34,38 @@ const ClassDiary = () => {
 
     useEffect(() => {
 
-    const fetchHomework = async () => {
+        const fetchHomework = async () => {
 
-        // 🔥 Sirf first time loading
-        if (isFirstLoad) {
-            setLoading(true);
-        }
-
-        try {
-            const user = JSON.parse(localStorage.getItem('user'));
-            const className = user?.grade;
-
-            const { data } = await API.get(
-                `/homework/view?className=${className}&date=${selectedDate}`
-            );
-
-            setHomeworkList(data);
-
-        } catch (err) {
-            console.error("Diary Fetch Failed");
-        } finally {
-
-            // 🔥 First load complete
+            // 🔥 Sirf first time loading
             if (isFirstLoad) {
-                setLoading(false);
-                setIsFirstLoad(false);
+                setLoading(true);
             }
-        }
-    };
 
-    fetchHomework();
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const className = user?.grade;
 
-}, [selectedDate]);
+                const { data } = await API.get(
+                    `/homework/view?className=${className}&date=${selectedDate}`
+                );
+
+                setHomeworkList(data);
+
+            } catch (err) {
+                console.error("Diary Fetch Failed");
+            } finally {
+
+                // 🔥 First load complete
+                if (isFirstLoad) {
+                    setLoading(false);
+                    setIsFirstLoad(false);
+                }
+            }
+        };
+
+        fetchHomework();
+
+    }, [selectedDate]);
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden overscroll-none fixed inset-0 overflow-y-auto">
@@ -75,7 +75,9 @@ const ClassDiary = () => {
                     <button onClick={() => navigate(-1)} className="p-3 bg-white rounded-2xl border border-[#DDE3EA] text-[#42A5F5] shadow-md active:scale-90 transition-all">
                         <ArrowLeft size={24} />
                     </button>
-                    <h1 className="text-4xl font-black italic tracking-tight capitalize">Class Diary</h1>
+                    <h1 className="text-4xl font-black italic tracking-tighter capitalize text-white">
+                        Class Diary
+                    </h1>
                     <div className="p-3 bg-blue-50 rounded-2xl text-[#42A5F5]">
                         <BookOpen size={24} />
                     </div>
@@ -110,7 +112,7 @@ const ClassDiary = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                               className="space-y-6 min-h-[420px]"
+                                className="space-y-6 min-h-[420px]"
                             >
                                 {/* 🔥 Ek hi baar top heading */}
                                 <div className="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-md text-center">
