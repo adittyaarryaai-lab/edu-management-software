@@ -478,7 +478,7 @@ function App() {
           <Route path="/teacher/grade/:assignmentId" element={<TeacherGrading />} />
           <Route path="/teacher/notices" element={<TeacherNotices />} />
           <Route path="/teacher/support" element={<TeacherSupport />} />
-          <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus />} />
+          <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus user={user} />} />
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
 
           {/* --- FINANCE MODULE ROUTES --- */}
