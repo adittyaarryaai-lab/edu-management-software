@@ -37,6 +37,7 @@ import AddStudent from './pages/AddStudent';
 import AddTeacher from './pages/AddTeacher';
 import ClassDiary from './pages/ClassDiary';
 import LeaveRequest from './pages/LeaveRequest';
+import StudentSyllabus from './pages/student/StudentSyllabus';
 // import AdminFees from './pages/AdminFees';
 import LeaveReview from './pages/LeaveReview';
 import StudentAssignments from './pages/StudentAssignments';
@@ -463,6 +464,7 @@ function App() {
           <Route path="/leave" element={<LeaveRequest />} />
           <Route path="/student/leave-history" element={<StudentLeaveHistory />} />
           <Route path="/my-subjects" element={<MySubjects user={user} />} />
+          <Route path="/syllabus" element={<StudentSyllabus user={user} />} />
 
           <Route path="/feedback" element={<Feedback />} />
 

@@ -172,4 +172,26 @@ router.put('/publish/:syllabusId', protect, async (req, res) => {
     }
 });
 
+// 8. STUDENT: Fetch published syllabus for their specific grade
+router.get('/my-syllabus', protect, async (req, res) => {
+    try {
+        const studentGrade = req.user.grade; // Login ke time pe student ka grade aata hai
+        
+        if (!studentGrade) {
+            return res.status(400).json({ message: "Student grade configuration missing." });
+        }
+
+        // Sirf wahi syllabus fetch karo jo student ki class ka ho aur PUBLISHED ho
+        const syllabuses = await ExamSyllabus.find({
+            schoolId: req.user.schoolId,
+            grade: studentGrade.toUpperCase(),
+            status: 'published'
+        }).sort({ createdAt: -1 }); // Latest sabse upar
+
+        res.json(syllabuses);
+    } catch (error) {
+        res.status(500).json({ message: "Neural Link Error: Failed to fetch syllabus." });
+    }
+});
+
 module.exports = router;

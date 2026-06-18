@@ -82,6 +82,15 @@ const StudentHome = ({ user, searchQuery }) => {
   ];
 
   const examModules = [
+
+    {
+      title: 'Syllabus',
+      icon: <BookOpen size={17} />,
+      path: '/syllabus',
+      bgColor: 'bg-[#E0F7FA]',
+      iconColor: 'bg-[#B2EBF2] text-[#0097A7]'
+    }, 
+
     {
       title: 'Date Sheet',
       icon: <Calendar size={17} />,
@@ -89,19 +98,21 @@ const StudentHome = ({ user, searchQuery }) => {
       bgColor: 'bg-[#FFF4E5]',
       iconColor: 'bg-[#FFE0B2] text-[#FB8C00]'
     },
-    {
-      title: 'Results',
-      icon: <BarChart3 size={17} />,
-      path: '/exam-results',
-      bgColor: 'bg-[#E8F5E9]',
-      iconColor: 'bg-[#C8E6C9] text-[#43A047]'
-    },
+    
     {
       title: 'Admit Card',
       icon: <ClipboardCheck size={17} />,
       path: '/admit-card',
       bgColor: 'bg-[#E3F2FD]',
       iconColor: 'bg-[#BBDEFB] text-[#1E88E5]'
+    },
+
+    {
+      title: 'Results',
+      icon: <BarChart3 size={17} />,
+      path: '/exam-results',
+      bgColor: 'bg-[#E8F5E9]',
+      iconColor: 'bg-[#C8E6C9] text-[#43A047]'
     },
     // {
     //   title: 'Exam Notices',
@@ -111,13 +122,7 @@ const StudentHome = ({ user, searchQuery }) => {
     //   iconColor: 'bg-[#E1BEE7] text-[#8E24AA]'
     // },
 
-    {
-      title: 'Syllabus',
-      icon: <BookOpen size={17} />,
-      path: '/syllabus',
-      bgColor: 'bg-[#E0F7FA]',
-      iconColor: 'bg-[#B2EBF2] text-[#0097A7]'
-    },
+    
     // {
     //   title: 'Exam Registration',
     //   icon: <UserPlus size={24} />,
