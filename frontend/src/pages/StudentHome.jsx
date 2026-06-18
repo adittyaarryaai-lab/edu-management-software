@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar, Clock, CreditCard, Bell, Sun, FileText,
   TrendingUp, FileSearch, ClipboardCheck,
-  Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus, Bot, ChevronDown, ChevronUp, ClipboardList, Sparkles, BarChart3
+  Bus, Book, Video, BookOpen, Megaphone, Users, GraduationCap, UserPlus,MessageSquare, Bot, ChevronDown, ChevronUp, ClipboardList, Sparkles, BarChart3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API from '../api';
@@ -41,42 +41,6 @@ const StudentHome = ({ user, searchQuery }) => {
     };
   };
 
-  // // --- DRAG START ---
-  // const handleMouseDown = () => {
-  //   setDragging(true);
-  // };
-
-  // // --- DRAG MOVE ---
-  // useEffect(() => {
-  //   const move = (e) => {
-  //     if (!dragging) return;
-
-  //     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  //     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-  //     const newPos = clampPosition(clientX - 40, clientY - 40);
-
-  //     setPosition(newPos);
-  //   };
-
-  //   const stop = () => setDragging(false);
-
-  //   window.addEventListener('mousemove', move);
-  //   window.addEventListener('mouseup', stop);
-
-  //   window.addEventListener('touchmove', move);
-  //   window.addEventListener('touchend', stop);
-
-  //   return () => {
-  //     window.removeEventListener('mousemove', move);
-  //     window.removeEventListener('mouseup', stop);
-
-  //     window.removeEventListener('touchmove', move);
-  //     window.removeEventListener('touchend', stop);
-  //   };
-  // }, [dragging]);
-
-  // --- RESIZE SCREEN FIX ---
   useEffect(() => {
     const handleResize = () => {
       setPosition(prev => clampPosition(prev.x, prev.y));
@@ -103,17 +67,18 @@ const StudentHome = ({ user, searchQuery }) => {
   const subModules = [
     { title: 'Assignment', icon: <FileText size={17} />, path: '/assignments' },
     { title: 'ERP Notices', icon: <Bell size={17} />, path: '/notices' },
-    { title: 'Mentorship', icon: <Users size={17} />, path: '/mentors' },
-    { title: 'Library', icon: <Book size={17} />, path: '/library' },
     { title: 'Performance', icon: <TrendingUp size={17} />, path: '/performance' },
+    { title: 'Holidays', icon: <Calendar size={17} />, path: '/holidays' },
+    { title: 'Mentorship', icon: <Users size={17} />, path: '/mentors' },
     { title: 'Leave Request', icon: <ClipboardList size={17} />, path: '/leave' },
     { title: 'My Subjects', icon: <BookOpen size={17} />, path: '/my-subjects' },
-    { title: 'Exam', icon: <GraduationCap size={17} />, path: '/exams' },
+    { title: 'Library', icon: <Book size={17} />, path: '/library' },
   ];
 
   const extraModules = [
     { title: 'Bus Tracker', icon: <Bus size={17} />, path: '/transport' },
     { title: 'Live Class', icon: <Video size={17} />, path: '/live-class' },
+    { title: 'Feedback', icon: <MessageSquare size={17} />, path: '/feedback' },
   ];
 
   const examModules = [
@@ -218,14 +183,14 @@ const StudentHome = ({ user, searchQuery }) => {
           onClick={() => navigate('/ai-chatbot')}
           className="relative w-full h-full rounded-full bg-gradient-to-br from-[#42A5F5] via-[#7E57C2] to-[#EC4899] shadow-[0_10px_40px_rgba(66,165,245,0.45)] flex items-center justify-center border-4 border-white active:scale-95 transition-all overflow-hidden group"
         > */}
-          {/* Glow */}
-          {/* <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl"></div> */}
+      {/* Glow */}
+      {/* <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-xl"></div> */}
 
-          {/* Pulse Ring */}
-          {/* <div className="absolute w-full h-full rounded-full border-2 border-white/30 animate-ping"></div> */}
+      {/* Pulse Ring */}
+      {/* <div className="absolute w-full h-full rounded-full border-2 border-white/30 animate-ping"></div> */}
 
-          {/* Icon */}
-          {/* <div className="relative z-10 flex flex-col items-center">
+      {/* Icon */}
+      {/* <div className="relative z-10 flex flex-col items-center">
             <Sparkles size={28} className="text-white drop-shadow-lg" />
             <span className="text-[9px] font-black text-white uppercase tracking-widest mt-1">
               AI

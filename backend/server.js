@@ -36,11 +36,13 @@ require('./utils/penaltyCron');
 
 const app = express();
 
-// Middlewares
 app.use(cors({
-    origin: '*', // Saari incoming production requests (Vercel + Local) ko allow karega
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: [
+        "http://localhost:5173",
+        "https://eduflowai-iota.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
 app.use(express.json());
