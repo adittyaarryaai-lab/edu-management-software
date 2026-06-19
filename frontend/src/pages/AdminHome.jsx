@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download,Calendar, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -156,18 +156,19 @@ const AdminHome = ({ searchQuery }) => {
 ];
 
     const managementModules = [
-        { id: 'add-student', title: 'Add student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-        { id: 'add-staff', title: 'Manage staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-indigo-50 text-indigo-500 border-indigo-100' },
-        { id: 'attendance-report', title: 'Student performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-50 text-cyan-500 border-cyan-100' },
-        { id: 'notice', title: 'Publish notice', icon: <Megaphone size={24} />, desc: 'Send alerts to all', color: 'bg-orange-50 text-orange-500 border-orange-100' },
-        { id: 'notice-feed', title: 'Notice archive', icon: <ClipboardList size={24} />, desc: 'Manage & delete notices', color: 'bg-rose-50 text-rose-500 border-rose-100' },
-        { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-        { id: 'edit-timetable', title: 'Edit timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-50 text-rose-500 border-rose-100' },
-        { id: 'manage-users', title: 'Manage student and teacher', icon: <Users size={24} />, desc: 'Edit or purge personnel', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-    ];
+    { id: 'add-student', title: 'Add student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+    { id: 'add-staff', title: 'Manage staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-indigo-50 text-indigo-500 border-indigo-100' },
+    { id: 'attendance-report', title: 'Student performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-50 text-cyan-500 border-cyan-100' },
+    { id: 'notice', title: 'Publish notice', icon: <Megaphone size={24} />, desc: 'Send notice to all', color: 'bg-orange-50 text-orange-500 border-orange-100' },
+    { id: 'notice-feed', title: 'Notice archive', icon: <ClipboardList size={24} />, desc: 'Manage & delete notices', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+    { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+    { id: 'edit-timetable', title: 'Edit timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+    { id: 'datesheet-engine', title: 'Generate datesheet', icon: <Calendar size={24} />, desc: 'Exam scheduler', color: 'bg-violet-50 text-violet-500 border-violet-100' },
+    { id: 'manage-users', title: 'Manage student and teacher', icon: <Users size={24} />, desc: 'Edit or Delete personnel', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+];
 
     return (
-        <div className="px-5 -mt-24 space-y-6 pb-24 relative z-10 font-sans italic">
+        <div className="px-5 -mt-24 space-y-6  relative z-10 font-sans italic">
 
             {/* Subscription Card */}
             {/* <div className={`p-8 rounded-[3rem] border shadow-xl transition-all ${subData?.hasPaidAdvance ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100'}`}>
@@ -247,32 +248,34 @@ const AdminHome = ({ searchQuery }) => {
 
             {/* Modules */}
             <div className="space-y-4">
-                <h3 className="text-[20px] font-black text-slate-900 uppercase tracking-[0.1em] ml-4 italic">Administrative panel</h3>
-                {managementModules
-                    .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
-                    .map((m, i) => (
-                        <div key={i} onClick={() => {
-                            if (m.id === 'manage-users') navigate('/admin/manage-users');
-                            if (m.id === 'add-student') navigate('/admin/add-student');
-                            if (m.id === 'add-staff') navigate('/admin/add-teacher');
-                            if (m.id === 'timetable') navigate('/admin/timetable');
-                            if (m.id === 'fees') navigate('/admin/fees');
-                            if (m.id === 'attendance-report') navigate('/admin/attendance-report');
-                            if (m.id === 'notice') navigate('/admin/global-notice');
-                            if (m.id === 'notice-feed') navigate('/notice-feed');
-                            if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
-                        }} className="bg-white p-6 rounded-[2.5rem] border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group shadow-sm hover:shadow-md hover:border-blue-100">
-                            <div className="flex items-center gap-5">
-                                <div className={`${m.color} p-4 rounded-2xl border transition-all`}>{m.icon}</div>
-                                <div>
-                                    <h4 className="font-black text-slate-700 text-[21px] leading-none uppercase italic tracking-tighter">{m.title}</h4>
-                                    <p className="text-[16px] text-slate-400 mt-2 font-bold italic uppercase tracking-tighter leading-none">{m.desc}</p>
-                                </div>
-                            </div>
-                            <div className="bg-slate-50 p-3 rounded-full border border-slate-100 text-slate-300 group-hover:text-[#42A5F5] group-hover:bg-blue-50 transition-all"><PlusCircle size={20} /></div>
-                        </div>
-                    ))}
+    <h3 className="text-[20px] font-black text-slate-900 uppercase tracking-[0.1em] ml-4 italic">Administrative panel</h3>
+    {managementModules
+        .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
+        .map((m, i) => (
+            <div key={i} onClick={() => {
+                if (m.id === 'manage-users') navigate('/admin/manage-users');
+                if (m.id === 'add-student') navigate('/admin/add-student');
+                if (m.id === 'add-staff') navigate('/admin/add-teacher');
+                if (m.id === 'timetable') navigate('/admin/timetable');
+                if (m.id === 'fees') navigate('/admin/fees');
+                if (m.id === 'attendance-report') navigate('/admin/attendance-report');
+                if (m.id === 'notice') navigate('/admin/global-notice');
+                if (m.id === 'notice-feed') navigate('/notice-feed');
+                if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
+                if (m.id === 'datesheet-engine') navigate('/admin/datesheet');
+            }} className="bg-white p-6 rounded-[2.5rem] border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group shadow-sm hover:shadow-md hover:border-blue-100">
+                <div className="flex items-center gap-5">
+                    <div className={`${m.color} p-4 rounded-2xl border transition-all`}>{m.icon}</div>
+                    <div>
+                        {/* Yahan se uppercase hata diya gaya hai */}
+                        <h4 className="font-black text-slate-700 text-[21px] leading-none italic tracking-tighter">{m.title}</h4>
+                        <p className="text-[16px] text-slate-400 mt-2 font-bold italic tracking-tighter leading-none">{m.desc}</p>
+                    </div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-full border border-slate-100 text-slate-300 group-hover:text-[#42A5F5] group-hover:bg-blue-50 transition-all"><PlusCircle size={20} /></div>
             </div>
+        ))}
+</div>
 
             {/* System Status Footer */}
             <div className="bg-slate-800 rounded-[3.5rem] p-8 text-white shadow-2xl relative overflow-hidden ">

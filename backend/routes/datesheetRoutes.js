@@ -1,0 +1,108 @@
+const express = require('express');
+const router = express.Router();
+const Datesheet = require('../models/Datesheet');
+const Timetable = require('../models/Timetable');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
+
+// The Auto-Generation Engine
+router.post('/generate-preview', protect, adminOnly, async (req, res) => {
+    try {
+        const { title, classes, startDate, gapDays, timing, resultDate, notes, signatures } = req.body;
+        const schoolId = req.user.schoolId;
+
+        // FETCH CURRENT SCHOOL NAME (FIXED: Using .schoolName instead of .name)
+        const School = require('../models/School');
+        const schoolDoc = await School.findById(schoolId);
+        
+        // YAHAN FIX KIYA HAI: schoolDoc.schoolName 
+        const schoolName = schoolDoc ? schoolDoc.schoolName : "EduFlowAI Public School";
+
+        // Step 1: Har class ke timetable se subjects fetch karo
+        const classSubjectsMap = {};
+
+        for (let cls of classes) {
+            const timetable = await Timetable.findOne({ grade: cls.toUpperCase(), schoolId });
+            const subjectsSet = new Set();
+
+            if (timetable) {
+                timetable.schedule.forEach(day => {
+                    day.periods.forEach(p => {
+                        if (p.subject && p.subject !== 'Break') subjectsSet.add(p.subject);
+                    });
+                });
+            }
+
+            let subjectsArray = Array.from(subjectsSet);
+            if (subjectsArray.length === 0) {
+                subjectsArray = ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi'];
+            }
+            classSubjectsMap[cls] = subjectsArray;
+        }
+
+        const maxSubjects = Math.max(...Object.values(classSubjectsMap).map(arr => arr.length));
+
+        let schedule = [];
+        let currentDate = new Date(startDate);
+        const gaps = gapDays ? parseInt(gapDays) : 0;
+
+        for (let i = 0; i < maxSubjects; i++) {
+            while (currentDate.getDay() === 0) {
+                currentDate.setDate(currentDate.getDate() + 1); // Skip Sunday
+            }
+
+            const formattedDate = currentDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+            const dayName = currentDate.toLocaleDateString('en-GB', { weekday: 'long' });
+
+            let row = {
+                date: formattedDate,
+                day: dayName,
+                // Timing hٹا di hai table column se as requested
+                classExams: {}
+            };
+
+            classes.forEach(cls => {
+                row.classExams[cls] = classSubjectsMap[cls][i] || '-';
+            });
+
+            schedule.push(row);
+            currentDate.setDate(currentDate.getDate() + gaps + 1);
+        }
+
+        // Send schoolName along with schedule
+        res.json({ schedule, schoolName });
+    } catch (error) {
+        res.status(500).json({ message: "Generation failed: " + error.message });
+    }
+});
+
+router.post('/save', protect, adminOnly, async (req, res) => {
+    try {
+        const newDatesheet = await Datesheet.create({ ...req.body, schoolId: req.user.schoolId });
+        res.status(201).json({ message: "Datesheet Published!", data: newDatesheet });
+    } catch (error) {
+        res.status(500).json({ message: "Save failed." });
+    }
+});
+
+// Manual Upload Save Route
+router.post('/save-manual', protect, adminOnly, async (req, res) => {
+    try {
+        const { title, classes, fileData } = req.body;
+        
+        if (!fileData) return res.status(400).json({ message: "No file provided!" });
+
+        const newDatesheet = await Datesheet.create({ 
+            schoolId: req.user.schoolId,
+            title,
+            classes,
+            isManual: true,
+            fileUrl: fileData 
+        });
+
+        res.status(201).json({ message: "Manual Datesheet Published!", data: newDatesheet });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to publish manual datesheet." });
+    }
+});
+
+module.exports = router;

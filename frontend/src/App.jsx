@@ -56,6 +56,7 @@ import AdminEditTimetable from './pages/AdminEditTimetable';
 import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics Page
 import StudentLeaveHistory from './pages/StudentLeaveHistory';
 import MySubjects from './pages/student/MySubjects'; // Import karo
+import AdminDatesheet from './pages/admin/AdminDatesheet';
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -443,6 +444,7 @@ function App() {
           <Route path="/admin/manage-users" element={<ManageUsers />} />
           <Route path="/admin/add-student" element={<AddStudent />} />
           <Route path="/admin/add-teacher" element={<AddTeacher />} />
+          <Route path="/admin/datesheet" element={<AdminDatesheet user={user} />} />
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />

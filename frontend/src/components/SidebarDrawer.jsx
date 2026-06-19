@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book, Database, ClipboardList, BarChart3, BookOpen } from 'lucide-react';
+import { Wallet, FileText, PieChart, AlertCircle, Clock, PlusCircle, User, ShieldCheck, HelpCircle, Settings, LayoutDashboard, Bell, Bus, MessageSquare, ClipboardCheck, Users, X, Cpu, ChevronRight, LogOut, CreditCard, Layers, Check, CheckSquare, CalendarDays, Video, Bot, Megaphone, MessageCircle, Calendar, TrendingUp, GraduationCap, Book, Database, ClipboardList, BarChart3, BookOpen, BookOpenCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../App.css';
@@ -86,20 +86,34 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <MessageCircle size={20} />, label: 'Support', color: 'text-neon', path: '/teacher/support' },
         { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
+
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
-        { icon: <Calendar size={20} />, label: 'Attendance', color: 'text-neon', path: '/attendance' },
-        { icon: <Clock size={20} />, label: 'TimeTable', color: 'text-neon', path: '/timetable' },
-        { icon: <BookOpen size={20} />, label: 'Class Diary', color: 'text-neon', path: '/class-diary' },
-        { icon: <CreditCard size={20} />, label: 'My Fees', color: 'text-neon', path: '/student/fees' },
-        { icon: <Megaphone size={20} />, label: 'Notice Board', color: 'text-neon', path: '/notice-feed' },
-        { icon: <FileText size={20} />, label: 'Assignments', color: 'text-white/60', path: '/assignments' },
-        { icon: <TrendingUp size={20} />, label: 'Performance', color: 'text-white/60', path: '/performance' },
-        { icon: <GraduationCap size={20} />, label: 'Exams', color: 'text-white/60', path: '/exams' },
-        { icon: <Book size={20} />, label: 'Library', color: 'text-white/60', path: '/library' },
-        { icon: <Video size={20} />, label: 'Live Class', color: 'text-white/60', path: '/live-class' },
         { icon: <HelpCircle size={20} />, label: 'Support', color: 'text-neon', path: '/support' },
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
+
+        { icon: <Calendar size={20} />, label: 'Attendance', path: '/attendance' },
+        { icon: <Clock size={20} />, label: 'TimeTable', path: '/timetable' },
+        { icon: <BookOpen size={20} />, label: 'Class Diary', path: '/class-diary' },
+        { icon: <CreditCard size={20} />, label: 'Fees', path: '/student/fees' },
+        { icon: <Megaphone size={20} />, label: 'Notices', path: '/notice-feed' },
+        { icon: <FileText size={20} />, label: 'Assignments', path: '/assignments' },
+        { icon: <Bell size={20} />, label: 'ERP Notices', path: '/notices' },
+        { icon: <TrendingUp size={20} />, label: 'Performance', path: '/performance' },
+        { icon: <Calendar size={20} />, label: 'Holidays', path: '/holidays' },
+        { icon: <Users size={20} />, label: 'Mentorship', path: '/mentors' },
+        { icon: <ClipboardList size={20} />, label: 'Leave Request', path: '/leave' },
+        { icon: <BookOpen size={20} />, label: 'My Subjects', path: '/my-subjects' },
+        { icon: <Book size={20} />, label: 'Library', path: '/library' },
+        { icon: <Bus size={20} />, label: 'Bus Tracker', path: '/transport' },
+        { icon: <Video size={20} />, label: 'Live Class', path: '/live-class' },
+        { icon: <MessageSquare size={20} />, label: 'Feedback', path: '/feedback' },
+
+        // Exam Modules
+        { icon: <BookOpen size={20} />, label: 'Syllabus', path: '/syllabus' },
+        { icon: <Calendar size={20} />, label: 'Date Sheet', path: '/exam-datesheet' },
+        { icon: <ClipboardCheck size={20} />, label: 'Admit Card', path: '/admit-card' },
+        { icon: <BarChart3 size={20} />, label: 'Results', path: '/exam-results' }
     ] : [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
         { icon: <ShieldCheck size={20} />, label: 'Security', color: 'text-neon', path: '/settings' },
@@ -254,7 +268,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Clock size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">TimeTable</span>
@@ -267,10 +281,23 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <BookOpen size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Class Diary</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* live class */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/live-class')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Video size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Live Class</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
@@ -293,157 +320,282 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                     <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
                                                 </div>
 
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Updates</p>
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Academic Center</p>
 
                                                 <div className="space-y-3.5 relative z-10">
-                                                    {/* Notice Module */}
+                                                    {/* Syllabus Module */}
                                                     <button
-                                                        onClick={() => handleNavigation('/notice-feed')}
+                                                        onClick={() => handleNavigation('/syllabus')}
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
                                                             <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                                <Megaphone size={20} />
+                                                                <BookOpen size={20} />
                                                             </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Notice Board</span>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Syllabus</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
-
-                                                    {/* Support MODULE */}
+                                                    {/* Assignment Module */}
                                                     <button
-                                                        onClick={() => handleNavigation('/support')}
-                                                        className="w-full flex items-center justify-between group/item"
-                                                    >
-                                                        <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                                <HelpCircle size={20} />
-                                                            </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Support</span>
-                                                        </div>
-                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => handleNavigation('/live-class')}
-                                                        className="w-full flex items-center justify-between group/item"
-                                                    >
-                                                        <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                                <Video size={20} />
-                                                            </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Live Class</span>
-                                                        </div>
-                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="mt-4 px-5">
-                                            <div className="relative bg-white rounded-[2.4rem] p-3.5 shadow-md border border-slate-100 overflow-hidden group">
-
-                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.4rem] overflow-hidden">
-                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                                    <div
-                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                        style={{
-                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                        }}
-                                                    />
-                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
-                                                </div>
-
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Finance</p>
-
-                                                <div className="space-y-3.5 relative z-10">
-                                                    {/* Fees MODULE */}
-                                                    <button
-                                                        onClick={() => handleNavigation('/student/fees')}
-                                                        className="w-full flex items-center justify-between group/item"
-                                                    >
-                                                        <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
-                                                                <CreditCard size={20} />
-                                                            </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">My Fees</span>
-                                                        </div>
-                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="mt-4 px-5">
-                                            <div className="relative bg-white rounded-[2.4rem] p-3.5 shadow-md border border-slate-100 overflow-hidden group">
-
-                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
-                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.4rem] overflow-hidden">
-                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
-                                                    <div
-                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
-                                                        style={{
-                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
-                                                        }}
-                                                    />
-                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
-                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
-                                                </div>
-
-
-                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Academics</p>
-
-                                                <div className="space-y-3.5 relative z-10">
-                                                    {/* Assignment MODULE */}
-                                                    <button
-                                                        onClick={() => handleNavigation('/Assignments')}
+                                                        onClick={() => handleNavigation('/assignments')}
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
                                                             <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <FileText size={20} />
                                                             </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Assignments</span>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Assignment</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
 
-                                                    {/* Performance MODULE */}
+                                                    {/* My Subjects Module */}
                                                     <button
-                                                        onClick={() => handleNavigation('/performance')}
+                                                        onClick={() => handleNavigation('/my-subjects')}
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <BookOpenCheck size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">My Subjects</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Library Module */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/library')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Book size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Library</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 px-5">
+                                            <div className="relative bg-white rounded-[2.4rem] p-3.5 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.4rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Examination Hub</p>
+
+                                                <div className="space-y-3.5 relative z-10">
+                                                    {/* Datesheet MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/exam-datesheet')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Calendar size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Date Sheet</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Admit Card MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/exam-admit-card')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <ClipboardCheck size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Admit Card</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Results MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/exam-results')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <BarChart3 size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Results</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Performance MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/exam-performance')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <TrendingUp size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Performance</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
-                                                    {/* Exam module */}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 px-5">
+                                            <div className="relative bg-white rounded-[2.4rem] p-3.5 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.4rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Campus & Support</p>
+
+                                                <div className="space-y-3.5 relative z-10">
+                                                    {/* Fees MODULE */}
                                                     <button
-                                                        onClick={() => handleNavigation('/exams')}
+                                                        onClick={() => handleNavigation('/fees')}
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                                <GraduationCap size={20} />
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <CreditCard size={20} />
                                                             </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Exams</span>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Fees</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
-                                                    {/* Library module */}
+                                                    {/* Bus Tracker MODULE */}
                                                     <button
-                                                        onClick={() => handleNavigation('/library')}
+                                                        onClick={() => handleNavigation('/bus-tracker')}
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
-                                                                <Book size={20} />
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Bus size={20} />
                                                             </div>
-                                                            <span className="font-bold text-slate-700 text-[15px] italic">Library</span>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Bus Tracker</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Leave Request MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/leave-request')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <ClipboardList size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Leave Request</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Mentorship MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/mentorship')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Users size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Mentorship</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 px-5">
+                                            <div className="relative bg-white rounded-[2.4rem] p-3.5 shadow-md border border-slate-100 overflow-hidden group">
+
+                                                {/* --- SNAKE PERIMETER ANIMATION (Precision Border Only) --- */}
+                                                <div className="absolute inset-0 pointer-events-none z-0 rounded-[2.4rem] overflow-hidden">
+                                                    {/* Rotating Gradient (Sirf kinaro par dikhega) */}
+                                                    <div
+                                                        className="absolute inset-[-100%] animate-[snake-rotate_4s_linear_infinite]"
+                                                        style={{
+                                                            background: 'conic-gradient(from 0deg, transparent 0%, #ef4444 25%, transparent 50%, #ef4444 75%, transparent 100%)',
+                                                        }}
+                                                    />
+                                                    {/* Inner Mask (Isne beech ka color chupa diya taaki sirf border bache) */}
+                                                    <div className="absolute inset-[2px] bg-white rounded-[2.4rem] z-10" />
+                                                </div>
+
+                                                <p className="text-[15px] font-bold text-slate-400 uppercase tracking-widest mb-3.5 ml-2 italic text-left relative z-10">Communication & Updates</p>
+
+                                                <div className="space-y-3.5 relative z-10">
+                                                    {/* Notices MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/notices')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Megaphone size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Notices</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                   {/* ERP Notices MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/erp-notices')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Bell size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">ERP Notices</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Holidays MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/holidays')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Calendar size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Holidays</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* Feedback MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/feedback')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <MessageSquare size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Feedback</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
@@ -495,7 +647,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <PlusCircle size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Assignments</span>
@@ -508,7 +660,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Layers size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Syllabus</span>
@@ -558,7 +710,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <CalendarDays size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Schedule</span>
@@ -571,7 +723,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Video size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Live class</span>
@@ -621,7 +773,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Megaphone size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Notice feed</span>
@@ -634,7 +786,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <MessageCircle size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Support center</span>
@@ -701,7 +853,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Users size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">User Control</span>
@@ -750,10 +902,24 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Database size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Edit Timetable</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+
+                                                    {/* datesheet MODULE */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/admin/datesheet')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Calendar size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Datesheet</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
@@ -799,7 +965,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <ClipboardList size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Notice Archive</span>
@@ -888,7 +1054,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <ShieldCheck size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Payment Gateway</span>
@@ -938,7 +1104,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         className="w-full flex items-center justify-between group/item"
                                                     >
                                                         <div className="flex items-center gap-4 text-left">
-                                                            <div className="bg-blue-50 text-blue-500 p-3 rounded-2xl border border-blue-100 group-hover/item:scale-110 transition-all">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
                                                                 <Users size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Fees Tracker</span>
