@@ -105,4 +105,53 @@ router.post('/save-manual', protect, adminOnly, async (req, res) => {
     }
 });
 
+// 3. STUDENT: Fetch Datesheet for their specific class
+router.get('/my-datesheet', protect, async (req, res) => {
+    try {
+        const studentGrade = req.user.grade;
+        
+        if (!studentGrade) {
+            return res.status(400).json({ message: "Student grade configuration missing." });
+        }
+
+        // DYNAMIC SCHOOL NAME FETCHING
+        const School = require('../models/School');
+        const schoolDoc = await School.findById(req.user.schoolId);
+        const schoolName = schoolDoc ? schoolDoc.schoolName : "EduFlowAI Public School";
+
+        // '.lean()' use kiya hai taaki Mongoose document normal JSON object ban jaye
+        let datesheets = await Datesheet.find({
+            schoolId: req.user.schoolId,
+            classes: studentGrade.toUpperCase()
+        }).lean().sort({ createdAt: -1 });
+
+        // Har datesheet payload mein schoolName attach kar do
+        datesheets = datesheets.map(ds => ({ ...ds, schoolName }));
+
+        res.json(datesheets);
+    } catch (error) {
+        res.status(500).json({ message: "Neural Link Error: Failed to fetch datesheet." });
+    }
+});
+
+// 4. ADMIN: Fetch all published datesheets (AI & Manual)
+router.get('/all', protect, adminOnly, async (req, res) => {
+    try {
+        const datesheets = await Datesheet.find({ schoolId: req.user.schoolId }).sort({ createdAt: -1 });
+        res.json(datesheets);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch datesheets." });
+    }
+});
+
+// 5. ADMIN: Delete a specific datesheet
+router.delete('/:id', protect, adminOnly, async (req, res) => {
+    try {
+        await Datesheet.findByIdAndDelete(req.params.id);
+        res.json({ message: "Datesheet deleted permanently." });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete datesheet." });
+    }
+});
+
 module.exports = router;

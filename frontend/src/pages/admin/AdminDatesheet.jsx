@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckSquare, Upload, Zap, Printer, ChevronDown, Check, FileUp, AlertTriangle, FileCheck } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckSquare, Upload, Zap, Printer, ChevronDown, Check, FileUp, AlertTriangle, FileCheck, List, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 import Toast from '../../components/Toast';
@@ -9,7 +9,7 @@ const AdminDatesheet = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showToast, setShowToast] = useState({ show: false, message: '', type: '' });
-    
+
     // UI States
     const [activeTab, setActiveTab] = useState('ai'); // 'ai' or 'manual'
     const [publishConfirmModal, setPublishConfirmModal] = useState({ show: false, type: '' }); // type: 'ai' or 'manual'
@@ -18,7 +18,7 @@ const AdminDatesheet = () => {
     const [availableClasses, setAvailableClasses] = useState([]);
     const [isClassOpen, setIsClassOpen] = useState(false);
     const [isManualClassOpen, setIsManualClassOpen] = useState(false);
-    
+
     // AI Form States
     const [isStartDateOpen, setIsStartDateOpen] = useState(false);
     const [isResultDateOpen, setIsResultDateOpen] = useState(false);
@@ -27,7 +27,9 @@ const AdminDatesheet = () => {
     const [isFromAmPmOpen, setIsFromAmPmOpen] = useState(false);
     const [startViewDate, setStartViewDate] = useState(new Date());
     const [resultViewDate, setResultViewDate] = useState(new Date());
-    
+    const [viewMode, setViewMode] = useState('create');
+    const [publishedList, setPublishedList] = useState([]);
+
     const startCalendarRef = useRef(null);
     const resultCalendarRef = useRef(null);
     const fromAmPmRef = useRef(null);
@@ -129,6 +131,27 @@ const AdminDatesheet = () => {
         }
     };
 
+    const fetchPublishedList = async () => {
+        try {
+            const { data } = await API.get('/datesheet/all');
+            setPublishedList(data);
+        } catch (err) {
+            triggerToast("Failed to load uploaded datesheets", "error");
+        }
+    };
+
+    const handleDeleteDatesheet = async (id) => {
+        if (!window.confirm("Are you sure? This will remove it from Student Dashboards!")) return;
+
+        try {
+            await API.delete(`/datesheet/${id}`);
+            triggerToast("Datesheet Deleted! 🗑️", "success");
+            fetchPublishedList(); // List ko refresh karne ke liye
+        } catch (err) {
+            triggerToast("Failed to delete.", "error");
+        }
+    };
+
     // AI Generation
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -141,22 +164,22 @@ const AdminDatesheet = () => {
             const combinedTiming = `${formData.fromTime} ${formData.fromAmPm} - ${formData.toTime} ${formData.toAmPm}`;
             const payload = { ...formData, timing: combinedTiming };
             const { data } = await API.post('/datesheet/generate-preview', payload);
-            
+
             setGeneratedSchedule(data.schedule);
-            if(data.schoolName) setCurrentSchoolName(data.schoolName);
+            if (data.schoolName) setCurrentSchoolName(data.schoolName);
             triggerToast("Datesheet Generated Successfully! ✨", "success");
-        } catch (err) { triggerToast(err.response?.data?.message || "Generation failed.", "error"); } 
+        } catch (err) { triggerToast(err.response?.data?.message || "Generation failed.", "error"); }
         finally { setLoading(false); }
     };
 
-  // PUBLISH LOGIC (Triggered from Modal)
+    // PUBLISH LOGIC (Triggered from Modal)
     const executePublish = async () => {
         setLoading(true);
         try {
             if (publishConfirmModal.type === 'ai') {
                 const combinedTiming = `${formData.fromTime} ${formData.fromAmPm} - ${formData.toTime} ${formData.toAmPm}`;
                 await API.post('/datesheet/save', { ...formData, timing: combinedTiming, schedule: generatedSchedule });
-                
+
                 // --- RESET AI FORM & PREVIEW ---
                 setFormData({
                     title: '', classes: [], startDate: '', gapDays: '',
@@ -164,10 +187,10 @@ const AdminDatesheet = () => {
                     resultDate: '', notes: '', signatures: { incharge: '', principal: '' }
                 });
                 setGeneratedSchedule(null); // Preview close karega aur wapas form par layega
-                
+
             } else {
                 await API.post('/datesheet/save-manual', manualData);
-                
+
                 // --- RESET MANUAL FORM ---
                 setManualData({
                     title: '', classes: [], fileData: ''
@@ -176,7 +199,7 @@ const AdminDatesheet = () => {
 
             setPublishConfirmModal({ show: false, type: '' });
             triggerToast("Published Officially to Students! 🚀", "success");
-            
+
             // Redirection HATA diya yahan se. Ab admin usi page par rahega.
 
         } catch (err) {
@@ -209,16 +232,28 @@ const AdminDatesheet = () => {
 
             <div className="px-5 -mt-10 relative z-20 space-y-8 max-w-6xl mx-auto">
 
+                {/* --- UPLOADED MANAGE BUTTON (RIGHT CORNER) --- */}
+                {!generatedSchedule && (
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={() => navigate('/admin/manage-datesheets')}
+                            className="bg-white border border-slate-200 text-[#42A5F5] px-6 py-3 rounded-[2rem] font-black uppercase tracking-widest text-[12px] shadow-sm hover:bg-blue-50 hover:border-blue-200 transition-all flex items-center gap-2"
+                        >
+                            Manage Uploaded
+                        </button>
+                    </div>
+                )}
+
                 {/* --- TOGGLE TABS (RESPONSIVE FIX) --- */}
                 {!generatedSchedule && (
                     <div className="flex gap-2 md:gap-4 mb-6 bg-white p-2 rounded-[2.5rem] shadow-md w-full max-w-md mx-auto border border-[#DDE3EA]">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('ai')}
                             className={`flex-1 px-2 md:px-8 py-3 rounded-[2rem] text-[10px] md:text-sm font-black uppercase tracking-widest transition-all text-center ${activeTab === 'ai' ? 'bg-[#42A5F5] text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                         >
                             AI Generator
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('manual')}
                             className={`flex-1 px-2 md:px-8 py-3 rounded-[2rem] text-[10px] md:text-sm font-black uppercase tracking-widest transition-all text-center ${activeTab === 'manual' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                         >
@@ -244,7 +279,7 @@ const AdminDatesheet = () => {
                                 <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Classes</label>
                                 <div className="relative">
                                     <button type="button" onClick={() => setIsClassOpen(!isClassOpen)} className="w-full flex items-center justify-between bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold text-slate-700 outline-none transition-all">
-                                        <span>{formData.classes.length > 0 ? `${formData.classes.length} Classes Selected` : 'Select Classes from Dropdown'}</span>
+                                        <span>{formData.classes.length === availableClasses.length && availableClasses.length > 0 ? 'ALL CLASSES SELECTED' : formData.classes.length > 0 ? `${formData.classes.length} Classes Selected` : 'Select Classes from Dropdown'}</span>
                                         <ChevronDown size={20} className={`text-[#42A5F5] transition-transform ${isClassOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
@@ -343,7 +378,7 @@ const AdminDatesheet = () => {
                                         )}
                                     </AnimatePresence>
                                 </div>
-                                
+
                                 <div>
                                     <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Gap Days (Excl. Sunday)</label>
                                     <input type="number" min="0" placeholder="e.g. 1" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold outline-none focus:border-[#42A5F5]" value={formData.gapDays} onChange={(e) => setFormData({ ...formData, gapDays: e.target.value })} required />
@@ -431,7 +466,7 @@ const AdminDatesheet = () => {
                                 <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Classes</label>
                                 <div className="relative">
                                     <button type="button" onClick={() => setIsManualClassOpen(!isManualClassOpen)} className="w-full flex items-center justify-between bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 font-bold text-indigo-900 outline-none transition-all">
-                                        <span>{manualData.classes.length > 0 ? `${manualData.classes.length} Classes Selected` : 'Select Classes from Dropdown'}</span>
+                                        <span>{manualData.classes.length === availableClasses.length && availableClasses.length > 0 ? 'ALL CLASSES SELECTED' : manualData.classes.length > 0 ? `${manualData.classes.length} Classes Selected` : 'Select Classes from Dropdown'}</span>
                                         <ChevronDown size={20} className={`text-indigo-500 transition-transform ${isManualClassOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
@@ -459,7 +494,7 @@ const AdminDatesheet = () => {
                             <div className="border-2 border-dashed border-indigo-200 rounded-[3.5rem] p-10 min-h-[350px] flex flex-col items-center justify-center bg-indigo-50/30 transition-all hover:bg-indigo-50/50">
                                 {manualData.fileData ? (
                                     <div className="relative flex flex-col items-center justify-center w-full animate-in fade-in zoom-in duration-300">
-                                        
+
                                         {/* Smart Check: Image Preview vs PDF Icon */}
                                         {manualData.fileData.includes('application/pdf') ? (
                                             <div className="bg-white p-8 rounded-[2rem] shadow-lg border border-indigo-100 flex flex-col items-center justify-center mb-6 w-64 h-64">
@@ -475,8 +510,8 @@ const AdminDatesheet = () => {
                                             </div>
                                         )}
 
-                                        <button 
-                                            onClick={() => setManualData({...manualData, fileData: ''})} 
+                                        <button
+                                            onClick={() => setManualData({ ...manualData, fileData: '' })}
                                             className="px-6 py-3 bg-red-50 text-red-500 rounded-[1.5rem] font-black text-[13px] uppercase tracking-[0.1em] hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 flex items-center gap-2"
                                         >
                                             Remove Document
@@ -489,24 +524,24 @@ const AdminDatesheet = () => {
                                         </div>
                                         <h3 className="font-black text-slate-700 text-xl mb-2 capitalize">Upload Datesheet</h3>
                                         <p className="font-bold text-slate-400 mb-8 text-[13px] uppercase tracking-widest">Select Image (JPG/PNG) or PDF</p>
-                                        
+
                                         {/* Custom styled file input button */}
                                         <label className="cursor-pointer bg-indigo-500 text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
                                             Browse Files
-                                            <input 
-                                                type="file" 
-                                                accept="image/*,application/pdf" 
-                                                onChange={handleManualFileUpload} 
-                                                className="hidden" 
+                                            <input
+                                                type="file"
+                                                accept="image/*,application/pdf"
+                                                onChange={handleManualFileUpload}
+                                                className="hidden"
                                             />
                                         </label>
                                     </div>
                                 )}
                             </div>
 
-                            <button 
+                            <button
                                 onClick={() => {
-                                    if(!manualData.title || manualData.classes.length === 0 || !manualData.fileData) return triggerToast("Fill all fields & upload file! ⚠️", "error");
+                                    if (!manualData.title || manualData.classes.length === 0 || !manualData.fileData) return triggerToast("Fill all fields & upload file! ⚠️", "error");
                                     setPublishConfirmModal({ show: true, type: 'manual' });
                                 }}
                                 className="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
@@ -527,7 +562,9 @@ const AdminDatesheet = () => {
                                 {currentSchoolName || "EDULFLOWAI PUBLIC SCHOOL"}
                             </h1>
                             <h2 className="text-xl font-bold uppercase text-slate-800 mb-1">{formData.title}</h2>
-                            <h3 className="text-lg font-bold uppercase text-slate-700">Date Sheet</h3>
+                            <h3 className="text-lg font-bold uppercase text-slate-700">
+                                Date Sheet - {formData.classes.length === availableClasses.length ? 'ALL CLASSES' : `Class ${formData.classes.join(', ')}`}
+                            </h3>
                         </div>
 
                         <div className="overflow-x-auto mb-8">

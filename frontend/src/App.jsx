@@ -38,6 +38,7 @@ import AddTeacher from './pages/AddTeacher';
 import ClassDiary from './pages/ClassDiary';
 import LeaveRequest from './pages/LeaveRequest';
 import StudentSyllabus from './pages/student/StudentSyllabus';
+import StudentDatesheet from './pages/student/StudentDatesheet';
 // import AdminFees from './pages/AdminFees';
 import LeaveReview from './pages/LeaveReview';
 import StudentAssignments from './pages/StudentAssignments';
@@ -57,6 +58,7 @@ import StudentDetail from './pages/StudentDetail'; // Day 87: New Deep Analytics
 import StudentLeaveHistory from './pages/StudentLeaveHistory';
 import MySubjects from './pages/student/MySubjects'; // Import karo
 import AdminDatesheet from './pages/admin/AdminDatesheet';
+import AdminManageDatesheets from './pages/admin/AdminManageDatesheets';
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -445,6 +447,7 @@ function App() {
           <Route path="/admin/add-student" element={<AddStudent />} />
           <Route path="/admin/add-teacher" element={<AddTeacher />} />
           <Route path="/admin/datesheet" element={<AdminDatesheet user={user} />} />
+          <Route path="/admin/manage-datesheets" element={<AdminManageDatesheets />} />
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />
@@ -467,6 +470,7 @@ function App() {
           <Route path="/student/leave-history" element={<StudentLeaveHistory />} />
           <Route path="/my-subjects" element={<MySubjects user={user} />} />
           <Route path="/syllabus" element={<StudentSyllabus user={user} />} />
+          <Route path="/exam-datesheet" element={<StudentDatesheet user={user} />} />
 
           <Route path="/feedback" element={<Feedback />} />
 
