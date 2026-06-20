@@ -86,6 +86,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <MessageCircle size={20} />, label: 'Support', color: 'text-neon', path: '/teacher/support' },
         { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
+        { icon: <Calendar size={20} />, label: 'Date Sheet', color: 'text-[#42A5F5]', path:'/teacher/datesheet' },
 
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
@@ -560,7 +561,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>
-                                                   {/* ERP Notices MODULE */}
+                                                    {/* ERP Notices MODULE */}
                                                     <button
                                                         onClick={() => handleNavigation('/erp-notices')}
                                                         className="w-full flex items-center justify-between group/item"
@@ -664,6 +665,19 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                                                 <Layers size={20} />
                                                             </div>
                                                             <span className="font-bold text-slate-700 text-[15px] italic">Syllabus</span>
+                                                        </div>
+                                                        <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
+                                                    </button>
+                                                    {/* DATE SHEET UPLOAD */}
+                                                    <button
+                                                        onClick={() => handleNavigation('/teacher/datesheet')}
+                                                        className="w-full flex items-center justify-between group/item"
+                                                    >
+                                                        <div className="flex items-center gap-4 text-left">
+                                                            <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 group-hover/item:scale-110 transition-all">
+                                                                <Calendar size={20} />
+                                                            </div>
+                                                            <span className="font-bold text-slate-700 text-[15px] italic">Date Sheet</span>
                                                         </div>
                                                         <ChevronRight size={20} className="text-black group-hover/item:translate-x-1 transition-transform" />
                                                     </button>

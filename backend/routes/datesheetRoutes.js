@@ -154,4 +154,26 @@ router.delete('/:id', protect, adminOnly, async (req, res) => {
     }
 });
 
+// 6. TEACHER: Fetch all published datesheets for the school with identity population
+router.get('/teacher-datesheets', protect, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        const schoolDoc = await School.findById(req.user.schoolId);
+        const schoolName = schoolDoc ? schoolDoc.schoolName : "EduFlowAI Public School";
+
+        // School ki saari current exam schedules fetch karo
+        let datesheets = await Datesheet.find({
+            schoolId: req.user.schoolId
+        }).lean().sort({ createdAt: -1 });
+
+        // Document matrices mein object parameters append karo
+        datesheets = datesheets.map(ds => ({ ...ds, schoolName }));
+
+        res.json(datesheets);
+    } catch (error) {
+        res.status(500).json({ message: "Neural Link Error: Failed to fetch institutional schedules." });
+    }
+});
+
+
 module.exports = router;

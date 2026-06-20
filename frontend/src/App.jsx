@@ -59,6 +59,7 @@ import StudentLeaveHistory from './pages/StudentLeaveHistory';
 import MySubjects from './pages/student/MySubjects'; // Import karo
 import AdminDatesheet from './pages/admin/AdminDatesheet';
 import AdminManageDatesheets from './pages/admin/AdminManageDatesheets';
+import TeacherDatesheet from './pages/teacher/TeacherDatesheet';
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -488,6 +489,7 @@ function App() {
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus user={user} />} />
           <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
+          <Route path="/teacher/datesheet" element={<TeacherDatesheet />} />
 
           {/* --- FINANCE MODULE ROUTES --- */}
           <Route path="/finance/dashboard" element={<FinanceDashboard searchQuery={searchQuery} />} />
