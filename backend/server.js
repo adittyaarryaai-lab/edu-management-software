@@ -21,11 +21,12 @@ const superAdminRoutes = require('./routes/superAdminRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const technicalRoutes = require('./routes/technicalRoutes');
 const homeworkRoutes = require('./routes/homeworkRoutes');
-const feeNoticeRoutes = require('./routes/feeNoticeRoutes'); // 👈 Naya Import
+const feeNoticeRoutes = require('./routes/feeNoticeRoutes'); 
 const leaveRoutes = require('./routes/leaveRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const examSyllabusRoutes = require('./routes/examSyllabusRoutes');
 const datesheetRoutes = require('./routes/datesheetRoutes');
+const admitCardRoutes = require('./routes/admitCardRoutes');
 
 dotenv.config();
 
@@ -83,6 +84,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/leaves', require('./routes/leaveRoutes'));
 app.use('/api/exam-syllabus', examSyllabusRoutes);
 app.use('/api/datesheet', datesheetRoutes);
+app.use('/api/admitcard', admitCardRoutes);
 app.get('/', (req, res) => {
     res.send('EduFlowAI API is running...');
 });

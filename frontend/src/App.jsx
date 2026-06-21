@@ -60,6 +60,9 @@ import MySubjects from './pages/student/MySubjects'; // Import karo
 import AdminDatesheet from './pages/admin/AdminDatesheet';
 import AdminManageDatesheets from './pages/admin/AdminManageDatesheets';
 import TeacherDatesheet from './pages/teacher/TeacherDatesheet';
+import AdminSchoolLogo from './pages/admin/AdminSchoolLogo';
+import AdminAdmitCard from './pages/admin/AdminAdmitCard';
+import AdminManageAdmitCards from './pages/admin/AdminManageAdmitCards';
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -449,6 +452,9 @@ function App() {
           <Route path="/admin/add-teacher" element={<AddTeacher />} />
           <Route path="/admin/datesheet" element={<AdminDatesheet user={user} />} />
           <Route path="/admin/manage-datesheets" element={<AdminManageDatesheets />} />
+          <Route path="/admin/school-logo" element={<AdminSchoolLogo />} />
+          <Route path="/admin/admit-card" element={<AdminAdmitCard />} />
+          <Route path="/admin/manage-admit-cards" element={<AdminManageAdmitCards />} />
 
           {/* Academic & Feature Routes */}
           <Route path="/assignments" element={<StudentAssignments user={user} />} />

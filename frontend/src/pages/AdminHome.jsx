@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot, Activity, BarChart3, ClipboardList, Zap, FileText, Download,Calendar, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Users, CreditCard, Megaphone, PlusCircle, Database, X, Bot,ClipboardCheck, Activity, BarChart3, ClipboardList, Zap, FileText, Download, Calendar, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -12,6 +12,23 @@ const AdminHome = ({ searchQuery }) => {
     const [isFinance, setIsFinance] = useState(false);
     const [msg, setMsg] = useState('');
     const [liveStats, setLiveStats] = useState({ students: 0, teachers: 0, fees: 0 });
+    // 1. Naya State (Add with other states)
+    const [hasLogo, setHasLogo] = useState(false);
+
+    // 2. Apne existing useEffect ke andar ya alag se ye chalwa de (Add around line 45)
+    useEffect(() => {
+        checkLogoStatus();
+    }, []);
+
+    // 3. Status fetch karne ka logic (Add before return)
+    const checkLogoStatus = async () => {
+        try {
+            const { data } = await API.get('/school/logo');
+            setHasLogo(!!data.logo); // Agar logo database mein hoga toh true, nahi toh false
+        } catch (err) {
+            console.log("Failed to verify institutional logo status.");
+        }
+    };
 
     useEffect(() => {
         const fetchLiveStats = async () => {
@@ -136,36 +153,43 @@ const AdminHome = ({ searchQuery }) => {
     };
 
     const adminStats = [
-    { 
-        label: 'Total students', 
-        value: liveStats.students.toLocaleString(), 
-        icon: <Users size={20} /> 
-    },
-    { 
-        label: 'Total teachers', 
-        value: liveStats.teachers.toLocaleString(), 
-        icon: <Bot size={20} /> 
-    },
-    { 
-        label: 'Fees collected', 
-        value: `₹${liveStats.fees >= 100000 
-            ? (liveStats.fees / 100000).toFixed(1) + 'L' 
-            : liveStats.fees.toLocaleString()}`, 
-        icon: <Activity size={20} /> 
-    },
-];
+        {
+            label: 'Total students',
+            value: liveStats.students.toLocaleString(),
+            icon: <Users size={20} />
+        },
+        {
+            label: 'Total teachers',
+            value: liveStats.teachers.toLocaleString(),
+            icon: <Bot size={20} />
+        },
+        {
+            label: 'Fees collected',
+            value: `₹${liveStats.fees >= 100000
+                ? (liveStats.fees / 100000).toFixed(1) + 'L'
+                : liveStats.fees.toLocaleString()}`,
+            icon: <Activity size={20} />
+        },
+    ];
 
     const managementModules = [
-    { id: 'add-student', title: 'Add student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-    { id: 'add-staff', title: 'Manage staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-indigo-50 text-indigo-500 border-indigo-100' },
-    { id: 'attendance-report', title: 'Student performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-50 text-cyan-500 border-cyan-100' },
-    { id: 'notice', title: 'Publish notice', icon: <Megaphone size={24} />, desc: 'Send notice to all', color: 'bg-orange-50 text-orange-500 border-orange-100' },
-    { id: 'notice-feed', title: 'Notice archive', icon: <ClipboardList size={24} />, desc: 'Manage & delete notices', color: 'bg-rose-50 text-rose-500 border-rose-100' },
-    { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-    { id: 'edit-timetable', title: 'Edit timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-50 text-rose-500 border-rose-100' },
-    { id: 'datesheet-engine', title: 'Generate datesheet', icon: <Calendar size={24} />, desc: 'Exam scheduler', color: 'bg-violet-50 text-violet-500 border-violet-100' },
-    { id: 'manage-users', title: 'Manage student and teacher', icon: <Users size={24} />, desc: 'Edit or Delete personnel', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
-];
+        { id: 'add-student', title: 'Add student', icon: <PlusCircle size={24} />, desc: 'Enroll new students', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+        { id: 'add-staff', title: 'Manage staff', icon: <Users size={24} />, desc: 'Assign roles & classes', color: 'bg-indigo-50 text-indigo-500 border-indigo-100' },
+        { id: 'attendance-report', title: 'Student performance', icon: <BarChart3 size={24} />, desc: 'Class wise performance', color: 'bg-cyan-50 text-cyan-500 border-cyan-100' },
+        { id: 'notice', title: 'Publish notice', icon: <Megaphone size={24} />, desc: 'Send notice to all', color: 'bg-orange-50 text-orange-500 border-orange-100' },
+        { id: 'notice-feed', title: 'Notice archive', icon: <ClipboardList size={24} />, desc: 'Manage & delete notices', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+        { id: 'timetable', title: 'Timetable', icon: <Database size={24} />, desc: 'Schedule all classes', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+        { id: 'edit-timetable', title: 'Edit timetable', icon: <Database size={24} />, desc: 'Modify existing schedules', color: 'bg-rose-50 text-rose-500 border-rose-100' },
+        { id: 'datesheet-engine', title: 'Generate datesheet', icon: <Calendar size={24} />, desc: 'Exam scheduler', color: 'bg-violet-50 text-violet-500 border-violet-100' },
+        { id: 'manage-users', title: 'Manage student and teacher', icon: <Users size={24} />, desc: 'Edit or Delete personnel', color: 'bg-blue-50 text-[#42A5F5] border-blue-100' },
+        { 
+    id: 'admit-card', // Is ID ke base pe navigate('/admin/admit-card') karwa liyo
+    title: 'Publish Admit Card ', 
+    icon: <ClipboardCheck size={24} />, 
+    desc: 'Exam hall tickets', 
+    color: 'bg-indigo-50 text-indigo-500 border-indigo-100' 
+},
+    ];
 
     return (
         <div className="px-5 -mt-24 space-y-6  relative z-10 font-sans italic">
@@ -233,49 +257,73 @@ const AdminHome = ({ searchQuery }) => {
 
             {/* Stats */}
             <div className="bg-white border border-slate-100 rounded-[3rem] p-8 shadow-2xl grid grid-cols-3 gap-4 ring-1 ring-slate-100">
-        {adminStats.map((stat, i) => (
-            <div key={i} className="text-center border-r last:border-0 border-slate-100 px-2">
-                <div className="flex justify-center text-[#42A5F5] mb-2">{stat.icon}</div>
-                <p className="text-[26px] font-black text-slate-800 leading-none tracking-tighter">
-                    {stat.value}
-                </p>
-                <p className="text-[15px] font-black text-slate-400 uppercase mt-2 tracking-widest leading-none">
-                    {stat.label}
-                </p>
+                {adminStats.map((stat, i) => (
+                    <div key={i} className="text-center border-r last:border-0 border-slate-100 px-2">
+                        <div className="flex justify-center text-[#42A5F5] mb-2">{stat.icon}</div>
+                        <p className="text-[26px] font-black text-slate-800 leading-none tracking-tighter">
+                            {stat.value}
+                        </p>
+                        <p className="text-[15px] font-black text-slate-400 uppercase mt-2 tracking-widest leading-none">
+                            {stat.label}
+                        </p>
+                    </div>
+                ))}
             </div>
-        ))}
-    </div>
 
             {/* Modules */}
             <div className="space-y-4">
-    <h3 className="text-[20px] font-black text-slate-900 uppercase tracking-[0.1em] ml-4 italic">Administrative panel</h3>
-    {managementModules
-        .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
-        .map((m, i) => (
-            <div key={i} onClick={() => {
-                if (m.id === 'manage-users') navigate('/admin/manage-users');
-                if (m.id === 'add-student') navigate('/admin/add-student');
-                if (m.id === 'add-staff') navigate('/admin/add-teacher');
-                if (m.id === 'timetable') navigate('/admin/timetable');
-                if (m.id === 'fees') navigate('/admin/fees');
-                if (m.id === 'attendance-report') navigate('/admin/attendance-report');
-                if (m.id === 'notice') navigate('/admin/global-notice');
-                if (m.id === 'notice-feed') navigate('/notice-feed');
-                if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
-                if (m.id === 'datesheet-engine') navigate('/admin/datesheet');
-            }} className="bg-white p-6 rounded-[2.5rem] border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group shadow-sm hover:shadow-md hover:border-blue-100">
-                <div className="flex items-center gap-5">
-                    <div className={`${m.color} p-4 rounded-2xl border transition-all`}>{m.icon}</div>
-                    <div>
-                        {/* Yahan se uppercase hata diya gaya hai */}
-                        <h4 className="font-black text-slate-700 text-[21px] leading-none italic tracking-tighter">{m.title}</h4>
-                        <p className="text-[16px] text-slate-400 mt-2 font-bold italic tracking-tighter leading-none">{m.desc}</p>
-                    </div>
+                <h3 className="text-[20px] font-black text-slate-900 uppercase tracking-[0.1em] ml-4 italic">Administrative panel</h3>
+                {/* --- DYNAMIC SCHOOL LOGO MANAGER BUTTON (RED / GREEN BLIP) --- */}
+                <div className="flex justify-center mt-4 mb-8">
+                    <button
+                        onClick={() => navigate('/admin/school-logo')}
+                        className={`border-2 px-8 py-3 rounded-full font-black uppercase tracking-widest text-[13px] shadow-sm active:scale-95 transition-all flex items-center gap-3 ${hasLogo
+                                ? 'bg-emerald-50/60 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 hover:shadow-emerald-100 hover:shadow-md'
+                                : 'bg-red-50/60 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 hover:shadow-red-100 hover:shadow-md'
+                            }`}
+                    >
+                        {/* Dynamic Icon Wrapper */}
+                        <span className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${hasLogo ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-500'
+                            }`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                <circle cx="9" cy="9" r="2" />
+                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                            </svg>
+                        </span>
+
+                        {/* Dynamic Text Indicator */}
+                        <span>{hasLogo ? 'School Logo Verified' : 'Upload School Logo'}</span>
+                    </button>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-full border border-slate-100 text-slate-300 group-hover:text-[#42A5F5] group-hover:bg-blue-50 transition-all"><PlusCircle size={20} /></div>
+                {managementModules
+                    .filter(m => m.title.toLowerCase().includes(searchQuery?.toLowerCase() || ''))
+                    .map((m, i) => (
+                        <div key={i} onClick={() => {
+                            if (m.id === 'manage-users') navigate('/admin/manage-users');
+                            if (m.id === 'add-student') navigate('/admin/add-student');
+                            if (m.id === 'add-staff') navigate('/admin/add-teacher');
+                            if (m.id === 'timetable') navigate('/admin/timetable');
+                            if (m.id === 'fees') navigate('/admin/fees');
+                            if (m.id === 'attendance-report') navigate('/admin/attendance-report');
+                            if (m.id === 'notice') navigate('/admin/global-notice');
+                            if (m.id === 'notice-feed') navigate('/notice-feed');
+                            if (m.id === 'edit-timetable') navigate('/admin/edit-timetable');
+                            if (m.id === 'datesheet-engine') navigate('/admin/datesheet');
+                            if (m.id === 'admit-card') navigate('/admin/admit-card');
+                        }} className="bg-white p-6 rounded-[2.5rem] border border-slate-50 flex items-center justify-between active:scale-[0.98] transition-all cursor-pointer group shadow-sm hover:shadow-md hover:border-blue-100">
+                            <div className="flex items-center gap-5">
+                                <div className={`${m.color} p-4 rounded-2xl border transition-all`}>{m.icon}</div>
+                                <div>
+                                    {/* Yahan se uppercase hata diya gaya hai */}
+                                    <h4 className="font-black text-slate-700 text-[21px] leading-none italic tracking-tighter">{m.title}</h4>
+                                    <p className="text-[16px] text-slate-400 mt-2 font-bold italic tracking-tighter leading-none">{m.desc}</p>
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-full border border-slate-100 text-slate-300 group-hover:text-[#42A5F5] group-hover:bg-blue-50 transition-all"><PlusCircle size={20} /></div>
+                        </div>
+                    ))}
             </div>
-        ))}
-</div>
 
             {/* System Status Footer */}
             <div className="bg-slate-800 rounded-[3.5rem] p-8 text-white shadow-2xl relative overflow-hidden ">

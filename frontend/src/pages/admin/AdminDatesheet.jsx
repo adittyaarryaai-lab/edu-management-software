@@ -222,7 +222,7 @@ const AdminDatesheet = () => {
                     </button>
                     <div className="text-center">
                         {/* Responsive Font Size for Header */}
-                        <h1 className="text-2xl md:text-4xl font-black italic tracking-tight capitalize">Datesheet Engine</h1>
+                        <h1 className="text-4xl md:text-4xl font-black italic tracking-tight capitalize">Datesheet Engine</h1>
                     </div>
                     <div className="p-2 md:p-3 bg-white/20 rounded-2xl border border-white/30 text-white shadow-sm">
                         <Zap size={24} />

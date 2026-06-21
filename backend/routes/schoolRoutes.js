@@ -113,4 +113,41 @@ router.get('/transactions', protect, adminOnly, async (req, res) => {
     }
 });
 
+// 1. GET SCHOOL LOGO
+router.get('/logo', protect, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        const school = await School.findById(req.user.schoolId).select('logo');
+        res.json({ logo: school?.logo || null });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch logo" });
+    }
+});
+
+// 2. UPDATE/UPLOAD SCHOOL LOGO
+router.post('/logo', protect, adminOnly, async (req, res) => {
+    try {
+        const { logoBase64 } = req.body;
+        if (!logoBase64) return res.status(400).json({ message: "No image provided" });
+
+        const School = require('../models/School');
+        await School.findByIdAndUpdate(req.user.schoolId, { logo: logoBase64 });
+        
+        res.json({ message: "Logo updated successfully!" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update logo" });
+    }
+});
+
+// 3. DELETE SCHOOL LOGO
+router.delete('/logo', protect, adminOnly, async (req, res) => {
+    try {
+        const School = require('../models/School');
+        await School.findByIdAndUpdate(req.user.schoolId, { $unset: { logo: 1 } });
+        res.json({ message: "Logo removed successfully!" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to remove logo" });
+    }
+});
+
 module.exports = router;
