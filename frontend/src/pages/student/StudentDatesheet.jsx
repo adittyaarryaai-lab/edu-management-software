@@ -421,10 +421,10 @@ const StudentDatesheet = ({ user }) => {
                 </AnimatePresence>
             </div>
 
-            {/* --- HIDDEN AI DATESHEET RENDERER (ONLY FOR PDF GENERATION) --- */}
+           {/* --- HIDDEN AI DATESHEET RENDERER (ONLY FOR PDF GENERATION) --- */}
             {selectedDatesheet && !selectedDatesheet.isManual && (currentView === 'download' || currentView === 'success') && (
                 <div className="h-0 w-0 overflow-hidden">
-                    
+
                     {/* WIDTH EXACTLY SET TO 680px (A4 SAFE PRINTABLE AREA) */}
                     <div id="ai-pdf-content" className="w-[680px] bg-[#ffffff] p-8 m-0 box-border mx-auto">
 
@@ -433,7 +433,9 @@ const StudentDatesheet = ({ user }) => {
                                 {selectedDatesheet.schoolName}
                             </h1>
                             <h2 className="text-xl font-bold uppercase text-[#1e293b] mb-1">{selectedDatesheet.title}</h2>
-                            <h3 className="text-lg font-bold uppercase text-[#334155]">Date Sheet For Class - {user.grade}</h3>
+                            <h3 className="text-lg font-bold uppercase text-[#334155]">
+                                Date Sheet For Class - {user.grade ? String(user.grade).split('-')[0].trim() : "N/A"}
+                            </h3>
                         </div>
 
                         {/* TABLE WRAPPER WITH PADDING TO PROTECT BORDER PIXELS */}
@@ -446,17 +448,34 @@ const StudentDatesheet = ({ user }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {selectedDatesheet.schedule.map((col, idx) => (
-                                        <tr key={idx} className="break-inside-avoid">
-                                            <td className="border-2 border-[#1e293b] p-3">
-                                                <div className="font-black whitespace-nowrap">{col.date}</div>
-                                                <div className="text-[#475569] font-semibold">{col.day}</div>
-                                            </td>
-                                            <td className="border-2 border-[#1e293b] p-3 capitalize text-lg">
-                                                {col.classExams[user.grade]}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {selectedDatesheet.schedule.map((col, idx) => {
+                                        // --- THE SMART SUBJECT MATCHER ---
+                                        const baseGrade = String(user.grade).split('-')[0].trim().toUpperCase();
+                                        let subject = "-";
+
+                                        if (col.classExams) {
+                                            // Pehle exact match (e.g., 9-A) check karega, phir base match (e.g., 9) check karega
+                                            subject = col.classExams[user.grade] || col.classExams[baseGrade] || "-";
+                                        }
+
+                                        // Skip missing or 'No Exam' cases perfectly for datesheet
+                                        if (!subject || subject === '-' || String(subject).toLowerCase() === 'no exam') {
+                                            subject = "NO EXAM";
+                                        }
+
+                                        return (
+                                            <tr key={idx} className="break-inside-avoid">
+                                                <td className="border-2 border-[#1e293b] p-3">
+                                                    <div className="font-black whitespace-nowrap">{col.date}</div>
+                                                    <div className="text-[#475569] font-semibold">{col.day}</div>
+                                                </td>
+                                                <td className="border-2 border-[#1e293b] p-3 capitalize text-lg font-black">
+                                                    {/* YAHAN FIX KIYA HAI: text-slate-400 ki jagah text-[#94a3b8] lagaya */}
+                                                    {subject === "NO EXAM" ? <span className="text-[#94a3b8] italic font-bold">No Exam</span> : subject}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

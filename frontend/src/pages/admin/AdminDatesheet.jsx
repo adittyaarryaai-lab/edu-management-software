@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckSquare, Upload, Zap, Printer, ChevronDown, Check, FileUp, AlertTriangle, FileCheck, List, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckSquare, Upload, Zap, Printer, ChevronDown, Check, FileUp, AlertTriangle, FileCheck, List, Trash2, Plus, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../api';
 import Toast from '../../components/Toast';
@@ -12,12 +12,11 @@ const AdminDatesheet = () => {
 
     // UI States
     const [activeTab, setActiveTab] = useState('ai'); // 'ai' or 'manual'
-    const [publishConfirmModal, setPublishConfirmModal] = useState({ show: false, type: '' }); // type: 'ai' or 'manual'
+    const [publishConfirmModal, setPublishConfirmModal] = useState({ show: false, type: '' });
 
     // Dropdown & Calendar States
     const [availableClasses, setAvailableClasses] = useState([]);
     const [isClassOpen, setIsClassOpen] = useState(false);
-    const [isManualClassOpen, setIsManualClassOpen] = useState(false);
 
     // AI Form States
     const [isStartDateOpen, setIsStartDateOpen] = useState(false);
@@ -27,13 +26,18 @@ const AdminDatesheet = () => {
     const [isFromAmPmOpen, setIsFromAmPmOpen] = useState(false);
     const [startViewDate, setStartViewDate] = useState(new Date());
     const [resultViewDate, setResultViewDate] = useState(new Date());
-    const [viewMode, setViewMode] = useState('create');
     const [publishedList, setPublishedList] = useState([]);
 
     const startCalendarRef = useRef(null);
     const resultCalendarRef = useRef(null);
     const fromAmPmRef = useRef(null);
     const toAmPmRef = useRef(null);
+
+    // NEW REFS FOR CUSTOM MANUAL DROPDOWNS
+    const manualDateCalendarRef = useRef(null);
+    const manualClassSelectRef = useRef(null);
+    const manualSubjectSelectRef = useRef(null);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -44,10 +48,23 @@ const AdminDatesheet = () => {
         resultDate: '', notes: '', signatures: { incharge: '', principal: '' }
     });
 
-    // Manual Upload Form Data
-    const [manualData, setManualData] = useState({
-        title: '', classes: [], fileData: ''
+    // --- MANUAL WIZARD DATA & CUSTOM STATES ---
+    const [manualData, setManualData] = useState({ title: '', fileData: '' });
+    const [manualWizard, setManualWizard] = useState({
+        timing: '',
+        selectedClass: '',
+        selectedSubject: '',
+        examDate: '',
+        classSubjects: ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer'],
+        completedClasses: [],
+        masterSchedule: [] // Tracks matrix for Admit Card Engine
     });
+
+    // Custom UI States for Manual Wizard
+    const [isManualClassSelectOpen, setIsManualClassSelectOpen] = useState(false);
+    const [isManualSubjectOpen, setIsManualSubjectOpen] = useState(false);
+    const [isManualDateOpen, setIsManualDateOpen] = useState(false);
+    const [manualViewDate, setManualViewDate] = useState(new Date());
 
     const [generatedSchedule, setGeneratedSchedule] = useState(null);
     const [currentSchoolName, setCurrentSchoolName] = useState("EduFlowAI Public School");
@@ -75,6 +92,11 @@ const AdminDatesheet = () => {
             if (resultCalendarRef.current && !resultCalendarRef.current.contains(e.target)) setIsResultDateOpen(false);
             if (fromAmPmRef.current && !fromAmPmRef.current.contains(e.target)) setIsFromAmPmOpen(false);
             if (toAmPmRef.current && !toAmPmRef.current.contains(e.target)) setIsToAmPmOpen(false);
+
+            // Ref checks for Custom Manual Wizard
+            if (manualDateCalendarRef.current && !manualDateCalendarRef.current.contains(e.target)) setIsManualDateOpen(false);
+            if (manualClassSelectRef.current && !manualClassSelectRef.current.contains(e.target)) setIsManualClassSelectOpen(false);
+            if (manualSubjectSelectRef.current && !manualSubjectSelectRef.current.contains(e.target)) setIsManualSubjectOpen(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -83,9 +105,28 @@ const AdminDatesheet = () => {
     const fetchClasses = async () => {
         try {
             const { data } = await API.get('/notices/meta/classes');
-            const sorted = data.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+            // Remove sections and duplicates
+            const baseClassesOnly = [...new Set(data.map(cls => String(cls).split('-')[0].trim()))];
+            const sorted = baseClassesOnly.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
             setAvailableClasses(sorted);
-        } catch (err) { triggerToast("Failed to fetch classes", "error"); }
+        } catch (err) {
+            triggerToast("Failed to fetch classes", "error");
+        }
+    };
+
+    // Fetches Real Subjects when Manual Class is selected
+    const handleManualClassSelect = async (cls) => {
+        setManualWizard(prev => ({ ...prev, selectedClass: cls, selectedSubject: '', examDate: '', classSubjects: [] }));
+        if (!cls) return;
+
+        try {
+            const { data } = await API.get(`/datesheet/class-subjects/${cls}`);
+            setManualWizard(prev => ({ ...prev, classSubjects: data }));
+        } catch (err) {
+            setManualWizard(prev => ({ ...prev, classSubjects: ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi'] }));
+        }
     };
 
     const triggerToast = (msg, type = "success") => {
@@ -93,7 +134,6 @@ const AdminDatesheet = () => {
         setTimeout(() => setShowToast({ show: false, message: '', type: '' }), 3000);
     };
 
-    // Class Selection Toggles
     const toggleClassAI = (cls) => {
         setFormData(prev => ({
             ...prev, classes: prev.classes.includes(cls) ? prev.classes.filter(c => c !== cls) : [...prev.classes, cls]
@@ -103,16 +143,6 @@ const AdminDatesheet = () => {
         setFormData(prev => ({ ...prev, classes: prev.classes.length === availableClasses.length ? [] : [...availableClasses] }));
     };
 
-    const toggleClassManual = (cls) => {
-        setManualData(prev => ({
-            ...prev, classes: prev.classes.includes(cls) ? prev.classes.filter(c => c !== cls) : [...prev.classes, cls]
-        }));
-    };
-    const handleSelectAllManual = () => {
-        setManualData(prev => ({ ...prev, classes: prev.classes.length === availableClasses.length ? [] : [...availableClasses] }));
-    };
-
-    // File Uploads
     const handleSignatureUpload = (e, type) => {
         const file = e.target.files[0];
         if (file) {
@@ -131,24 +161,93 @@ const AdminDatesheet = () => {
         }
     };
 
-    const fetchPublishedList = async () => {
-        try {
-            const { data } = await API.get('/datesheet/all');
-            setPublishedList(data);
-        } catch (err) {
-            triggerToast("Failed to load uploaded datesheets", "error");
+    // --- MANUAL WIZARD FUNCTIONS ---
+    // Computed array of BASE CLASSES ONLY (e.g. 9-A -> 9) excluding already completed classes AND the currently selected class
+    const baseClassesForManual = [...new Set(availableClasses.map(c => c.split('-')[0].trim()))]
+        .filter(c => !manualWizard.completedClasses.includes(c) && c !== manualWizard.selectedClass);
+
+    const handleManualAddSubject = () => {
+        if (!manualWizard.selectedClass || !manualWizard.selectedSubject || !manualWizard.examDate) {
+            return triggerToast("Please select Subject and Exam Date first!", "error");
         }
+
+        const dateObj = new Date(manualWizard.examDate);
+        const formattedDate = dateObj.toLocaleDateString('en-GB').replace(/\//g, '-');
+        const dayName = dateObj.toLocaleDateString('en-GB', { weekday: 'long' });
+
+        setManualWizard(prev => {
+            const updatedSchedule = [...prev.masterSchedule];
+            let dateRow = updatedSchedule.find(r => r.date === formattedDate);
+            if (!dateRow) {
+                dateRow = { date: formattedDate, day: dayName, classExams: {} };
+                updatedSchedule.push(dateRow);
+            }
+            dateRow.classExams[prev.selectedClass] = prev.selectedSubject;
+
+            return {
+                ...prev,
+                masterSchedule: updatedSchedule,
+                classSubjects: prev.classSubjects.filter(s => s !== prev.selectedSubject),
+                selectedSubject: '',
+                examDate: ''
+            };
+        });
+        triggerToast("Subject scheduled!", "success");
     };
 
-    const handleDeleteDatesheet = async (id) => {
-        if (!window.confirm("Are you sure? This will remove it from Student Dashboards!")) return;
+    const handleManualClassDone = () => {
+        setManualWizard(prev => ({
+            ...prev,
+            completedClasses: [...prev.completedClasses, prev.selectedClass],
+            selectedClass: '',
+            classSubjects: ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer']
+        }));
+        triggerToast("Class schedule locked!", "success");
+    };
 
+    // --- NEW: EDIT COMPLETED CLASS LOGIC (SMART SUBJECT FILTERING) ---
+    const handleEditCompletedClass = async (cls) => {
         try {
-            await API.delete(`/datesheet/${id}`);
-            triggerToast("Datesheet Deleted! 🗑️", "success");
-            fetchPublishedList(); // List ko refresh karne ke liye
+            // 1. Asli subjects fetch karo backend se
+            const { data } = await API.get(`/datesheet/class-subjects/${cls}`);
+
+            setManualWizard(prev => {
+                // 2. Check karo ki is class ke kitne subjects ALREADY schedule ho chuke hain datesheet mein
+                const scheduledSubjects = prev.masterSchedule
+                    .filter(row => row.classExams[cls])
+                    .map(row => row.classExams[cls]);
+
+                // 3. Jo schedule ho chuke hain, unko total subjects mein se hata do (Filter)
+                const remainingSubjects = data.filter(s => !scheduledSubjects.includes(s));
+
+                return {
+                    ...prev,
+                    selectedClass: cls,
+                    selectedSubject: '',
+                    examDate: '',
+                    classSubjects: remainingSubjects, // Ab dropdown mein SIRF BACHE HUE subjects aayenge!
+                    completedClasses: prev.completedClasses.filter(c => c !== cls)
+                };
+            });
         } catch (err) {
-            triggerToast("Failed to delete.", "error");
+            // Agar API fail ho jaye toh default subjects par same logic lagao
+            setManualWizard(prev => {
+                const fallbackSubjects = ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer'];
+                const scheduledSubjects = prev.masterSchedule
+                    .filter(row => row.classExams[cls])
+                    .map(row => row.classExams[cls]);
+
+                const remainingSubjects = fallbackSubjects.filter(s => !scheduledSubjects.includes(s));
+
+                return {
+                    ...prev,
+                    selectedClass: cls,
+                    selectedSubject: '',
+                    examDate: '',
+                    classSubjects: remainingSubjects,
+                    completedClasses: prev.completedClasses.filter(c => c !== cls)
+                };
+            });
         }
     };
 
@@ -172,7 +271,7 @@ const AdminDatesheet = () => {
         finally { setLoading(false); }
     };
 
-    // PUBLISH LOGIC (Triggered from Modal)
+    // PUBLISH LOGIC
     const executePublish = async () => {
         setLoading(true);
         try {
@@ -180,28 +279,33 @@ const AdminDatesheet = () => {
                 const combinedTiming = `${formData.fromTime} ${formData.fromAmPm} - ${formData.toTime} ${formData.toAmPm}`;
                 await API.post('/datesheet/save', { ...formData, timing: combinedTiming, schedule: generatedSchedule });
 
-                // --- RESET AI FORM & PREVIEW ---
                 setFormData({
                     title: '', classes: [], startDate: '', gapDays: '',
                     fromTime: '', fromAmPm: 'AM', toTime: '', toAmPm: 'PM',
                     resultDate: '', notes: '', signatures: { incharge: '', principal: '' }
                 });
-                setGeneratedSchedule(null); // Preview close karega aur wapas form par layega
+                setGeneratedSchedule(null);
 
             } else {
-                await API.post('/datesheet/save-manual', manualData);
+                const payload = {
+                    title: manualData.title,
+                    fileData: manualData.fileData,
+                    classes: manualWizard.completedClasses,
+                    timing: manualWizard.timing,
+                    schedule: manualWizard.masterSchedule
+                };
+                await API.post('/datesheet/save-manual', payload);
 
-                // --- RESET MANUAL FORM ---
-                setManualData({
-                    title: '', classes: [], fileData: ''
+                setManualData({ title: '', fileData: '' });
+                setManualWizard({
+                    timing: '', selectedClass: '', selectedSubject: '', examDate: '',
+                    classSubjects: ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi', 'Computer'],
+                    completedClasses: [], masterSchedule: []
                 });
             }
 
             setPublishConfirmModal({ show: false, type: '' });
             triggerToast("Published Officially to Students! 🚀", "success");
-
-            // Redirection HATA diya yahan se. Ab admin usi page par rahega.
-
         } catch (err) {
             setPublishConfirmModal({ show: false, type: '' });
             triggerToast("Publish failed.", "error");
@@ -209,11 +313,11 @@ const AdminDatesheet = () => {
             setLoading(false);
         }
     };
+
     return (
         <div className="min-h-screen bg-[#F8FAFC] pb-24 font-sans italic text-slate-800 text-[15px] overflow-x-hidden fixed inset-0 overflow-y-auto">
             {showToast.show && <Toast message={showToast.message} type={showToast.type} onClose={() => setShowToast({ show: false, message: '', type: '' })} />}
 
-            {/* Header */}
             {/* Header */}
             <div className="bg-[#42A5F5] text-white px-6 pt-12 pb-24 rounded-b-[4rem] shadow-lg relative overflow-hidden">
                 <div className="flex justify-between items-center gap-2 relative z-10">
@@ -221,7 +325,6 @@ const AdminDatesheet = () => {
                         <ArrowLeft size={24} />
                     </button>
                     <div className="text-center">
-                        {/* Responsive Font Size for Header */}
                         <h1 className="text-4xl md:text-4xl font-black italic tracking-tight capitalize">Datesheet Engine</h1>
                     </div>
                     <div className="p-2 md:p-3 bg-white/20 rounded-2xl border border-white/30 text-white shadow-sm">
@@ -232,7 +335,7 @@ const AdminDatesheet = () => {
 
             <div className="px-5 -mt-10 relative z-20 space-y-8 max-w-6xl mx-auto">
 
-                {/* --- UPLOADED MANAGE BUTTON (RIGHT CORNER) --- */}
+                {/* Manage Button */}
                 {!generatedSchedule && (
                     <div className="flex justify-end mb-4">
                         <button
@@ -244,7 +347,7 @@ const AdminDatesheet = () => {
                     </div>
                 )}
 
-                {/* --- TOGGLE TABS (RESPONSIVE FIX) --- */}
+                {/* Toggle Tabs */}
                 {!generatedSchedule && (
                     <div className="flex gap-2 md:gap-4 mb-6 bg-white p-2 rounded-[2.5rem] shadow-md w-full max-w-md mx-auto border border-[#DDE3EA]">
                         <button
@@ -257,7 +360,7 @@ const AdminDatesheet = () => {
                             onClick={() => setActiveTab('manual')}
                             className={`flex-1 px-2 md:px-8 py-3 rounded-[2rem] text-[10px] md:text-sm font-black uppercase tracking-widest transition-all text-center ${activeTab === 'manual' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
                         >
-                            Manual Upload
+                            Manual Generate
                         </button>
                     </div>
                 )}
@@ -265,16 +368,15 @@ const AdminDatesheet = () => {
                 {/* --- TAB 1: AI GENERATOR --- */}
                 {activeTab === 'ai' && !generatedSchedule && (
                     <motion.form initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleGenerate} className="bg-white rounded-[3.5rem] p-8 shadow-2xl border border-[#DDE3EA]">
-                        {/* Same AI Form Code ... */}
                         <div className="space-y-6">
                             {/* Exam Title */}
                             <div>
                                 <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Exam Datesheet Heading</label>
-                                <input type="text" placeholder="e.g. MID TERM EXAMINATION JUNE / JULY" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200 text-[16px] font-bold outline-none focus:border-[#42A5F5] uppercase"
+                                <input type="text" placeholder="e.g. MID TERM EXAMINATION" className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200 text-[16px] font-bold outline-none focus:border-[#42A5F5] uppercase"
                                     value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
                             </div>
 
-                            {/* Animated Class Dropdown */}
+                            {/* Animated Class Dropdown AI */}
                             <div>
                                 <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Classes</label>
                                 <div className="relative">
@@ -304,7 +406,6 @@ const AdminDatesheet = () => {
 
                             {/* Calendars & Gaps */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Exct same start/result/gap fields from previous code */}
                                 <div className="relative" ref={startCalendarRef}>
                                     <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Exam Starting Date</label>
                                     <button type="button" onClick={() => { setIsStartDateOpen(!isStartDateOpen); setIsResultDateOpen(false); }} className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold text-left">{formData.startDate || "Select Date"}</button>
@@ -312,9 +413,7 @@ const AdminDatesheet = () => {
                                         {isStartDateOpen && (
                                             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-3 bg-white border border-[#DDE3EA] rounded-[2.5rem] shadow-2xl p-5">
                                                 <div className="flex justify-between items-center mb-4">
-                                                    {(startViewDate.getMonth() !== today.getMonth() || startViewDate.getFullYear() !== today.getFullYear()) ? (
-                                                        <button type="button" onClick={() => setStartViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="font-black text-slate-700">←</button>
-                                                    ) : (<div className="w-6"></div>)}
+                                                    <button type="button" onClick={() => setStartViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="font-black text-slate-700">←</button>
                                                     <span className="font-black text-[#42A5F5]">{startViewDate.toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
                                                     <button type="button" onClick={() => setStartViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} className="font-black text-slate-700">→</button>
                                                 </div>
@@ -328,8 +427,7 @@ const AdminDatesheet = () => {
                                                     for (let i = 0; i < startDay; i++) { days.push(<div key={i}></div>); }
                                                     for (let day = 1; day <= lastDate; day++) {
                                                         const tempDate = new Date(year, month, day); tempDate.setHours(0, 0, 0, 0);
-                                                        const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
-                                                        const isPast = isCurrentMonth && tempDate < today;
+                                                        const isPast = tempDate < today;
                                                         const formatted = tempDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
                                                         days.push(
                                                             <button type="button" key={day} disabled={isPast} onClick={() => { if (isPast) return; setFormData({ ...formData, startDate: formatted }); setIsStartDateOpen(false); }} className={`p-2 rounded-xl text-[13px] font-black ${isPast ? "opacity-20 cursor-not-allowed" : "text-slate-600 hover:bg-blue-100"}`}>{day}</button>
@@ -347,11 +445,9 @@ const AdminDatesheet = () => {
                                     <button type="button" onClick={() => { setIsResultDateOpen(!isResultDateOpen); setIsStartDateOpen(false); }} className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200 font-bold text-left">{formData.resultDate || "Select Date"}</button>
                                     <AnimatePresence>
                                         {isResultDateOpen && (
-                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-3 bg-white border border-[#DDE3EA] rounded-[2.5rem] shadow-2xl p-5">
+                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-3 bg-white border border-[#DDE3EA] rounded-[2.5rem) shadow-2xl p-5">
                                                 <div className="flex justify-between items-center mb-4">
-                                                    {(resultViewDate.getMonth() !== today.getMonth() || resultViewDate.getFullYear() !== today.getFullYear()) ? (
-                                                        <button type="button" onClick={() => setResultViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="font-black text-slate-700">←</button>
-                                                    ) : (<div className="w-6"></div>)}
+                                                    <button type="button" onClick={() => setResultViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="font-black text-slate-700">←</button>
                                                     <span className="font-black text-[#42A5F5]">{resultViewDate.toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
                                                     <button type="button" onClick={() => setResultViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} className="font-black text-slate-700">→</button>
                                                 </div>
@@ -365,8 +461,7 @@ const AdminDatesheet = () => {
                                                     for (let i = 0; i < startDay; i++) { days.push(<div key={i}></div>); }
                                                     for (let day = 1; day <= lastDate; day++) {
                                                         const tempDate = new Date(year, month, day); tempDate.setHours(0, 0, 0, 0);
-                                                        const isCurrentMonth = month === today.getMonth() && year === today.getFullYear();
-                                                        const isPast = isCurrentMonth && tempDate < today;
+                                                        const isPast = tempDate < today;
                                                         const formatted = tempDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
                                                         days.push(
                                                             <button type="button" key={day} disabled={isPast} onClick={() => { if (isPast) return; setFormData({ ...formData, resultDate: formatted }); setIsResultDateOpen(false); }} className={`p-2 rounded-xl text-[13px] font-black ${isPast ? "opacity-20 cursor-not-allowed" : "text-slate-600 hover:bg-blue-100"}`}>{day}</button>
@@ -447,116 +542,263 @@ const AdminDatesheet = () => {
                     </motion.form>
                 )}
 
-                {/* --- TAB 2: MANUAL UPLOAD --- */}
+                {/* --- TAB 2: MANUAL UPLOAD & WIZARD --- */}
                 {activeTab === 'manual' && !generatedSchedule && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-[3.5rem] p-8 shadow-2xl border border-indigo-100">
                         <h2 className="text-2xl font-black text-indigo-900 mb-6 flex items-center gap-2">
-                            <FileUp className="text-indigo-500" /> Upload Existing Datesheet
+                            <FileUp className="text-indigo-500" /> Upload & Setup Admit Card Matrix
                         </h2>
 
                         <div className="space-y-6">
-                            <div>
-                                <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Exam Datesheet Heading</label>
-                                <input type="text" placeholder="e.g. MID TERM EXAMINATION JUNE / JULY" className="w-full bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 text-[16px] font-bold outline-none focus:border-indigo-400 uppercase"
-                                    value={manualData.title} onChange={(e) => setManualData({ ...manualData, title: e.target.value })} />
-                            </div>
-
-                            {/* Dropdown for Manual */}
-                            <div>
-                                <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Classes</label>
-                                <div className="relative">
-                                    <button type="button" onClick={() => setIsManualClassOpen(!isManualClassOpen)} className="w-full flex items-center justify-between bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 font-bold text-indigo-900 outline-none transition-all">
-                                        <span>{manualData.classes.length === availableClasses.length && availableClasses.length > 0 ? 'ALL CLASSES SELECTED' : manualData.classes.length > 0 ? `${manualData.classes.length} Classes Selected` : 'Select Classes from Dropdown'}</span>
-                                        <ChevronDown size={20} className={`text-indigo-500 transition-transform ${isManualClassOpen ? 'rotate-180' : ''}`} />
-                                    </button>
-
-                                    <AnimatePresence>
-                                        {isManualClassOpen && (
-                                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-2 bg-white border border-indigo-100 rounded-3xl shadow-2xl p-4 max-h-72 overflow-y-auto">
-                                                <button type="button" onClick={handleSelectAllManual} className="w-full mb-3 bg-indigo-50 text-indigo-600 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-100 transition-all">
-                                                    {manualData.classes.length === availableClasses.length ? 'Deselect All' : 'Select All Classes'}
-                                                </button>
-                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                    {availableClasses.map(cls => (
-                                                        <button key={cls} type="button" onClick={() => toggleClassManual(cls)} className={`flex justify-between items-center px-4 py-3 rounded-xl font-bold transition-all ${manualData.classes.includes(cls) ? 'bg-indigo-500 text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600'}`}>
-                                                            Class {cls} {manualData.classes.includes(cls) && <Check size={16} />}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Datesheet Title</label>
+                                    <input type="text" placeholder="e.g. HALF YEARLY EXAM" className="w-full bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 text-[16px] font-bold outline-none focus:border-indigo-400 uppercase"
+                                        value={manualData.title} onChange={(e) => setManualData({ ...manualData, title: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="text-[13px] font-black text-slate-500 uppercase ml-2 mb-2 block tracking-widest">Timing</label>
+                                    <input type="text" placeholder="e.g. 09:00 AM - 12:30 PM" className="w-full bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 text-[16px] font-bold outline-none focus:border-indigo-400 uppercase"
+                                        value={manualWizard.timing} onChange={(e) => setManualWizard({ ...manualWizard, timing: e.target.value })} />
                                 </div>
                             </div>
 
-                            {/* File Upload Box */}
-                            {/* Premium File Upload Box */}
-                            <div className="border-2 border-dashed border-indigo-200 rounded-[3.5rem] p-10 min-h-[350px] flex flex-col items-center justify-center bg-indigo-50/30 transition-all hover:bg-indigo-50/50">
-                                {manualData.fileData ? (
-                                    <div className="relative flex flex-col items-center justify-center w-full animate-in fade-in zoom-in duration-300">
+                            {/* THE NEW SMART WIZARD FOR ADMIT CARDS WITH CUSTOM DROPDOWNS */}
+                            <div className="bg-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100 space-y-4">
+                                <h3 className="font-black uppercase tracking-widest text-indigo-400 text-sm mb-2 border-b border-indigo-100 pb-2">Subject Mapping Wizard</h3>
 
-                                        {/* Smart Check: Image Preview vs PDF Icon */}
-                                        {manualData.fileData.includes('application/pdf') ? (
-                                            <div className="bg-white p-8 rounded-[2rem] shadow-lg border border-indigo-100 flex flex-col items-center justify-center mb-6 w-64 h-64">
-                                                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
-                                                    <FileCheck size={40} className="text-emerald-500" />
-                                                </div>
-                                                <p className="font-black text-slate-700 text-lg uppercase tracking-widest text-center">PDF Ready</p>
-                                                <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider text-center">Document Verified</p>
-                                            </div>
-                                        ) : (
-                                            <div className="bg-white p-4 rounded-[2rem] shadow-lg border border-indigo-100 mb-6 inline-block">
-                                                <img src={manualData.fileData} alt="Preview" className="max-h-64 object-contain rounded-2xl" />
-                                            </div>
-                                        )}
+                                {/* --- NEW: INTERACTIVE COMPLETED CLASSES LIST --- */}
+                                {manualWizard.completedClasses.length > 0 && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 mb-4">
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2"><CheckCircle2 size={14} className="text-emerald-500" /> Locked Classes (Click to Edit)</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {manualWizard.completedClasses.map(cls => (
+                                                <button key={cls} type="button" onClick={() => handleEditCompletedClass(cls)} className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full font-bold text-xs shadow-sm hover:bg-emerald-100 transition-all">
+                                                    Class {cls} <List size={14} />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
 
-                                        <button
-                                            onClick={() => setManualData({ ...manualData, fileData: '' })}
-                                            className="px-6 py-3 bg-red-50 text-red-500 rounded-[1.5rem] font-black text-[13px] uppercase tracking-[0.1em] hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95 flex items-center gap-2"
-                                        >
-                                            Remove Document
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                                    {/* Custom Manual Class Dropdown */}
+                                    <div className="relative" ref={manualClassSelectRef}>
+                                        <button type="button" onClick={() => setIsManualClassSelectOpen(!isManualClassSelectOpen)} className="w-full flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 font-bold outline-none uppercase text-sm text-slate-700">
+                                            <span>{manualWizard.selectedClass ? `Class ${manualWizard.selectedClass}` : 'Select Class'}</span>
+                                            <ChevronDown size={18} className={`text-indigo-500 transition-transform ${isManualClassSelectOpen ? 'rotate-180' : ''}`} />
                                         </button>
+                                        <AnimatePresence>
+                                            {isManualClassSelectOpen && (
+                                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 max-h-60 overflow-y-auto">
+                                                    <div className="flex flex-col gap-2">
+                                                        {baseClassesForManual.map(c => (
+                                                            <button key={c} type="button" onClick={() => { handleManualClassSelect(c); setIsManualClassSelectOpen(false); }} className={`text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${manualWizard.selectedClass === c ? 'bg-indigo-500 text-white' : 'hover:bg-slate-50 text-slate-700'}`}>
+                                                                Class {c}
+                                                            </button>
+                                                        ))}
+                                                        {baseClassesForManual.length === 0 && manualWizard.completedClasses.length > 0 && <p className="text-xs text-center text-slate-400 p-2">All classes mapped. Edit locked classes if needed.</p>}
+                                                        {baseClassesForManual.length === 0 && manualWizard.completedClasses.length === 0 && <p className="text-xs text-center text-slate-400 p-2">No classes found</p>}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                    {/* Custom Manual Subject Dropdown */}
+                                    <div className="relative" ref={manualSubjectSelectRef}>
+                                        <button type="button" disabled={!manualWizard.selectedClass} onClick={() => setIsManualSubjectOpen(!isManualSubjectOpen)} className={`w-full flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 font-bold outline-none uppercase text-sm ${!manualWizard.selectedClass ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-700'}`}>
+                                            <span className="truncate">{manualWizard.selectedSubject || 'Select Subject'}</span>
+                                            <ChevronDown size={18} className={`text-indigo-500 transition-transform ${isManualSubjectOpen ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        <AnimatePresence>
+                                            {isManualSubjectOpen && (
+                                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 max-h-60 overflow-y-auto">
+                                                    <div className="flex flex-col gap-2">
+                                                        {manualWizard.classSubjects.map(s => (
+                                                            <button key={s} type="button" onClick={() => { setManualWizard({ ...manualWizard, selectedSubject: s }); setIsManualSubjectOpen(false); }} className={`text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${manualWizard.selectedSubject === s ? 'bg-indigo-500 text-white' : 'hover:bg-slate-50 text-slate-700'}`}>
+                                                                {s}
+                                                            </button>
+                                                        ))}
+                                                        {manualWizard.classSubjects.length === 0 && <p className="text-xs text-center text-slate-400 p-2">No subjects left</p>}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                    {/* Custom Manual Exam Date Calendar */}
+                                    <div className="relative" ref={manualDateCalendarRef}>
+                                        <button type="button" disabled={!manualWizard.selectedSubject} onClick={() => setIsManualDateOpen(!isManualDateOpen)} className={`w-full bg-white p-4 rounded-xl border border-slate-200 font-bold text-left text-sm ${!manualWizard.selectedSubject ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-700'}`}>
+                                            {manualWizard.examDate || "Select Exam Date"}
+                                        </button>
+                                        <AnimatePresence>
+                                            {isManualDateOpen && (
+                                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="absolute z-50 right-0 min-w-[280px] mt-2 bg-white border border-[#DDE3EA] rounded-2xl shadow-2xl p-4">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <button type="button" onClick={() => setManualViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="font-black text-slate-700 px-2 py-1">←</button>
+                                                        <span className="font-black text-indigo-500 text-sm">{manualViewDate.toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
+                                                        <button type="button" onClick={() => setManualViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} className="font-black text-slate-700 px-2 py-1">→</button>
+                                                    </div>
+                                                    <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
+                                                        {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (<span key={d}>{d}</span>))}
+                                                    </div>
+                                                    {(() => {
+                                                        const year = manualViewDate.getFullYear(); const month = manualViewDate.getMonth(); const firstDay = new Date(year, month, 1); const lastDate = new Date(year, month + 1, 0).getDate();
+                                                        let startDay = firstDay.getDay(); startDay = startDay === 0 ? 6 : startDay - 1;
+
+                                                        // --- SMART DATE BLOCKER LOGIC (RESET FOR NEW CLASS) ---
+                                                        let minAllowedDate = new Date();
+                                                        minAllowedDate.setHours(0, 0, 0, 0); // Default constraint: Today
+                                                        
+                                                        if (manualWizard.selectedClass) {
+                                                            // Find ONLY the dates already scheduled for the CURRENTLY selected class
+                                                            const scheduledDatesForCurrentClass = manualWizard.masterSchedule
+                                                                .filter(row => row.classExams[manualWizard.selectedClass])
+                                                                .map(row => {
+                                                                    const [d, m, y] = row.date.split('-');
+                                                                    return new Date(y, m - 1, d).getTime();
+                                                                });
+                                                            
+                                                            // Apply the blocking logic ONLY IF the current class has scheduled subjects
+                                                            if (scheduledDatesForCurrentClass.length > 0) {
+                                                                const latestExamTime = Math.max(...scheduledDatesForCurrentClass);
+                                                                minAllowedDate = new Date(latestExamTime);
+                                                                minAllowedDate.setDate(minAllowedDate.getDate() + 1); // Force next day
+                                                                minAllowedDate.setHours(0,0,0,0);
+                                                            }
+                                                        }
+
+                                                        const days = [];
+                                                        for (let i = 0; i < startDay; i++) { days.push(<div key={`empty-${i}`}></div>); }
+                                                        
+                                                        for (let day = 1; day <= lastDate; day++) {
+                                                            const tempDate = new Date(year, month, day); tempDate.setHours(0, 0, 0, 0);
+                                                            
+                                                            // 1. Block past dates AND dates before the minimum allowed date for THIS class
+                                                            const isPastOrBlocked = tempDate < minAllowedDate;
+                                                            
+                                                            // 2. Block ALL Sundays permanently
+                                                            const isSunday = tempDate.getDay() === 0;
+                                                            
+                                                            // 3. Highlight dates occupied by OTHER classes (just a visual dot, NOT blocked)
+                                                            const formattedTemp = tempDate.toLocaleDateString('en-GB').replace(/\//g, '-');
+                                                            const isDateOccupiedByOtherClass = manualWizard.masterSchedule.some(row => row.date === formattedTemp && !row.classExams[manualWizard.selectedClass]);
+
+                                                            // The date is locked IF it's past/blocked OR if it's a Sunday
+                                                            const isLocked = isPastOrBlocked || isSunday;
+                                                            const formattedDateValue = tempDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+                                                            
+                                                            days.push(
+                                                                <button type="button" key={day} disabled={isLocked} onClick={() => { if (isLocked) return; setManualWizard({ ...manualWizard, examDate: formattedDateValue }); setIsManualDateOpen(false); }} className={`p-1.5 rounded-lg text-[13px] font-black transition-all relative ${isLocked ? "opacity-20 cursor-not-allowed bg-slate-100 text-slate-400" : "text-slate-600 hover:bg-indigo-100"}`}>
+                                                                    {/* Shows a tiny dot if another class has an exam on this date, so admin knows it's a busy day */}
+                                                                    {isDateOccupiedByOtherClass && !isLocked && <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>}
+                                                                    {day}
+                                                                </button>
+                                                            );
+                                                        }
+                                                        return <div className="grid grid-cols-7 gap-1">{days}</div>;
+                                                    })()}
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                </div>
+
+                                {/* --- LIVE SCHEDULED SUBJECTS LIST --- */}
+                                {manualWizard.selectedClass && manualWizard.masterSchedule.filter(row => row.classExams[manualWizard.selectedClass]).length > 0 && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-4 rounded-[1rem] border border-indigo-100 shadow-sm mt-4 space-y-2">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-2">
+                                            Scheduled for Class {manualWizard.selectedClass}
+                                        </p>
+                                        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                            {manualWizard.masterSchedule
+                                                .filter(row => row.classExams[manualWizard.selectedClass])
+                                                .map((row, idx) => (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                                                        key={idx}
+                                                        className="flex justify-between items-center bg-indigo-50/50 px-4 py-3 rounded-xl border border-indigo-50/80"
+                                                    >
+                                                        <span className="font-bold text-[14px] text-indigo-900 capitalize">
+                                                            {row.classExams[manualWizard.selectedClass]}
+                                                        </span>
+                                                        <div className="text-right flex items-center gap-2">
+                                                            <div>
+                                                                <span className="block text-[12px] font-black text-indigo-500">{row.date}</span>
+                                                                <span className="block text-[10px] font-bold text-slate-400 uppercase">{row.day}</span>
+                                                            </div>
+                                                            {/* BONUS: Delete function for subject */}
+                                                            <button type="button" onClick={() => {
+                                                                const subToDelete = row.classExams[manualWizard.selectedClass];
+                                                                setManualWizard(prev => ({
+                                                                    ...prev,
+                                                                    masterSchedule: prev.masterSchedule.map(r => r.date === row.date ? { ...r, classExams: Object.fromEntries(Object.entries(r.classExams).filter(([k]) => k !== manualWizard.selectedClass)) } : r).filter(r => Object.keys(r.classExams).length > 0),
+                                                                    classSubjects: [subToDelete, ...prev.classSubjects].sort()
+                                                                }));
+                                                            }} className="p-1.5 text-red-300 hover:text-red-500 transition-all"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                <div className="flex gap-4 pt-4">
+                                    <button type="button" onClick={handleManualAddSubject} className="flex-1 py-3 bg-slate-900 text-white font-black uppercase tracking-widest rounded-xl hover:bg-[#42A5F5] transition-all text-xs shadow-md">
+                                        + Add Subject
+                                    </button>
+                                    {manualWizard.selectedClass && (
+                                        <button type="button" onClick={handleManualClassDone} className="flex-1 py-3 bg-emerald-500 text-white font-black uppercase tracking-widest rounded-xl shadow-md text-xs hover:bg-emerald-600">
+                                            Done for Class {manualWizard.selectedClass}
+                                        </button>
+                                    )}
+                                </div>
+
+                            </div>
+
+                            {/* Premium File Upload Box */}
+                            <div className="border-2 border-dashed border-indigo-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center bg-white transition-all hover:bg-indigo-50/20">
+                                {manualData.fileData ? (
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-3 shadow-inner">
+                                            <FileCheck size={32} className="text-emerald-500" />
+                                        </div>
+                                        <p className="font-black text-slate-700 uppercase tracking-widest">Document Ready</p>
+                                        <button onClick={() => setManualData({ ...manualData, fileData: '' })} className="mt-4 px-4 py-2 bg-red-50 text-red-500 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Remove</button>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center w-full">
-                                        <div className="w-28 h-28 bg-indigo-100 rounded-[2.5rem] flex items-center justify-center mb-6 shadow-inner rotate-3 hover:rotate-0 transition-transform duration-300">
-                                            <FileUp size={48} className="text-indigo-500" />
-                                        </div>
-                                        <h3 className="font-black text-slate-700 text-xl mb-2 capitalize">Upload Datesheet</h3>
-                                        <p className="font-bold text-slate-400 mb-8 text-[13px] uppercase tracking-widest">Select Image (JPG/PNG) or PDF</p>
-
-                                        {/* Custom styled file input button */}
-                                        <label className="cursor-pointer bg-indigo-500 text-white px-10 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-                                            Browse Files
-                                            <input
-                                                type="file"
-                                                accept="image/*,application/pdf"
-                                                onChange={handleManualFileUpload}
-                                                className="hidden"
-                                            />
+                                    <div className="flex flex-col items-center">
+                                        <FileUp size={40} className="text-indigo-300 mb-3" />
+                                        <label className="cursor-pointer bg-indigo-500 text-white px-8 py-3 rounded-[1.5rem] font-black uppercase tracking-widest shadow-md hover:bg-indigo-600 transition-all text-xs">
+                                            Attach PDF/Image
+                                            <input type="file" accept="image/*,application/pdf" onChange={handleManualFileUpload} className="hidden" />
                                         </label>
                                     </div>
                                 )}
                             </div>
 
                             <button
-                                onClick={() => {
-                                    if (!manualData.title || manualData.classes.length === 0 || !manualData.fileData) return triggerToast("Fill all fields & upload file! ⚠️", "error");
-                                    setPublishConfirmModal({ show: true, type: 'manual' });
-                                }}
-                                className="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                                disabled={!(manualData.title.trim() !== '' && manualWizard.timing.trim() !== '' && manualWizard.completedClasses.length > 0 && manualData.fileData !== '')}
+                                onClick={() => setPublishConfirmModal({ show: true, type: 'manual' })}
+                                className={`w-full py-6 rounded-[2.5rem] font-black uppercase tracking-[0.2em] shadow-xl transition-all flex items-center justify-center gap-2 ${(manualData.title.trim() !== '' && manualWizard.timing.trim() !== '' && manualWizard.completedClasses.length > 0 && manualData.fileData !== '')
+                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95'
+                                    : 'bg-slate-200 text-slate-400 cursor-not-allowed opacity-70 shadow-none'
+                                    }`}
                             >
-                                <Upload size={24} /> Publish Publicly
+                                <Upload size={24} /> Publish Students
                             </button>
                         </div>
                     </motion.div>
                 )}
 
 
-                {/* --- GENERATED AI PREVIEW SECTION (INVERTED MATRIX) --- */}
+                {/* --- GENERATED AI PREVIEW SECTION --- */}
                 {generatedSchedule && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-[1rem] p-8 shadow-2xl border border-slate-800 print:shadow-none print:border-none print:p-0">
-                        {/* Excatly Same Generated UI as Before */}
+                        {/* Same UI as existing preview */}
                         <div className="text-center mb-8 border-b-2 border-slate-800 pb-6">
                             <h1 className="text-3xl font-black uppercase text-slate-900 tracking-wider mb-2">
                                 {currentSchoolName || "EDULFLOWAI PUBLIC SCHOOL"}
@@ -630,11 +872,10 @@ const AdminDatesheet = () => {
                                 Discard
                             </button>
                         </div>
-
                     </motion.div>
                 )}
 
-                {/* --- CONFIRMATION MODAL (For both AI and Manual Publish) --- */}
+                {/* --- CONFIRMATION MODAL --- */}
                 <AnimatePresence>
                     {publishConfirmModal.show && (
                         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
@@ -647,7 +888,6 @@ const AdminDatesheet = () => {
                                 <p className="text-slate-500 font-bold mb-8 leading-relaxed">
                                     Are you sure you want to publish this {publishConfirmModal.type === 'ai' ? 'Generated' : 'Manual'} Datesheet to students?
                                 </p>
-
                                 <div className="flex gap-4">
                                     <button disabled={loading} onClick={executePublish} className="flex-1 bg-[#42A5F5] text-white py-4 rounded-[2rem] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all flex justify-center items-center">
                                         {loading ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : "Yes, Publish"}

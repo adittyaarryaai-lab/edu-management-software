@@ -3,27 +3,26 @@ const router = express.Router();
 const Datesheet = require('../models/Datesheet');
 const Timetable = require('../models/Timetable');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
-
-// The Auto-Generation Engine
+// --- 1. THE AUTO-GENERATION ENGINE (UPDATED WITH SMART REGEX & SHUFFLE) ---
 router.post('/generate-preview', protect, adminOnly, async (req, res) => {
     try {
         const { title, classes, startDate, gapDays, timing, resultDate, notes, signatures } = req.body;
         const schoolId = req.user.schoolId;
 
-        // FETCH CURRENT SCHOOL NAME (FIXED: Using .schoolName instead of .name)
         const School = require('../models/School');
         const schoolDoc = await School.findById(schoolId);
-        
-        // YAHAN FIX KIYA HAI: schoolDoc.schoolName 
         const schoolName = schoolDoc ? schoolDoc.schoolName : "EduFlowAI Public School";
 
-        // Step 1: Har class ke timetable se subjects fetch karo
         const classSubjectsMap = {};
 
         for (let cls of classes) {
-            const timetable = await Timetable.findOne({ grade: cls.toUpperCase(), schoolId });
+            // SMART REGEX: Agar cls '9' hai, toh ye '9-A', '9-B' ya '9' sab check karega aur pehla uthayega
+            const timetable = await Timetable.findOne({ 
+                grade: new RegExp(`^${cls}(-[A-Za-z])?$`, 'i'), 
+                schoolId 
+            });
+            
             const subjectsSet = new Set();
-
             if (timetable) {
                 timetable.schedule.forEach(day => {
                     day.periods.forEach(p => {
@@ -36,6 +35,11 @@ router.post('/generate-preview', protect, adminOnly, async (req, res) => {
             if (subjectsArray.length === 0) {
                 subjectsArray = ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi'];
             }
+            
+            // --- SHUFFLE LOGIC ---
+            // Isse har class ka exam alag din hoga, ek line mein same subjects nahi aayenge
+            subjectsArray = subjectsArray.sort(() => Math.random() - 0.5);
+            
             classSubjectsMap[cls] = subjectsArray;
         }
 
@@ -56,7 +60,6 @@ router.post('/generate-preview', protect, adminOnly, async (req, res) => {
             let row = {
                 date: formattedDate,
                 day: dayName,
-                // Timing hٹا di hai table column se as requested
                 classExams: {}
             };
 
@@ -68,10 +71,37 @@ router.post('/generate-preview', protect, adminOnly, async (req, res) => {
             currentDate.setDate(currentDate.getDate() + gaps + 1);
         }
 
-        // Send schoolName along with schedule
         res.json({ schedule, schoolName });
     } catch (error) {
         res.status(500).json({ message: "Generation failed: " + error.message });
+    }
+});
+
+// --- 2. NAYA ROUTE: FETCH LIVE SUBJECTS FOR MANUAL WIZARD ---
+router.get('/class-subjects/:baseClass', protect, adminOnly, async (req, res) => {
+    try {
+        const baseClass = req.params.baseClass;
+        // Same Smart Regex Logic
+        const timetable = await Timetable.findOne({
+            schoolId: req.user.schoolId,
+            grade: new RegExp(`^${baseClass}(-[A-Za-z])?$`, 'i')
+        });
+
+        const subjectsSet = new Set();
+        if (timetable) {
+            timetable.schedule.forEach(day => {
+                day.periods.forEach(p => {
+                    if (p.subject && p.subject !== 'Break') subjectsSet.add(p.subject);
+                });
+            });
+        }
+        let subjectsArray = Array.from(subjectsSet);
+        if (subjectsArray.length === 0) {
+            subjectsArray = ['English', 'Mathematics', 'Science', 'Social Science', 'Hindi'];
+        }
+        res.json(subjectsArray);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to fetch subjects." });
     }
 });
 
@@ -84,28 +114,30 @@ router.post('/save', protect, adminOnly, async (req, res) => {
     }
 });
 
-// Manual Upload Save Route
+// Manual Upload Save Route (Upgraded with Scheduler Matrix)
 router.post('/save-manual', protect, adminOnly, async (req, res) => {
     try {
-        const { title, classes, fileData } = req.body;
+        const { title, classes, fileData, schedule, timing } = req.body;
         
-        if (!fileData) return res.status(400).json({ message: "No file provided!" });
+        if (!fileData) return res.status(400).json({ message: "No PDF/Image file provided!" });
 
         const newDatesheet = await Datesheet.create({ 
             schoolId: req.user.schoolId,
             title,
-            classes,
+            classes, // Base classes array e.g., ["9", "10"]
             isManual: true,
-            fileUrl: fileData 
+            fileUrl: fileData,
+            schedule: schedule || [], // Saves the matrix built by wizard
+            timing: timing || "Refer to Document"
         });
 
-        res.status(201).json({ message: "Manual Datesheet Published!", data: newDatesheet });
+        res.status(201).json({ message: "Manual Datesheet Published with Matrix!", data: newDatesheet });
     } catch (error) {
         res.status(500).json({ message: "Failed to publish manual datesheet." });
     }
 });
 
-// 3. STUDENT: Fetch Datesheet for their specific class
+// 3. STUDENT: Fetch Datesheet for their specific class (SMART BASE-CLASS MATCH)
 router.get('/my-datesheet', protect, async (req, res) => {
     try {
         const studentGrade = req.user.grade;
@@ -119,10 +151,14 @@ router.get('/my-datesheet', protect, async (req, res) => {
         const schoolDoc = await School.findById(req.user.schoolId);
         const schoolName = schoolDoc ? schoolDoc.schoolName : "EduFlowAI Public School";
 
+        // --- SMART LOGIC: "9-A" ko "9" mein badlo ---
+        const baseGrade = String(studentGrade).split('-')[0].trim().toUpperCase();
+
         // '.lean()' use kiya hai taaki Mongoose document normal JSON object ban jaye
         let datesheets = await Datesheet.find({
             schoolId: req.user.schoolId,
-            classes: studentGrade.toUpperCase()
+            // $in check karega: Agar datesheet "9-A" ki bani hai ya "9" ki, dono dikha dega!
+            classes: { $in: [studentGrade.toUpperCase(), baseGrade] }
         }).lean().sort({ createdAt: -1 });
 
         // Har datesheet payload mein schoolName attach kar do

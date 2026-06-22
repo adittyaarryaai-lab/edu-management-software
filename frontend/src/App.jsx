@@ -39,6 +39,7 @@ import ClassDiary from './pages/ClassDiary';
 import LeaveRequest from './pages/LeaveRequest';
 import StudentSyllabus from './pages/student/StudentSyllabus';
 import StudentDatesheet from './pages/student/StudentDatesheet';
+import StudentAdmitCard from './pages/student/StudentAdmitCard';
 // import AdminFees from './pages/AdminFees';
 import LeaveReview from './pages/LeaveReview';
 import StudentAssignments from './pages/StudentAssignments';
@@ -63,6 +64,7 @@ import TeacherDatesheet from './pages/teacher/TeacherDatesheet';
 import AdminSchoolLogo from './pages/admin/AdminSchoolLogo';
 import AdminAdmitCard from './pages/admin/AdminAdmitCard';
 import AdminManageAdmitCards from './pages/admin/AdminManageAdmitCards';
+
 
 import FinanceDashboard from './pages/finance/FinanceDashboard';
 // import StudentsFees from './pages/finance/StudentsFees';
@@ -478,6 +480,7 @@ function App() {
           <Route path="/my-subjects" element={<MySubjects user={user} />} />
           <Route path="/syllabus" element={<StudentSyllabus user={user} />} />
           <Route path="/exam-datesheet" element={<StudentDatesheet user={user} />} />
+          <Route path="/admit-card" element={<StudentAdmitCard user={user} />} />
 
           <Route path="/feedback" element={<Feedback />} />
 
