@@ -119,9 +119,9 @@ const TeacherUploadResult = ({ user }) => {
     const handleFinalInitiate = async () => {
         setLoading(true);
         try {
-            const baseGrade = user.assignedClass.split('-')[0].trim();
+            const exactGrade = user.assignedClass.trim(); // "9-A" poora jayega
             await API.post('/exam-results/initiate', {
-                grade: baseGrade,
+                grade: exactGrade,
                 examTitle: formData.title,
                 maxMarks: Number(formData.maxMarks)
             });

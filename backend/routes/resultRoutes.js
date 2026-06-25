@@ -3,6 +3,7 @@ const router = express.Router();
 const Result = require('../models/Result');
 const User = require('../models/User');
 const Timetable = require('../models/Timetable');
+const School = require('../models/School');
 const { protect } = require('../middleware/authMiddleware');
 
 // 1. Class Teacher Initiates Result Request
@@ -15,8 +16,8 @@ router.post('/initiate', protect, async (req, res) => {
         const existing = await Result.findOne({ schoolId, grade, examTitle });
         if (existing) return res.status(400).json({ message: "Request already active!" });
 
-        // Fetch Timetable to know who teaches what in this class
-        const timetable = await Timetable.findOne({ schoolId, grade: new RegExp(`^${grade}(-[A-Za-z])?$`, 'i') });
+        const baseGrade = grade.split('-')[0].trim();
+        const timetable = await Timetable.findOne({ schoolId, grade: new RegExp(`^${baseGrade}(-[A-Za-z])?$`, 'i') });
         if (!timetable) return res.status(404).json({ message: "Timetable not found for mapping subjects." });
 
         // --- EXACT SYLLABUS LOGIC ---
@@ -36,8 +37,7 @@ router.post('/initiate', protect, async (req, res) => {
             assignedTeachers: Array.from(subjectMap[sub]) // Array of teacherEmpId
         }));
 
-        // Fetch students for grid
-        const students = await User.find({ schoolId, role: 'student', grade: new RegExp(`^${grade}(-[A-Za-z])?$`, 'i') }).select('_id enrollmentNo name');
+        const students = await User.find({ schoolId, role: 'student', grade: grade }).select('_id enrollmentNo name');
 
         const studentMarksData = students.map(st => ({
             studentId: st._id,
@@ -81,8 +81,8 @@ router.get('/pending', protect, async (req, res) => {
 // 3. Monitor Hub (For Class Teachers)
 router.get('/monitor/:grade', protect, async (req, res) => {
     try {
-        const grade = req.params.grade.split('-')[0].trim();
-        const managed = await Result.find({ schoolId: req.user.schoolId, grade }).sort({ createdAt: -1 });
+        const exactGrade = req.params.grade.trim(); // "9-A" pura use hoga
+        const managed = await Result.find({ schoolId: req.user.schoolId, grade: exactGrade }).sort({ createdAt: -1 });
         res.json(managed);
     } catch (error) { res.status(500).json({ message: "Error fetching monitor data." }); }
 });
@@ -98,7 +98,7 @@ router.put('/submit-marks/:resultId', protect, async (req, res) => {
         const maxMarks = result.maxMarks;
         const isInvalid = studentMarks.some(sm => sm.marksObtained > maxMarks);
         if (isInvalid) return res.status(400).json({ message: `Marks cannot exceed ${maxMarks}` });
-        
+
         // Update logic: Dhoondho aur update karo, nahi mila toh push karo
         result.studentMarks.forEach(student => {
             const incomingMark = studentMarks.find(sm => sm.studentId === student.studentId.toString());
@@ -135,10 +135,10 @@ router.put('/publish/:resultId', protect, async (req, res) => {
     try {
         const result = await Result.findById(req.params.resultId);
         if (!result) return res.status(404).json({ message: "Result not found." });
-        
+
         result.status = 'published';
         await result.save();
-        
+
         res.json({ message: "Results Published to Student Dashboards!" });
     } catch (error) {
         res.status(500).json({ message: "Failed to publish results." });
@@ -152,6 +152,104 @@ router.delete('/:resultId', protect, async (req, res) => {
         res.json({ message: "Result Collection Deleted Permanently!" });
     } catch (error) {
         res.status(500).json({ message: "Failed to delete result." });
+    }
+});
+
+// 7. STUDENT: Fetch published results for their specific base grade
+router.get('/my-results', protect, async (req, res) => {
+    try {
+        const schoolId = req.user.schoolId;
+        const studentGrade = req.user.grade?.trim();
+
+        if (!studentGrade) {
+            return res.status(400).json({
+                message: "Student grade configuration missing."
+            });
+        }
+
+        // School fetch
+        const school = await School.findById(schoolId).select("schoolName logo");
+
+        const results = await Result.find({
+            schoolId,
+            grade: studentGrade,
+            status: 'published'
+        }).sort({ createdAt: -1 });
+
+        const preppedResults = results.map((resObj) => {
+            const studentTotals = resObj.studentMarks.map(sm => {
+                const total = sm.marks.reduce(
+                    (acc, curr) =>
+                        acc + (curr.status === "Present" ? curr.marksObtained : 0),
+                    0
+                );
+
+                return {
+                    studentId: sm.studentId.toString(),
+                    total
+                };
+            });
+
+            // Rank sorting
+            studentTotals.sort((a, b) => b.total - a.total);
+
+            const myIdStr = req.user._id.toString();
+            const myRankIndex = studentTotals.findIndex(
+                st => st.studentId === myIdStr
+            );
+
+            const myRank = myRankIndex !== -1 ? myRankIndex + 1 : "N/A";
+
+            const myMarksSubDoc = resObj.studentMarks.find(
+                sm => sm.studentId.toString() === myIdStr
+            );
+
+            if (!myMarksSubDoc) return null;
+
+            const myMarks = myMarksSubDoc.marks;
+
+            let totalObtained = 0;
+            let grandTotal = 0;
+            let percentage = 0;
+
+            if (myMarks.length > 0) {
+                totalObtained = myMarks.reduce(
+                    (acc, curr) =>
+                        acc + (curr.status === "Present" ? curr.marksObtained : 0),
+                    0
+                );
+
+                grandTotal = resObj.maxMarks * myMarks.length;
+
+                percentage = (
+                    (totalObtained / grandTotal) *
+                    100
+                ).toFixed(2);
+            }
+
+            return {
+                _id: resObj._id,
+                examTitle: resObj.examTitle,
+                grade: resObj.grade,
+                maxMarks: resObj.maxMarks,
+                myMarks,
+                totalObtained,
+                grandTotal,
+                percentage,
+                rank: myRank,
+                totalStudents: studentTotals.length,
+
+                // NEW
+                schoolName: school?.schoolName || "School Name",
+                schoolLogo: school?.logo || null
+            };
+        });
+        res.json(preppedResults.filter(Boolean));
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to fetch exam results: " + error.message
+        });
     }
 });
 

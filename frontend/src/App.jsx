@@ -41,6 +41,7 @@ import StudentSyllabus from './pages/student/StudentSyllabus';
 import StudentDatesheet from './pages/student/StudentDatesheet';
 import StudentAdmitCard from './pages/student/StudentAdmitCard';
 import TeacherUploadResult from './pages/teacher/TeacherUploadResult';
+import StudentExamResult from './pages/student/StudentExamResult';
 // import AdminFees from './pages/AdminFees';
 import LeaveReview from './pages/LeaveReview';
 import StudentAssignments from './pages/StudentAssignments';
@@ -483,6 +484,7 @@ function App() {
           <Route path="/syllabus" element={<StudentSyllabus user={user} />} />
           <Route path="/exam-datesheet" element={<StudentDatesheet user={user} />} />
           <Route path="/admit-card" element={<StudentAdmitCard user={user} />} />
+          <Route path="/exam-results" element={<StudentExamResult />} />
 
           <Route path="/feedback" element={<Feedback />} />
 
