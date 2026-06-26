@@ -26,7 +26,7 @@ import Exams from './pages/Exams';
 import Transport from './pages/Transport';
 import IDCard from './pages/IDCard';
 import Library from './pages/Library';
-import LiveClass from './pages/LiveClass';
+import StudentLiveClass from './pages/student/StudentLiveClass';
 import Feedback from './pages/Feedback';
 import Requests from './pages/Requests';
 import Mentorship from './pages/Mentorship';
@@ -51,7 +51,7 @@ import TeacherSupport from './pages/TeacherSupport';
 import ChangePassword from './pages/ChangePassword';
 import TeacherUploadSyllabus from './pages/TeacherUploadSyllabus';
 import DigitalMaterial from './pages/DigitalMaterial';
-import TeacherLiveClass from './pages/TeacherLiveClass';
+import TeacherLiveClass from './pages/teacher/TeacherLiveClass';
 import StudentAttendance from './pages/StudentAttendance';
 import AdminAttendance from './pages/AdminAttendance';
 import AdminGlobalNotice from './pages/AdminGlobalNotice';
@@ -476,7 +476,7 @@ function App() {
           <Route path="/id-card" element={<IDCard user={user} />} />
           <Route path="/library" element={<Library />} />
           <Route path="/library/digital" element={<DigitalMaterial />} />
-          <Route path="/live-class" element={<LiveClass user={user} />} />
+          <Route path="/live-class" element={<StudentLiveClass />} />
           <Route path="/class-diary" element={<ClassDiary />} />
           <Route path="/leave" element={<LeaveRequest />} />
           <Route path="/student/leave-history" element={<StudentLeaveHistory />} />
@@ -501,7 +501,7 @@ function App() {
           <Route path="/teacher/notices" element={<TeacherNotices />} />
           <Route path="/teacher/support" element={<TeacherSupport />} />
           <Route path="/teacher/upload-syllabus" element={<TeacherUploadSyllabus user={user} />} />
-          <Route path="/teacher/live-class" element={<TeacherLiveClass />} />
+          <Route path="/teacher/live-class" element={<TeacherLiveClass user={user} />} />
           <Route path="/teacher/datesheet" element={<TeacherDatesheet />} />
 
           {/* --- FINANCE MODULE ROUTES --- */}

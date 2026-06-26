@@ -16,7 +16,7 @@ const noticeRoutes = require('./routes/noticeRoutes');
 const supportRoutes = require('./routes/supportRoutes');
 const syllabusRoutes = require('./routes/syllabusRoutes')
 const libraryRoutes = require('./routes/libraryRoutes');
-const liveClassRoutes = require('./routes/liveClassRoutes');
+const liveClassRoutes = require('./routes/liveclassRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const technicalRoutes = require('./routes/technicalRoutes');
@@ -75,7 +75,7 @@ app.use('/api/notices', noticeRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/library', libraryRoutes);
-app.use('/api/live-classes', liveClassRoutes);
+app.use('/api/liveclass', liveClassRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/school', schoolRoutes);
 app.use('/api/technical', technicalRoutes);

@@ -72,12 +72,12 @@ const StudentHome = ({ user, searchQuery }) => {
     { title: 'Mentorship', icon: <Users size={17} />, path: '/mentors' },
     { title: 'Leave Request', icon: <ClipboardList size={17} />, path: '/leave' },
     { title: 'My Subjects', icon: <BookOpen size={17} />, path: '/my-subjects' },
-    { title: 'Library', icon: <Book size={17} />, path: '/library' },
+    { title: 'Live Class', icon: <Video size={17} />, path: '/live-class' },
   ];
 
   const extraModules = [
     { title: 'Bus Tracker', icon: <Bus size={17} />, path: '/transport' },
-    { title: 'Live Class', icon: <Video size={17} />, path: '/live-class' },
+    { title: 'Library', icon: <Book size={17} />, path: '/library' },
     { title: 'Feedback', icon: <MessageSquare size={17} />, path: '/feedback' },
   ];
 
