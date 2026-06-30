@@ -257,7 +257,7 @@ const AdminFeedback = () => {
                                             </div>
                                         </div>
 
-                                        {/* Ratings Display */}
+                                        {/* Rating Displays */}
                                         <div className="flex flex-col items-center md:items-end w-full md:w-auto bg-slate-50 md:bg-transparent p-4 md:p-0 rounded-2xl">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <Star size={28} className="text-amber-400" fill="#fbbf24" />

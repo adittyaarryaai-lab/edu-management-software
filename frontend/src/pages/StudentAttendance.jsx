@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Award, Calendar, AlertCircle, CheckCircle, XCircle, Cpu, ChevronLeft, ChevronRight, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Award, Calendar, AlertCircle, CheckCircle, XCircle, Cpu, ChevronLeft, ChevronRight, BarChart3, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import API from '../api';
@@ -30,7 +30,8 @@ const StudentAttendance = () => {
         date.setMonth(date.getMonth() + offset);
         setCurrentMonth(date.toISOString().slice(0, 7));
     };
-    // 2. Apni file mein is helper function ko add kar le (Render function se theek upar):
+
+    // Helper function
     const getLogForDate = (day) => {
         if (!stats?.history) return null;
 
@@ -38,7 +39,7 @@ const StudentAttendance = () => {
         const [year, month] = currentMonth.split('-');
         const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
 
-        // Find if the student was marked Present/Absent on this exact date
+        // Find if the student was marked Present/Absent/On Leave on this exact date
         return stats.history.find(log => {
             // Safe check to match dates
             const logDateStr = new Date(log.date).toISOString().split('T')[0];
@@ -62,6 +63,7 @@ const StudentAttendance = () => {
             });
         }
     };
+
     if (loading) return <Loader />;
 
     return (
@@ -175,6 +177,10 @@ const StudentAttendance = () => {
                                     } else if (log.status === 'Absent') {
                                         cellStyle = "bg-rose-50 text-rose-600 border-rose-200 font-black relative";
                                         dotColor = "bg-rose-500";
+                                    } else if (log.status === 'On Leave') {
+                                        // Amber theme for On Leave status
+                                        cellStyle = "bg-amber-50 text-amber-600 border-amber-200 font-black relative";
+                                        dotColor = "bg-amber-500";
                                     }
                                 }
 
@@ -225,6 +231,17 @@ const StudentAttendance = () => {
                                         <p className="text-sm font-medium text-slate-700 bg-slate-50 p-3 rounded-2xl inline-block">
                                             Attendance was not registered for this day.
                                         </p>
+                                    </>
+                                ) : selectedDateLog.status === 'On Leave' ? (
+                                    <>
+                                        {/* Amber / Yellow color card specifically for ON LEAVE */}
+                                        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 mt-4 shadow-inner bg-amber-50 text-amber-500 border border-amber-100">
+                                            <Lock size={40} />
+                                        </div>
+                                        <h2 className="text-3xl font-black uppercase tracking-wide mb-2 text-amber-600">
+                                            On Leave
+                                        </h2>
+                                        <p className="text-sm font-medium text-slate-400 italic">Approved by Administration</p>
                                     </>
                                 ) : (
                                     <>

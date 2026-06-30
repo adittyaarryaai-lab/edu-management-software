@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Save, Calendar, RefreshCcw, ClipboardCheck, AlertCircle, FileText } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Save, Calendar, RefreshCcw, ClipboardCheck, AlertCircle, FileText, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
@@ -21,7 +21,7 @@ const TeacherAttendance = ({ user }) => {
     const [loading, setLoading] = useState(true);
     const [students, setStudents] = useState([]);
     const [isUpdateMode, setIsUpdateMode] = useState(false);
-    const [showList, setShowList] = useState(false); // Controls gatekeeper
+    const [showList, setShowList] = useState(false);
     const [isDateOpen, setIsDateOpen] = useState(false);
     const [viewDate, setViewDate] = useState(new Date());
     const [searchQuery, setSearchQuery] = useState('');
@@ -38,20 +38,26 @@ const TeacherAttendance = ({ user }) => {
             }
             try {
                 setLoading(true);
-                setShowList(false); // Date badalne par pehle gatekeeper dikhao
-                const { data: resp } = await API.get(`/attendance/my-students`);
+                setShowList(false);
+                
+                // Fetch students and existing records
+                const { data: resp } = await API.get(`/attendance/my-students?date=${selectedDate}`);
                 const { data: existing } = await API.get(`/attendance/view?grade=${assignedClass}&date=${selectedDate}`);
 
                 const stdList = resp.students;
 
-                if (existing && existing.records.length > 0) {
+                if (existing && existing.records && existing.records.length > 0) {
                     const formattedData = stdList.map(s => {
                         const record = existing.records.find(r => r.studentId === s._id || r.student === s._id);
+                        // Smart Check: Agar backend se aaj leave true aayi hai ya pehle se record me onLeave true tha
+                        const isOnLeave = s.onLeave || (record && record.onLeave) || false;
+                        
                         return {
                             id: s._id,
                             name: s.name,
                             roll: s.enrollmentNo,
-                            status: record ? record.status : 'Present'
+                            status: isOnLeave ? 'On Leave' : (record ? record.status : 'Present'),
+                            onLeave: isOnLeave
                         };
                     });
                     setStudents(formattedData);
@@ -61,7 +67,9 @@ const TeacherAttendance = ({ user }) => {
                         id: s._id,
                         name: s.name,
                         roll: s.enrollmentNo,
-                        status: 'Present'
+                        // Naye record mein agar chutti par hai toh seedha 'On Leave'
+                        status: s.onLeave ? 'On Leave' : 'Present',
+                        onLeave: s.onLeave || false
                     }));
                     setStudents(formattedData);
                     setIsUpdateMode(false);
@@ -75,27 +83,30 @@ const TeacherAttendance = ({ user }) => {
         fetchData();
     }, [selectedDate, assignedClass]);
 
+    // Smart Toggle: Agar bachha leave par hai toh button click kaam nahi karega
     const toggleStatus = (id) => {
-        setStudents(students.map(s =>
-            s.id === id ? { ...s, status: s.status === 'Present' ? 'Absent' : 'Present' } : s
-        ));
+        setStudents(students.map(s => {
+            if (s.id === id && !s.onLeave) {
+                return { ...s, status: s.status === 'Present' ? 'Absent' : 'Present' };
+            }
+            return s;
+        }));
     };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dateRef.current && !dateRef.current.contains(event.target)) {
                 setIsDateOpen(false);
             }
         };
-
         document.addEventListener("mousedown", handleClickOutside);
-
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
     const fetchPendingCount = async () => {
-        if (!assignedClass) return; // Agar class assigned nahi hai toh request mat bhejo
+        if (!assignedClass) return;
         try {
             const { data } = await API.get('/leaves/pending-count');
             setPendingCount(data.count);
@@ -105,12 +116,9 @@ const TeacherAttendance = ({ user }) => {
     };
 
     useEffect(() => {
-        // Jab bhi teacher is page par wapas aaye (focus kare), count refresh ho
         const handleFocus = () => fetchPendingCount();
         window.addEventListener('focus', handleFocus);
-
-        fetchPendingCount(); // Initial load
-
+        fetchPendingCount();
         return () => window.removeEventListener('focus', handleFocus);
     }, []);
 
@@ -122,7 +130,8 @@ const TeacherAttendance = ({ user }) => {
             const records = students.map(s => ({
                 studentId: s.id,
                 name: s.name,
-                status: s.status
+                status: s.status,
+                onLeave: s.onLeave // Sending leave tag back to DB for history accuracy
             }));
             const payload = {
                 grade: assignedClass,
@@ -164,10 +173,7 @@ const TeacherAttendance = ({ user }) => {
 
             {/* Header */}
             <div className="bg-[#42A5F5] px-6 pt-12 pb-24 rounded-b-[4rem] shadow-xl relative z-10 overflow-visible">
-                {/* <div className="absolute inset-0 bg-gradient-to-t from-blue-50 to-transparent pointer-events-none opacity-50"></div> */}
                 <div className="flex justify-between items-center relative z-10">
-
-                    {/* Back Button */}
                     <button
                         onClick={() => navigate(-1)}
                         className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-md active:scale-95 transition-all"
@@ -175,18 +181,15 @@ const TeacherAttendance = ({ user }) => {
                         <ArrowLeft size={24} />
                     </button>
 
-                    {/* Center Title */}
                     <div className="text-center">
                         <h1 className="text-4xl font-black italic tracking-tight text-white capitalize">
                             Attendance
                         </h1>
-
                         <p className="text-[15px] font-black uppercase tracking-widest text-white opacity-80 mt-1">
                             Class Management
                         </p>
                     </div>
 
-                    {/* Right Icon */}
                     <div className="p-3 bg-white rounded-2xl text-[#42A5F5] shadow-sm">
                         <Calendar size={24} />
                     </div>
@@ -194,7 +197,6 @@ const TeacherAttendance = ({ user }) => {
                <div className="bg-white mt-6 p-6 rounded-[3rem] border border-[#DDE3EA] shadow-lg italic relative z-10">
                     <div className="flex justify-between items-center px-2">
                         <div>
-                            {/* <p className="text-[11px] font-black uppercase text-slate-400 tracking-widest italic mb-1"></p> */}
                             <h2 className="font-black text-xl text-[#42A5F5] italic uppercase tracking-tighter">
                                 Class {assignedClass}
                             </h2>
@@ -202,7 +204,6 @@ const TeacherAttendance = ({ user }) => {
                         <div ref={dateRef} className="text-right relative overflow-visible">
                             <p className="text-[12px] font-black uppercase text-slate-400 tracking-widest italic mb-1 mr-2">Select date</p>
 
-                            {/* Trigger Button */}
                             <button
                                 onClick={() => setIsDateOpen(!isDateOpen)}
                                 className="bg-slate-50 p-3 px-5 rounded-2xl font-black text-[16px] text-[#42A5F5] italic border border-slate-100 shadow-sm flex items-center gap-2 active:scale-95 transition-all"
@@ -211,7 +212,6 @@ const TeacherAttendance = ({ user }) => {
                                 <Calendar size={16} className="opacity-60" />
                             </button>
 
-                            {/* Custom Dropdown Calendar */}
                             <AnimatePresence>
                                 {isDateOpen && (
                                     <motion.div
@@ -222,47 +222,19 @@ const TeacherAttendance = ({ user }) => {
                                     >
                                         <div className="flex flex-col gap-4">
                                             <h4 className="text-[12px] font-black uppercase text-slate-800 text-center tracking-widest">Change Date</h4>
-
-                                            {/* Native Input Hidden but controlled by Custom UI */}
                                             <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-
-                                                {/* HEADER */}
                                                 <div className="flex justify-between items-center mb-3">
-                                                    <button
-                                                        onClick={() =>
-                                                            setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
-                                                        }
-                                                        className="text-[#42A5F5] font-bold"
-                                                    >
-                                                        ←
-                                                    </button>
-
+                                                    <button onClick={() => setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} className="text-[#42A5F5] font-bold">←</button>
                                                     <span className="font-black text-[#42A5F5]">
-                                                        {viewDate.toLocaleDateString('en-GB', {
-                                                            month: 'long',
-                                                            year: 'numeric'
-                                                        })}
+                                                        {viewDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
                                                     </span>
-
-                                                    <button
-                                                        onClick={() =>
-                                                            setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-                                                        }
-                                                        className="text-[#42A5F5] font-bold"
-                                                    >
-                                                        →
-                                                    </button>
+                                                    <button onClick={() => setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} className="text-[#42A5F5] font-bold">→</button>
                                                 </div>
 
-                                                {/* DAYS NAME */}
                                                 <div className="grid grid-cols-7 gap-2 text-center text-[12px] font-bold text-slate-400 mb-2">
-                                                    {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (
-                                                        <span key={d}>{d}</span>
-                                                    ))}
+                                                    {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(d => (<span key={d}>{d}</span>))}
                                                 </div>
 
-                                                {/* CALCULATIONS */}
-                                                {/* CALCULATIONS SECTION KE ANDAR IS JAGAH CHANGE KARO */}
                                                 {(() => {
                                                     const year = viewDate.getFullYear();
                                                     const month = viewDate.getMonth();
@@ -287,18 +259,13 @@ const TeacherAttendance = ({ user }) => {
                                                                 key={day}
                                                                 disabled={isFuture}
                                                                 onClick={() => {
-                                                                    // --- STEP 2 KA KAAM YAHAN HUA HAI ---
                                                                     const dYear = viewDate.getFullYear();
                                                                     const dMonth = viewDate.getMonth();
                                                                     const selectedTempDate = new Date(dYear, dMonth, day);
-
-                                                                    setSelectedDate(getLocalDate(selectedTempDate)); // 👈 Ye fix laga diya
+                                                                    setSelectedDate(getLocalDate(selectedTempDate));
                                                                     setIsDateOpen(false);
                                                                 }}
-                                                                className={`p-2 rounded-xl text-[13px] font-black
-                    ${isSelected ? 'bg-blue-50' : 'text-slate-600'}
-                    ${isFuture ? 'opacity-20 cursor-not-allowed' : 'hover:bg-blue-100'}
-                `}
+                                                                className={`p-2 rounded-xl text-[13px] font-black ${isSelected ? 'bg-blue-50' : 'text-slate-600'} ${isFuture ? 'opacity-20 cursor-not-allowed' : 'hover:bg-blue-100'}`}
                                                             >
                                                                 {day}
                                                             </button>
@@ -308,17 +275,8 @@ const TeacherAttendance = ({ user }) => {
                                                 })()}
                                             </div>
 
-
-                                            <p className="text-[15px] text-slate-900 font-bold text-center italic">
-                                                Future dates are not allowed
-                                            </p>
-
-                                            <button
-                                                onClick={() => setIsDateOpen(false)}
-                                                className="w-full py-3 bg-slate-800 text-white rounded-xl font-black uppercase text-[10px] tracking-widest italic active:scale-95 transition-all"
-                                            >
-                                                Close
-                                            </button>
+                                            <p className="text-[15px] text-slate-900 font-bold text-center italic">Future dates are not allowed</p>
+                                            <button onClick={() => setIsDateOpen(false)} className="w-full py-3 bg-slate-800 text-white rounded-xl font-black uppercase text-[10px] tracking-widest italic active:scale-95 transition-all">Close</button>
                                         </div>
                                     </motion.div>
                                 )}
@@ -328,7 +286,7 @@ const TeacherAttendance = ({ user }) => {
                     {/* LEAVE REQUEST BUTTON */}
                     <div className="mt-2 relative">
                         <button
-                            onClick={() => navigate('/teacher/leave-requests')} // Ye route hum baad mein set karenge
+                            onClick={() => navigate('/teacher/leave-requests')}
                             className="w-full bg-white p-6 rounded-[2.5rem] border border-[#DDE3EA] shadow-lg flex items-center justify-between group transition-all hover:border-[#42A5F5] active:scale-[0.98]"
                         >
                             <div className="flex items-center gap-5">
@@ -337,18 +295,13 @@ const TeacherAttendance = ({ user }) => {
                                 </div>
                                 <div>
                                     <h3 className="text-[17px] font-black text-slate-700 italic uppercase">Leave Requests</h3>
-                                    {/* <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic">Review pending applications</p> */}
                                 </div>
                             </div>
 
                             <motion.div
                                 initial={{ scale: 0.8 }}
                                 animate={{ scale: 1 }}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[14px] transition-all duration-500
-        ${pendingCount > 0
-                                        ? "bg-rose-500 text-white shadow-lg shadow-rose-200 animate-bounce"
-                                        : "bg-slate-100 text-slate-400"
-                                    }`}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-[14px] transition-all duration-500 ${pendingCount > 0 ? "bg-rose-500 text-white shadow-lg shadow-rose-200 animate-bounce" : "bg-slate-100 text-slate-400"}`}
                             >
                                 {pendingCount}
                             </motion.div>
@@ -356,10 +309,10 @@ const TeacherAttendance = ({ user }) => {
                     </div>
                 </div>
             </div>
+
             {/* Main Area */}
             <div className={`px-5 -mt-10 space-y-6 relative ${isDateOpen ? 'z-0' : 'z-20'}`}>
                 {!showList ? (
-                    /* GATEKEEPER BUTTON VIEW */
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[4rem] border-2 border-dashed border-slate-200 shadow-xl mx-2 text-center space-y-8 animate-in fade-in zoom-in-95 duration-500 relative z-0">
                         {isFutureDate ? (
                             <>
@@ -379,12 +332,9 @@ const TeacherAttendance = ({ user }) => {
                                     <ClipboardCheck size={60} className="text-[#42A5F5]" />
                                 </div>
                                 <div className="space-y-2">
-                                    {/* <h3 className="text-2xl font-black text-slate-800 italic capitalize">Ready for session</h3> */}
                                     <p className="text-[18px] text-slate-900 font-bold uppercase tracking-widest">
                                         Class: {assignedClass} • Date: {new Date(selectedDate).toLocaleDateString('en-GB', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
+                                            day: '2-digit', month: '2-digit', year: 'numeric'
                                         })}
                                     </p>
                                 </div>
@@ -398,17 +348,17 @@ const TeacherAttendance = ({ user }) => {
                         )}
                     </div>
                 ) : (
-                    /* ATTENDANCE LIST VIEW */
                     <>
                         <div className="flex justify-between items-center px-6 mb-2">
                             <span className="text-[15px] font-black text-[#42A5F5] uppercase tracking-widest italic">
                                 {isUpdateMode ? '📍 Updating Atd.' : '📝 Mark Atd.'}
                             </span>
                             <span className="text-[15px] font-black text-white uppercase tracking-widest bg-[#42A5F5] px-5 py-2 rounded-full shadow-md italic">
-                                Present: {students.filter(s => s.status === 'Present').length} / {students.length}
+                                Present: {students.filter(s => s.status === 'Present').length} / {students.filter(s => !s.onLeave).length}
                             </span>
                         </div>
-                        {/* --- NEURAL SEARCH NODE --- */}
+
+                        {/* Search */}
                         <div className="px-2 mb-6">
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
@@ -422,10 +372,7 @@ const TeacherAttendance = ({ user }) => {
                                     className="w-full bg-white border border-[#DDE3EA] p-5 pl-14 rounded-[2rem] text-[16px] font-black italic text-slate-900 outline-none focus:border-[#42A5F5] focus:shadow-lg focus:shadow-blue-50 transition-all placeholder:text-slate-300 shadow-sm"
                                 />
                                 {searchQuery && (
-                                    <button
-                                        onClick={() => setSearchQuery('')}
-                                        className="absolute inset-y-0 right-5 flex items-center text-slate-300 hover:text-rose-500"
-                                    >
+                                    <button onClick={() => setSearchQuery('')} className="absolute inset-y-0 right-5 flex items-center text-slate-300 hover:text-rose-500">
                                         <XCircle size={20} />
                                     </button>
                                 )}
@@ -450,29 +397,36 @@ const TeacherAttendance = ({ user }) => {
                                             </div>
                                         </div>
 
-                                        <button
-                                            onClick={() => toggleStatus(student.id)}
-                                            className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-black text-[11px] uppercase transition-all shadow-sm ${student.status === 'Present'
-                                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                                                : 'bg-rose-500 text-white shadow-lg shadow-rose-100'
+                                        {/* SMART LOCK LOGIC FOR LEAVE */}
+                                        {student.onLeave ? (
+                                            <div className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-black text-[11px] uppercase shadow-inner bg-amber-50 text-amber-500 border border-amber-200 opacity-90 cursor-not-allowed">
+                                                <Lock size={16} />
+                                                On Leave
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => toggleStatus(student.id)}
+                                                className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-black text-[11px] uppercase transition-all shadow-sm ${student.status === 'Present'
+                                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                                                    : 'bg-rose-500 text-white shadow-lg shadow-rose-100'
                                                 }`}
-                                        >
-                                            {student.status === 'Present' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-                                            {student.status}
-                                        </button>
+                                            >
+                                                {student.status === 'Present' ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                                                {student.status}
+                                            </button>
+                                        )}
                                     </div>
                                 ))
                             }
 
-                            {/* No Results Message */}
                             {students.filter(s =>
                                 s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 s.roll.toString().includes(searchQuery)
                             ).length === 0 && (
-                                    <div className="text-center py-10 opacity-20 italic font-black uppercase text-[19px] tracking-widest">
-                                        No matching student found
-                                    </div>
-                                )}
+                                <div className="text-center py-10 opacity-20 italic font-black uppercase text-[19px] tracking-widest">
+                                    No matching student found
+                                </div>
+                            )}
                         </div>
 
                         <div className="pt-10 pb-20 w-full px-4 z-30 italic">
