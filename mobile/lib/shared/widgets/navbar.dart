@@ -1,0 +1,333 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class Navbar extends StatefulWidget {
+  final String searchQuery;
+  final Function(String) onSearchChanged;
+  final VoidCallback onSupportClick;
+  final VoidCallback onMenuClick;
+
+  const Navbar({
+    super.key,
+    required this.searchQuery,
+    required this.onSearchChanged,
+    required this.onSupportClick,
+    required this.onMenuClick,
+  });
+
+  @override
+  State<Navbar> createState() => _NavbarState();
+}
+
+class _NavbarState extends State<Navbar> {
+  Map<String, dynamic>? user;
+  String greetingText = "Good Morning";
+  String greetingEmoji = "☀️";
+  int unreadCount = 0; // FIXED: Default 0 kar diya hai
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+    _updateGreeting();
+    _timer = Timer.periodic(const Duration(minutes: 15), (_) => _updateGreeting());
+    // _fetchUnreadCount(); 
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString('user');
+    if (userStr != null) {
+      setState(() => user = jsonDecode(userStr));
+    }
+  }
+
+  void _updateGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      setState(() { greetingText = "Good Morning"; greetingEmoji = "☀️"; });
+    } else if (hour < 17) {
+      setState(() { greetingText = "Good Afternoon"; greetingEmoji = "🌤️"; });
+    } else if (hour < 21) {
+      setState(() { greetingText = "Good Evening"; greetingEmoji = "👋"; });
+    } else {
+      setState(() { greetingText = "Good Night"; greetingEmoji = "🌙"; });
+    }
+  }
+
+  void _handleBellClick() {
+    if (user?['role'] == 'superadmin') return;
+    if (user?['role'] != 'admin' && unreadCount > 0) {
+      setState(() => unreadCount = 0);
+    }
+    context.go('/notice-feed');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final role = user?['role'] ?? 'student';
+    final name = user?['name'] ?? 'Guest';
+    final firstName = name.split(' ')[0];
+    final capitalizedName = firstName.isNotEmpty 
+        ? firstName[0].toUpperCase() + firstName.substring(1).toLowerCase() 
+        : '';
+    final capitalizedRole = role.isNotEmpty 
+        ? role[0].toUpperCase() + role.substring(1).toLowerCase() 
+        : '';
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(40),
+        bottomRight: Radius.circular(40),
+      ),
+      child: Container(
+        padding: const EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 15),
+        decoration: const BoxDecoration(
+          color: Color(0xFF42A5F5),
+          boxShadow: [
+            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // --- 1. TOP MOVING ORANGE LINE ANIMATION ---
+            Positioned(
+              top: -55, left: -24, right: -24,
+              child: Container(
+                height: 4,
+                width: double.infinity,
+                color: Colors.red.withOpacity(0.1),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 150,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.transparent, Colors.orangeAccent, Colors.transparent],
+                        ),
+                      ),
+                    ).animate(onPlay: (c) => c.repeat())
+                     .slideX(begin: -5, end: 5, duration: 2.5.seconds, curve: Curves.linear),
+                  ],
+                ),
+              ),
+            ),
+
+            // --- MAIN CONTENT ---
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: widget.onMenuClick,
+                          child: const Icon(Icons.menu, color: Colors.white, size: 26)
+                              .animate().fadeIn().scale(),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.white.withOpacity(0.3)),
+                          ),
+                          child: const Icon(Icons.memory, color: Colors.white, size: 16)
+                              .animate(onPlay: (c) => c.repeat()).rotate(duration: 4.seconds),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          "EduFlowAI v2.0",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        if (role != 'superadmin')
+                          GestureDetector(
+                            onTap: _handleBellClick,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                  ),
+                                  child: const Icon(Icons.notifications_none, color: Colors.white, size: 20),
+                                ),
+                                // FIXED: Badge only shows if unreadCount > 0
+                                if (role != 'admin' && unreadCount > 0)
+                                  Positioned(
+                                    top: -4, right: -4,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.redAccent,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: const Color(0xFF42A5F5), width: 2),
+                                      ),
+                                      child: Text(
+                                        unreadCount.toString(),
+                                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                                      ),
+                                    ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(begin: const Offset(1, 1), end: const Offset(1.2, 1.2)),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(width: 12),
+                        if (role != 'superadmin')
+                          GestureDetector(
+                            onTap: widget.onSupportClick,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                              ),
+                              child: const Icon(Icons.headset_mic_outlined, color: Colors.white, size: 20),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    "$capitalizedRole Portal",
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1, fontStyle: FontStyle.italic),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: "$greetingText $greetingEmoji ", style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                      TextSpan(text: capitalizedName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                  style: const TextStyle(fontSize: 24, fontStyle: FontStyle.italic),
+                ),
+                const SizedBox(height: 8),
+
+                // FIXED: Animated Search Bar with Clear Button
+                _AnimatedSearchBar(
+                  searchQuery: widget.searchQuery,
+                  onSearchChanged: widget.onSearchChanged,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedSearchBar extends StatefulWidget {
+  final String searchQuery;
+  final Function(String) onSearchChanged;
+
+  const _AnimatedSearchBar({required this.searchQuery, required this.onSearchChanged});
+
+  @override
+  State<_AnimatedSearchBar> createState() => _AnimatedSearchBarState();
+}
+
+class _AnimatedSearchBarState extends State<_AnimatedSearchBar> {
+  bool _isPressed = false;
+  late TextEditingController _controller; // Controller added to clear text
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.searchQuery);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _clearSearch() {
+    _controller.clear();
+    widget.onSearchChanged(""); // Notify parent
+    FocusScope.of(context).unfocus(); // Close keyboard
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutBack,
+        transform: Matrix4.identity()..scale(_isPressed ? 0.97 : 1.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(_isPressed ? 0.05 : 0.1),
+              blurRadius: _isPressed ? 5 : 15,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
+        child: TextField(
+          controller: _controller,
+          onChanged: widget.onSearchChanged,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF334155), fontStyle: FontStyle.italic),
+          decoration: InputDecoration(
+            hintText: "Search modules...",
+            hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontWeight: FontWeight.bold),
+            prefixIcon: const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+            
+            // FIXED: Clear (Cross) Button Logic
+            suffixIcon: widget.searchQuery.isNotEmpty 
+                ? IconButton(
+                    icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+                    onPressed: _clearSearch,
+                  )
+                : null,
+            
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          ),
+        ),
+      ),
+    );
+  }
+}

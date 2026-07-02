@@ -1,0 +1,84 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../features/auth/screens/login_screen.dart';
+import '../features/student/screens/student_home.dart';
+import '../shared/widgets/layout_wrapper.dart';
+import '../splash_screen.dart'; // <--- Nayi File banayenge iske liye
+
+final appRouter = GoRouter(
+  initialLocation: '/splash', // FIXED: Ab sabse pehle hamesha Splash khulega
+
+  redirect: (context, state) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString('user');
+    final isLoggedIn = userStr != null;
+
+    final isGoingToLogin = state.uri.path == '/login';
+    final isGoingToSplash = state.uri.path == '/splash';
+
+    // 1. Agar Splash Screen par hai, toh usko wahi rehne do (Animation puri hone do)
+    if (isGoingToSplash) return null;
+
+    // 2. Agar Login NAHI hai, aur Splash ya Login ke alawa kahin ja raha hai -> Pakad ke Login pe dalo
+    if (!isLoggedIn && !isGoingToLogin) {
+      return '/login';
+    }
+
+    // 3. Agar Login HAI, aur galti se Login screen maang raha hai -> Seedha Dashboard pe phek do
+    if (isLoggedIn && isGoingToLogin) {
+      final role = jsonDecode(userStr)['role'] ?? 'student';
+
+      if (role == 'superadmin') return '/superadmin/dashboard';
+      if (role == 'finance') return '/finance/dashboard';
+      
+      return '/'; 
+    }
+
+    return null; 
+  },
+
+  routes: [
+    // --- SPLASH SCREEN ROUTE ---
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+
+    // --- STUDENT/TEACHER DASHBOARD ---
+    GoRoute(
+      path: '/',
+      builder: (context, state) {
+        return LayoutWrapper(
+          role: 'student',
+          childBuilder: (query) => StudentHome(searchQuery: query),
+        );
+      },
+    ),
+
+    // --- SUPERADMIN ---
+    GoRoute(
+      path: '/superadmin/dashboard',
+      builder: (context, state) => const LayoutWrapper(
+        role: 'superadmin',
+        child: Center(child: Text('Super Admin Hub')),
+      ),
+    ),
+
+    // --- FINANCE ---
+    GoRoute(
+      path: '/finance/dashboard',
+      builder: (context, state) => const LayoutWrapper(
+        role: 'finance',
+        child: Center(child: Text('Finance Dashboard')),
+      ),
+    ),
+  ],
+);
