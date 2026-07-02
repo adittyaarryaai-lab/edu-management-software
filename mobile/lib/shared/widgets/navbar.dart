@@ -108,7 +108,7 @@ class _NavbarState extends State<Navbar> {
               child: Container(
                 height: 4,
                 width: double.infinity,
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 child: Stack(
                   children: [
                     Container(
@@ -144,9 +144,9 @@ class _NavbarState extends State<Navbar> {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.white.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white.withOpacity(0.3)),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                           ),
                           child: const Icon(Icons.memory, color: Colors.white, size: 16)
                               .animate(onPlay: (c) => c.repeat()).rotate(duration: 4.seconds),
@@ -169,9 +169,9 @@ class _NavbarState extends State<Navbar> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: Colors.white.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                                   ),
                                   child: const Icon(Icons.notifications_none, color: Colors.white, size: 20),
                                 ),
@@ -202,9 +202,9 @@ class _NavbarState extends State<Navbar> {
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                               ),
                               child: const Icon(Icons.headset_mic_outlined, color: Colors.white, size: 20),
                             ),
@@ -218,8 +218,8 @@ class _NavbarState extends State<Navbar> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    color: Colors.white.withValues(alpha: 0.2),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -300,7 +300,7 @@ class _AnimatedSearchBarState extends State<_AnimatedSearchBar> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(_isPressed ? 0.05 : 0.1),
+              color: Colors.black.withValues(alpha: _isPressed ? 0.05 : 0.1),
               blurRadius: _isPressed ? 5 : 15,
               offset: const Offset(0, 5),
             )

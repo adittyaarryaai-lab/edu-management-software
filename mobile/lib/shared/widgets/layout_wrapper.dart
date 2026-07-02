@@ -83,7 +83,7 @@ class _LayoutWrapperState extends State<LayoutWrapper> {
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 400),
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                   ),
                 ),
               ),

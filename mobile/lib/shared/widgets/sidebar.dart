@@ -51,9 +51,11 @@ class _SidebarState extends State<Sidebar> {
   }
 
   void _navigate(String path) {
-    _scrollController.jumpTo(0); // reset scroll
-    Navigator.of(context).pop(); // close drawer
-    context.go(path);
+    // 1. Koi pop() nahi, koi drawer close nahi. 
+    // 2. WidgetsBinding ensure karega ki click hone ke turant baad (agle frame mein) seedha naya page khule.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.push(path); // Seedha attendance page khulega poori screen pe
+    });
   }
 
   // =======================================================================
@@ -76,7 +78,7 @@ class _SidebarState extends State<Sidebar> {
                     Navigator.pop(dialogContext), // Yahan dialogContext
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(color: Colors.black.withOpacity(0.4)),
+                  child: Container(color: Colors.black.withValues(alpha: 0.4)),
                 ),
               ),
 
@@ -93,7 +95,7 @@ class _SidebarState extends State<Sidebar> {
                       borderRadius: BorderRadius.circular(50),
                       boxShadow: [
                         BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
+                            color: Colors.black.withValues(alpha: 0.15),
                             blurRadius: 40,
                             offset: const Offset(0, 20))
                       ],
@@ -201,7 +203,7 @@ class _SidebarState extends State<Sidebar> {
                                       backgroundColor: Colors.redAccent,
                                       elevation: 15,
                                       shadowColor:
-                                          Colors.redAccent.withOpacity(0.5),
+                                          Colors.redAccent.withValues(alpha: 0.5),
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 20),
                                       shape: RoundedRectangleBorder(
@@ -287,7 +289,7 @@ class _SidebarState extends State<Sidebar> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 35,
                   spreadRadius: 4,
                   offset: const Offset(10, 0),
@@ -368,10 +370,10 @@ class _SidebarState extends State<Sidebar> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(15),
                           border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
+                              Border.all(color: Colors.white.withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -418,7 +420,7 @@ class _SidebarState extends State<Sidebar> {
                     children: _buildRoleBasedMenu(role),
                   ),
                 ),
-                // --- LOGOUT BUTTON ---
+               // --- LOGOUT BUTTON ---
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -426,15 +428,16 @@ class _SidebarState extends State<Sidebar> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      _scrollController.jumpTo(0);
-                      _showLogoutConfirmation(context);
+                      // Scroll crash kar raha tha, isko hata diya
+                      // Seedha premium modal open karo!
+                      _showLogoutConfirmation(context); 
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        border: Border.all(color: Colors.red.withOpacity(0.2)),
+                        color: Colors.red.withValues(alpha: 0.1),
+                        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -843,7 +846,7 @@ class _QuickAction extends StatelessWidget {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 5)
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 5)
                 ]),
             child: Icon(icon,
                 size: 18,

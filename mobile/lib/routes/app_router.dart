@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/auth/screens/login_screen.dart';
 import '../features/student/screens/student_home.dart';
+import '../features/student/screens/student_attendance.dart';
 import '../shared/widgets/layout_wrapper.dart';
-import '../splash_screen.dart'; // <--- Nayi File banayenge iske liye
+import '../splash_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash', // FIXED: Ab sabse pehle hamesha Splash khulega
@@ -33,11 +34,11 @@ final appRouter = GoRouter(
 
       if (role == 'superadmin') return '/superadmin/dashboard';
       if (role == 'finance') return '/finance/dashboard';
-      
-      return '/'; 
+
+      return '/';
     }
 
-    return null; 
+    return null;
   },
 
   routes: [
@@ -50,6 +51,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
+    ),
+
+    GoRoute(
+      path: '/attendance',
+      builder: (context, state) => const StudentAttendance(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---

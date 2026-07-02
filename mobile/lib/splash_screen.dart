@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final rest = "duFlowAI";
+    const rest = "duFlowAI";
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 350,
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF4FC3F7).withOpacity(0.4)),
+                  color: const Color(0xFF4FC3F7).withValues(alpha: 0.4)),
             )
                 .animate(onPlay: (c) => c.repeat(reverse: true))
                 .scale(
@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 400,
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF7E57C2).withOpacity(0.3)),
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.3)),
             )
                 .animate(onPlay: (c) => c.repeat(reverse: true))
                 .scale(
@@ -104,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen>
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(color: Colors.white.withOpacity(0.2)),
+              child: Container(color: Colors.white.withValues(alpha: 0.2)),
             ),
           ),
 
@@ -167,7 +167,7 @@ class _SplashScreenState extends State<SplashScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: const Color(0xFF42A5F5).withOpacity(0.3),
+                          color: const Color(0xFF42A5F5).withValues(alpha: 0.3),
                           width: 2),
                     ),
                   )
@@ -184,15 +184,15 @@ class _SplashScreenState extends State<SplashScreen>
                     height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF42A5F5).withOpacity(0.5),
+                          color: const Color(0xFF42A5F5).withValues(alpha: 0.5),
                           blurRadius: 30,
                           spreadRadius: 5,
                         ),
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                           blurRadius: 12,
                           spreadRadius: -2,
                           offset: const Offset(-2, -2),
@@ -240,7 +240,7 @@ class _SplashScreenState extends State<SplashScreen>
                           boxShadow: [
                             BoxShadow(
                                 color: const Color(0xFF42A5F5)
-                                    .withOpacity(0.4 * value),
+                                    .withValues(alpha: 0.4 * value),
                                 blurRadius: 40 * value)
                           ],
                         ),
@@ -291,7 +291,7 @@ class _SplashScreenState extends State<SplashScreen>
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.amber.withOpacity(0.5), blurRadius: 10)
+                          color: Colors.amber.withValues(alpha: 0.5), blurRadius: 10)
                     ],
                   ),
                   child: const Text("v2.0",
@@ -320,11 +320,11 @@ class _SplashScreenState extends State<SplashScreen>
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                        color: const Color(0xFF42A5F5).withOpacity(0.8),
+                        color: const Color(0xFF42A5F5).withValues(alpha: 0.8),
                         blurRadius: 20,
                         spreadRadius: 5),
                     BoxShadow(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         blurRadius: 5,
                         spreadRadius: 2),
                   ],
@@ -391,11 +391,11 @@ class _SplashScreenState extends State<SplashScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isBlue ? const Color(0xFF42A5F5).withOpacity(0.1) : Colors.white,
+        color: isBlue ? const Color(0xFF42A5F5).withValues(alpha: 0.1) : Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5))
         ],

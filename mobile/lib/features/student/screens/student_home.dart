@@ -101,7 +101,7 @@ class _StudentHomeState extends State<StudentHome> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(40), // Thoda compact roundness
                   border: Border.all(color: const Color(0xFFF1F5F9)),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 5))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 5))],
                 ),
                 child: noResults 
                   ? _buildNoResults() 
@@ -175,7 +175,7 @@ class _StudentHomeState extends State<StudentHome> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(40),
               border: Border.all(color: const Color(0xFFF1F5F9)),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 5))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5))],
             ),
             child: Column(
               children: [
@@ -193,7 +193,7 @@ class _StudentHomeState extends State<StudentHome> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: const Color(0xFFF1F5F9)),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)],
                       ),
                       child: const Icon(Icons.school, color: Color(0xFF7E57C2), size: 22),
                     ),
@@ -238,8 +238,8 @@ class _StudentHomeState extends State<StudentHome> {
         decoration: BoxDecoration(
           color: Color(m['bg']),
           borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: Colors.white.withOpacity(0.6)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.6)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)],
         ),
         child: Stack(
           children: [
@@ -248,7 +248,7 @@ class _StudentHomeState extends State<StudentHome> {
               bottom: -20, right: -20,
               child: Container(
                 width: 90, height: 90,
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.4), shape: BoxShape.circle),
               ),
             ),
             Column(
@@ -284,8 +284,8 @@ class _StudentHomeState extends State<StudentHome> {
         decoration: BoxDecoration(
           color: Color(m['bg']),
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white.withOpacity(0.5)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 5)],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.5)),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,7 +357,7 @@ class _StudentHomeState extends State<StudentHome> {
         decoration: BoxDecoration(
           color: Color(m['bg']),
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: Colors.white.withOpacity(0.7)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

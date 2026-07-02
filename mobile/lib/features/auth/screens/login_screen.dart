@@ -20,8 +20,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _showPass = false;
 
   void _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty)
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       return;
+    }
 
     final success = await ref
         .read(authProvider.notifier)

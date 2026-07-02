@@ -74,7 +74,7 @@ class _BottomNavState extends State<BottomNav> {
                           ImageFilter.blur(sigmaX: 20 * val, sigmaY: 20 * val),
                       child: Container(
                         color: const Color(0xFF020617)
-                            .withOpacity(0.85 * val), // bg-slate-950/85
+                            .withValues(alpha: 0.85 * val), // bg-slate-950/85
                       ),
                     );
                   },
@@ -89,10 +89,10 @@ class _BottomNavState extends State<BottomNav> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: Colors.white.withOpacity(0.4)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.8),
+                          color: Colors.black.withValues(alpha: 0.8),
                           blurRadius: 100,
                           offset: const Offset(0, 40))
                     ],
@@ -131,7 +131,7 @@ class _BottomNavState extends State<BottomNav> {
                               boxShadow: [
                                 BoxShadow(
                                     color: const Color(0xFF42A5F5)
-                                        .withOpacity(0.4),
+                                        .withValues(alpha: 0.4),
                                     blurRadius: 40,
                                     spreadRadius: 10)
                               ],
@@ -215,7 +215,7 @@ class _BottomNavState extends State<BottomNav> {
                               Icon(Icons.verified_user,
                                   size: 22,
                                   color:
-                                      const Color(0xFF1E293B).withOpacity(0.2)),
+                                      const Color(0xFF1E293B).withValues(alpha: 0.2)),
                               const SizedBox(height: 5),
                               Text(
                                 "INSTITUTIONAL LEDGER VERIFIED",
@@ -223,7 +223,7 @@ class _BottomNavState extends State<BottomNav> {
                                     fontSize: 10,
                                     fontWeight: FontWeight.w900,
                                     color: const Color(0xFF1E293B)
-                                        .withOpacity(0.2),
+                                        .withValues(alpha: 0.2),
                                     letterSpacing: 4,
                                     fontStyle: FontStyle.italic),
                               )
@@ -274,8 +274,8 @@ class _BottomNavState extends State<BottomNav> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isContact
-                ? Colors.blue.shade50.withOpacity(0.5)
-                : Colors.grey.shade50.withOpacity(0.8),
+                ? Colors.blue.shade50.withValues(alpha: 0.5)
+                : Colors.grey.shade50.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(35),
             border: Border.all(
                 color: isContact ? Colors.blue.shade100 : Colors.grey.shade200),
@@ -289,7 +289,7 @@ class _BottomNavState extends State<BottomNav> {
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.05), blurRadius: 5)
+                          color: Colors.black.withValues(alpha: 0.05), blurRadius: 5)
                     ]),
                 child: Icon(icon, color: const Color(0xFF42A5F5), size: 18),
               ),
@@ -324,7 +324,7 @@ class _BottomNavState extends State<BottomNav> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 40,
               offset: const Offset(0, -10)) // Shadow thoda kam kiya
         ],
@@ -356,7 +356,7 @@ class _BottomNavState extends State<BottomNav> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: const Color(0xFF42A5F5).withOpacity(0.4),
+                                color: const Color(0xFF42A5F5).withValues(alpha: 0.4),
                                 blurRadius: 15,
                                 spreadRadius: 5)
                           ],
@@ -370,7 +370,7 @@ class _BottomNavState extends State<BottomNav> {
                           border: Border.all(color: Colors.white, width: 3),
                           boxShadow: [
                             BoxShadow(
-                                color: const Color(0xFF42A5F5).withOpacity(0.4),
+                                color: const Color(0xFF42A5F5).withValues(alpha: 0.4),
                                 blurRadius: 15,
                                 offset: const Offset(0, 10))
                           ],
