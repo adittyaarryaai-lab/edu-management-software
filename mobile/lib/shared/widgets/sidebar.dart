@@ -51,6 +51,8 @@ class _SidebarState extends State<Sidebar> {
   }
 
   void _navigate(String path) {
+
+    print("Navigating to: $path");
     // 1. Koi pop() nahi, koi drawer close nahi. 
     // 2. WidgetsBinding ensure karega ki click hone ke turant baad (agle frame mein) seedha naya page khule.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -543,7 +545,7 @@ class _SidebarState extends State<Sidebar> {
             _MenuItem(
                 icon: Icons.credit_card,
                 label: "Fees",
-                path: '/fees',
+               path: '/student/fees',
                 onTap: _navigate),
             _MenuItem(
                 icon: Icons.directions_bus,

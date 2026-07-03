@@ -122,7 +122,7 @@ class _StudentAttendanceState extends State<StudentAttendance> {
         backgroundColor: const Color(0xFFF8FAFC),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(), // <--- NAYA CODE: Bounce band
-          padding: const EdgeInsets.only(bottom: 100), // pb-24 equivalent
+          padding: const EdgeInsets.only(bottom: 50), // pb-24 equivalent
           child: Column(
             children: [
               // ==========================================================

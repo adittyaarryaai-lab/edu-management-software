@@ -103,7 +103,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
         backgroundColor: const Color(0xFFF8FAFC),
         body: SingleChildScrollView(
           physics: const ClampingScrollPhysics(), // FIXED: No top-bounce!
-          padding: const EdgeInsets.only(bottom: 100),
+          padding: const EdgeInsets.only(bottom: 50),
           child: Column(
             children: [
             // ==========================================================

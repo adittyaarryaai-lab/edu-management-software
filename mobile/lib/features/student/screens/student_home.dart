@@ -147,52 +147,49 @@ class _StudentHomeState extends State<StudentHome> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 elevation: 0,
-                backgroundColor: const Color(0xFFF8FAFC), // soft glass white
+                backgroundColor: Colors.transparent, // pure transparent
                 duration: const Duration(seconds: 2),
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.only(
-                  bottom: 35,
-                  left: 40,
-                  right: 40,
+                  bottom: 740, // upar shift (adjust if needed)
+                  left: 35,
+                  right: 35,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  side: const BorderSide(
-                    color: Color(0xFFE2E8F0),
-                    width: 1.5,
-                  ),
+                  borderRadius: BorderRadius.circular(28),
                 ),
-                content: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color:
-                            const Color(0xFFDBEAFE), // light blue liquid bubble
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.keyboard_double_arrow_left_rounded,
-                        color: Color(0xFF3B82F6),
-                        size: 18,
-                      ),
+                content: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black
+                        .withOpacity(0.36), // liquid transparent feel
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.18),
+                      width: 1.2,
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text(
-                        "Press BACK again to EXIT",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontStyle: FontStyle.italic,
-                          color: Color(0xFF475569),
-                          fontSize: 13,
-                          letterSpacing: 0.4,
-                        ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.04),
+                        blurRadius: 25,
+                        spreadRadius: 2,
                       ),
+                    ],
+                  ),
+                  child: const Text(
+                    "Press BACK again to EXIT app",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      color: Color(0xFFE2E8F0), // soft liquid text
+                      fontSize: 10,
+                      letterSpacing: 0.5,
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
