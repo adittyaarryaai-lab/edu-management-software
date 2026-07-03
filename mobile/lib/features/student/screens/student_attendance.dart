@@ -106,53 +106,70 @@ class _StudentAttendanceState extends State<StudentAttendance> {
       return const CustomLoader(); // <--- TERA NAYA PREMIUM LOADER
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(), // <--- NAYA CODE
-        padding: const EdgeInsets.only(bottom: 100), // pb-24 equivalent
-        child: Column(
-          children: [
-            // ==========================================================
-            // 1. HEADER SECTION (Blue Curve)
-            // ==========================================================
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 60, bottom: 40),
-              decoration: const BoxDecoration(
-                color: Color(0xFF42A5F5),
-                borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(55)), // rounded-b-[3.5rem]
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 15,
-                      offset: Offset(0, 10))
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                clipBehavior: Clip.none,
-                children: [
-                  // Back Button
-                  Positioned(
-                    top: 0,
-                    left: 24,
-                    child: GestureDetector(
-                      onTap: () => context.go('/'),
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(16),
-                          border:
-                              Border.all(color: Colors.white.withValues(alpha: 0.2)),
+    return PopScope(
+      canPop: false, // System ke default back button se app exit roko
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        // Agar pichla page hai toh back, warna direct Dashboard
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/');
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(), // <--- NAYA CODE: Bounce band
+          padding: const EdgeInsets.only(bottom: 100), // pb-24 equivalent
+          child: Column(
+            children: [
+              // ==========================================================
+              // 1. HEADER SECTION (Blue Curve)
+              // ==========================================================
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 60, bottom: 40),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF42A5F5),
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(55)), // rounded-b-[3.5rem]
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        offset: Offset(0, 10))
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Back Button
+                    Positioned(
+                      top: 0,
+                      left: 24,
+                      child: GestureDetector(
+                        onTap: () {
+                          // NAYA CODE: Upar wale back arrow ko bhi smart bana diya
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.white.withOpacity(0.2)),
+                          ),
+                          child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                         ),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 24),
                       ),
                     ),
-                  ),
 
                   // Right CPU Icon
                   Positioned(
@@ -418,7 +435,7 @@ class _StudentAttendanceState extends State<StudentAttendance> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // --- WIDGET BUILDERS ---

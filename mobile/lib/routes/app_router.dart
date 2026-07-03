@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/student/screens/student_home.dart';
 import '../features/student/screens/student_attendance.dart';
+import '../features/student/screens/student_timetable.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -56,6 +57,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/attendance',
       builder: (context, state) => const StudentAttendance(),
+    ),
+
+    GoRoute(
+      path: '/timetable',
+      builder: (context, state) => const StudentTimetable(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---
