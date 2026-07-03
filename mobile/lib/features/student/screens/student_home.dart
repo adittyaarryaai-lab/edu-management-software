@@ -165,15 +165,15 @@ class _StudentHomeState extends State<StudentHome> {
                   ),
                   decoration: BoxDecoration(
                     color: Colors.black
-                        .withOpacity(0.36), // liquid transparent feel
+                        .withValues(alpha: 0.36), // liquid transparent feel
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: 0.18),
                       width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.white.withOpacity(0.04),
+                        color: Colors.white.withValues(alpha: 0.04),
                         blurRadius: 25,
                         spreadRadius: 2,
                       ),

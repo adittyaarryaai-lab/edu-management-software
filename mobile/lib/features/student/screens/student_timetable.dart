@@ -150,10 +150,10 @@ class _StudentTimetableState extends State<StudentTimetable> {
                           child: Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.1)),
+                                  color: Colors.white.withValues(alpha: 0.1)),
                             ),
                             child: const Icon(Icons.arrow_back,
                                 color: Colors.white, size: 24),
@@ -179,7 +179,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                               style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white.withOpacity(0.8),
+                                  color: Colors.white.withValues(alpha: 0.8),
                                   letterSpacing: 2),
                             ),
                           ],
@@ -189,10 +189,10 @@ class _StudentTimetableState extends State<StudentTimetable> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.1)),
+                                color: Colors.white.withValues(alpha: 0.1)),
                           ),
                           child: const Icon(Icons.watch_later_outlined,
                               color: Colors.white, size: 24),
@@ -222,12 +222,12 @@ class _StudentTimetableState extends State<StudentTimetable> {
                             decoration: BoxDecoration(
                               color: isActive
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.1),
+                                  : Colors.white.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                   color: isActive
                                       ? Colors.white
-                                      : Colors.white.withOpacity(0.2)),
+                                      : Colors.white.withValues(alpha: 0.2)),
                               // FIXED: Shadow ab kabhi error nahi dega kyunki transparent se interpolate hoga
                               boxShadow: [
                                 BoxShadow(
@@ -248,7 +248,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                                 fontWeight: FontWeight.w900,
                                 color: isActive
                                     ? const Color(0xFF42A5F5)
-                                    : Colors.white.withOpacity(0.8),
+                                    : Colors.white.withValues(alpha: 0.8),
                                 fontStyle: FontStyle.italic,
                                 letterSpacing: 1,
                               ),
@@ -315,7 +315,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
         borderRadius: BorderRadius.circular(40), // rounded-[2.5rem]
         border: Border.all(color: const Color(0xFFDDE3EA)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8)
+          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 8)
         ],
       ),
       child: Row(

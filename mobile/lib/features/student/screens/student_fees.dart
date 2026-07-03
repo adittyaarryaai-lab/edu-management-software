@@ -81,8 +81,8 @@ class _StudentFeesState extends State<StudentFees> {
                                 "EDUFLOWAI INSTITUTION")
                             .toString()
                             .toUpperCase(),
-                        style: pw.TextStyle(
-                            color: const PdfColor.fromInt(0xFF22D3EE),
+                        style: const pw.TextStyle(
+                            color: PdfColor.fromInt(0xFF22D3EE),
                             fontSize: 24,
                             fontWeight: pw.FontWeight.bold),
                       ),
@@ -104,18 +104,18 @@ class _StudentFeesState extends State<StudentFees> {
                     children: [
                       pw.Text(
                           "Receipt ID: #REC-${paymentId.substring(paymentId.length - 6).toUpperCase()}",
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          style: const pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       pw.Text(
                           "Date: ${DateFormat('dd/MM/yyyy').format(DateTime.parse(p['date']))}",
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          style: const pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                     ]),
                 pw.SizedBox(height: 20),
 
                 // --- DATA TABLE ---
                 pw.TableHelper.fromTextArray(
                   headers: ['FIELD', 'STUDENT INFORMATION'],
-                  headerStyle: pw.TextStyle(
-                      color: const PdfColor.fromInt(0xFF22D3EE),
+                  headerStyle: const pw.TextStyle(
+                      color: PdfColor.fromInt(0xFF22D3EE),
                       fontWeight: pw.FontWeight.bold),
                   headerDecoration: const pw.BoxDecoration(
                       color: PdfColor.fromInt(0xFF0F172A)),
@@ -139,7 +139,7 @@ class _StudentFeesState extends State<StudentFees> {
                 // --- FINAL TOTAL ---
                 pw.Text(
                     "TOTAL PAID: INR ${NumberFormat('#,##0').format(p['amountPaid'] ?? 0)}/-",
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                         fontSize: 16, fontWeight: pw.FontWeight.bold)),
 
                 pw.Spacer(),
@@ -209,7 +209,7 @@ class _StudentFeesState extends State<StudentFees> {
                 onTap: () => Navigator.pop(dialogContext),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(color: Colors.black.withOpacity(0.6)),
+                  child: Container(color: Colors.black.withValues(alpha: 0.6)),
                 ),
               ),
               // Modal Content
@@ -250,13 +250,13 @@ class _StudentFeesState extends State<StudentFees> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
+                            const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.watch_later,
+                                Icon(Icons.watch_later,
                                     color: Color(0xFFD97706), size: 22),
-                                const SizedBox(width: 8),
-                                const Text("Verification pending",
+                                SizedBox(width: 8),
+                                Text("Verification pending",
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w900,
@@ -278,12 +278,27 @@ class _StudentFeesState extends State<StudentFees> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
                                 child: Image.network(
-                                  "http://10.0.2.2:5000${pendingSignal['screenshot']}",
+                                  // NAYA CODE: Yahan apne laptop ka asli Wi-Fi IPv4 address daal!
+                                  "http://192.168.31.33:5000${pendingSignal['screenshot']}", // <--- Is line ko change kar
                                   fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Center(
-                                          child: Icon(Icons.broken_image,
-                                              color: Colors.black26, size: 50)),
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.broken_image,
+                                              color: Colors.black26, size: 40),
+                                          SizedBox(height: 4),
+                                          Text("Image Load Failed",
+                                              style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.black26,
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -402,11 +417,17 @@ class _StudentFeesState extends State<StudentFees> {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-        body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 50),
-          child: Column(
-            children: [
+        // --- NAYA CODE: RefreshIndicator lagaya Pull-to-Refresh ke liye ---
+        body: RefreshIndicator(
+          color: const Color(0xFF42A5F5), // Premium Blue Spinner
+          backgroundColor: Colors.white,
+          onRefresh: _fetchSummary, // Ye function automatic API wapas call kar dega
+          child: SingleChildScrollView(
+            // FIXED: Pull-to-refresh kaam kare isliye Clamping hatake AlwaysScrollable lagana padta hai
+            physics: const AlwaysScrollableScrollPhysics(), 
+            padding: const EdgeInsets.only(bottom: 100),
+            child: Column(
+              children: [
               // ==========================================================
               // HEADER SECTION
               // ==========================================================
@@ -437,18 +458,19 @@ class _StudentFeesState extends State<StudentFees> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          if (context.canPop())
+                          if (context.canPop()) {
                             context.pop();
-                          else
+                          } else {
                             context.go('/');
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.1)),
+                                color: Colors.white.withValues(alpha: 0.1)),
                           ),
                           child: const Icon(Icons.arrow_back,
                               color: Colors.white, size: 24),
@@ -470,7 +492,7 @@ class _StudentFeesState extends State<StudentFees> {
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 letterSpacing: 2),
                           ),
                         ],
@@ -478,10 +500,10 @@ class _StudentFeesState extends State<StudentFees> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                           border:
-                              Border.all(color: Colors.white.withOpacity(0.1)),
+                              Border.all(color: Colors.white.withValues(alpha: 0.1)),
                         ),
                         child: const Icon(Icons.credit_card,
                             color: Colors.white, size: 24),
@@ -776,6 +798,7 @@ class _StudentFeesState extends State<StudentFees> {
                       const SizedBox(height: 24),
 
                       // --- TIMELINE INFO ---
+                      // --- TIMELINE INFO ---
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
@@ -790,42 +813,59 @@ class _StudentFeesState extends State<StudentFees> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text("NEXT DEADLINE",
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white60,
-                                        letterSpacing: 1.5)),
-                                Text(
+                            // FIXED: Left column ko Expanded kiya taaki long text wrap ho sake
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("NEXT DEADLINE",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white60,
+                                          letterSpacing: 1)),
+                                  const SizedBox(height: 4),
+                                  Text(
                                     "${isFeesDone ? 'NEXT CYCLE: ' : ''}$deadlineStr",
                                     style: const TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.white)),
-                              ],
+                                        color: Colors.white),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 10),
                             Container(
                                 width: 1,
                                 height: 40,
-                                color: Colors.white.withOpacity(0.2)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Text("LAST ACTIVITY",
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white60,
-                                        letterSpacing: 1.5)),
-                                Text(lastDate,
+                                color: Colors.white.withValues(alpha: 0.2)),
+                            const SizedBox(width: 10),
+                            // FIXED: Right column ko bhi Expanded diya safe scaling ke liye
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  const Text("LAST ACTIVITY",
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white60,
+                                          letterSpacing: 1)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    lastDate,
                                     style: const TextStyle(
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w900,
-                                        color: Colors.white)),
-                              ],
+                                        color: Colors.white),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -968,7 +1008,7 @@ class _StudentFeesState extends State<StudentFees> {
                                     Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                            color: Colors.blue.withOpacity(0.1),
+                                            color: Colors.blue.withValues(alpha: 0.1),
                                             borderRadius:
                                                 BorderRadius.circular(12)),
                                         child: const Icon(
@@ -1050,7 +1090,7 @@ class _StudentFeesState extends State<StudentFees> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                             color:
-                                                Colors.amber.withOpacity(0.1),
+                                                Colors.amber.withValues(alpha: 0.1),
                                             borderRadius:
                                                 BorderRadius.circular(12)),
                                         child: const Icon(Icons.bolt,
@@ -1386,17 +1426,17 @@ class _StudentFeesState extends State<StudentFees> {
                                     size: 120, color: Colors.white10),
                               ),
                             ),
-                            Column(
+                            const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("SECURITY ASSURED",
+                                Text("SECURITY ASSURED",
                                     style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w900,
                                         color: Colors.white,
                                         letterSpacing: 4)),
-                                const SizedBox(height: 5),
-                                const Text("End-to-end encrypted billing",
+                                SizedBox(height: 5),
+                                Text("End-to-end encrypted billing",
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w900,
@@ -1415,6 +1455,7 @@ class _StudentFeesState extends State<StudentFees> {
           ),
         ),
       ),
+      )
     );
   }
 }
