@@ -88,221 +88,237 @@ class _StudentTimetableState extends State<StudentTimetable> {
     }
 
     return PopScope(
-      canPop: false, // 1. Phone ke default back button se app exit ko roko
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
+        canPop: false, // 1. Phone ke default back button se app exit ko roko
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
 
-        // 2. Agar pichle pages hain toh wahan jao, warna direct Dashboard (Home) pe
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/');
-        }
-      },
-      child: Scaffold( // <--- Scaffold ab PopScope ka child ban gaya
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(), // FIXED: No top-bounce!
-          padding: const EdgeInsets.only(bottom: 50),
-          child: Column(
-            children: [
-            // ==========================================================
-            // HEADER SECTION (Blue Gradient + Days Scroller)
-            // ==========================================================
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 60, bottom: 50),
-              decoration: const BoxDecoration(
-                color: Color(0xFF42A5F5),
-                gradient: LinearGradient(
-                  colors: [Color(0xFF64B5F6), Color(0xFF42A5F5)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius:
-                    BorderRadius.vertical(bottom: Radius.circular(55)),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 15,
-                      offset: Offset(0, 10))
-                ],
-              ),
-              child: Column(
-                children: [
-                  // --- TOP BAR ---
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Back Button
-                        GestureDetector(
-                          onTap: () {
-                            // Agar pichla page stack mein hai, toh pop karo
-                            if (context.canPop()) {
-                              context.pop();
-                            } else {
-                              // Agar stack khali hai, toh seedha Dashboard par bhej do
-                              context.go('/');
-                            }
-                          }, // Back jayega perfectly
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.1)),
-                            ),
-                            child: const Icon(Icons.arrow_back,
-                                color: Colors.white, size: 24),
-                          ),
+          // 2. Agar pichle pages hain toh wahan jao, warna direct Dashboard (Home) pe
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        },
+        child: Scaffold(
+            backgroundColor: const Color(0xFFF8FAFC),
+            // --- NAYA CODE: RefreshIndicator ---
+            body: RefreshIndicator(
+              color: const Color(0xFF42A5F5),
+              backgroundColor: Colors.white,
+              onRefresh: _fetchTimetable, // Asli API function laga diya!
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(), // FIXED
+                padding: const EdgeInsets.only(bottom: 50), // FIXED: 50px
+                child: Column(
+                  children: [
+                    // ==========================================================
+                    // HEADER SECTION (Blue Gradient + Days Scroller)
+                    // ==========================================================
+                    // ==========================================================
+                    // HEADER SECTION (Blue Gradient + Days Scroller)
+                    // ==========================================================
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 60, bottom: 50),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF42A5F5),
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF64B5F6), Color(0xFF42A5F5)],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                         ),
+                        borderRadius:
+                            BorderRadius.vertical(bottom: Radius.circular(55)),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 15,
+                              offset: Offset(0, 10))
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // --- TOP BAR ---
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Back Button
+                                GestureDetector(
+                                  onTap: () {
+                                    // Agar pichla page stack mein hai, toh pop karo
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      // Agar stack khali hai, toh seedha Dashboard par bhej do
+                                      context.go('/');
+                                    }
+                                  }, // Back jayega perfectly
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.1)),
+                                    ),
+                                    child: const Icon(Icons.arrow_back,
+                                        color: Colors.white, size: 24),
+                                  ),
+                                ),
 
-                        // Center Title
-                        Column(
-                          children: [
-                            const Text(
-                              "Class Schedule",
-                              style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  fontStyle: FontStyle.italic,
-                                  letterSpacing: -0.5),
-                            ),
-                            Text(
-                              user?['grade'] != null
-                                  ? "Class: ${user!['grade']}"
-                                  : "Not Assigned",
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  letterSpacing: 2),
-                            ),
-                          ],
-                        ),
+                                // Center Title
+                                Column(
+                                  children: [
+                                    const Text(
+                                      "Class Schedule",
+                                      style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                          fontStyle: FontStyle.italic,
+                                          letterSpacing: -0.5),
+                                    ),
+                                    Text(
+                                      user?['grade'] != null
+                                          ? "Class: ${user!['grade']}"
+                                          : "Not Assigned",
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.8),
+                                          letterSpacing: 2),
+                                    ),
+                                  ],
+                                ),
 
-                        // Right Icon (Clock)
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.1)),
-                          ),
-                          child: const Icon(Icons.watch_later_outlined,
-                              color: Colors.white, size: 24),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 35),
-
-                  // --- DAYS SCROLLER ---
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: daysMap.map((day) {
-                        bool isActive = activeDay == day['full'];
-                        return GestureDetector(
-                          onTap: () => setState(() => activeDay = day['full']!),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves
-                                .easeOut, // FIXED: easeOutBack hata diya taaki shadow minus mein na jaye!
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: isActive
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.2)),
-                              // FIXED: Shadow ab kabhi error nahi dega kyunki transparent se interpolate hoga
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isActive
-                                      ? Colors.black12
-                                      : Colors.transparent,
-                                  blurRadius: isActive ? 10.0 : 0.0,
-                                  offset: isActive
-                                      ? const Offset(0, 5)
-                                      : Offset.zero,
-                                )
+                                // Right Icon (Clock)
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.1)),
+                                  ),
+                                  child: const Icon(Icons.watch_later_outlined,
+                                      color: Colors.white, size: 24),
+                                ),
                               ],
                             ),
-                            child: Text(
-                              day['short']!,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w900,
-                                color: isActive
-                                    ? const Color(0xFF42A5F5)
-                                    : Colors.white.withValues(alpha: 0.8),
-                                fontStyle: FontStyle.italic,
-                                letterSpacing: 1,
-                              ),
-                            ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.5),
-                ],
-              ),
-            ),
+                          const SizedBox(height: 35),
 
-            // ==========================================================
-            // SCHEDULE LIST OVERLAPPING HEADER (-mt-10)
-            // ==========================================================
-            Transform.translate(
-              offset: const Offset(0, -30),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  switchInCurve: Curves.easeOutBack,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(
-                              0, 0.05), // Halki si neeche se aayegi
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
+                          // --- DAYS SCROLLER ---
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              children: daysMap.map((day) {
+                                bool isActive = activeDay == day['full'];
+                                return GestureDetector(
+                                  onTap: () =>
+                                      setState(() => activeDay = day['full']!),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves
+                                        .easeOut, // FIXED: easeOutBack hata diya taaki shadow minus mein na jaye!
+                                    margin: const EdgeInsets.only(right: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                    decoration: BoxDecoration(
+                                      color: isActive
+                                          ? Colors.white
+                                          : Colors.white.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                          color: isActive
+                                              ? Colors.white
+                                              : Colors.white
+                                                  .withValues(alpha: 0.2)),
+                                      // FIXED: Shadow ab kabhi error nahi dega kyunki transparent se interpolate hoga
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isActive
+                                              ? Colors.black12
+                                              : Colors.transparent,
+                                          blurRadius: isActive ? 10.0 : 0.0,
+                                          offset: isActive
+                                              ? const Offset(0, 5)
+                                              : Offset.zero,
+                                        )
+                                      ],
+                                    ),
+                                    child: Text(
+                                      day['short']!,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w900,
+                                        color: isActive
+                                            ? const Color(0xFF42A5F5)
+                                            : Colors.white
+                                                .withValues(alpha: 0.8),
+                                        fontStyle: FontStyle.italic,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.5),
+                        ],
                       ),
-                    );
-                  },
-                  child: currentPeriods.isNotEmpty
-                      ? Column(
-                          // KEY is very important here to prevent the Red Screen crash!
-                          key: ValueKey('filled_$activeDay'),
-                          children: currentPeriods.map((item) {
-                            return _buildPeriodCard(item);
-                          }).toList(),
-                        )
-                      : _buildEmptyState(key: ValueKey('empty_$activeDay')),
+                    ),
+
+                    // ==========================================================
+                    // SCHEDULE LIST OVERLAPPING HEADER (-mt-10)
+                    // ==========================================================
+                    Transform.translate(
+                      offset: const Offset(0, -30),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 400),
+                          switchInCurve: Curves.easeOutBack,
+                          switchOutCurve: Curves.easeIn,
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(
+                                      0, 0.05), // Halki si neeche se aayegi
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: currentPeriods.isNotEmpty
+                              ? Column(
+                                  // KEY is very important here to prevent the Red Screen crash!
+                                  key: ValueKey('filled_$activeDay'),
+                                  children: currentPeriods.map((item) {
+                                    return _buildPeriodCard(item);
+                                  }).toList(),
+                                )
+                              : _buildEmptyState(
+                                  key: ValueKey('empty_$activeDay')),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    ));
+            )));
   }
 
   // --- PERIOD CARD UI ---
@@ -335,7 +351,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                 Text(
                   item['startTime'] ?? "--:--",
                   style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: FontWeight.w900,
                       color: Colors.black38,
                       fontStyle: FontStyle.italic),
@@ -344,7 +360,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                 Text(
                   "TO\n${item['endTime'] ?? '--:--'}",
                   style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 11,
                       fontWeight: FontWeight.w900,
                       color: Colors.black38,
                       fontStyle: FontStyle.italic,
@@ -364,7 +380,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                 Text(
                   (item['subject'] ?? "Unknown").toString().toUpperCase(),
                   style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 15,
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF1E293B),
                       fontStyle: FontStyle.italic),
@@ -382,13 +398,14 @@ class _StudentTimetableState extends State<StudentTimetable> {
                       child: Text(
                         "Teacher: ${item['teacherName'] ?? 'Not Assigned'}",
                         style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF64748B),
                             fontStyle: FontStyle.italic),
                         // --- YE CHANGES KARNE HAI ---
-                        overflow: TextOverflow.visible, 
-                        maxLines: 2, // Agar naam bahut bada hai toh 2 lines lega
+                        overflow: TextOverflow.visible,
+                        maxLines:
+                            2, // Agar naam bahut bada hai toh 2 lines lega
                       ),
                     ),
                   ],
@@ -412,7 +429,7 @@ class _StudentTimetableState extends State<StudentTimetable> {
                       Text(
                         "ROOM: ${item['room']?.toString().toUpperCase() ?? 'N/A'}",
                         style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFF42A5F5),
                             letterSpacing: 1.5,

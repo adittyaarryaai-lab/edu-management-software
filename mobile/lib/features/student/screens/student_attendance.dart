@@ -28,32 +28,32 @@ class _StudentAttendanceState extends State<StudentAttendance> {
   }
 
   Future<void> _fetchStats() async {
-  String monthStr = DateFormat('yyyy-MM').format(currentMonth);
+    String monthStr = DateFormat('yyyy-MM').format(currentMonth);
 
-  if (_monthlyCache.containsKey(monthStr)) {
-    setState(() {
-      stats = _monthlyCache[monthStr];
-      loading = false;
-    });
-    return;
+    if (_monthlyCache.containsKey(monthStr)) {
+      setState(() {
+        stats = _monthlyCache[monthStr];
+        loading = false;
+      });
+      return;
+    }
+
+    try {
+      final response =
+          await ApiClient.dio.get('/attendance/student-stats?month=$monthStr');
+
+      final data = response.data;
+
+      _monthlyCache[monthStr] = data;
+
+      setState(() {
+        stats = data;
+        loading = false;
+      });
+    } catch (e) {
+      print("Attendance Sync Failed: $e");
+    }
   }
-
-  try {
-    final response =
-        await ApiClient.dio.get('/attendance/student-stats?month=$monthStr');
-
-    final data = response.data;
-
-    _monthlyCache[monthStr] = data;
-
-    setState(() {
-      stats = data;
-      loading = false;
-    });
-  } catch (e) {
-    print("Attendance Sync Failed: $e");
-  }
-}
 
   void _changeMonth(int offset) {
     setState(() {
@@ -102,340 +102,393 @@ class _StudentAttendanceState extends State<StudentAttendance> {
 
   @override
   Widget build(BuildContext context) {
-   if (loading) {
+    if (loading) {
       return const CustomLoader(); // <--- TERA NAYA PREMIUM LOADER
     }
 
     return PopScope(
-      canPop: false, // System ke default back button se app exit roko
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
+        canPop: false, // System ke default back button se app exit roko
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
 
-        // Agar pichla page hai toh back, warna direct Dashboard
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/');
-        }
-      },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(), // <--- NAYA CODE: Bounce band
-          padding: const EdgeInsets.only(bottom: 50), // pb-24 equivalent
-          child: Column(
-            children: [
-              // ==========================================================
-              // 1. HEADER SECTION (Blue Curve)
-              // ==========================================================
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 60, bottom: 40),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF42A5F5),
-                  borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(55)), // rounded-b-[3.5rem]
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 15,
-                        offset: Offset(0, 10))
-                  ],
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Back Button
-                    Positioned(
-                      top: 0,
-                      left: 24,
-                      child: GestureDetector(
-                        onTap: () {
-                          // NAYA CODE: Upar wale back arrow ko bhi smart bana diya
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/');
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                          ),
-                          child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                        ),
-                      ),
-                    ),
-
-                  // Right CPU Icon
-                  Positioned(
-                    top: 0,
-                    right: 24,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                      ),
-                      child: const Icon(Icons.memory,
-                          color: Colors.white, size: 24),
-                    ),
-                  ),
-
-                  // Attendance Circle
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 20),
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Inner blur/color
-                          Container(
-                            width: 128,
-                            height: 128,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  width: 6),
-                            ),
-                            child: Center(
-                              child: Text(
-                                "${stats?['percentage'] ?? 0}%",
-                                style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white,
-                                    letterSpacing: -1),
-                              ),
-                            ),
-                          ),
-                          // Outer glow border
-                          Container(
-                            width: 128,
-                            height: 128,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 6),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    blurRadius: 20,
-                                    spreadRadius: 0)
-                              ],
-                            ),
-                          ),
-                        ],
-                      )
-                          .animate()
-                          .scale(duration: 500.ms, curve: Curves.easeOutBack),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "Attendance Percentage %",
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            fontStyle: FontStyle.italic),
-                      ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.5),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // ==========================================================
-            // 2. STATS CARDS
-            // ==========================================================
-            Transform.translate(
-              offset: const Offset(0, -25), // -mt-8 equivalent
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+          // Agar pichla page hai toh back, warna direct Dashboard
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/');
+          }
+        },
+        child: Scaffold(
+            backgroundColor: const Color(0xFFF8FAFC),
+            // --- NAYA CODE: RefreshIndicator ---
+            body: RefreshIndicator(
+              color: const Color(0xFF42A5F5),
+              backgroundColor: Colors.white,
+              // (NOTE: Agar tere attendance mein API call ka function '_fetchAttendance' hai toh wo likhna)
+              onRefresh: () async {
+                // Yahan tera attendance load hone wala function call hoga
+                await Future.delayed(const Duration(
+                    seconds:
+                        1)); // Agar function nahi hai toh ye placeholder hai
+                setState(() {});
+              },
+              child: SingleChildScrollView(
+                physics:
+                    const AlwaysScrollableScrollPhysics(), // FIXED: Pull to refresh ke liye
+                padding: const EdgeInsets.only(
+                    bottom: 50), // FIXED: 50px standard padding
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        _buildStatCard(
-                            "Total days",
-                            stats?['totalDays']?.toString() ?? '0',
-                            const Color(0xFFFFFFFF),
-                            const Color(0xFF475569),
-                            Icons.calendar_month,
-                            const Color(0xFF2196F3)),
-                        const SizedBox(width: 12),
-                        _buildStatCard(
-                            "Present",
-                            stats?['presentDays']?.toString() ?? '0',
-                            const Color(0xFFE0F2F1),
-                            const Color(0xFF059669),
-                            Icons.check_circle,
-                            const Color(0xFF10B981)),
-                        const SizedBox(width: 12),
-                        _buildStatCard(
-                            "Absent",
-                            stats?['absentDays']?.toString() ?? '0',
-                            const Color(0xFFFFEBEE),
-                            const Color(0xFFE11D48),
-                            Icons.cancel,
-                            const Color(0xFFF43F5E)),
-                      ],
-                    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
-
-                    const SizedBox(height: 24),
-
                     // ==========================================================
-                    // 3. MONTH NAVIGATOR
+                    // 1. HEADER SECTION (Blue Curve)
+                    // ==========================================================
+                    // ==========================================================
+                    // 1. HEADER SECTION (Blue Curve)
                     // ==========================================================
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: const Color(0xFFDDE3EA)),
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 60, bottom: 40),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF42A5F5),
+                        borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(55)), // rounded-b-[3.5rem]
                         boxShadow: [
                           BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2))
+                              color: Colors.black12,
+                              blurRadius: 15,
+                              offset: Offset(0, 10))
                         ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
                         children: [
-                          GestureDetector(
-                            onTap: () => _changeMonth(-1),
-                            child: const Icon(Icons.chevron_left,
-                                size: 30, color: Color(0xFF94A3B8)),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_month,
-                                  size: 22, color: Color(0xFF42A5F5)),
-                              const SizedBox(width: 8),
-                              Text(
-                                DateFormat('MMMM yyyy').format(currentMonth),
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF334155),
-                                    fontStyle: FontStyle.italic),
+                          // Back Button
+                          Positioned(
+                            top: 0,
+                            left: 24,
+                            child: GestureDetector(
+                              onTap: () {
+                                // NAYA CODE: Upar wale back arrow ko bhi smart bana diya
+                                if (context.canPop()) {
+                                  context.pop();
+                                } else {
+                                  context.go('/');
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.2)),
+                                ),
+                                child: const Icon(Icons.arrow_back,
+                                    color: Colors.white, size: 24),
                               ),
+                            ),
+                          ),
+
+                          // Right CPU Icon
+                          Positioned(
+                            top: 0,
+                            right: 24,
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.2)),
+                              ),
+                              child: const Icon(Icons.memory,
+                                  color: Colors.white, size: 24),
+                            ),
+                          ),
+
+                          // Attendance Circle
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(height: 20),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Inner blur/color
+                                  Container(
+                                    width: 128,
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.2),
+                                          width: 6),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "${stats?['percentage'] ?? 0}%",
+                                        style: const TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            letterSpacing: -1),
+                                      ),
+                                    ),
+                                  ),
+                                  // Outer glow border
+                                  Container(
+                                    width: 128,
+                                    height: 128,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.3),
+                                            blurRadius: 20,
+                                            spreadRadius: 0)
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ).animate().scale(
+                                  duration: 500.ms, curve: Curves.easeOutBack),
+                              const SizedBox(height: 16),
+                              const Text(
+                                "Attendance Percentage %",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic),
+                              )
+                                  .animate()
+                                  .fadeIn(delay: 200.ms)
+                                  .slideY(begin: 0.5),
                             ],
                           ),
-                          GestureDetector(
-                            onTap: () => _changeMonth(1),
-                            child: const Icon(Icons.chevron_right,
-                                size: 30, color: Color(0xFF94A3B8)),
-                          ),
                         ],
                       ),
-                    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-
-                    const SizedBox(height: 24),
+                    ),
 
                     // ==========================================================
-                    // 4. CALENDAR BOARD
+                    // 2. STATS CARDS
                     // ==========================================================
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(50),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10))
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          // Days Header (Mo, Tu, We...)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: ["MO", "TU", "WE", "TH", "FR", "SA", "SU"]
-                                .map((d) => SizedBox(
-                                      width: 35,
-                                      child: Text(d,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w900,
-                                              color: Color(0xFF94A3B8),
-                                              letterSpacing: 1)),
-                                    ))
-                                .toList(),
-                          ),
-                          const SizedBox(height: 15),
+                    Transform.translate(
+                      offset: const Offset(0, -25), // -mt-8 equivalent
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                _buildStatCard(
+                                    "Total days",
+                                    stats?['totalDays']?.toString() ?? '0',
+                                    const Color(0xFFFFFFFF),
+                                    const Color(0xFF475569),
+                                    Icons.calendar_month,
+                                    const Color(0xFF2196F3)),
+                                const SizedBox(width: 12),
+                                _buildStatCard(
+                                    "Present",
+                                    stats?['presentDays']?.toString() ?? '0',
+                                    const Color(0xFFE0F2F1),
+                                    const Color(0xFF059669),
+                                    Icons.check_circle,
+                                    const Color(0xFF10B981)),
+                                const SizedBox(width: 12),
+                                _buildStatCard(
+                                    "Absent",
+                                    stats?['absentDays']?.toString() ?? '0',
+                                    const Color(0xFFFFEBEE),
+                                    const Color(0xFFE11D48),
+                                    Icons.cancel,
+                                    const Color(0xFFF43F5E)),
+                              ],
+                            )
+                                .animate()
+                                .fadeIn(delay: 300.ms)
+                                .slideY(begin: 0.2),
 
-                          // Dates Grid
-                          _buildCalendarGrid(),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2),
+                            const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
-
-                    // ==========================================================
-                    // 5. SELECTED DATE DETAILS CARD
-                    // ==========================================================
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutBack,
-                      child: selectedDateLog != null
-                          ? Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(30),
+                            // ==========================================================
+                            // 3. MONTH NAVIGATOR
+                            // ==========================================================
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(45),
-                                border: Border.all(
-                                    color: Colors.blue.shade50, width: 4),
+                                borderRadius: BorderRadius.circular(30),
+                                border:
+                                    Border.all(color: const Color(0xFFDDE3EA)),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.08),
-                                      blurRadius: 25,
+                                      color:
+                                          Colors.black.withValues(alpha: 0.02),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2))
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _changeMonth(-1),
+                                    child: const Icon(Icons.chevron_left,
+                                        size: 30, color: Color(0xFF94A3B8)),
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.calendar_month,
+                                          size: 22, color: Color(0xFF42A5F5)),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        DateFormat('MMMM yyyy')
+                                            .format(currentMonth),
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF334155),
+                                            fontStyle: FontStyle.italic),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => _changeMonth(1),
+                                    child: const Icon(Icons.chevron_right,
+                                        size: 30, color: Color(0xFF94A3B8)),
+                                  ),
+                                ],
+                              ),
+                            )
+                                .animate()
+                                .fadeIn(delay: 400.ms)
+                                .slideY(begin: 0.2),
+
+                            const SizedBox(height: 24),
+
+                            // ==========================================================
+                            // 4. CALENDAR BOARD
+                            // ==========================================================
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(50),
+                                border:
+                                    Border.all(color: const Color(0xFFE2E8F0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 20,
                                       offset: const Offset(0, 10))
                                 ],
                               ),
                               child: Column(
                                 children: [
-                                  Text(
-                                    selectedDateLog!['formattedDate']
-                                        .toString()
-                                        .toUpperCase(),
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w900,
-                                        color: Color(0xFF334155),
-                                        letterSpacing: 2),
+                                  // Days Header (Mo, Tu, We...)
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      "MO",
+                                      "TU",
+                                      "WE",
+                                      "TH",
+                                      "FR",
+                                      "SA",
+                                      "SU"
+                                    ]
+                                        .map((d) => SizedBox(
+                                              width: 35,
+                                              child: Text(d,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      color: Color(0xFF94A3B8),
+                                                      letterSpacing: 1)),
+                                            ))
+                                        .toList(),
                                   ),
-                                  const SizedBox(height: 20),
-                                  _buildStatusContent(
-                                      selectedDateLog!['status']),
+                                  const SizedBox(height: 15),
+
+                                  // Dates Grid
+                                  _buildCalendarGrid(),
                                 ],
                               ),
-                            ).animate().fadeIn().slideY(begin: 0.5)
-                          : const SizedBox.shrink(),
+                            )
+                                .animate()
+                                .fadeIn(delay: 500.ms)
+                                .slideY(begin: 0.2),
+
+                            const SizedBox(height: 24),
+
+                            // ==========================================================
+                            // 5. SELECTED DATE DETAILS CARD
+                            // ==========================================================
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOutBack,
+                              child: selectedDateLog != null
+                                  ? Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(30),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(45),
+                                        border: Border.all(
+                                            color: Colors.blue.shade50,
+                                            width: 4),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.08),
+                                              blurRadius: 25,
+                                              offset: const Offset(0, 10))
+                                        ],
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            selectedDateLog!['formattedDate']
+                                                .toString()
+                                                .toUpperCase(),
+                                            style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w900,
+                                                color: Color(0xFF334155),
+                                                letterSpacing: 2),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          _buildStatusContent(
+                                              selectedDateLog!['status']),
+                                        ],
+                                      ),
+                                    ).animate().fadeIn().slideY(begin: 0.5)
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    ));
+            )));
   }
 
   // --- WIDGET BUILDERS ---
@@ -450,7 +503,8 @@ class _StudentAttendanceState extends State<StudentAttendance> {
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: const Color(0xFFDDE3EA)),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)
           ],
         ),
         child: Column(
@@ -544,7 +598,8 @@ class _StudentAttendanceState extends State<StudentAttendance> {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                          color: Colors.blue.withValues(alpha: 0.3), blurRadius: 8)
+                          color: Colors.blue.withValues(alpha: 0.3),
+                          blurRadius: 8)
                     ]
                   : [],
             ),

@@ -425,7 +425,7 @@ class _StudentFeesState extends State<StudentFees> {
           child: SingleChildScrollView(
             // FIXED: Pull-to-refresh kaam kare isliye Clamping hatake AlwaysScrollable lagana padta hai
             physics: const AlwaysScrollableScrollPhysics(), 
-            padding: const EdgeInsets.only(bottom: 100),
+            padding: const EdgeInsets.only(bottom: 50),
             child: Column(
               children: [
               // ==========================================================
@@ -894,7 +894,7 @@ class _StudentFeesState extends State<StudentFees> {
                             children: [
                               const Text("Balance Adjustment Required",
                                   style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w900,
                                       color: Color(0xFF1E293B),
                                       fontStyle: FontStyle.italic)),
@@ -903,7 +903,7 @@ class _StudentFeesState extends State<StudentFees> {
                                 children: [
                                   const Text("Current monthly fees: ",
                                       style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 13,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xFF64748B),
                                           fontStyle: FontStyle.italic)),
@@ -976,7 +976,7 @@ class _StudentFeesState extends State<StudentFees> {
                                             "RESOLVE TOTAL BALANCE NOW: ₹${NumberFormat('#,##0').format(finalOutstanding)}",
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
-                                                fontSize: 13,
+                                                fontSize: 12,
                                                 fontWeight: FontWeight.w900,
                                                 color: Colors.white)),
                                       ),
@@ -1191,7 +1191,7 @@ class _StudentFeesState extends State<StudentFees> {
                                 ),
                                 child: const Text("ALL TRANSACTIONS",
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w900,
                                         color: Color(0xFF94A3B8),
                                         letterSpacing: 2)),
@@ -1226,7 +1226,7 @@ class _StudentFeesState extends State<StudentFees> {
                                                               .toUpperCase(),
                                                           style:
                                                               const TextStyle(
-                                                                  fontSize: 14,
+                                                                  fontSize: 12,
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .w900,
@@ -1301,7 +1301,7 @@ class _StudentFeesState extends State<StudentFees> {
                                                                           children: [
                                                                             Text(
                                                                               pay['category']?.toString().toUpperCase() ?? "GENERAL FEE",
-                                                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B)),
+                                                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Color(0xFF1E293B)),
                                                                               maxLines: 1,
                                                                               overflow: TextOverflow.ellipsis, // Bada text ... ban jayega
                                                                             ),

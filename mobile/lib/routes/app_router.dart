@@ -10,6 +10,7 @@ import '../features/student/screens/student_timetable.dart';
 import '../features/student/screens/student_fees.dart';
 import '../features/student/screens/student_checkout.dart';
 import '../features/student/screens/student_payment_methods.dart';
+import '../features/student/screens/class_diary.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -80,6 +81,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/student/payment-methods',
       builder: (context, state) => const StudentPaymentMethods(),
+    ),
+
+    GoRoute(
+      path: '/class-diary',
+      builder: (context, state) => const ClassDiary(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---
