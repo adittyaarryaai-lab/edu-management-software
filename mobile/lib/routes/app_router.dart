@@ -13,6 +13,7 @@ import '../features/student/screens/student_payment_methods.dart';
 import '../features/student/screens/class_diary.dart';
 import '../features/student/screens/notice_feed.dart';
 import '../features/student/screens/student_performance.dart';
+import '../features/student/screens/mentorship.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -98,6 +99,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/performance',
       builder: (context, state) => const StudentPerformance(),
+    ),
+
+    GoRoute(
+      path: '/mentors',
+      builder: (context, state) => const Mentorship(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---

@@ -560,7 +560,7 @@ class _SidebarState extends State<Sidebar> {
             _MenuItem(
                 icon: Icons.people,
                 label: "Mentorship",
-                path: '/mentorship',
+                path: '/mentors',
                 onTap: _navigate),
           ]),
           _buildCategory("Communication & Updates", [
