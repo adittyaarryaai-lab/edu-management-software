@@ -19,6 +19,7 @@ import '../features/student/screens/student_my_subjects.dart';
 import '../features/student/screens/student_live_classes.dart';
 import '../features/student/screens/student_erp_notices.dart';
 import '../features/student/screens/student_feedback.dart';
+import '../features/student/screens/student_settings.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -134,6 +135,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/feedback', 
       builder: (context, state) => const StudentFeedback(),
+    ),
+
+    GoRoute(
+      path: '/settings', 
+      builder: (context, state) => const StudentSettings(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---
