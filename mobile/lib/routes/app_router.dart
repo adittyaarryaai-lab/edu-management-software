@@ -21,6 +21,8 @@ import '../features/student/screens/student_erp_notices.dart';
 import '../features/student/screens/student_feedback.dart';
 import '../features/student/screens/student_settings.dart';
 import '../features/student/screens/change_password.dart';
+import '../features/student/screens/library.dart';
+import '../features/student/screens/student_transport.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -146,6 +148,16 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/change-password', 
       builder: (context, state) => const ChangePassword(),
+    ),
+
+    GoRoute(
+      path: '/library', 
+      builder: (context, state) => const StudentLibrary(),
+    ),
+
+    GoRoute(
+      path: '/transport', 
+      builder: (context, state) => const StudentTransport(),
     ),
 
     // --- STUDENT/TEACHER DASHBOARD ---
