@@ -82,7 +82,7 @@ class _StudentHomeState extends State<StudentHome> {
       'path': '/transport'
     },
     {'title': 'Library', 'icon': Icons.book, 'path': '/library'},
-    {'title': 'Feedback', 'icon': Icons.message, 'path': '/student/feedback'},
+    {'title': 'Feedback', 'icon': Icons.message, 'path': '/feedback'},
   ];
 
   final examModules = [

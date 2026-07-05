@@ -494,7 +494,7 @@ class _SidebarState extends State<Sidebar> {
             _MenuItem(
                 icon: Icons.videocam,
                 label: "Live Class",
-                path: '/live-class',
+                path: '/live-classes',
                 onTap: _navigate),
           ]),
           _buildCategory("Academic Center", [
