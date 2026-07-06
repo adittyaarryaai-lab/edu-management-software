@@ -28,6 +28,7 @@ import '../features/student/screens/student_leave_request.dart';
 import '../features/student/screens/student_leave_history.dart';
 import '../features/student/screens/student_syllabus.dart';
 import '../features/student/screens/student_datesheet.dart';
+import '../features/student/screens/student_exam_result.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -188,9 +189,14 @@ final appRouter = GoRouter(
     ),
 
     GoRoute(
-  path: '/exam-datesheet',
-  builder: (context, state) => const StudentDatesheet(),
-),
+      path: '/exam-datesheet',
+      builder: (context, state) => const StudentDatesheet(),
+    ),
+
+    GoRoute(
+      path: '/exam-results',
+      builder: (context, state) => const StudentExamResult(),
+    ),
 
     // --- STUDENT/TEACHER DASHBOARD ---
     GoRoute(
