@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🔥 THEME KE LIYE NAYA IMPORT
+import 'package:go_router/go_router.dart';
 import '../../core/theme/theme_provider.dart'; // 🔥 APNA GLOBAL THEME PROVIDER (path check kar lena)
 
 // 🔥 StatefulWidget ko ConsumerStatefulWidget mein badal diya
@@ -81,12 +82,25 @@ class _CustomLoaderState extends ConsumerState<CustomLoader> with SingleTickerPr
       height: 1.0,
     );
 
-    return Scaffold(
-      backgroundColor: bgColor, // 🔥 Dynamic Background
-      body: Center(
-        child: Transform.scale(
-          scale: 0.85,
-          child: SizedBox(
+    return PopScope(
+      canPop: false, // Default back behavior ko block karega
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        
+        // Agar router ke paas pichli screen ki history hai, toh gracefully wapas bhejo
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          // Agar history nahi hai (e.g. direct load), toh Dashboard par fek do
+          context.go('/'); 
+        }
+      },
+      child: Scaffold(
+        backgroundColor: bgColor, // 🔥 Dynamic Background
+        body: Center(
+          child: Transform.scale(
+            scale: 0.85,
+            child: SizedBox(
             width: 320,
             height: 120,
             child: Stack(
@@ -126,7 +140,7 @@ class _CustomLoaderState extends ConsumerState<CustomLoader> with SingleTickerPr
                               // The horizontal base of L
                               Container(
                                 width: 25,
-                                height: 4.5,
+                                height: 6.5,
                                 color: elementColor, // 🔥 Dynamic
                               ),
                               // The vertical animated stem of L
@@ -134,8 +148,8 @@ class _CustomLoaderState extends ConsumerState<CustomLoader> with SingleTickerPr
                                 animation: _lLineHeightAnim,
                                 builder: (context, child) {
                                   return Container(
-                                    width: 4.5,
-                                    height: _lLineHeightAnim.value + 4.5, // Total height based on animation
+                                    width: 6.5,
+                                    height: _lLineHeightAnim.value + 6.5, // Total height based on animation
                                     color: elementColor, // 🔥 Dynamic
                                   );
                                 },
@@ -166,7 +180,7 @@ class _CustomLoaderState extends ConsumerState<CustomLoader> with SingleTickerPr
                                   alignment: Alignment.bottomCenter,
                                   transform: Matrix4.identity()..scale(1.0, _iStretchAnim.value),
                                   child: Container(
-                                    width: 4.5,
+                                    width: 6.5,
                                     height: 38, // Base height of the stem
                                     color: elementColor, // 🔥 Dynamic
                                   ),
@@ -224,6 +238,6 @@ class _CustomLoaderState extends ConsumerState<CustomLoader> with SingleTickerPr
           ),
         ),
       ),
-    );
+     ) );
   }
 }

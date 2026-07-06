@@ -45,6 +45,8 @@ class _StudentExamResultState extends ConsumerState<StudentExamResult> {
   Future<void> _loadData({bool isRefresh = false}) async {
     if (!isRefresh && mounted) setState(() => isInitialLoading = true);
 
+    if (!isRefresh) await Future.delayed(const Duration(milliseconds: 1000));
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final userStr = prefs.getString('user');

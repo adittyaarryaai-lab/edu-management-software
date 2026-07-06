@@ -354,7 +354,7 @@ class _StudentDatesheetState extends ConsumerState<StudentDatesheet> {
     try {
       final String remoteUrl = urlStr.startsWith('http')
           ? urlStr
-          : "http://192.168.20.131:5000$urlStr"; // Apne local IP ke hisab se set rakhna
+          : "http://10.163.134.38:5000$urlStr"; // Apne local IP ke hisab se set rakhna
 
       final Directory dir = await getApplicationDocumentsDirectory();
       final String filePath = "${dir.path}/$fileName.pdf";
