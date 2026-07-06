@@ -23,6 +23,7 @@ import '../features/student/screens/student_settings.dart';
 import '../features/student/screens/change_password.dart';
 import '../features/student/screens/library.dart';
 import '../features/student/screens/student_transport.dart';
+import '../features/student/screens/student_assignments.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -159,6 +160,11 @@ final appRouter = GoRouter(
       path: '/transport', 
       builder: (context, state) => const StudentTransport(),
     ),
+
+    GoRoute(
+  path: '/assignments',
+  builder: (context, state) => const StudentAssignments(),
+),
 
     // --- STUDENT/TEACHER DASHBOARD ---
     GoRoute(

@@ -593,7 +593,7 @@ class _StudentHomeState extends ConsumerState<StudentHome> {
               maxLines: 2,
               overflow: TextOverflow.visible,
               style: TextStyle(
-                fontSize: 10.5,
+                fontSize: 9,
                 fontWeight: FontWeight.w900,
                 color: textColor,
                 height: 1.1,
