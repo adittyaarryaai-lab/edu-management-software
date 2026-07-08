@@ -31,9 +31,10 @@ import '../features/student/screens/student_datesheet.dart';
 import '../features/student/screens/student_exam_result.dart';
 import '../features/student/screens/student_admit_card.dart';
 import '../shared/widgets/technical_support_modal.dart';
-import '../shared/widgets//my_account.dart'; // Apna actual path check kar lena
+import '../shared/widgets//my_account.dart'; 
 import '../features/student/screens/student_support.dart';
 import '../features/teacher/screens/teacher_home.dart';
+import '../features/teacher/screens/teacher_attendance.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -222,7 +223,6 @@ final appRouter = GoRouter(
       builder: (context, state) => const MyAccount(),
     ),
 
-    // 🔥 MAIN FIX 2: TEACHER HOME KE UPAR BHI LAYOUT WRAPPER LAGA DIYA 🔥
     GoRoute(
       path: '/teacher/home',
       builder: (context, state) {
@@ -233,7 +233,11 @@ final appRouter = GoRouter(
       },
     ),
 
-    // --- STUDENT DASHBOARD (ROOT ROUTE) ---
+    GoRoute(
+      path: '/teacher/attendance',
+      builder: (context, state) => const TeacherAttendance(),
+    ),
+
     GoRoute(
       path: '/',
       builder: (context, state) {
@@ -244,7 +248,6 @@ final appRouter = GoRouter(
       },
     ),
 
-    // --- SUPERADMIN ---
     GoRoute(
       path: '/superadmin/dashboard',
       builder: (context, state) => const LayoutWrapper(
@@ -253,7 +256,6 @@ final appRouter = GoRouter(
       ),
     ),
 
-    // --- FINANCE ---
     GoRoute(
       path: '/finance/dashboard',
       builder: (context, state) => const LayoutWrapper(
