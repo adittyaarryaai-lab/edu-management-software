@@ -31,16 +31,16 @@ import '../features/student/screens/student_datesheet.dart';
 import '../features/student/screens/student_exam_result.dart';
 import '../features/student/screens/student_admit_card.dart';
 import '../shared/widgets/technical_support_modal.dart';
-import '../shared/widgets//my_account.dart'; 
+import '../shared/widgets//my_account.dart';
 import '../features/student/screens/student_support.dart';
 import '../features/teacher/screens/teacher_home.dart';
 import '../features/teacher/screens/teacher_attendance.dart';
+import '../features/teacher/screens/teacher_leave_requests.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
-
   redirect: (context, state) async {
     final prefs = await SharedPreferences.getInstance();
     final userStr = prefs.getString('user');
@@ -66,8 +66,9 @@ final appRouter = GoRouter(
       if (isGoingToLogin || isGoingToRoot) {
         if (role == 'superadmin') return '/superadmin/dashboard';
         if (role == 'finance') return '/finance/dashboard';
-        if (role == 'teacher') return '/teacher/home'; // Teacher gaya teacher home pe
-        
+        if (role == 'teacher')
+          return '/teacher/home'; // Teacher gaya teacher home pe
+
         // Agar inme se koi nahi hai toh matlab student hai
         if (isGoingToLogin) return '/'; // Student ko root pe bhej do
       }
@@ -75,7 +76,6 @@ final appRouter = GoRouter(
 
     return null;
   },
-
   routes: [
     // --- SPLASH SCREEN ROUTE ---
     GoRoute(
@@ -214,7 +214,7 @@ final appRouter = GoRouter(
     ),
 
     GoRoute(
-      path: '/support', 
+      path: '/support',
       builder: (context, state) => const StudentSupport(),
     ),
 
@@ -236,6 +236,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/teacher/attendance',
       builder: (context, state) => const TeacherAttendance(),
+    ),
+
+    GoRoute(
+      path: '/teacher/leave-requests',
+      builder: (context, state) => const TeacherLeaveRequests(),
     ),
 
     GoRoute(
