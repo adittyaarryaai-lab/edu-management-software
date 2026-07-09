@@ -40,6 +40,7 @@ import '../features/teacher/screens/teacher_timetable.dart';
 import '../features/teacher/screens/teacher_notices.dart';
 import '../features/teacher/screens/teacher_support.dart';
 import '../features/teacher/screens/teacher_student_list.dart';
+import '../features/teacher/screens/teacher_academic_calendar.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -265,6 +266,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/teacher/students',
       builder: (context, state) => const TeacherStudentList(),
+    ),
+
+    GoRoute(
+      path: '/teacher/calendar',
+      builder: (context, state) => const TeacherAcademicCalendar(),
     ),
 
     GoRoute(

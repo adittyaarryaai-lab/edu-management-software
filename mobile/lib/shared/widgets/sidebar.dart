@@ -686,76 +686,88 @@ class _SidebarState extends ConsumerState<Sidebar> {
       case 'teacher':
         return [
           _buildCategory(
-              "Academic Management",
+              "Daily Routine & Class",
               [
                 _MenuItem(
-                    icon: Icons.check_box,
+                    icon: Icons.check_box_outlined,
                     label: "Class Attendance",
                     path: '/teacher/attendance',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
                 _MenuItem(
-                    icon: Icons.add_circle_outline,
-                    label: "Assignments",
-                    path: '/teacher/assignments',
-                    onTap: _navigate,
-                    isDarkMode: isDarkMode),
-                _MenuItem(
-                    icon: Icons.layers,
-                    label: "Syllabus",
-                    path: '/teacher/upload-syllabus',
-                    onTap: _navigate,
-                    isDarkMode: isDarkMode),
-                _MenuItem(
-                    icon: Icons.calendar_month,
-                    label: "Date Sheet",
-                    path: '/teacher/datesheet',
-                    onTap: _navigate,
-                    isDarkMode: isDarkMode),
-              ],
-              isDarkMode),
-          _buildCategory(
-              "Class Management",
-              [
-                _MenuItem(
-                    icon: Icons.people,
-                    label: "Class list",
+                    icon: Icons.people_outline,
+                    label: "Class List",
                     path: '/teacher/students',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
                 _MenuItem(
-                    icon: Icons.calendar_month,
+                    icon: Icons.calendar_month_outlined,
                     label: "Schedule",
-                    path: '/timetable',
+                    path: '/teacher/timetable', // 🔥 PATH UPDATED 🔥
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
                 _MenuItem(
-                    icon: Icons.videocam,
-                    label: "Live class",
+                    icon: Icons.videocam_outlined,
+                    label: "Live Class",
                     path: '/teacher/live-class',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
               ],
               isDarkMode),
           _buildCategory(
-              "Communication",
+              "Academics & Examination",
               [
                 _MenuItem(
-                    icon: Icons.smart_toy,
+                    icon: Icons.note_add_outlined,
+                    label: "Assignments",
+                    path: '/teacher/assignments',
+                    onTap: _navigate,
+                    isDarkMode: isDarkMode),
+                _MenuItem(
+                    icon: Icons.layers_outlined,
+                    label: "Syllabus",
+                    path: '/teacher/upload-syllabus',
+                    onTap: _navigate,
+                    isDarkMode: isDarkMode),
+                _MenuItem(
+                    icon: Icons.event_note_outlined,
+                    label: "Exam Datesheet",
+                    path: '/teacher/datesheet',
+                    onTap: _navigate,
+                    isDarkMode: isDarkMode),
+                _MenuItem(
+                    icon: Icons.bar_chart_outlined,
+                    label: "Exam Results",
+                    path: '/teacher/results',
+                    onTap: _navigate,
+                    isDarkMode: isDarkMode),
+              ],
+              isDarkMode),
+          _buildCategory(
+              "Communication & Updates",
+              [
+                _MenuItem(
+                    icon: Icons.smart_toy_outlined,
                     label: "Broadcast",
                     path: '/teacher/notices',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
                 _MenuItem(
-                    icon: Icons.campaign,
-                    label: "Notice feed",
+                    icon: Icons.campaign_outlined,
+                    label: "Notice Feed",
                     path: '/notice-feed',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
                 _MenuItem(
                     icon: Icons.chat_bubble_outline,
-                    label: "Support center",
+                    label: "Support Center",
                     path: '/teacher/support',
+                    onTap: _navigate,
+                    isDarkMode: isDarkMode),
+                _MenuItem(
+                    icon: Icons.calendar_today,
+                    label: "Academic Calendar",
+                    path: '/teacher/calendar',
                     onTap: _navigate,
                     isDarkMode: isDarkMode),
               ],
