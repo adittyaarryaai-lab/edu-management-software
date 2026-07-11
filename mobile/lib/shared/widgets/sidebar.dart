@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🔥 NAYA IMPORT FOR THEME
 import '../../../core/theme/theme_provider.dart'; // 🔥 APNA GLOBAL THEME PROVIDER
+import '../../../core/constants/app_config.dart';
 
 // 🔥 ConsumerStatefulWidget so it listens to theme changes
 class Sidebar extends ConsumerStatefulWidget {
@@ -268,18 +269,10 @@ class _SidebarState extends ConsumerState<Sidebar> {
     final Color bgColor =
         isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
 
-    // 🔥 NAYA CODE: AVATAR URL SANITIZATION 🔥
+   // 🔥 NAYA CODE: AVATAR URL SANITIZATION VIA APP CONFIG 🔥
     String? avatarUrl;
-    final String currentLaptopIP = "10.163.134.38"; // Tera current IP
     if (user?['avatar'] != null && user!['avatar'].toString().isNotEmpty) {
-      String rawAvatar = user!['avatar'].toString();
-      if (rawAvatar.startsWith('http')) {
-        avatarUrl = rawAvatar
-            .replaceAll('localhost', currentLaptopIP)
-            .replaceAll('127.0.0.1', currentLaptopIP);
-      } else {
-        avatarUrl = "http://$currentLaptopIP:5000$rawAvatar";
-      }
+      avatarUrl = AppConfig.getAbsoluteUrl(user!['avatar'].toString());
     }
 
     return Drawer(

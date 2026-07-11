@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import '../../../core/constants/app_config.dart';
 
 // 🔥 ConsumerStatefulWidget for theme listening
 class StudentFees extends ConsumerStatefulWidget {
@@ -287,8 +288,8 @@ class _StudentFeesState extends ConsumerState<StudentFees> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(24),
                                 child: Image.network(
-                                  // NAYA CODE: Yahan apne laptop ka asli Wi-Fi IPv4 address daal!
-                                  "http://192.168.31.33:5000${pendingSignal['screenshot']}", // <--- Is line ko change kar
+                                  // 🔥 APNA UNIVERSAL RESOLVER 🔥
+                                  AppConfig.getAbsoluteUrl(pendingSignal['screenshot'] ?? ''),
                                   fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
                                     return const Center(

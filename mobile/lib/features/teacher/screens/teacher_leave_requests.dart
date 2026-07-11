@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class TeacherLeaveRequests extends ConsumerStatefulWidget {
   const TeacherLeaveRequests({super.key});
@@ -18,9 +19,7 @@ class TeacherLeaveRequests extends ConsumerStatefulWidget {
 class _TeacherLeaveRequestsState extends ConsumerState<TeacherLeaveRequests> {
   bool isLoading = true;
   List<dynamic> requests = [];
-  
-  // 🔥 TERA CURRENT IP (Document links ke liye) 🔥
-  final String currentLaptopIP = "10.163.134.38";
+
 
   @override
   void initState() {
@@ -65,7 +64,8 @@ class _TeacherLeaveRequestsState extends ConsumerState<TeacherLeaveRequests> {
   }
 
   Future<void> _openDocument(String docPath) async {
-    String url = "http://$currentLaptopIP:5000$docPath";
+    // 🔥 CONFIG SE DIRECT ABSOLUTE URL LEY LIYA 🔥
+    String url = AppConfig.getAbsoluteUrl(docPath);
     final Uri uri = Uri.parse(url);
     try {
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {

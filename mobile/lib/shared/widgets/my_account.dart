@@ -12,6 +12,7 @@ import 'package:http_parser/http_parser.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class MyAccount extends ConsumerStatefulWidget {
   const MyAccount({super.key});
@@ -70,9 +71,6 @@ class _MyAccountState extends ConsumerState<MyAccount> {
   Map<String, dynamic>? schoolData;
   String? avatarPreview;
 
-  // 🔥 REGIONAL NETWORK BALANCER IP 🔥
-  final String currentLaptopIP = "10.163.134.38";
-
   @override
   void initState() {
     super.initState();
@@ -109,13 +107,9 @@ class _MyAccountState extends ConsumerState<MyAccount> {
   }
 
   void _sanitizeAvatarPath() {
-    if (user?['avatar'] != null) {
-      String avatar = user!['avatar'].toString();
-      if (avatar.startsWith('http')) {
-        avatarPreview = avatar.replaceAll('localhost', currentLaptopIP).replaceAll('127.0.0.1', currentLaptopIP);
-      } else {
-        avatarPreview = "http://$currentLaptopIP:5000$avatar";
-      }
+    if (user?['avatar'] != null && user!['avatar'].toString().isNotEmpty) {
+      // 🔥 AppConfig ka jadoo: Saare IP/paths automatically handle honge! 🔥
+      avatarPreview = AppConfig.getAbsoluteUrl(user!['avatar'].toString());
     }
   }
 

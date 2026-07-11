@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🔥 NAYA IMPORT FOR THEME
 import '../../../core/theme/theme_provider.dart'; // 🔥 APNA GLOBAL THEME PROVIDER
+import '../../../core/constants/app_config.dart';
 
 // 🔥 ConsumerStatefulWidget for theme listening
 class BottomNav extends ConsumerStatefulWidget {
@@ -50,9 +51,9 @@ class _BottomNavState extends ConsumerState<BottomNav> {
 
     // Student Details
     final studentName = user?['name'] ?? "Student Name";
-    String? avatar = user?['avatar'];
-    if (avatar != null && !avatar.startsWith('http')) {
-      avatar = "http://10.163.134.38:5000$avatar"; // 10.0.2.2 is local for Android
+    String? avatarUrl;
+    if (user?['avatar'] != null) {
+      avatarUrl = AppConfig.getAbsoluteUrl(user!['avatar']); // 🔥 NAYA UNIVERSAL SYSTEM 🔥
     }
 
     // 🔥 DYNAMIC MODAL COLORS
@@ -145,8 +146,8 @@ class _BottomNavState extends ConsumerState<BottomNav> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: avatar != null
-                                  ? Image.network(avatar,
+                              child: avatarUrl != null
+                                  ? Image.network(avatarUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (c, e, s) =>
                                           _buildDefaultAvatar())

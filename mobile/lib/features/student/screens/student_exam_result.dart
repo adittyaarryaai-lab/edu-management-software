@@ -14,6 +14,7 @@ import 'package:open_filex/open_filex.dart'; // 🔥 AUTO OPEN FEATURE
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class StudentExamResult extends ConsumerStatefulWidget {
   const StudentExamResult({super.key});
@@ -32,9 +33,6 @@ class _StudentExamResultState extends ConsumerState<StudentExamResult> {
   Map<String, dynamic>? studentProfile;
   String schoolName = "EduFlowAI Public School";
   String? schoolLogo;
-
-  // 🔥 CURRENT NETWORK IP FIXER 🔥
-  final String currentLaptopIP = "192.168.20.131"; 
 
   @override
   void initState() {
@@ -198,23 +196,22 @@ class _StudentExamResultState extends ConsumerState<StudentExamResult> {
     try {
       final pdf = pw.Document();
 
-      // Fetch School Logo Image (Sanitize URL just in case)
+      // Fetch School Logo Image (Sanitize URL via AppConfig)
       pw.MemoryImage? logoImage;
       if (schoolLogo != null && schoolLogo!.isNotEmpty) {
         try {
-          String url = schoolLogo!;
-          url = url.replaceAll('localhost', currentLaptopIP)
-                   .replaceAll('127.0.0.1', currentLaptopIP)
-                   .replaceAll('10.0.2.2', currentLaptopIP);
+          // 🔥 UNIVERSAL URL RESOLVER 🔥
+          String fullUrl = AppConfig.getAbsoluteUrl(schoolLogo!);
           
-          String fullUrl = url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
-          final response = await ApiClient.dio.get(fullUrl, options: Options(responseType: ResponseType.bytes));
+          final response = await ApiClient.dio.get(
+            fullUrl, 
+            options: Options(responseType: ResponseType.bytes)
+          );
           logoImage = pw.MemoryImage(response.data);
         } catch (e) {
           debugPrint("Logo fetch failed for PDF: $e");
         }
       }
-
       // Prepare Data
       final String examTitle = (selectedResult!['examTitle'] ?? '').toString().toUpperCase();
       final String stuName = (studentProfile?['name'] ?? 'N/A').toString();

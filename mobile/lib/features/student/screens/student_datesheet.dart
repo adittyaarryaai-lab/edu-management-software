@@ -15,6 +15,7 @@ import 'package:open_filex/open_filex.dart'; // 🔥 NAYA IMPORT: SEEDHA "OPEN W
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class StudentDatesheet extends ConsumerStatefulWidget {
   const StudentDatesheet({super.key});
@@ -181,41 +182,18 @@ class _StudentDatesheetState extends ConsumerState<StudentDatesheet> {
     pw.MemoryImage? inchargeImage;
     pw.MemoryImage? principalImage;
 
-    // 🔥 TERA CURRENT LAPTOP IP ENGINE 🔥
-    final String currentLaptopIP = "192.168.20.131";
-
     try {
       if (selectedDatesheet!['signatures']?['incharge'] != null) {
-        String url = selectedDatesheet!['signatures']['incharge'].toString();
-
-        // 🔥 AGAR DB ME LOCALHOST YA PURANA IP HAI, TOH CORRECTION MAARO 🔥
-        url = url
-            .replaceAll('localhost', currentLaptopIP)
-            .replaceAll('127.0.0.1', currentLaptopIP)
-            .replaceAll('10.0.2.2', currentLaptopIP)
-            .replaceAll('192.168.1.15', currentLaptopIP); // Purana IP clean-up
-
-        String fullUrl =
-            url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
-
+        String fullUrl = AppConfig.getAbsoluteUrl(
+            selectedDatesheet!['signatures']['incharge'].toString());
         final response = await ApiClient.dio
             .get(fullUrl, options: Options(responseType: ResponseType.bytes));
         inchargeImage = pw.MemoryImage(response.data);
       }
 
       if (selectedDatesheet!['signatures']?['principal'] != null) {
-        String url = selectedDatesheet!['signatures']['principal'].toString();
-
-        // 🔥 SAME CLEAN-UP FOR PRINCIPAL SIGNATURE 🔥
-        url = url
-            .replaceAll('localhost', currentLaptopIP)
-            .replaceAll('127.0.0.1', currentLaptopIP)
-            .replaceAll('10.0.2.2', currentLaptopIP)
-            .replaceAll('192.168.1.15', currentLaptopIP);
-
-        String fullUrl =
-            url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
-
+        String fullUrl = AppConfig.getAbsoluteUrl(
+            selectedDatesheet!['signatures']['principal'].toString());
         final response = await ApiClient.dio
             .get(fullUrl, options: Options(responseType: ResponseType.bytes));
         principalImage = pw.MemoryImage(response.data);
@@ -347,14 +325,13 @@ class _StudentDatesheetState extends ConsumerState<StudentDatesheet> {
     }
   }
 
-  Future<void> _downloadResource(String? urlStr, String fileName) async {
+ Future<void> _downloadResource(String? urlStr, String fileName) async {
     if (urlStr == null || urlStr.isEmpty) return;
     _showToast("Downloading File... ⏳");
 
     try {
-      final String remoteUrl = urlStr.startsWith('http')
-          ? urlStr
-          : "http://10.163.134.38:5000$urlStr"; // Apne local IP ke hisab se set rakhna
+      // 🔥 UNIVERSAL CONFIG RESOLVER 🔥
+      final String remoteUrl = AppConfig.getAbsoluteUrl(urlStr);
 
       final Directory dir = await getApplicationDocumentsDirectory();
       final String filePath = "${dir.path}/$fileName.pdf";
@@ -366,13 +343,11 @@ class _StudentDatesheetState extends ConsumerState<StudentDatesheet> {
       // Seedha "Open With" popup
       await OpenFilex.open(filePath);
     } catch (err) {
-      _showToast("Direct download failed. Routing via cloud sync...",
-          isError: true);
-      final Uri url = Uri.parse(urlStr.startsWith('http')
-          ? urlStr
-          : "http://192.168.20.131:5000$urlStr");
-      if (await canLaunchUrl(url))
+      _showToast("Direct download failed. Routing via cloud sync...", isError: true);
+      final Uri url = Uri.parse(AppConfig.getAbsoluteUrl(urlStr));
+      if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
     }
   }
 

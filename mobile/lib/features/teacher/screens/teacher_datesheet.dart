@@ -14,6 +14,7 @@ import 'dart:io'; // 🔥 FILE HANDLING KE LIYE
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class TeacherDatesheet extends ConsumerStatefulWidget {
   const TeacherDatesheet({super.key});
@@ -30,8 +31,6 @@ class _TeacherDatesheetState extends ConsumerState<TeacherDatesheet> {
   String currentView = 'list'; // 'list' or 'download'
   Map<String, dynamic>? selectedDatesheet;
 
-  // 🔥 TERA CURRENT IP (Manual Links ke liye) 🔥
-  final String currentLaptopIP = "10.163.134.38";
 
   @override
   void initState() {
@@ -88,10 +87,7 @@ class _TeacherDatesheetState extends ConsumerState<TeacherDatesheet> {
     if (selectedDatesheet == null) return;
 
     if (selectedDatesheet!['isManual'] == true) {
-      String fileUrl = selectedDatesheet!['fileUrl'] ?? '';
-      if (!fileUrl.startsWith('http')) {
-        fileUrl = "http://$currentLaptopIP:5000$fileUrl";
-      }
+      String fileUrl = AppConfig.getAbsoluteUrl(selectedDatesheet!['fileUrl'] ?? '');
       
       _showToast("Downloading File... ⏳");
       try {
@@ -138,17 +134,13 @@ class _TeacherDatesheetState extends ConsumerState<TeacherDatesheet> {
     // Fetch Signatures
     try {
       if (selectedDatesheet!['signatures']?['incharge'] != null) {
-        String url = selectedDatesheet!['signatures']['incharge'].toString();
-        url = url.replaceAll('localhost', currentLaptopIP).replaceAll('127.0.0.1', currentLaptopIP);
-        String fullUrl = url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
+        String fullUrl = AppConfig.getAbsoluteUrl(selectedDatesheet!['signatures']['incharge']);
         final response = await ApiClient.dio.get(fullUrl, options: Options(responseType: ResponseType.bytes));
         inchargeImage = pw.MemoryImage(response.data);
       }
 
       if (selectedDatesheet!['signatures']?['principal'] != null) {
-        String url = selectedDatesheet!['signatures']['principal'].toString();
-        url = url.replaceAll('localhost', currentLaptopIP).replaceAll('127.0.0.1', currentLaptopIP);
-        String fullUrl = url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
+        String fullUrl = AppConfig.getAbsoluteUrl(selectedDatesheet!['signatures']['principal']);
         final response = await ApiClient.dio.get(fullUrl, options: Options(responseType: ResponseType.bytes));
         principalImage = pw.MemoryImage(response.data);
       }
