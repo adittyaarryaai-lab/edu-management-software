@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'; // 🔥 NAYA IMPORT FOR
 import '../../../core/network/api_client.dart';
 import '../../../shared/widgets/custom_loader.dart';
 import '../../../core/theme/theme_provider.dart'; // 🔥 APNA GLOBAL THEME PROVIDER
+import '../../../core/constants/app_config.dart';
 
 // 🔥 ConsumerStatefulWidget so it listens to theme changes
 class Mentorship extends ConsumerStatefulWidget {
@@ -227,7 +228,7 @@ class _MentorshipState extends ConsumerState<Mentorship> {
                                           clipBehavior: Clip.hardEdge,
                                           child: (mentor?['avatar'] != null && mentor!['avatar'].toString().isNotEmpty)
                                               // Handle backend IP if running on emulator (localhost to 10.0.2.2)
-                                              ? Image.network("http://10.163.134.38:5000${mentor!['avatar']}", fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.person, size: 60, color: Color(0xFF42A5F5)))
+                                              ? Image.network(AppConfig.getAbsoluteUrl(mentor!['avatar'].toString()), fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.person, size: 60, color: Color(0xFF42A5F5)))
                                               : const Icon(Icons.person, size: 60, color: Color(0xFF42A5F5)),
                                         ),
                                         Positioned(

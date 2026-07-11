@@ -1,11 +1,12 @@
 import 'dart:convert'; // jsonDecode ke liye zaroori hai
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../constants/app_config.dart';
 
 class ApiClient {
   static final Dio dio = Dio(
     BaseOptions(
-      baseUrl: 'http://10.163.134.38:5000/api',
+      baseUrl: AppConfig.baseUrl,
       connectTimeout: const Duration(seconds: 10),
     ),
   );

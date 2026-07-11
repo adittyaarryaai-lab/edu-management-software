@@ -15,6 +15,7 @@ import 'package:open_filex/open_filex.dart'; // 🔥 AUTO OPEN FEATURE
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/custom_loader.dart';
+import '../../../core/constants/app_config.dart';
 
 class StudentAdmitCard extends ConsumerStatefulWidget {
   const StudentAdmitCard({super.key});
@@ -39,8 +40,7 @@ class _StudentAdmitCardState extends ConsumerState<StudentAdmitCard> {
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _enrollCtrl = TextEditingController();
 
-  // 🔥 CURRENT LAPTOP IP 🔥
-  final String currentLaptopIP = "10.163.134.38"; 
+
 
   @override
   void initState() {
@@ -159,11 +159,13 @@ class _StudentAdmitCardState extends ConsumerState<StudentAdmitCard> {
       Future<pw.MemoryImage?> fetchImage(String? rawUrl) async {
         if (rawUrl == null || rawUrl.isEmpty) return null;
         try {
-          String url = rawUrl.replaceAll('localhost', currentLaptopIP)
-                             .replaceAll('127.0.0.1', currentLaptopIP)
-                             .replaceAll('10.0.2.2', currentLaptopIP);
-          String fullUrl = url.startsWith('http') ? url : "http://$currentLaptopIP:5000$url";
-          final response = await ApiClient.dio.get(fullUrl, options: Options(responseType: ResponseType.bytes));
+          // 🔥 HUMARA NAYA UNIVERSAL URL CONVERTER 🔥
+          String fullUrl = AppConfig.getAbsoluteUrl(rawUrl);
+          
+          final response = await ApiClient.dio.get(
+            fullUrl, 
+            options: Options(responseType: ResponseType.bytes)
+          );
           return pw.MemoryImage(response.data);
         } catch (e) {
           debugPrint("Failed to fetch image: $e");

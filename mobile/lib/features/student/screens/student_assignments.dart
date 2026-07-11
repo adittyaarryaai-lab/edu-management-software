@@ -13,6 +13,7 @@ import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../shared/widgets/custom_loader.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/constants/app_config.dart';
 
 class StudentAssignments extends ConsumerStatefulWidget {
   const StudentAssignments({super.key});
@@ -144,20 +145,17 @@ class _StudentAssignmentsState extends ConsumerState<StudentAssignments> {
 
     _showToast("Downloading resource file... 📥");
 
-    try {
-      final String remoteUrl =
-          "http://192.168.20.131:5000$urlStr"; // Local host emulator endpoint
+   try {
+      final String remoteUrl = AppConfig.getAbsoluteUrl(urlStr); // 🔥 CONFIG SE URL UTHAO
       final String fileName = urlStr.split('/').last;
 
       // Android Public Downloads folder path
       String localPath = "/storage/emulated/0/Download/$fileName";
 
-      // Safety Check: Agar public download folder directly accessible nahi hai due to scoped storage
       try {
         await ApiClient.dio.download(remoteUrl, localPath);
         _showToast("File saved securely in phone 'Downloads' folder! ✅");
       } catch (e) {
-        // Fallback: App ke secure external documents folder mein save karega (No permissions required)
         final Directory? extDir = await getExternalStorageDirectory();
         if (extDir != null) {
           localPath = "${extDir.path}/$fileName";
@@ -169,11 +167,10 @@ class _StudentAssignmentsState extends ConsumerState<StudentAssignments> {
       }
     } catch (err) {
       debugPrint("Download Core Error: $err");
-      _showToast("Direct download failed. Routing via cloud sync...",
-          isError: true);
+      _showToast("Direct download failed. Routing via browser...", isError: true);
 
-      // Ulti-fallback: Agar sab fail ho jaye toh normal link ki tarah hand-off kar do
-      final Uri url = Uri.parse("http://10.0.2.2:5000$urlStr");
+      // FALLBACK: Browser me khol do agar direct download na chale
+      final Uri url = Uri.parse(AppConfig.getAbsoluteUrl(urlStr));
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       }
