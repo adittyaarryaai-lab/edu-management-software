@@ -46,6 +46,7 @@ import '../features/teacher/screens/teacher_datesheet.dart';
 import '../features/teacher/screens/teacher_upload_result.dart';
 import '../features/teacher/screens/teacher_upload_syllabus.dart';
 import '../features/teacher/screens/teacher_assignments.dart';
+import '../features/finance/screens/finance_dashboard.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -304,6 +305,16 @@ final appRouter = GoRouter(
     ),
 
     GoRoute(
+      path: '/finance/dashboard',
+      builder: (context, state) {
+        return LayoutWrapper(
+          role: 'finance',
+          childBuilder: (query) => FinanceDashboard(searchQuery: query),
+        );
+      },
+    ),
+
+    GoRoute(
       path: '/',
       builder: (context, state) {
         return LayoutWrapper(
@@ -321,12 +332,5 @@ final appRouter = GoRouter(
       ),
     ),
 
-    GoRoute(
-      path: '/finance/dashboard',
-      builder: (context, state) => const LayoutWrapper(
-        role: 'finance',
-        child: Center(child: Text('Finance Dashboard')),
-      ),
-    ),
   ],
 );
