@@ -45,6 +45,7 @@ import '../features/teacher/screens/teacher_live_class.dart';
 import '../features/teacher/screens/teacher_datesheet.dart';
 import '../features/teacher/screens/teacher_upload_result.dart';
 import '../features/teacher/screens/teacher_upload_syllabus.dart';
+import '../features/teacher/screens/teacher_assignments.dart';
 import '../shared/widgets/layout_wrapper.dart';
 import '../splash_screen.dart';
 
@@ -295,6 +296,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/teacher/upload-syllabus',
       builder: (context, state) => const TeacherUploadSyllabus(),
+    ),
+
+    GoRoute(
+      path: '/teacher/assignments',
+      builder: (context, state) => const TeacherAssignments(),
     ),
 
     GoRoute(

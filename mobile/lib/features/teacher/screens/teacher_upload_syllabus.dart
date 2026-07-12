@@ -551,9 +551,8 @@ class _TeacherUploadSyllabusState extends ConsumerState<TeacherUploadSyllabus> {
               ...(syllabus['subjects'] as List).map((sub) {
                 bool showSubjectEdit = sub['isSubmitted'] && (!isPublished || isEditMode);
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: sub['isSubmitted'] ? (isDarkMode ? const Color(0xFF1E3A8A).withOpacity(0.3) : const Color(0xFFEFF6FF)) : (isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC)), borderRadius: BorderRadius.circular(20), border: Border.all(color: cardBorder)),
+                  // Sirf margin rakha hai taaki subjects aapas mein chipke na
+                  margin: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -563,13 +562,13 @@ class _TeacherUploadSyllabusState extends ConsumerState<TeacherUploadSyllabus> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(sub['subjectName'].toString().toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: textColorPrimary)),
+                              Text(sub['subjectName'].toString().toUpperCase(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: textColorPrimary)),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
                                   Icon(sub['isSubmitted'] ? Icons.check_circle : Icons.access_time, size: 12, color: sub['isSubmitted'] ? const Color(0xFF42A5F5) : Colors.amber),
                                   const SizedBox(width: 4),
-                                  Text(sub['isSubmitted'] ? "Compiled Successfully" : "Pending Entry", style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: sub['isSubmitted'] ? const Color(0xFF42A5F5) : Colors.amber, letterSpacing: 0)),
+                                  Text(sub['isSubmitted'] ? "Compiled Successfully" : "Pending Entry", style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: sub['isSubmitted'] ? const Color(0xFF42A5F5) : Colors.amber, letterSpacing: 0)),
                                 ],
                               )
                             ],
@@ -587,10 +586,13 @@ class _TeacherUploadSyllabusState extends ConsumerState<TeacherUploadSyllabus> {
                       ),
                       if (sub['isSubmitted']) ...[
                         const SizedBox(height: 12),
+                        // Content ke peeche se bhi dabba hata diya, sirf ek cool left border rakha hai quote ki tarah
                         Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: isDarkMode ? const Color(0xFF0F172A) : Colors.white, borderRadius: BorderRadius.circular(12), border: Border(left: const BorderSide(color: Color(0xFF42A5F5), width: 3))),
-                          child: Text(sub['content'].toString(), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textColorSecondary, fontStyle: FontStyle.italic)),
+                          padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+                          decoration: const BoxDecoration(
+                            border: Border(left: BorderSide(color: Color(0xFF42A5F5), width: 3))
+                          ),
+                          child: Text(sub['content'].toString(), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: textColorSecondary, fontStyle: FontStyle.italic)),
                         )
                       ]
                     ],
