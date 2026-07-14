@@ -461,54 +461,40 @@ class _StudentHomeState extends ConsumerState<StudentHome> {
       onTap: () => context.go(m['path']),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 400),
-        height: 120,
-        padding: const EdgeInsets.all(16),
+        height: 120, // Large card height
+        padding: const EdgeInsets.all(16), // Large card padding
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(40), // Large card border radius
           border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02), blurRadius: 5)
           ],
         ),
-        child: Stack(
+        // 🔥 Stack aur background circle hata diya. Direct Column rakha hai (Small card style)
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Positioned(
-              bottom: -20,
-              right: -20,
-              child: Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: isDarkMode ? 0.1 : 0.4),
-                    shape: BoxShape.circle),
-              ),
+            Text(
+              m['title'],
+              style: TextStyle(
+                  fontSize: 16, // Large font
+                  fontWeight: FontWeight.w900,
+                  color: textColor,
+                  fontStyle: FontStyle.italic,
+                  height: 1.1),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  m['title'],
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: textColor,
-                      fontStyle: FontStyle.italic),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                        color: iconBg,
-                        borderRadius: BorderRadius.circular(20)),
-                    child:
-                        Icon(m['icon'], color: iconColor, size: 28),
-                  ),
-                ),
-              ],
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Icon(m['icon'], color: iconColor, size: 28), // Large icon
+              ),
             ),
           ],
         ),
