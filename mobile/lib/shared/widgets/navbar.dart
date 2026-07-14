@@ -124,6 +124,9 @@ class _NavbarState extends ConsumerState<Navbar> {
     // 🔥 GLOBAL THEME SE DARK MODE CHECK KAR RAHE HAIN 🔥
     final themeMode = ref.watch(themeProvider);
     final bool isDarkMode = themeMode == ThemeMode.dark;
+    
+    // 🔥 THE MASTER FIX: Get top safe area (Dynamic Island/Notch size) 🔥
+    final double topSafeArea = MediaQuery.of(context).padding.top;
 
     final role = user?['role'] ?? 'student';
     final name = user?['name'] ?? 'Guest';
@@ -142,8 +145,12 @@ class _NavbarState extends ConsumerState<Navbar> {
       ),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500), // Smooth color transition
-        padding:
-            const EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 15),
+        // 🔥 FIX: Hardcoded '30' ki jagah SafeArea ki padding add kardi + 10px breathing room
+        padding: EdgeInsets.only(
+            top: topSafeArea > 0 ? topSafeArea + 10 : 30, 
+            left: 20, 
+            right: 20, 
+            bottom: 15),
         decoration: BoxDecoration(
           // 🔥 DYNAMIC BACKGROUND: Light mode me Blue, Dark mode me Dark Slate/Blue
           color: isDarkMode ? const Color(0xFF1E293B) : const Color(0xFF42A5F5),
