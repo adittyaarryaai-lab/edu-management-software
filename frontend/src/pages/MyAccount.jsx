@@ -32,6 +32,22 @@ const MyAccount = ({ user }) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        // 🔥 1. FRONTEND GUARD: Check if it's actually an image
+        if (!file.type.startsWith('image/')) {
+            setToast({ show: true, message: "Please upload an image file only! 🚫", type: 'error' });
+            setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
+            e.target.value = null; // Input reset
+            return;
+        }
+
+        // 🔥 2. SIZE GUARD: Stop images larger than 5MB
+        if (file.size > 5000000) {
+            setToast({ show: true, message: "Image is too large! Max 5MB allowed. ⚠️", type: 'error' });
+            setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
+            e.target.value = null;
+            return;
+        }
+
         const formData = new FormData();
         formData.append('avatar', file);
 
@@ -39,7 +55,6 @@ const MyAccount = ({ user }) => {
         try {
             const { data } = await API.put('/auth/update-profile', formData);
 
-            // Fix: Purana data (Father, Mother, ID) ko naye Avatar ke saath merge karo
             const currentUser = JSON.parse(localStorage.getItem('user'));
             const updatedUser = { ...currentUser, avatar: data.avatar };
 
@@ -49,7 +64,9 @@ const MyAccount = ({ user }) => {
             setToast({ show: true, message: "Profile Photo Updated! 🧬", type: 'success' });
             setTimeout(() => window.location.reload(), 2000);
         } catch (err) {
-            setToast({ show: true, message: "Only Images (JPG, PNG, WEBP) are allowed!", type: 'error' });
+            // 🔥 3. DYNAMIC ERROR: Backend se aane wala asli error dikhao
+            const errorMsg = err.response?.data?.message || err.message || "Upload Failed! Network issue.";
+            setToast({ show: true, message: errorMsg, type: 'error' });
             setTimeout(() => setToast({ show: false, message: '', type: 'error' }), 3000);
         } finally {
             setUploading(false);

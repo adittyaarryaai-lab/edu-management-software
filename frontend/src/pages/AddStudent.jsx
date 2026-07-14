@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import Toast from '../components/Toast';
 import { AnimatePresence, motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const handleDateTyping = (e) => {
     let val = e.target.value.replace(/\D/g, ""); // Sirf numbers allowed
@@ -52,6 +54,42 @@ const AddStudent = () => {
         }
     };
 
+    // 🔥 NAYA PDF GENERATOR FUNCTION (STUDENTS KE LIYE)
+    const generateCredentialsPDF = (credentialsList) => {
+        if (!credentialsList || credentialsList.length === 0) return;
+
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.setTextColor(66, 165, 245); 
+        doc.text("EduFlowAI - Student Identity & Access Matrix", 14, 22);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("CONFIDENTIAL: Handover these credentials to the respective students/parents.", 14, 30);
+
+        const tableBody = credentialsList.map((user, index) => [
+            index + 1,
+            user.name,
+            user.grade, // 🔥 Teacher mein role tha, yahan grade aayega
+            user.email,
+            user.password
+        ]);
+
+        autoTable(doc, {
+            startY: 38,
+            head: [['S.No', 'Student Name', 'Class/Grade', 'Email (Login ID)', 'AI Password']],
+            body: tableBody,
+            headStyles: { fillColor: [66, 165, 245], textColor: [255, 255, 255], fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            styles: { fontSize: 10, cellPadding: 5 }
+        });
+
+        doc.save(`Student_Credentials_Batch_${new Date().getTime()}.pdf`);
+    };
+
+   // 🔥 UPDATED BULK UPLOAD FUNCTION
     const handleBulkUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -65,16 +103,26 @@ const AddStudent = () => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            setMsg(data.message);
-            if (data.errors) {
-                console.log("Bulk partial errors:", data.errors);
-                alert("Some students skipped. Check console for details.");
+            // Alerts removed, using Toasts and Console only
+            if (data.errors && data.errors.length > 0) {
+                console.warn("Some rows failed:", data.errors);
+                setMsg("Synced with some exceptions. Check console! ⚠️");
+            } else {
+                setMsg(data.message);
             }
-            setTimeout(() => navigate('/admin/manage-users'), 2000);
+
+            // 🔥 PDF Generation Trigger
+            if (data.credentials && data.credentials.length > 0) {
+                generateCredentialsPDF(data.credentials);
+            }
+
+            setTimeout(() => navigate('/admin/manage-users'), 3000);
         } catch (err) {
-            alert(err.response?.data?.message || "Neural Link Failed during Bulk Sync! 🛡️");
+            console.error(err);
+            setMsg("Neural Link Failed during Bulk Sync! 🛡️");
         } finally {
             setLoading(false);
+            e.target.value = null; // 🔥 Input reset so same file can be uploaded again
         }
     };
 

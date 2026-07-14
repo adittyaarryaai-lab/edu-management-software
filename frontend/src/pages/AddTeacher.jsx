@@ -5,6 +5,9 @@ import API from '../api';
 import Toast from '../components/Toast';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 
 const AddTeacher = () => {
     const navigate = useNavigate();
@@ -36,26 +39,81 @@ const AddTeacher = () => {
         }
     };
 
-    const handleBulkUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+   const generateCredentialsPDF = (credentialsList) => {
+        if (!credentialsList || credentialsList.length === 0) return;
 
-    setLoading(true);
-    try {
-        const { data } = await API.post('/auth/bulk-register-teachers', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const doc = new jsPDF();
+        
+        // PDF Title
+        doc.setFontSize(18);
+        doc.setTextColor(66, 165, 245); // EduFlow Blue
+        doc.text("EduFlowAI - Faculty Identity & Access Matrix", 14, 22);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("CONFIDENTIAL: Handover these credentials to the respective personnel.", 14, 30);
+
+        // Map Table Data
+        const tableBody = credentialsList.map((user, index) => [
+            index + 1,
+            user.name,
+            user.role,
+            user.email,
+            user.password
+        ]);
+
+        // 🔥 FIX: Using autoTable explicitly
+        autoTable(doc, {
+            startY: 38,
+            head: [['S.No', 'Faculty Name', 'Role', 'Email (Login ID)', 'AI Password']],
+            body: tableBody,
+            headStyles: { fillColor: [66, 165, 245], textColor: [255, 255, 255], fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            styles: { fontSize: 10, cellPadding: 5 }
         });
-        setMsg(data.message);
-        setTimeout(() => navigate('/admin/manage-users'), 2000);
-    } catch (err) {
-        alert("Faculty Sync Failed! 🛡️");
-    } finally {
-        setLoading(false);
-    }
-};
+
+        // Trigger Download
+        doc.save(`Faculty_Credentials_Batch_${new Date().getTime()}.pdf`);
+    };
+
+    // 🔥 UPDATED BULK UPLOAD FUNCTION (NO ALERTS, ONLY TOASTS)
+    const handleBulkUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setLoading(true);
+        try {
+            const { data } = await API.post('/auth/bulk-register-teachers', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            // 1. Alert hat gaya, ab sirf Toast chalega
+            if (data.errors && data.errors.length > 0) {
+                console.warn("Some rows failed:", data.errors);
+                setMsg("Synced with some exceptions. Check console! ⚠️");
+            } else {
+                setMsg(data.message);
+            }
+
+            // 2. PDF Generation Trigger
+            if (data.credentials && data.credentials.length > 0) {
+                generateCredentialsPDF(data.credentials);
+            }
+            
+            setTimeout(() => navigate('/admin/manage-users'), 3000);
+        } catch (err) {
+            console.error(err);
+            setMsg("Faculty Sync Failed! Neural link broken 🛡️");
+        } finally {
+            setLoading(false);
+            e.target.value = null; // Input Reset
+        }
+    };
 
     const handleAddTeacher = async (e) => {
         e.preventDefault();

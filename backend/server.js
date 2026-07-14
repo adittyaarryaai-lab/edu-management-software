@@ -56,8 +56,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    console.log("Incoming Origin:", origin);
-
+    // 🔥 YAHAN SE CONSOLE.LOG HATA DIYA HAI TAACI TERMINAL KACHRA NA HO 🔥
+    
     if (!origin) {
       return callback(null, true);
     }
@@ -69,7 +69,7 @@ app.use(cors({
       return callback(null, true);
     }
 
-    console.log("Blocked Origin:", origin);
+    console.log("Blocked Origin:", origin); // Sirf tab print hoga jab koi galat jagah se hack karne ki koshish karega
     return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
