@@ -47,20 +47,30 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+
   "https://eduflowai.uk",
-  "https://www.eduflowai.uk"
+  "https://www.eduflowai.uk",
+
+  "https://eduflowai-iota.vercel.app",
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Postman ya mobile apps ke liye
-    if (!origin) return callback(null, true);
+    console.log("Incoming Origin:", origin);
 
-    if (allowedOrigins.includes(origin)) {
+    if (!origin) {
       return callback(null, true);
     }
 
-    return callback(new Error("Not allowed by CORS"));
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
+    console.log("Blocked Origin:", origin);
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -69,8 +79,8 @@ app.use(cors({
     "X-Requested-With",
     "Content-Type",
     "Accept",
-    "Authorization"
-  ]
+    "Authorization",
+  ],
 }));
 
 // Preflight requests handle karega
