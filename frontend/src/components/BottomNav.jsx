@@ -16,7 +16,8 @@ const BottomNav = () => {
   const schoolContact = user.schoolData?.adminDetails?.mobile || "+91 98765-43210";
 
   // 3. BACHE KI PHOTO & NAAM (Logged in user profile)
-  const studentPhoto = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`) : null;
+  const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "https://tera-backend.onrender.com";
+  const studentPhoto = user.avatar ? (user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`) : null;
   const studentName = user.name || "Student Name";
 
   return (

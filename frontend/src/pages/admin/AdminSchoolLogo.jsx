@@ -38,9 +38,15 @@ const AdminSchoolLogo = () => {
     const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // 🔥 FRONTEND GUARD: Check if it's actually an image
+            if (!file.type.startsWith('image/')) {
+                return triggerToast("Please upload an image file only! 🚫", "error");
+            }
+
             if (file.size > 2 * 1024 * 1024) {
                 return triggerToast("File size must be under 2MB", "error");
             }
+            
             const reader = new FileReader();
             reader.onloadend = async () => {
                 await uploadLogoToDB(reader.result);
