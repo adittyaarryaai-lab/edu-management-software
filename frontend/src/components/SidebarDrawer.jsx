@@ -25,6 +25,8 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
     const [showConfirm, setShowConfirm] = useState(false);
     // if (!isOpen) return null;
 
+    const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "https://eduflowai-3a47.onrender.com"; // Apna asli Render backend URL daal dena
+
 
     const handleLogout = () => {
         const backup = localStorage.getItem('superadmin_backup');
@@ -86,7 +88,7 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
         { icon: <MessageCircle size={20} />, label: 'Support', color: 'text-neon', path: '/teacher/support' },
         { icon: <Layers size={20} />, label: 'Syllabus', color: 'text-neon', path: '/teacher/upload-syllabus' },
         { icon: <ShieldCheck size={20} />, label: 'Setting', color: 'text-neon', path: '/settings' },
-        { icon: <Calendar size={20} />, label: 'Date Sheet', color: 'text-[#42A5F5]', path:'/teacher/datesheet' },
+        { icon: <Calendar size={20} />, label: 'Date Sheet', color: 'text-[#42A5F5]', path: '/teacher/datesheet' },
 
     ] : user?.role === 'student' ? [
         { icon: <User size={20} />, label: 'My Account', color: 'text-neon', path: '/my-account' },
@@ -156,7 +158,11 @@ const SidebarDrawer = ({ isOpen, onClose, user }) => {
                                     <div className="w-15 h-15 bg-white p-1 rounded-full shadow-xl">
                                         <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 flex items-center justify-center">
                                             {user?.avatar ? (
-                                                <img src={`http://localhost:5000${user.avatar}`} alt="profile" className="w-full h-full object-cover" />
+                                                <img
+                                                    src={user.avatar.startsWith('http') ? user.avatar : `${BASE_URL}${user.avatar}`}
+                                                    alt="profile"
+                                                    className="w-full h-full object-cover"
+                                                />
                                             ) : (
                                                 <User size={22} className="text-[#42A5F5]" />
                                             )}
