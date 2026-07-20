@@ -615,7 +615,7 @@ hover:shadow-[0_15px_35px_rgba(74,144,226,0.35)]
 
                     {i >= 1 && (
                       <>
-                        <li>✓ AI Assistant</li>
+                        {/* <li>✓ AI Assistant</li> */}
                         <li>✓ Advanced Analytics</li>
                       </>
                     )}
