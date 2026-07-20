@@ -6,6 +6,8 @@ import Loader from '../components/Loader';
 import Toast from '../components/Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "https://eduflowai-3a47.onrender.com";
+
 const ManageUsers = () => {
     const navigate = useNavigate();
     const [viewMode, setViewMode] = useState(null); // 'teachers' or 'students'
@@ -210,10 +212,10 @@ const ManageUsers = () => {
                         <div key={u._id} className="bg-white p-5 rounded-[3rem] border border-slate-50 flex items-center justify-between group shadow-lg hover:shadow-2xl transition-all ring-1 ring-slate-100/50">
                             <div className="flex items-center gap-4">
                                 <img
-                                    src={u.avatar?.startsWith('http') ? u.avatar : `http://localhost:5000${u.avatar}`}
-                                    className="w-14 h-14 rounded-2xl border-2 border-slate-50 object-cover shadow-sm"
+                                    src={u.avatar ? (u.avatar.startsWith('http') ? u.avatar : `${BASE_URL}${u.avatar}`) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
+                                    className="w-14 h-14 rounded-2xl border-2 border-slate-50 object-cover shadow-sm bg-slate-100"
                                     alt="user"
-                                    onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }} // Fallback agar image load na ho
+                                    onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }}
                                 />
                                 <div>
                                     <h4 className="font-black text-slate-900 text-[19px] uppercase italic tracking-tight leading-tight">{u.name}</h4>
@@ -575,49 +577,49 @@ const ManageUsers = () => {
             </AnimatePresence>
 
             <AnimatePresence>
-{showDeleteConfirm && (
-    <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-        <motion.div
-            initial={{ scale: 0.9, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.9, y: 20 }}
-            className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl text-center"
-        >
-            <h3 className="text-xl font-black text-slate-800 mb-2 italic">
-                Are you sure?
-            </h3>
+                {showDeleteConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-white w-full max-w-sm rounded-[2rem] p-6 shadow-2xl text-center"
+                        >
+                            <h3 className="text-xl font-black text-slate-800 mb-2 italic">
+                                Are you sure?
+                            </h3>
 
-            <p className="text-slate-500 font-bold text-sm mb-6">
-                Do you want to delete this user?
-            </p>
+                            <p className="text-slate-500 font-bold text-sm mb-6">
+                                Do you want to delete this user?
+                            </p>
 
-            <div className="grid grid-cols-2 gap-3">
-                <button
-                    onClick={() => {
-                        setShowDeleteConfirm(false);
-                        setDeleteUserId(null);
-                    }}
-                    className="py-4 rounded-2xl bg-slate-100 font-black"
-                >
-                    No
-                </button>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteConfirm(false);
+                                        setDeleteUserId(null);
+                                    }}
+                                    className="py-4 rounded-2xl bg-slate-100 font-black"
+                                >
+                                    No
+                                </button>
 
-                <button
-                    onClick={() => handleDelete(deleteUserId)}
-                    className="py-4 rounded-2xl bg-rose-500 text-white font-black"
-                >
-                    Yes
-                </button>
-            </div>
-        </motion.div>
-    </motion.div>
-)}
-</AnimatePresence>
+                                <button
+                                    onClick={() => handleDelete(deleteUserId)}
+                                    className="py-4 rounded-2xl bg-rose-500 text-white font-black"
+                                >
+                                    Yes
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {msg && <Toast message={msg} onClose={() => setMsg('')} />}
         </div>
