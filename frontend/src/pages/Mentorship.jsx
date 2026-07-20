@@ -5,6 +5,8 @@ import API from '../api';
 import Loader from '../components/Loader';
 import { motion } from 'framer-motion';
 
+const BASE_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : "https://eduflowai-3a47.onrender.com";
+
 const Mentorship = () => {
     const navigate = useNavigate();
     const [mentor, setMentor] = useState(null);
@@ -81,7 +83,11 @@ const Mentorship = () => {
                         <div className="relative mb-6">
                             <div className="w-40 h-40 bg-blue-50 rounded-[4rem] flex items-center justify-center overflow-hidden border-4 border-white shadow-2xl shadow-blue-100">
                                 {mentor?.avatar ? (
-                                    <img src={`http://localhost:5000${mentor.avatar}`} alt="Mentor" className="w-full h-full object-cover" />
+                                    <img
+                                        src={mentor.avatar.startsWith('http') ? mentor.avatar : `${BASE_URL}${mentor.avatar}`}
+                                        alt="Mentor"
+                                        className="w-full h-full object-cover"
+                                    />
                                 ) : (
                                     <User size={80} className="text-[#42A5F5]" />
                                 )}
