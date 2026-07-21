@@ -114,7 +114,7 @@ shadow-[0_8px_30px_rgba(0,0,0,0.04)]
             </div>
             <div className="hidden md:flex items-center gap-3">
               <button
-                onClick={() => scrollToSection("platform")}
+                onClick={() => scrollToSection("Home")}
                 className={`
     px-4 py-2 rounded-xl
     backdrop-blur-md
@@ -126,6 +126,27 @@ shadow-[0_8px_30px_rgba(0,0,0,0.04)]
     hover:-translate-y-1
     hover:shadow-[0_8px_20px_rgba(74,144,226,0.15)]
     ${activeSection === "platform"
+                    ? "bg-blue-100 text-[#4A90E2] border border-[#4A90E2]"
+                    : "bg-white/70 border border-blue-100 text-slate-700"
+                  }
+`}
+              >
+                Home
+              </button>
+
+              <button
+                onClick={() => scrollToSection("platform")}
+                className={`
+    px-4 py-2 rounded-xl
+    backdrop-blur-md
+    font-medium
+    transition-all duration-300
+    hover:bg-blue-50
+    hover:border-[#4A90E2]
+    hover:text-[#4A90E2]
+    hover:-translate-y-1
+    hover:shadow-[0_8px_20px_rgba(74,144,226,0.15)]
+    ${activeSection === "ai"
                     ? "bg-blue-100 text-[#4A90E2] border border-[#4A90E2]"
                     : "bg-white/70 border border-blue-100 text-slate-700"
                   }
@@ -217,7 +238,7 @@ hover:shadow-[0_15px_35px_rgba(74,144,226,0.35)]
           </div>
         </nav>
 
-        <section className="bg-transparent pt-40 pb-24 px-6">
+        <section id="Home" className="bg-transparent pt-40 pb-24 px-6">
           <div className="max-w-6xl mx-auto text-center">
             <div
               className="
