@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,17 +19,21 @@ class Sidebar extends ConsumerStatefulWidget {
 
 class _SidebarState extends ConsumerState<Sidebar> {
   Map<String, dynamic>? user;
+  Timer? _syncTimer;
   final ScrollController _scrollController = ScrollController();
 
-  @override
+@override
   void initState() {
     super.initState();
     _loadUser();
+    // 🔥 Har 1.5 second mein silent check karega ki ID toh nahi badli
+    _syncTimer = Timer.periodic(const Duration(milliseconds: 1500), (_) => _silentUserUpdate());
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _syncTimer?.cancel(); // 🔥 Memory leak se bachane ke liye timer kill
     super.dispose();
   }
 
@@ -40,18 +45,74 @@ class _SidebarState extends ConsumerState<Sidebar> {
     }
   }
 
-  void _handleLogout() async {
+ // 🔥 SMART SILENT SYNC 🔥
+  Future<void> _silentUserUpdate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString('user');
+    if (userStr != null) {
+      final parsedUser = jsonDecode(userStr);
+      // Sirf tabhi update karega jab purana user aur naya user alag honge
+      if (jsonEncode(user) != jsonEncode(parsedUser)) {
+        if (mounted) setState(() => user = parsedUser);
+      }
+    }
+  }
+
+void _handleLogout() async {
     final prefs = await SharedPreferences.getInstance();
     final backup = prefs.getString('superadmin_backup');
     ref.read(themeProvider.notifier).resetTheme();
+
+    // 1. Superadmin Restore Logic (Apna purana system intact)
     if (backup != null) {
       await prefs.setString('user', backup);
       await prefs.remove('superadmin_backup');
       if (mounted) context.go('/superadmin/dashboard');
-    } else {
-      await prefs.remove('user');
-      if (mounted) context.go('/login');
+      return;
     }
+
+    // 2. Multi-Account Smart Logout Logic
+    final currentUserStr = prefs.getString('user');
+    final savedAccountsStr = prefs.getString('saved_accounts');
+
+    if (currentUserStr != null && savedAccountsStr != null) {
+      final currentUser = jsonDecode(currentUserStr);
+      List<dynamic> savedAccounts = jsonDecode(savedAccountsStr);
+
+      // Current user ki exact ID nikalo
+      final currentUserId = currentUser['_id'] ?? currentUser['id'] ?? currentUser['email'];
+
+      // Logout wale account ko local saved list se hamesha ke liye uda do
+      savedAccounts.removeWhere((acc) => (acc['_id'] ?? acc['id'] ?? acc['email']) == currentUserId);
+
+      // Agar list me aur bache hain (jaise Ravi bacha hai)
+      if (savedAccounts.isNotEmpty) {
+        // Nayi list save karo
+        await prefs.setString('saved_accounts', jsonEncode(savedAccounts));
+        
+        // Next available account (Ravi) ko active user bana do
+        final nextUser = savedAccounts.first;
+        await prefs.setString('user', jsonEncode(nextUser)); 
+
+        if (mounted) {
+          // Naye user ke role ke hisaab se dashboard pe fenk do (Bina login screen dikhaye!)
+          final role = nextUser['role'];
+          if (role == 'superadmin') {
+            context.go('/superadmin/dashboard');
+          } else if (role == 'finance') {
+            context.go('/finance/dashboard');
+          } else {
+            context.go('/');
+          }
+        }
+        return; 
+      }
+    }
+
+    // 3. Agar koi bhi account nahi bacha hai, toh full clean karo aur Login bhej do!
+    await prefs.remove('user');
+    await prefs.remove('saved_accounts'); // Kachra saaf
+    if (mounted) context.go('/login');
   }
 
   void _navigate(String path) {
@@ -255,6 +316,7 @@ class _SidebarState extends ConsumerState<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
+
     final role = user?['role'] ?? 'student';
     final name = user?['name'] ?? 'Guest User';
     final id = role == 'student'
@@ -269,7 +331,7 @@ class _SidebarState extends ConsumerState<Sidebar> {
     final Color bgColor =
         isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
 
-   // 🔥 NAYA CODE: AVATAR URL SANITIZATION VIA APP CONFIG 🔥
+    // 🔥 NAYA CODE: AVATAR URL SANITIZATION VIA APP CONFIG 🔥
     String? avatarUrl;
     if (user?['avatar'] != null && user!['avatar'].toString().isNotEmpty) {
       avatarUrl = AppConfig.getAbsoluteUrl(user!['avatar'].toString());
@@ -364,14 +426,18 @@ class _SidebarState extends ConsumerState<Sidebar> {
                                 ? Image.network(
                                     avatarUrl,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => const CircleAvatar(
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const CircleAvatar(
                                       backgroundColor: Color(0xFFF1F5F9),
-                                      child: Icon(Icons.person, color: Color(0xFF42A5F5), size: 30),
+                                      child: Icon(Icons.person,
+                                          color: Color(0xFF42A5F5), size: 30),
                                     ),
                                   )
                                 : const CircleAvatar(
                                     backgroundColor: Color(0xFFF1F5F9),
-                                    child: Icon(Icons.person, color: Color(0xFF42A5F5), size: 30),
+                                    child: Icon(Icons.person,
+                                        color: Color(0xFF42A5F5), size: 30),
                                   ),
                           ),
                         ),
@@ -426,7 +492,8 @@ class _SidebarState extends ConsumerState<Sidebar> {
                                     : role == 'admin'
                                         ? Icons.assignment
                                         : role == 'teacher'
-                                            ? Icons.chat_bubble_outline // Teacher ke liye MessageCircle icon
+                                            ? Icons
+                                                .chat_bubble_outline // Teacher ke liye MessageCircle icon
                                             : Icons.help_outline,
                                 label: role == 'finance'
                                     ? "Add Pay"
@@ -458,8 +525,10 @@ class _SidebarState extends ConsumerState<Sidebar> {
               Expanded(
                 child: RefreshIndicator(
                   color: const Color(0xFF42A5F5),
-                  backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-                  onRefresh: _loadUser, // 🔥 Ye seedha tera function call karega aur naya data layega
+                  backgroundColor:
+                      isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                  onRefresh:
+                      _loadUser, // 🔥 Ye seedha tera function call karega aur naya data layega
                   child: ListView(
                     padding: const EdgeInsets.only(top: 10, bottom: 20),
                     // 🔥 RefreshIndicator ko chalane ke liye AlwaysScrollable zaroori hai

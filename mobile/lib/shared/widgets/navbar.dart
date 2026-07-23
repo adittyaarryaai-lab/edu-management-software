@@ -87,6 +87,19 @@ class _NavbarState extends ConsumerState<Navbar> {
     }
   }
 
+  // 🔥 THE MASTER HACK: SILENT SYNC BINA INFINITE LOOP KE 🔥
+  Future<void> _silentUserUpdate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString('user');
+    if (userStr != null) {
+      final parsedUser = jsonDecode(userStr);
+      // Sirf tabhi update karo jab sach mein photo ya naam badla ho
+      if (jsonEncode(user) != jsonEncode(parsedUser)) {
+        if (mounted) setState(() => user = parsedUser);
+      }
+    }
+  }
+
   void _updateGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -122,6 +135,7 @@ class _NavbarState extends ConsumerState<Navbar> {
 
   @override
   Widget build(BuildContext context) {
+    _silentUserUpdate();
     // 🔥 GLOBAL THEME SE DARK MODE CHECK KAR RAHE HAIN 🔥
     final themeMode = ref.watch(themeProvider);
     final bool isDarkMode = themeMode == ThemeMode.dark;

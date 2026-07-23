@@ -23,17 +23,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
         'password': password,
       });
 
-      // Save user to SharedPreferences (Equivalent to localStorage)
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', jsonEncode(response.data));
+      
+      // Multi-Account Array Fetch ya Initialize
+      String? accountsJson = prefs.getString('saved_accounts');
+      List<dynamic> accountsList = accountsJson != null ? jsonDecode(accountsJson) : [];
+
+      Map<String, dynamic> newAccount = Map<String, dynamic>.from(response.data);
+      String newUserId = newAccount['_id'] ?? newAccount['id'] ?? email;
+
+      // Agar account pehle se saved hai toh use update kar do, warna add kar do
+      int existingIndex = accountsList.indexWhere((acc) => (acc['_id'] ?? acc['id'] ?? acc['email']) == newUserId);
+      if (existingIndex != -1) {
+        accountsList[existingIndex] = newAccount;
+      } else {
+        accountsList.add(newAccount);
+      }
+
+      // Save updated accounts array & active user
+      await prefs.setString('saved_accounts', jsonEncode(accountsList));
+      await prefs.setString('user', jsonEncode(newAccount));
 
       state = AuthState(isLoading: false);
       return true; // Login success
     } on DioException catch (e) {
-      print("ERROR TYPE: ${e.type}");
-      print("ERROR MESSAGE: ${e.message}");
-      print("FULL ERROR: ${e.response?.data}");
-      print("STATUS CODE: ${e.response?.statusCode}");
       String errorMessage = "Login failed! Check your credentials.";
       if (e.response != null && e.response?.data != null) {
         errorMessage = e.response?.data['message'] ?? errorMessage;
@@ -65,6 +78,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return null;
     } on DioException catch (e) {
       return e.response?.data['message'] ?? "Reset Failed";
+    }
+  }
+
+  // 🔥 ACCOUNT SWITCH LOGIC 🔥
+  Future<void> switchAccount(Map<String, dynamic> accountData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(accountData));
+  }
+
+  // 🔥 ACCOUNT REMOVE LOGIC 🔥
+  Future<void> removeAccount(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? accountsJson = prefs.getString('saved_accounts');
+    if (accountsJson != null) {
+      List<dynamic> accountsList = jsonDecode(accountsJson);
+      accountsList.removeWhere((acc) => (acc['_id'] ?? acc['id'] ?? acc['email']) == userId);
+      await prefs.setString('saved_accounts', jsonEncode(accountsList));
+
+      if (accountsList.isNotEmpty) {
+        await prefs.setString('user', jsonEncode(accountsList.first));
+      } else {
+        await prefs.remove('user');
+      }
     }
   }
 }

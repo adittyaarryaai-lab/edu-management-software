@@ -9,6 +9,7 @@ import '../../../core/network/api_client.dart';
 import '../../../shared/widgets/custom_loader.dart';
 import '../../../core/theme/theme_provider.dart'; // 🔥 APNA GLOBAL THEME PROVIDER
 
+
 // 🔥 ConsumerStatefulWidget for theme listening
 class ClassDiary extends ConsumerStatefulWidget {
   const ClassDiary({super.key});
